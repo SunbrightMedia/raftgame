@@ -17,6 +17,15 @@ public class DevMenu : MonoBehaviour
     [Tooltip("Directional light driven by the time-of-day slider.")]
     public Light sun;
 
+    [Header("Clouds")]
+    [Range(0f, 1f)] public float cloudOpacity = 0.85f;
+    [Tooltip("Lower means more sky covered.")]
+    [Range(0f, 1f)] public float cloudCoverage = 0.50f;
+    [Tooltip("Horizontal size of the cloud masses.")]
+    [Range(0.05f, 3f)] public float cloudScale = 0.55f;
+    [Tooltip("How fuzzy the edges are.")]
+    [Range(0.01f, 0.6f)] public float cloudSoftness = 0.32f;
+
     GameObject _panel;
     readonly List<Action> _refreshers = new List<Action>();
     Font _font;
@@ -162,6 +171,22 @@ public class DevMenu : MonoBehaviour
             },
             v => v.ToString("0") + "%");
 
+        AddHeader(panel, "Clouds", ref y);
+        AddSlider(panel, "Opacity", 0f, 1f, ref y,
+            () => cloudOpacity,
+            v => { cloudOpacity = v; ApplyCloudSettings(); },
+            v => (v * 100f).ToString("0") + "%");
+        AddSlider(panel, "Coverage", 0f, 1f, ref y,
+            () => 1f - cloudCoverage,
+            v => { cloudCoverage = 1f - v; ApplyCloudSettings(); },
+            v => (v * 100f).ToString("0") + "%");
+        AddSlider(panel, "Size", 0.05f, 3f, ref y,
+            () => cloudScale,
+            v => { cloudScale = v; ApplyCloudSettings(); });
+        AddSlider(panel, "Fuzziness", 0.01f, 0.6f, ref y,
+            () => cloudSoftness,
+            v => { cloudSoftness = v; ApplyCloudSettings(); });
+
         AddHeader(panel, "Underwater", ref y);
         AddSlider(panel, "Opacity", 0f, 100f, ref y,
             () => Underwater() != null ? Underwater().opacity : 0f,
@@ -283,6 +308,16 @@ public class DevMenu : MonoBehaviour
             sky.SetFloat(SkySunGlowFalloff, Mathf.Lerp(180f, 22f, golden));
             sky.SetFloat(SkySunGlowStrength, Mathf.Lerp(0.25f, 1.5f, golden) * Mathf.Max(day, blue * 0.5f));
             sky.SetFloat(SkyExposure, Mathf.Lerp(0.55f, 1f, day) + blue * 0.1f);
+
+            // Clouds are lit by the same sky they sit in: white at noon, warm
+            // and underlit at golden hour, near-black at night. Their shadow
+            // side picks up the zenith so they never read as grey cutouts.
+            Color litCloud = Color.Lerp(NightCloud, DayCloud, day);
+            litCloud = Color.Lerp(litCloud, GoldenCloud, golden);
+            sky.SetColor(SkyCloudColor, litCloud);
+            sky.SetColor(SkyCloudShadow, Color.Lerp(zenith * 1.4f, litCloud, 0.25f));
+
+            ApplyCloudSettings(sky);
         }
 
         // Matching the fog to the horizon keeps the waterline from cutting a
@@ -330,6 +365,10 @@ public class DevMenu : MonoBehaviour
     static readonly Color DayGlow = new Color(1f, 0.93f, 0.78f);
     static readonly Color GoldenGlow = new Color(1f, 0.45f, 0.20f);
 
+    static readonly Color DayCloud = new Color(1f, 0.98f, 0.95f);
+    static readonly Color GoldenCloud = new Color(1f, 0.72f, 0.52f);
+    static readonly Color NightCloud = new Color(0.07f, 0.08f, 0.14f);
+
     static readonly int SkyHorizon = Shader.PropertyToID("_HorizonColor");
     static readonly int SkyMid = Shader.PropertyToID("_MidColor");
     static readonly int SkyZenith = Shader.PropertyToID("_ZenithColor");
@@ -340,8 +379,26 @@ public class DevMenu : MonoBehaviour
     static readonly int SkySunGlowFalloff = Shader.PropertyToID("_SunGlowFalloff");
     static readonly int SkySunGlowStrength = Shader.PropertyToID("_SunGlowStrength");
     static readonly int SkyExposure = Shader.PropertyToID("_Exposure");
+    static readonly int SkyCloudColor = Shader.PropertyToID("_CloudColor");
+    static readonly int SkyCloudShadow = Shader.PropertyToID("_CloudShadowColor");
+    static readonly int SkyCloudOpacity = Shader.PropertyToID("_CloudOpacity");
+    static readonly int SkyCloudCoverage = Shader.PropertyToID("_CloudCoverage");
+    static readonly int SkyCloudScale = Shader.PropertyToID("_CloudScale");
+    static readonly int SkyCloudSoftness = Shader.PropertyToID("_CloudSoftness");
 
     Material _skyInstance;
+
+    /// <summary>Pushes the cloud shape controls to the sky material.</summary>
+    void ApplyCloudSettings(Material sky = null)
+    {
+        sky = sky ?? SkyboxInstance();
+        if (sky == null) return;
+
+        sky.SetFloat(SkyCloudOpacity, cloudOpacity);
+        sky.SetFloat(SkyCloudCoverage, cloudCoverage);
+        sky.SetFloat(SkyCloudScale, cloudScale);
+        sky.SetFloat(SkyCloudSoftness, cloudSoftness);
+    }
 
     /// <summary>Inverse of the time-to-elevation mapping, for seeding the slider.</summary>
     static float SunRotationToHour(float eulerX)
