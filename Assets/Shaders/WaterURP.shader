@@ -18,12 +18,15 @@ Shader "Raft/WaterURP"
         _Smoothness ("Smoothness", Range(0, 1)) = 0.94
         _Metallic ("Metallic", Range(0, 1)) = 0.05
         _FresnelPower ("Fresnel Power", Range(0.5, 8)) = 5
+        _SkyReflection ("Sky Reflection", Range(0, 1)) = 0.65
+        _SunGlint ("Sun Glint", Range(0, 8)) = 0.6
+        _DebugView ("Debug View", Float) = 0
 
         [Header(Foam)]
         _FoamColor ("Foam Colour", Color) = (1, 1, 1, 1)
-        _FoamDepth ("Shoreline Foam Width", Range(0, 3)) = 0.5
-        _FoamCrest ("Crest Foam Threshold", Range(0, 1)) = 0.72
-        _FoamCrestSharpness ("Crest Foam Sharpness", Range(1, 20)) = 6
+        _FoamDepth ("Shoreline Foam Width", Range(0, 3)) = 0.15
+        _FoamCrest ("Crest Foam Threshold", Range(0, 1)) = 0.55
+        _FoamCrestSharpness ("Crest Foam Softness", Range(0.02, 1)) = 0.45
 
         [Header(Ripples)]
         _RippleStrength ("Ripple Strength", Range(0, 2)) = 0.35
@@ -81,6 +84,9 @@ Shader "Raft/WaterURP"
                 float _Smoothness;
                 float _Metallic;
                 float _FresnelPower;
+                float _SkyReflection;
+                float _SunGlint;
+                float _DebugView;
 
                 float4 _FoamColor;
                 float _FoamDepth;
@@ -105,11 +111,12 @@ Shader "Raft/WaterURP"
             struct Varyings
             {
                 float4 positionCS : SV_POSITION;
+                // Displaced world position. Only y is displaced, so xz still
+                // holds the original grid coordinate and the fragment stage can
+                // re-evaluate the waves here exactly.
                 float3 positionWS : TEXCOORD0;
-                float3 normalWS : TEXCOORD1;
-                float4 screenPos : TEXCOORD2;
-                float2 crest : TEXCOORD3; // x = height, y = total amplitude
-                float fogFactor : TEXCOORD4;
+                float4 screenPos : TEXCOORD1;
+                float fogFactor : TEXCOORD2;
             };
 
             // Accumulates height and the two slope derivatives for one wave.
@@ -155,27 +162,34 @@ Shader "Raft/WaterURP"
                                       _RippleStrength));
             }
 
+            void EvaluateWaves(float2 pos, out float height, out float2 slope,
+                               out float amplitude)
+            {
+                height = 0;
+                slope = 0;
+                amplitude = 0;
+                AddWave(_WaveA, _WaveSpeeds.x, pos, height, slope, amplitude);
+                AddWave(_WaveB, _WaveSpeeds.y, pos, height, slope, amplitude);
+                AddWave(_WaveC, _WaveSpeeds.z, pos, height, slope, amplitude);
+                AddWave(_WaveD, _WaveSpeeds.w, pos, height, slope, amplitude);
+                amplitude = max(amplitude, 0.0001);
+            }
+
             Varyings vert(Attributes input)
             {
                 Varyings output = (Varyings)0;
 
                 float3 positionWS = TransformObjectToWorld(input.positionOS.xyz);
 
-                float height = 0;
-                float2 slope = 0;
-                float amplitude = 0;
-                AddWave(_WaveA, _WaveSpeeds.x, positionWS.xz, height, slope, amplitude);
-                AddWave(_WaveB, _WaveSpeeds.y, positionWS.xz, height, slope, amplitude);
-                AddWave(_WaveC, _WaveSpeeds.z, positionWS.xz, height, slope, amplitude);
-                AddWave(_WaveD, _WaveSpeeds.w, positionWS.xz, height, slope, amplitude);
+                float height, amplitude;
+                float2 slope;
+                EvaluateWaves(positionWS.xz, height, slope, amplitude);
 
                 positionWS.y += height;
 
                 output.positionWS = positionWS;
                 output.positionCS = TransformWorldToHClip(positionWS);
-                output.normalWS = normalize(float3(-slope.x, 1, -slope.y));
                 output.screenPos = ComputeScreenPos(output.positionCS);
-                output.crest = float2(height, max(amplitude, 0.0001));
                 output.fogFactor = ComputeFogFactor(output.positionCS.z);
 
                 return output;
@@ -184,6 +198,17 @@ Shader "Raft/WaterURP"
             half4 frag(Varyings input) : SV_Target
             {
                 float2 screenUV = input.screenPos.xy / max(input.screenPos.w, 0.0001);
+
+                // Re-evaluate the waves per pixel. The vertex stage only moves
+                // y, so xz here is still the exact grid coordinate. Doing it
+                // again costs four sin/cos and buys smooth normals and foam
+                // instead of values lerped across 2.5m triangles - that
+                // interpolation is what turned crest foam into flat white
+                // polygons and gave the horizon its stair-stepped look.
+                float height, amplitude;
+                float2 slope;
+                EvaluateWaves(input.positionWS.xz, height, slope, amplitude);
+                float3 waveNormal = normalize(float3(-slope.x, 1, -slope.y));
 
                 // Thickness of water between this surface and whatever is behind it.
                 float rawDepth = SampleSceneDepth(screenUV);
@@ -194,15 +219,22 @@ Shader "Raft/WaterURP"
                 float depthBlend = saturate(waterDepth / _DepthFade);
                 float4 water = lerp(_ShallowColor, _DeepColor, depthBlend);
 
-                float3 normalWS = RippleNormal(input.positionWS.xz, normalize(input.normalWS));
+                float3 normalWS = RippleNormal(input.positionWS.xz, waveNormal);
                 float3 viewDirWS = SafeNormalize(GetWorldSpaceViewDir(input.positionWS));
                 float fresnel = pow(1 - saturate(dot(viewDirWS, normalWS)), _FresnelPower);
 
                 // Foam where the surface nearly touches geometry, plus a little
-                // on the highest wave crests.
+                // on the highest wave crests. The crest term is a smooth band,
+                // not a hard step, so it can't snap to triangle edges.
                 float edgeFoam = 1 - saturate(waterDepth / max(_FoamDepth, 0.0001));
-                float crest = saturate(input.crest.x / input.crest.y);
-                float crestFoam = saturate((crest - _FoamCrest) * _FoamCrestSharpness);
+                float crest = saturate(height / amplitude);
+                float softness = max(_FoamCrestSharpness, 0.02);
+                float crestFoam = smoothstep(_FoamCrest, _FoamCrest + softness, crest);
+
+                // Only the steep faces of a crest actually break into foam;
+                // gating on slope keeps it off flat water.
+                crestFoam *= saturate(length(slope) * 1.5);
+
                 float foam = saturate(max(edgeFoam * edgeFoam, crestFoam));
 
                 float3 albedo = lerp(water.rgb, _FoamColor.rgb, foam);
@@ -226,11 +258,37 @@ Shader "Raft/WaterURP"
                 surfaceData.alpha = alpha;
 
                 half4 color = UniversalFragmentPBR(inputData, surfaceData);
+
+                // The scene has no reflection probe, so URP's environment
+                // specular has nothing to sample and the water reads as matte
+                // paint. Reflect the view vector against the ambient probe
+                // instead: it carries the skybox, so the surface picks up sky
+                // at grazing angles the way water should.
+                float3 reflectDir = reflect(-viewDirWS, normalWS);
+                float3 skyColor = SampleSH(reflectDir);
+                color.rgb = lerp(color.rgb, skyColor,
+                                 fresnel * _SkyReflection * (1 - foam));
+
+                // An explicit wide sun glint. At smoothness 0.94 the PBR
+                // highlight is nearly a point and vanishes between pixels.
+                Light sun = GetMainLight(inputData.shadowCoord);
+                float3 halfDir = SafeNormalize(sun.direction + viewDirWS);
+                float glint = pow(saturate(dot(normalWS, halfDir)), 220.0);
+                color.rgb += sun.color * glint * _SunGlint * sun.shadowAttenuation
+                             * (1 - foam);
+
                 color.rgb = MixFog(color.rgb, input.fogFactor);
                 color.a = alpha;
 
+                if (_DebugView > 0.5)
+                {
+                    // r = edge foam, g = crest foam, b = water depth / 10
+                    return half4(edgeFoam, crestFoam, saturate(waterDepth / 10.0), 1);
+                }
+
                 return color;
             }
+
             ENDHLSL
         }
     }
