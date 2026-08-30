@@ -40,10 +40,10 @@ Shader "Raft/GradientSky"
         _CloudShadowColor ("Cloud Shadow Colour", Color) = (0.42, 0.47, 0.60, 1)
         _CloudOpacity ("Cloud Opacity", Range(0, 1)) = 0.85
         _CloudCoverage ("Coverage Threshold", Range(0, 1)) = 0.50
-        _CloudSoftness ("Edge Softness", Range(0.01, 0.6)) = 0.32
+        _CloudSoftness ("Edge Softness", Range(0.005, 0.6)) = 0.03
         _CloudScale ("Horizontal Size", Range(0.05, 3)) = 0.55
         _CloudVerticalScale ("Vertical Squash", Range(0.2, 6)) = 1.1
-        _CloudWarp ("Shape Warp", Range(0, 3)) = 1.1
+        _CloudWarp ("Shape Warp", Range(0, 3)) = 0.7
         _CloudBottom ("Layer Bottom", Range(10, 600)) = 80
         _CloudTop ("Layer Top", Range(20, 1200)) = 520
         _CloudHeightVariation ("Height Variation", Range(0, 1)) = 0.75
@@ -53,6 +53,11 @@ Shader "Raft/GradientSky"
         _CloudDensity ("Density", Range(0.1, 12)) = 3.5
         _CloudSpeed ("Drift Speed", Range(0, 20)) = 2.2
         _CloudSteps ("March Steps", Range(4, 24)) = 12
+
+        [Header(Cloud Styling)]
+        _CloudAngular ("Angular (0 fluffy, 1 faceted)", Range(0, 1)) = 1
+        _CloudFacetSize ("Facet Size", Range(0.02, 1)) = 0.34
+        _CloudBands ("Shading Bands", Range(1, 12)) = 3
     }
 
     SubShader
@@ -114,6 +119,9 @@ Shader "Raft/GradientSky"
                 float _CloudDensity;
                 float _CloudSpeed;
                 float _CloudSteps;
+                float _CloudAngular;
+                float _CloudFacetSize;
+                float _CloudBands;
             CBUFFER_END
 
             struct Attributes
@@ -217,7 +225,31 @@ Shader "Raft/GradientSky"
                                      Fbm(q * 0.55 + 27.3)) - 0.5;
                 q += warp * _CloudWarp;
 
+                // DREDGE's clouds are deliberately angular and hard-edged
+                // rather than soft - that harshness is the point of its art
+                // direction. Two things produce it here.
+                //
+                // First, snapping the sample position onto a coarse lattice.
+                // Evaluating smooth noise at quantised positions makes its
+                // contours come out as flat facets and straight edges instead
+                // of curves.
+                if (_CloudAngular > 0.001)
+                {
+                    float3 snapped = floor(q / _CloudFacetSize) * _CloudFacetSize;
+                    q = lerp(q, snapped, _CloudAngular);
+                }
+
                 float raw = Fbm(q);
+
+                // Second, terracing the density field. Quantising it into a few
+                // levels turns a smooth gradient into stepped contours, so the
+                // silhouette is built from hard steps rather than a soft ramp -
+                // the geometric, palette-knife read rather than a fuzzy one.
+                if (_CloudAngular > 0.001)
+                {
+                    float levels = lerp(64.0, 4.0, _CloudAngular);
+                    raw = floor(raw * levels) / levels;
+                }
 
                 // Position within THIS column's cloud, not within the slab.
                 float slab = saturate((p.y - _CloudBottom) / max(_CloudTop - _CloudBottom, 0.001));
@@ -266,6 +298,13 @@ Shader "Raft/GradientSky"
                     // what make a cloud look solid rather than painted on.
                     float toward = CloudDensity(p + sunDir * (dt * 0.75));
                     float light = exp(-toward * 3.0);
+
+                    // Flat shading bands rather than a smooth falloff. This is
+                    // the other half of the look: light reads as a few distinct
+                    // planes of tone, like broad brush strokes, instead of a
+                    // continuous gradient across the mass.
+                    if (_CloudBands >= 1.5)
+                        light = floor(light * _CloudBands + 0.5) / _CloudBands;
 
                     float alpha = 1.0 - exp(-density * dt * _CloudDensity * 0.01);
                     float3 shade = lerp(shadowColor, litColor, light);

@@ -23,12 +23,17 @@ public class DevMenu : MonoBehaviour
     [Range(0f, 1f)] public float cloudCoverage = 0.50f;
     [Tooltip("Horizontal size of the cloud masses.")]
     [Range(0.05f, 3f)] public float cloudScale = 0.55f;
-    [Tooltip("How fuzzy the edges are.")]
-    [Range(0.01f, 0.6f)] public float cloudSoftness = 0.32f;
+    [Tooltip("Edge hardness. Low values give the hard-edged look; raise it "
+           + "for soft fluffy clouds.")]
+    [Range(0.005f, 0.6f)] public float cloudSoftness = 0.03f;
     [Tooltip("How much cloud height and thickness vary from place to place. "
            + "At 0 every cloud occupies the same slice of the layer and it "
            + "reads as a flat sheet.")]
     [Range(0f, 1f)] public float cloudHeightVariation = 0.75f;
+    [Tooltip("0 = soft and fluffy, 1 = hard-edged and faceted (DREDGE-style).")]
+    [Range(0f, 1f)] public float cloudAngular = 1f;
+    [Tooltip("How many flat tones the cloud lighting is stepped into.")]
+    [Range(1f, 12f)] public float cloudBands = 3f;
 
     GameObject _panel;
     readonly List<Action> _refreshers = new List<Action>();
@@ -194,6 +199,14 @@ public class DevMenu : MonoBehaviour
             () => cloudHeightVariation,
             v => { cloudHeightVariation = v; ApplyCloudSettings(); },
             v => (v * 100f).ToString("0") + "%");
+        AddSlider(panel, "Angularity", 0f, 1f, ref y,
+            () => cloudAngular,
+            v => { cloudAngular = v; ApplyCloudSettings(); },
+            v => (v * 100f).ToString("0") + "%");
+        AddSlider(panel, "Shading bands", 1f, 12f, ref y,
+            () => cloudBands,
+            v => { cloudBands = Mathf.Round(v); ApplyCloudSettings(); },
+            v => Mathf.Round(v).ToString("0"));
 
         AddHeader(panel, "Underwater", ref y);
         AddSlider(panel, "Opacity", 0f, 100f, ref y,
@@ -394,6 +407,8 @@ public class DevMenu : MonoBehaviour
     static readonly int SkyCloudScale = Shader.PropertyToID("_CloudScale");
     static readonly int SkyCloudSoftness = Shader.PropertyToID("_CloudSoftness");
     static readonly int SkyCloudHeightVariation = Shader.PropertyToID("_CloudHeightVariation");
+    static readonly int SkyCloudAngular = Shader.PropertyToID("_CloudAngular");
+    static readonly int SkyCloudBands = Shader.PropertyToID("_CloudBands");
 
     Material _skyInstance;
 
@@ -408,6 +423,8 @@ public class DevMenu : MonoBehaviour
         sky.SetFloat(SkyCloudScale, cloudScale);
         sky.SetFloat(SkyCloudSoftness, cloudSoftness);
         sky.SetFloat(SkyCloudHeightVariation, cloudHeightVariation);
+        sky.SetFloat(SkyCloudAngular, cloudAngular);
+        sky.SetFloat(SkyCloudBands, cloudBands);
     }
 
     /// <summary>Inverse of the time-to-elevation mapping, for seeding the slider.</summary>
