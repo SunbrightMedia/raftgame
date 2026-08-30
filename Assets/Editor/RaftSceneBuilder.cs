@@ -27,6 +27,7 @@ public static class RaftSceneBuilder
         var player = CreatePlayer();
         water.GetComponent<WaterSurface>().followTarget = player.transform;
         CreateDebris(player.transform);
+        CreateClouds(player.transform);
         CreateDevMenu();
 
         Physics.gravity = new Vector3(0f, -9.81f, 0f);
@@ -175,6 +176,15 @@ public static class RaftSceneBuilder
         // every piece of flotsam.
         spawner.debrisMaterial =
             MakeMaterial("Debris", Color.white, 0.15f, 0f, false, "Raft/FacetedWood");
+    }
+
+    static void CreateClouds(Transform player)
+    {
+        var go = new GameObject("Cloud Field");
+        var field = go.AddComponent<CloudField>();
+        field.followTarget = player;
+        field.cloudMaterial =
+            MakeMaterial("Cloud", Color.white, 0f, 0f, true, "Raft/StylizedCloud");
     }
 
     static void CreateDevMenu()

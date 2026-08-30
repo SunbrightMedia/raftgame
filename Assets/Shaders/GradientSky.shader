@@ -1,4 +1,9 @@
-// Three-stop gradient skybox with a soft sun and raymarched clouds.
+// Three-stop gradient skybox with a soft sun.
+//
+// Clouds are NOT here: they are real low-poly meshes (see CloudField), because
+// an angular flat-shaded style wants a polygon silhouette. Raymarching a
+// density field and then hardening its edges only exposes the sampling - the
+// individual march planes show through as stacked translucent slabs.
 //
 // Unity's built-in Skybox/Procedural is a scattering model, and it will not
 // give a good sunset here: pushing its atmosphere thickness up to redden a low
@@ -35,29 +40,6 @@ Shader "Raft/GradientSky"
         _SunGlowFalloff ("Glow Falloff", Range(1, 400)) = 60
         _SunGlowStrength ("Glow Strength", Range(0, 4)) = 0.7
 
-        [Header(Clouds)]
-        _CloudColor ("Cloud Lit Colour", Color) = (1, 0.98, 0.95, 1)
-        _CloudShadowColor ("Cloud Shadow Colour", Color) = (0.42, 0.47, 0.60, 1)
-        _CloudOpacity ("Cloud Opacity", Range(0, 1)) = 0.85
-        _CloudCoverage ("Coverage Threshold", Range(0, 1)) = 0.50
-        _CloudSoftness ("Edge Softness", Range(0.005, 0.6)) = 0.03
-        _CloudScale ("Horizontal Size", Range(0.05, 3)) = 0.55
-        _CloudVerticalScale ("Vertical Squash", Range(0.2, 6)) = 1.1
-        _CloudWarp ("Shape Warp", Range(0, 3)) = 0.7
-        _CloudBottom ("Layer Bottom", Range(10, 600)) = 80
-        _CloudTop ("Layer Top", Range(20, 1200)) = 520
-        _CloudHeightVariation ("Height Variation", Range(0, 1)) = 0.75
-        _CloudMinThickness ("Min Thickness", Range(0.05, 1)) = 0.18
-        _CloudProfileScale ("Height Variation Scale", Range(0.1, 4)) = 0.8
-        _CloudTowering ("Towering", Range(0, 0.6)) = 0.26
-        _CloudDensity ("Density", Range(0.1, 12)) = 3.5
-        _CloudSpeed ("Drift Speed", Range(0, 20)) = 2.2
-        _CloudSteps ("March Steps", Range(4, 24)) = 12
-
-        [Header(Cloud Styling)]
-        _CloudAngular ("Angular (0 fluffy, 1 faceted)", Range(0, 1)) = 1
-        _CloudFacetSize ("Facet Size", Range(0.02, 1)) = 0.34
-        _CloudBands ("Shading Bands", Range(1, 12)) = 3
     }
 
     SubShader
@@ -102,26 +84,6 @@ Shader "Raft/GradientSky"
                 float _SunGlowFalloff;
                 float _SunGlowStrength;
 
-                float4 _CloudColor;
-                float4 _CloudShadowColor;
-                float _CloudOpacity;
-                float _CloudCoverage;
-                float _CloudSoftness;
-                float _CloudScale;
-                float _CloudVerticalScale;
-                float _CloudWarp;
-                float _CloudBottom;
-                float _CloudTop;
-                float _CloudHeightVariation;
-                float _CloudMinThickness;
-                float _CloudProfileScale;
-                float _CloudTowering;
-                float _CloudDensity;
-                float _CloudSpeed;
-                float _CloudSteps;
-                float _CloudAngular;
-                float _CloudFacetSize;
-                float _CloudBands;
             CBUFFER_END
 
             struct Attributes
@@ -137,186 +99,11 @@ Shader "Raft/GradientSky"
 
             // ---- noise -------------------------------------------------
 
-            float Hash3(float3 p)
-            {
-                p = frac(p * 0.3183099 + float3(0.11, 0.17, 0.23));
-                p *= 17.0;
-                return frac(p.x * p.y * p.z * (p.x + p.y + p.z));
-            }
-
-            float Noise3(float3 p)
-            {
-                float3 i = floor(p);
-                float3 f = frac(p);
-                f = f * f * (3.0 - 2.0 * f);
-
-                return lerp(
-                    lerp(lerp(Hash3(i + float3(0, 0, 0)), Hash3(i + float3(1, 0, 0)), f.x),
-                         lerp(Hash3(i + float3(0, 1, 0)), Hash3(i + float3(1, 1, 0)), f.x), f.y),
-                    lerp(lerp(Hash3(i + float3(0, 0, 1)), Hash3(i + float3(1, 0, 1)), f.x),
-                         lerp(Hash3(i + float3(0, 1, 1)), Hash3(i + float3(1, 1, 1)), f.x), f.y),
-                    f.z);
-            }
-
-            // Three octaves is about the floor for something that reads as
-            // cloud rather than as blobs: the coarse octave carries the mass,
-            // the finer ones give the fuzz along its edge.
-            float Fbm(float3 p)
-            {
-                float sum = 0.0;
-                float amplitude = 0.5;
-
-                [unroll]
-                for (int i = 0; i < 3; i++)
-                {
-                    sum += amplitude * Noise3(p);
-                    p *= 2.03;
-                    amplitude *= 0.5;
-                }
-                return sum;
-            }
-
             // Interleaved gradient noise. Cheap, and unlike a hash it has no
             // visible clumping.
             float InterleavedGradientNoise(float2 pixel)
             {
                 return frac(52.9829189 * frac(dot(pixel, float2(0.06711056, 0.00583715))));
-            }
-
-            // ---- clouds ------------------------------------------------
-
-            // Where the clouds above this patch of sky start and stop, as
-            // fractions of the slab.
-            //
-            // This is what stops the layer reading as one flat sheet. With a
-            // single fixed vertical envelope every cloud occupies exactly the
-            // same slice of the slab, so however varied their outlines are they
-            // all share a top and a bottom - which is precisely what a sheet
-            // is. Letting the base and thickness wander per column gives tall
-            // towers in one place and thin wisps in another.
-            void CloudProfile(float2 xz, out float baseHeight, out float topHeight)
-            {
-                float2 w = xz * (_CloudScale * 0.01) * _CloudProfileScale;
-                w += _Time.y * _CloudSpeed * 0.01;
-
-                float where = Noise3(float3(w, 3.7));
-                float howTall = Noise3(float3(w * 1.7 + 11.3, 8.1));
-
-                // Thickness ranges from a wisp to nearly the whole slab.
-                float thickness = lerp(_CloudMinThickness, 1.0,
-                                       howTall * _CloudHeightVariation);
-                baseHeight = lerp(0.0, 1.0 - thickness, where * _CloudHeightVariation);
-                topHeight = baseHeight + thickness;
-            }
-
-            float CloudDensity(float3 p)
-            {
-                // Squashing the vertical axis before sampling biases the shapes
-                // toward layered forms rather than spheres.
-                float3 q = p * (_CloudScale * 0.01);
-                q.y *= _CloudVerticalScale;
-                q.xz += _Time.y * _CloudSpeed * 0.01;
-
-                // Domain warp. Plain FBM is uniform mush; pushing the sample
-                // point around with more noise is what gives clouds their
-                // billowed, non-repeating shapes.
-                float3 warp = float3(Fbm(q * 0.55),
-                                     Fbm(q * 0.55 + 13.7),
-                                     Fbm(q * 0.55 + 27.3)) - 0.5;
-                q += warp * _CloudWarp;
-
-                // DREDGE's clouds are deliberately angular and hard-edged
-                // rather than soft - that harshness is the point of its art
-                // direction. Two things produce it here.
-                //
-                // First, snapping the sample position onto a coarse lattice.
-                // Evaluating smooth noise at quantised positions makes its
-                // contours come out as flat facets and straight edges instead
-                // of curves.
-                if (_CloudAngular > 0.001)
-                {
-                    float3 snapped = floor(q / _CloudFacetSize) * _CloudFacetSize;
-                    q = lerp(q, snapped, _CloudAngular);
-                }
-
-                float raw = Fbm(q);
-
-                // Second, terracing the density field. Quantising it into a few
-                // levels turns a smooth gradient into stepped contours, so the
-                // silhouette is built from hard steps rather than a soft ramp -
-                // the geometric, palette-knife read rather than a fuzzy one.
-                if (_CloudAngular > 0.001)
-                {
-                    float levels = lerp(64.0, 4.0, _CloudAngular);
-                    raw = floor(raw * levels) / levels;
-                }
-
-                // Position within THIS column's cloud, not within the slab.
-                float slab = saturate((p.y - _CloudBottom) / max(_CloudTop - _CloudBottom, 0.001));
-                float baseHeight, topHeight;
-                CloudProfile(p.xz, baseHeight, topHeight);
-                float local = (slab - baseHeight) / max(topHeight - baseHeight, 0.001);
-                if (local < 0.0 || local > 1.0) return 0.0;
-
-                // Raising the coverage threshold with height erodes the upper
-                // part of each cloud, so they sit wide at the base and round
-                // off toward the top instead of ending in a flat lid.
-                float threshold = _CloudCoverage + local * _CloudTowering;
-                float density = smoothstep(threshold, threshold + _CloudSoftness, raw);
-
-                // Feather both ends of the column so nothing is cut square.
-                density *= smoothstep(0.0, 0.22, local) * (1.0 - smoothstep(0.55, 1.0, local));
-                return density;
-            }
-
-            // Returns premultiplied colour in rgb and coverage in a.
-            float4 MarchClouds(float3 dir, float3 sunDir, float3 litColor, float3 shadowColor)
-            {
-                // Rays near the horizon cross enormous distances of the layer
-                // and smear into streaks, so fade them out.
-                float horizon = smoothstep(0.02, 0.22, dir.y);
-                if (horizon <= 0.001) return (float4)0;
-
-                float tBottom = _CloudBottom / dir.y;
-                float tTop = _CloudTop / dir.y;
-
-                int steps = (int)_CloudSteps;
-                float dt = (tTop - tBottom) / steps;
-
-                float3 accum = 0;
-                float transmittance = 1;
-
-                [loop]
-                for (int i = 0; i < steps; i++)
-                {
-                    float3 p = dir * (tBottom + dt * (i + 0.5));
-                    float density = CloudDensity(p);
-                    if (density <= 0.001) continue;
-
-                    // A single sample toward the sun approximates
-                    // self-shadowing: the bright rim and darker underside are
-                    // what make a cloud look solid rather than painted on.
-                    float toward = CloudDensity(p + sunDir * (dt * 0.75));
-                    float light = exp(-toward * 3.0);
-
-                    // Flat shading bands rather than a smooth falloff. This is
-                    // the other half of the look: light reads as a few distinct
-                    // planes of tone, like broad brush strokes, instead of a
-                    // continuous gradient across the mass.
-                    if (_CloudBands >= 1.5)
-                        light = floor(light * _CloudBands + 0.5) / _CloudBands;
-
-                    float alpha = 1.0 - exp(-density * dt * _CloudDensity * 0.01);
-                    float3 shade = lerp(shadowColor, litColor, light);
-
-                    accum += transmittance * alpha * shade;
-                    transmittance *= (1.0 - alpha);
-
-                    if (transmittance < 0.01) break;
-                }
-
-                float coverage = (1.0 - transmittance) * horizon * _CloudOpacity;
-                return float4(accum * horizon * _CloudOpacity, coverage);
             }
 
             // ---- passes ------------------------------------------------
@@ -350,11 +137,6 @@ Shader "Raft/GradientSky"
                 float3 sunDir = normalize(_SunDirection.xyz);
                 float alignment = dot(dir, sunDir);
                 float angle = acos(clamp(alignment, -1.0, 1.0));
-
-                // Clouds sit in front of the sky but behind the sun's glow, so
-                // a low sun still burns through them.
-                float4 clouds = MarchClouds(dir, sunDir, _CloudColor.rgb, _CloudShadowColor.rgb);
-                sky = sky * (1.0 - clouds.a) + clouds.rgb;
 
                 // Three nested falloffs rather than a disc with an edge. The
                 // core is a Gaussian, which has no boundary to see - a

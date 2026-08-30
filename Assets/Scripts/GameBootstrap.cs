@@ -20,6 +20,7 @@ public static class GameBootstrap
     {
         EnsureGlobal<DevMenu>("Dev Menu");
         EnsureGlobal<UnderwaterEffect>("Underwater Effect");
+        EnsureCloudField();
         EnsurePlayerSystems();
         EnsureDebrisSpawner();
     }
@@ -44,6 +45,16 @@ public static class GameBootstrap
 
         if (player.GetComponent<HeldLight>() == null)
             player.gameObject.AddComponent<HeldLight>();
+    }
+
+    static void EnsureCloudField()
+    {
+        if (Object.FindObjectOfType<CloudField>() != null) return;
+
+        var field = new GameObject("Cloud Field").AddComponent<CloudField>();
+
+        var player = Object.FindObjectOfType<FirstPersonController>();
+        if (player != null) field.followTarget = player.transform;
     }
 
     static void EnsureDebrisSpawner()
