@@ -93,20 +93,27 @@ public static class RaftSceneBuilder
 
         System.IO.Directory.CreateDirectory(MaterialDir);
         string skyPath = MaterialDir + "/Sky.mat";
+
+        // Raft/GradientSky, not Skybox/Procedural. The built-in scattering
+        // model cannot give a decent sunset here: thickening its atmosphere to
+        // redden a low sun turns the horizon yellow, and a blue sky tint over
+        // yellow reads as green. DevMenu drives the gradient by time of day.
+        var skyShader = Shader.Find("Raft/GradientSky");
         var sky = AssetDatabase.LoadAssetAtPath<Material>(skyPath);
         if (sky == null)
         {
-            sky = new Material(Shader.Find("Skybox/Procedural"));
+            sky = new Material(skyShader);
             AssetDatabase.CreateAsset(sky, skyPath);
         }
-        sky.SetFloat("_SunSize", 0.04f);
-        // Thickness drives how much the procedural skybox yellows toward the
-        // horizon. Above ~1 it paints a sunset band, which under this 42-degree
-        // midday sun just looks wrong - and green, once the blue tint is over it.
-        sky.SetFloat("_AtmosphereThickness", 0.62f);
-        sky.SetColor("_SkyTint", new Color(0.45f, 0.66f, 0.9f));
-        sky.SetColor("_GroundColor", new Color(0.19f, 0.32f, 0.42f));
-        sky.SetFloat("_Exposure", 1.05f);
+        if (skyShader != null) sky.shader = skyShader;
+
+        sky.SetColor("_HorizonColor", new Color(0.70f, 0.83f, 0.95f));
+        sky.SetColor("_MidColor", new Color(0.40f, 0.64f, 0.92f));
+        sky.SetColor("_ZenithColor", new Color(0.15f, 0.38f, 0.78f));
+        sky.SetColor("_GroundColor", new Color(0.10f, 0.14f, 0.20f));
+        sky.SetColor("_SunColor", new Color(1f, 0.96f, 0.90f));
+        sky.SetVector("_SunDirection", -sunGo.transform.forward);
+        sky.SetFloat("_Exposure", 1f);
         EditorUtility.SetDirty(sky);
 
         RenderSettings.skybox = sky;

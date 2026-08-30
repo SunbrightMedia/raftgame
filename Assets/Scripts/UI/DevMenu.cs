@@ -253,31 +253,41 @@ public class DevMenu : MonoBehaviour
         RenderSettings.ambientIntensity = ambient;
         RenderSettings.reflectionIntensity = ambient;
 
+        // Three-stop gradient, blended night -> day -> blue hour -> golden.
+        // Golden is applied last so it wins where the bands overlap; a low sun
+        // is the strongest thing in the sky when it is there.
+        Color horizon = Color.Lerp(NightHorizon, DayHorizon, day);
+        Color mid = Color.Lerp(NightMid, DayMid, day);
+        Color zenith = Color.Lerp(NightZenith, DayZenith, day);
+
+        horizon = Color.Lerp(horizon, BlueHourHorizon, blue);
+        mid = Color.Lerp(mid, BlueHourMid, blue);
+        zenith = Color.Lerp(zenith, BlueHourZenith, blue);
+
+        horizon = Color.Lerp(horizon, GoldenHorizon, golden);
+        mid = Color.Lerp(mid, GoldenMid, golden);
+        zenith = Color.Lerp(zenith, GoldenZenith, golden);
+
         var sky = SkyboxInstance();
         if (sky != null)
         {
-            if (sky.HasProperty(SkyExposure))
-                sky.SetFloat(SkyExposure, Mathf.Lerp(0.10f, 1.05f, day) + blue * 0.18f);
+            sky.SetColor(SkyHorizon, horizon);
+            sky.SetColor(SkyMid, mid);
+            sky.SetColor(SkyZenith, zenith);
+            sky.SetColor(SkyGround, Color.Lerp(NightHorizon, horizon * 0.35f, day + blue * 0.5f));
+            sky.SetVector(SkySunDirection, -sun.transform.forward);
+            sky.SetColor(SkySunColor, sun.color);
 
-            // A low sun's light travels through far more atmosphere, which is
-            // what scatters out the blue and leaves the reds. The procedural
-            // skybox models exactly that, so thicken the air through golden
-            // hour instead of painting an orange tint over the top.
-            if (sky.HasProperty(SkyAtmosphere))
-                sky.SetFloat(SkyAtmosphere, Mathf.Lerp(0.62f, 1.65f, golden));
-
-            if (sky.HasProperty(SkyTint))
-            {
-                Color tint = Color.Lerp(DaySkyTint, SunsetSkyTint, golden);
-                tint = Color.Lerp(tint, BlueHourSkyTint, blue);
-                sky.SetColor(SkyTint, tint);
-            }
+            // The warm wash around a low sun widens and strengthens as it sets.
+            sky.SetColor(SkySunGlowColor, Color.Lerp(DayGlow, GoldenGlow, golden));
+            sky.SetFloat(SkySunGlowFalloff, Mathf.Lerp(180f, 22f, golden));
+            sky.SetFloat(SkySunGlowStrength, Mathf.Lerp(0.25f, 1.5f, golden) * Mathf.Max(day, blue * 0.5f));
+            sky.SetFloat(SkyExposure, Mathf.Lerp(0.55f, 1f, day) + blue * 0.1f);
         }
 
-        Color fog = Color.Lerp(NightFog, DayFog, day);
-        fog = Color.Lerp(fog, EmberFog, golden);
-        fog = Color.Lerp(fog, BlueHourFog, blue);
-        RenderSettings.fogColor = fog;
+        // Matching the fog to the horizon keeps the waterline from cutting a
+        // hard line across the view.
+        RenderSettings.fogColor = Color.Lerp(horizon, mid, 0.35f);
 
         _environmentDirtyAt = Time.unscaledTime + 0.15f;
     }
@@ -298,44 +308,70 @@ public class DevMenu : MonoBehaviour
     static readonly Color Daylight = new Color(1f, 0.96f, 0.90f);
     static readonly Color GoldenLight = new Color(1f, 0.66f, 0.34f);
 
-    static readonly Color DaySkyTint = new Color(0.45f, 0.66f, 0.90f);
-    static readonly Color SunsetSkyTint = new Color(0.86f, 0.42f, 0.55f);
-    static readonly Color BlueHourSkyTint = new Color(0.26f, 0.32f, 0.70f);
+    // Three stops per phase: horizon, mid, zenith. The mid stop is what sells a
+    // sunset - warm at the waterline, magenta through the middle, deep blue up
+    // top. A two-stop gradient always looks like a colour wash instead.
+    static readonly Color DayHorizon = new Color(0.70f, 0.83f, 0.95f);
+    static readonly Color DayMid = new Color(0.40f, 0.64f, 0.92f);
+    static readonly Color DayZenith = new Color(0.15f, 0.38f, 0.78f);
 
-    static readonly Color DayFog = new Color(0.62f, 0.75f, 0.85f);
-    static readonly Color EmberFog = new Color(0.88f, 0.50f, 0.36f);
-    static readonly Color BlueHourFog = new Color(0.20f, 0.25f, 0.45f);
-    static readonly Color NightFog = new Color(0.03f, 0.04f, 0.09f);
+    static readonly Color GoldenHorizon = new Color(1.00f, 0.47f, 0.18f);
+    static readonly Color GoldenMid = new Color(0.78f, 0.32f, 0.46f);
+    static readonly Color GoldenZenith = new Color(0.20f, 0.19f, 0.46f);
 
-    static readonly int SkyAtmosphere = Shader.PropertyToID("_AtmosphereThickness");
-    static readonly int SkyTint = Shader.PropertyToID("_SkyTint");
+    static readonly Color BlueHourHorizon = new Color(0.44f, 0.28f, 0.50f);
+    static readonly Color BlueHourMid = new Color(0.18f, 0.19f, 0.46f);
+    static readonly Color BlueHourZenith = new Color(0.05f, 0.07f, 0.22f);
 
+    static readonly Color NightHorizon = new Color(0.035f, 0.05f, 0.11f);
+    static readonly Color NightMid = new Color(0.02f, 0.03f, 0.08f);
+    static readonly Color NightZenith = new Color(0.008f, 0.012f, 0.04f);
+
+    static readonly Color DayGlow = new Color(1f, 0.93f, 0.78f);
+    static readonly Color GoldenGlow = new Color(1f, 0.45f, 0.20f);
+
+    static readonly int SkyHorizon = Shader.PropertyToID("_HorizonColor");
+    static readonly int SkyMid = Shader.PropertyToID("_MidColor");
+    static readonly int SkyZenith = Shader.PropertyToID("_ZenithColor");
+    static readonly int SkyGround = Shader.PropertyToID("_GroundColor");
+    static readonly int SkySunDirection = Shader.PropertyToID("_SunDirection");
+    static readonly int SkySunColor = Shader.PropertyToID("_SunColor");
+    static readonly int SkySunGlowColor = Shader.PropertyToID("_SunGlowColor");
+    static readonly int SkySunGlowFalloff = Shader.PropertyToID("_SunGlowFalloff");
+    static readonly int SkySunGlowStrength = Shader.PropertyToID("_SunGlowStrength");
     static readonly int SkyExposure = Shader.PropertyToID("_Exposure");
+
     Material _skyInstance;
 
-    /// <summary>
-    /// A private copy of the skybox material. Editing RenderSettings.skybox
-    /// directly would write through to the shared Sky.mat asset and those edits
-    /// survive leaving play mode - the slider would permanently darken the
-    /// project's sky.
-    /// </summary>
-    Material SkyboxInstance()
-    {
-        if (_skyInstance != null) return _skyInstance;
-        if (RenderSettings.skybox == null) return null;
-
-        _skyInstance = new Material(RenderSettings.skybox) { name = "Sky (runtime)" };
-        RenderSettings.skybox = _skyInstance;
-        return _skyInstance;
-    }
-
+    /// <summary>Inverse of the time-to-elevation mapping, for seeding the slider.</summary>
     static float SunRotationToHour(float eulerX)
     {
         if (eulerX > 180f) eulerX -= 360f;
         return Mathf.Clamp(eulerX / 180f * 12f + 6f, 0f, 24f);
     }
 
-    // ---- UI construction ------------------------------------------------
+    /// <summary>
+    /// A private gradient-sky material for this play session.
+    ///
+    /// Two reasons it is always an instance rather than the asset: writing to
+    /// RenderSettings.skybox edits the shared Sky.mat, and those edits survive
+    /// leaving play mode, so the sliders would permanently repaint the
+    /// project's sky. And a scene saved before Raft/GradientSky existed still
+    /// points at Skybox/Procedural, whose properties these calls would silently
+    /// miss - so the shader is swapped here rather than depending on the scene
+    /// having been rebuilt.
+    /// </summary>
+    Material SkyboxInstance()
+    {
+        if (_skyInstance != null) return _skyInstance;
+
+        var gradient = Shader.Find("Raft/GradientSky");
+        if (gradient == null) return null;
+
+        _skyInstance = new Material(gradient) { name = "Sky (runtime)" };
+        RenderSettings.skybox = _skyInstance;
+        return _skyInstance;
+    }
 
     void AddHeader(RectTransform parent, string text, ref float y)
     {
