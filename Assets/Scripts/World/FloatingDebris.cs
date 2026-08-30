@@ -116,6 +116,16 @@ public class FloatingDebris : MonoBehaviour
         Vector3 position = transform.position;
         if (position.y > WaterSurface.GetHeight(position) + floatOffset) return;
 
+        // Waves wash straight over the deck (the raft only follows part of the
+        // wave height), so "the water reached me" is not the same as "I am in
+        // open water". An item resting on something solid stays a physics
+        // object; without this it turned into flotsam and got dragged under the
+        // raft, which read as items randomly vanishing.
+        if (Physics.Raycast(position, Vector3.down,
+                            transform.localScale.y * 0.5f + 0.2f,
+                            ~0, QueryTriggerInteraction.Ignore))
+            return;
+
         Vector3 heading = _body != null
             ? new Vector3(_body.velocity.x, 0f, _body.velocity.z)
             : Vector3.zero;
@@ -168,8 +178,21 @@ public class FloatingDebris : MonoBehaviour
         // something solid, hold its height and steer out instead.
         if (IsBlocked(candidate))
         {
-            candidate.y = position.y;
-            SteerAwayFrom(candidate);
+            // Prefer riding up onto whatever is in the way - an item washed
+            // over the raft should end up ON the deck, never trapped beneath
+            // it where it looks like it disappeared.
+            Vector3 above = new Vector3(candidate.x, candidate.y + 3f, candidate.z);
+            if (Physics.Raycast(above, Vector3.down, out RaycastHit top, 6f,
+                                ~0, QueryTriggerInteraction.Ignore))
+            {
+                candidate.y = top.point.y + transform.localScale.y * 0.5f + 0.02f;
+            }
+
+            if (IsBlocked(candidate))
+            {
+                candidate.y = position.y;
+                SteerAwayFrom(candidate);
+            }
             if (IsBlocked(candidate)) candidate = position;
         }
 

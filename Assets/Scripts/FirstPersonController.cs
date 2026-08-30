@@ -25,11 +25,16 @@ public class FirstPersonController : MonoBehaviour
     public float swimDescend = 11f;
     [Tooltip("Water resistance. Higher stops you faster.")]
     public float swimDrag = 1.5f;
-    [Tooltip("Depth within which jump breaches instead of paddling - this is "
-           + "what lets you hop back onto the raft.")]
-    public float breachDepth = 0.7f;
+    [Tooltip("Water depth over the feet at or below which jump breaches instead "
+           + "of paddling - this is what lets you hop back onto the raft. Must "
+           + "exceed swimEnterDepth or the player can never be both swimming "
+           + "and shallow enough to use it. Treading water settles around "
+           + "1.6m, so this wants to be near the player's full height.")]
+    public float breachDepth = 1.95f;
     [Tooltip("How high a breach jump goes, relative to a normal jump.")]
-    public float breachJumpScale = 0.9f;
+    public float breachJumpScale = 1.15f;
+    [Tooltip("Seconds between breach jumps.")]
+    public float breachCooldown = 0.45f;
     [Tooltip("Water depth over the feet before swimming starts.")]
     public float swimEnterDepth = 1.1f;
 
@@ -138,9 +143,20 @@ public class FirstPersonController : MonoBehaviour
         // Near the surface, jump breaches the water instead of paddling - this
         // is what gets the player back onto the raft. Deeper down the same key
         // just swims upward.
-        bool atSurface = WaterDepth <= breachDepth;
-        if (wantUp && atSurface)
+        //
+        // The threshold has to sit ABOVE swimEnterDepth: below it the player
+        // is not swimming at all and never reaches this code. Guarding here
+        // rather than trusting the inspector value, because when these two
+        // cross over the feature simply goes dead with nothing to show for it.
+        float breach = Mathf.Max(breachDepth, swimEnterDepth + 0.2f);
+
+        if (wantUp && WaterDepth <= breach && Time.time >= _nextBreachTime)
         {
+            _nextBreachTime = Time.time + breachCooldown;
+            // Briefly stop damping so the launch is not immediately eaten by
+            // water drag while the body is still submerged.
+            _breachUntil = Time.time + 0.35f;
+
             float jumpVelocity = Mathf.Sqrt(
                 2f * Mathf.Abs(Physics.gravity.y) * jumpHeight * breachJumpScale);
             _rb.velocity = new Vector3(_rb.velocity.x, jumpVelocity, _rb.velocity.z);
@@ -156,6 +172,10 @@ public class FirstPersonController : MonoBehaviour
         if (wantUp) _rb.AddForce(Vector3.up * swimAscend, ForceMode.Acceleration);
         if (wantDown) _rb.AddForce(Vector3.down * swimDescend, ForceMode.Acceleration);
 
-        _rb.AddForce(-_rb.velocity * swimDrag, ForceMode.Acceleration);
+        if (Time.time >= _breachUntil)
+            _rb.AddForce(-_rb.velocity * swimDrag, ForceMode.Acceleration);
     }
+
+    float _nextBreachTime;
+    float _breachUntil;
 }
