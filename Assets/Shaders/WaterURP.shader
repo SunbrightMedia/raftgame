@@ -137,6 +137,22 @@ Shader "Raft/WaterURP"
                 float fogFactor : TEXCOORD2;
             };
 
+            // Quantise with a one-pixel-soft seam.
+            //
+            // A plain floor() step is a hard edge in the middle of a triangle,
+            // which MSAA cannot see (it only samples geometry silhouettes) and
+            // which post-process AA can only guess at after the fact. fwidth
+            // gives how fast the value changes per pixel, so the seam can be
+            // blended across exactly one pixel while the flat plateaus either
+            // side of it stay perfectly flat.
+            float BandedAA(float value, float bands)
+            {
+                float scaled = value * max(bands, 1.0);
+                float width = clamp(fwidth(scaled), 1e-5, 1.0);
+                float stepped = floor(scaled) + smoothstep(1.0 - width, 1.0, frac(scaled));
+                return saturate(stepped / max(bands - 1.0, 1.0));
+            }
+
             // Accumulates height and the two slope derivatives for one wave.
             void AddWave(float4 wave, float speed, float2 pos, inout float height,
                          inout float2 slope, inout float amplitude)
@@ -286,9 +302,7 @@ Shader "Raft/WaterURP"
                 // the single biggest thing that makes stylised water read as
                 // stylised: depth becomes a few bands of solid colour, like
                 // contour lines on a chart, rather than a smooth gradient.
-                float depthBands = max(_DepthBands, 1.0);
-                float bandedDepth = floor(depthBlend * depthBands) / max(depthBands - 1.0, 1.0);
-                depthBlend = lerp(depthBlend, saturate(bandedDepth), _Stylize);
+                depthBlend = lerp(depthBlend, BandedAA(depthBlend, _DepthBands), _Stylize);
 
                 float4 water = lerp(_ShallowColor, _DeepColor, depthBlend);
 
@@ -318,9 +332,10 @@ Shader "Raft/WaterURP"
 
                 // Snap foam to a hard edge. Soft foam reads as airbrushed;
                 // the style wants crisp shapes with a definite boundary.
-                float hardFoam = smoothstep(0.5 - (1.0 - _FoamHardness) * 0.5,
-                                            0.5 + (1.0 - _FoamHardness) * 0.5,
-                                            foam);
+                // Widen the threshold by at least one pixel so a hard foam
+                // edge still resolves cleanly instead of crawling.
+                float foamEdge = max((1.0 - _FoamHardness) * 0.5, fwidth(foam));
+                float hardFoam = smoothstep(0.5 - foamEdge, 0.5 + foamEdge, foam);
                 foam = lerp(foam, hardFoam, _Stylize);
 
                 float3 albedo = lerp(water.rgb, _FoamColor.rgb, foam);
@@ -351,10 +366,9 @@ Shader "Raft/WaterURP"
                 // the whole surface stays in one palette.
                 if (_Stylize > 0.001)
                 {
-                    float bands = max(_ShadeBands, 1.0);
                     float luma = dot(color.rgb, float3(0.299, 0.587, 0.114));
-                    float stepped = floor(luma * bands) / max(bands - 1.0, 1.0);
-                    float scale = luma > 1e-4 ? saturate(stepped) / luma : 1.0;
+                    float stepped = BandedAA(luma, _ShadeBands);
+                    float scale = luma > 1e-4 ? stepped / luma : 1.0;
                     color.rgb = lerp(color.rgb, color.rgb * scale, _Stylize);
                 }
 
@@ -374,7 +388,8 @@ Shader "Raft/WaterURP"
                 float3 halfDir = SafeNormalize(sun.direction + viewDirWS);
                 float glint = pow(saturate(dot(normalWS, halfDir)), 220.0);
                 // A hard-edged glint shape rather than a soft bloom.
-                glint = lerp(glint, step(0.25, glint), _Stylize);
+                float glintEdge = max(fwidth(glint), 1e-5);
+                glint = lerp(glint, smoothstep(0.25 - glintEdge, 0.25 + glintEdge, glint), _Stylize);
                 color.rgb += sun.color * glint * _SunGlint * sun.shadowAttenuation
                              * (1 - foam);
 

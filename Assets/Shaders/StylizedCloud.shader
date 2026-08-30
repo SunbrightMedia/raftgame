@@ -84,6 +84,22 @@ Shader "Raft/StylizedCloud"
                 float _HazeStrength;
             CBUFFER_END
 
+            // Quantise with a one-pixel-soft seam.
+            //
+            // A plain floor() step is a hard edge in the middle of a triangle,
+            // which MSAA cannot see (it only samples geometry silhouettes) and
+            // which post-process AA can only guess at after the fact. fwidth
+            // gives how fast the value changes per pixel, so the seam can be
+            // blended across exactly one pixel while the flat plateaus either
+            // side of it stay perfectly flat.
+            float BandedAA(float value, float bands)
+            {
+                float scaled = value * max(bands, 1.0);
+                float width = clamp(fwidth(scaled), 1e-5, 1.0);
+                float stepped = floor(scaled) + smoothstep(1.0 - width, 1.0, frac(scaled));
+                return saturate(stepped / max(bands - 1.0, 1.0));
+            }
+
             struct Attributes
             {
                 float4 positionOS : POSITION;
@@ -129,8 +145,7 @@ Shader "Raft/StylizedCloud"
 
                 // Quantise last, so both contributions land in the same set of
                 // flat tones.
-                float bands = max(_Bands, 1.0);
-                float stepped = saturate(floor(shade * bands) / max(bands - 1.0, 1.0));
+                float stepped = BandedAA(shade, _Bands);
 
                 float3 color = lerp(_ShadowColor.rgb, _LitColor.rgb, stepped);
 

@@ -85,6 +85,12 @@ public static class RenderSetup
         // Long geometric edges against a bright sky: exactly what MSAA fixes.
         pipeline.msaaSampleCount = 4;
 
+        // MSAA only covers triangle silhouettes. The stylised shading steps
+        // colour in the MIDDLE of faces - band boundaries, foam edges - which
+        // MSAA is blind to. Rendering above native and downsampling
+        // supersamples the shading itself and cleans those up.
+        pipeline.renderScale = 1.4f;
+
         pipeline.shadowDistance = 150f;
         pipeline.shadowCascadeCount = 4;
         pipeline.supportsHDR = true;

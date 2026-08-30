@@ -17,6 +17,12 @@ public class DevMenu : MonoBehaviour
     [Tooltip("Directional light driven by the time-of-day slider.")]
     public Light sun;
 
+    [Header("Quality")]
+    [Tooltip("Renders above native resolution and downsamples. The most "
+           + "effective fix for aliasing that MSAA cannot see, because it "
+           + "supersamples the shading itself, not just triangle edges.")]
+    [Range(1f, 2f)] public float renderScale = 1.4f;
+
     [Header("Water style")]
     [Tooltip("0 = the old realistic shading, 1 = flat banded toon water.")]
     [Range(0f, 1f)] public float waterStylize = 1f;
@@ -51,11 +57,13 @@ public class DevMenu : MonoBehaviour
         // Apply once up front so lighting matches the slider from the start
         // rather than only after it is first dragged.
         ApplyTimeOfDay();
+        ApplyRenderScale();
     }
 
     void OnDestroy()
     {
         if (IsOpen) IsOpen = false;
+        RestoreRenderScale();
     }
 
     void Update()
@@ -120,6 +128,12 @@ public class DevMenu : MonoBehaviour
 
         float y = -14f;
         AddHeader(panel, "Dev Menu  (P to close)", ref y);
+
+        AddHeader(panel, "Quality", ref y);
+        AddSlider(panel, "Render scale", 1f, 2f, ref y,
+            () => renderScale,
+            v => { renderScale = v; ApplyRenderScale(); },
+            v => v.ToString("0.00") + "x  (" + (v * v).ToString("0.0") + "x pixels)");
 
         AddHeader(panel, "Water", ref y);
         AddSlider(panel, "Wave speed", 0f, 3f, ref y,
@@ -415,6 +429,37 @@ public class DevMenu : MonoBehaviour
         water.stylize = waterStylize;
         water.shadeBands = waterShadeBands;
         water.depthBands = waterDepthBands;
+    }
+
+    float _originalRenderScale = -1f;
+
+    /// <summary>
+    /// Supersampling. Renders above native resolution and downsamples, which
+    /// antialiases the shading itself rather than only triangle silhouettes -
+    /// so it catches the banding and foam edges MSAA is blind to.
+    ///
+    /// The value is restored on teardown: renderScale lives on the pipeline
+    /// ASSET, so leaving it raised would persist into the project after play
+    /// mode ends.
+    /// </summary>
+    void ApplyRenderScale()
+    {
+        var pipeline = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline
+                       as UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
+        if (pipeline == null) return;
+
+        if (_originalRenderScale < 0f) _originalRenderScale = pipeline.renderScale;
+        pipeline.renderScale = renderScale;
+    }
+
+    void RestoreRenderScale()
+    {
+        if (_originalRenderScale < 0f) return;
+
+        var pipeline = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline
+                       as UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
+        if (pipeline != null) pipeline.renderScale = _originalRenderScale;
+        _originalRenderScale = -1f;
     }
 
     CloudField _clouds;
