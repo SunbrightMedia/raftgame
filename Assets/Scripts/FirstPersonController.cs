@@ -17,7 +17,21 @@ public class FirstPersonController : MonoBehaviour
 
     [Header("Swimming")]
     public float swimSpeed = 2.5f;
+    [Tooltip("Upward pull toward the surface when submerged.")]
     public float swimBuoyancy = 12f;
+    [Tooltip("Extra climb rate while holding jump underwater.")]
+    public float swimAscend = 9f;
+    [Tooltip("Dive rate while holding crouch.")]
+    public float swimDescend = 11f;
+    [Tooltip("Water resistance. Higher stops you faster.")]
+    public float swimDrag = 1.5f;
+    [Tooltip("Depth within which jump breaches instead of paddling - this is "
+           + "what lets you hop back onto the raft.")]
+    public float breachDepth = 0.7f;
+    [Tooltip("How high a breach jump goes, relative to a normal jump.")]
+    public float breachJumpScale = 0.9f;
+    [Tooltip("Water depth over the feet before swimming starts.")]
+    public float swimEnterDepth = 1.1f;
 
     [Header("Ground check")]
     public LayerMask groundMask = ~0;
@@ -83,9 +97,13 @@ public class FirstPersonController : MonoBehaviour
 
     void CheckWater()
     {
-        float chestY = transform.position.y + _capsule.height * 0.75f;
-        IsSwimming = WaterSurface.GetHeight(transform.position) > chestY;
+        // Depth of water over the player's feet.
+        WaterDepth = WaterSurface.GetHeight(transform.position) - transform.position.y;
+        IsSwimming = WaterDepth > swimEnterDepth;
     }
+
+    /// <summary>Metres of water over the player's feet. Negative when clear of it.</summary>
+    public float WaterDepth { get; private set; }
 
     void Walk(Vector2 input)
     {
@@ -111,16 +129,33 @@ public class FirstPersonController : MonoBehaviour
 
     void Swim(Vector2 input)
     {
+        bool wantUp = Input.GetKey(KeyCode.Space);
+        bool wantDown = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+
         Vector3 wish = (_camera.forward * input.y + _camera.right * input.x) * swimSpeed;
         _rb.AddForce((wish - _rb.velocity) * 4f, ForceMode.Acceleration);
 
-        // Push back up to the surface, damped so the player bobs instead of popping out.
-        float surface = WaterSurface.GetHeight(transform.position);
-        float submersion = Mathf.Clamp01((surface - transform.position.y) / 2f);
-        _rb.AddForce(Vector3.up * (swimBuoyancy * submersion), ForceMode.Acceleration);
-        _rb.AddForce(-_rb.velocity * 1.5f, ForceMode.Acceleration);
+        // Near the surface, jump breaches the water instead of paddling - this
+        // is what gets the player back onto the raft. Deeper down the same key
+        // just swims upward.
+        bool atSurface = WaterDepth <= breachDepth;
+        if (wantUp && atSurface)
+        {
+            float jumpVelocity = Mathf.Sqrt(
+                2f * Mathf.Abs(Physics.gravity.y) * jumpHeight * breachJumpScale);
+            _rb.velocity = new Vector3(_rb.velocity.x, jumpVelocity, _rb.velocity.z);
+            return;
+        }
 
-        if (Input.GetKey(KeyCode.Space))
-            _rb.AddForce(Vector3.up * swimSpeed * 2f, ForceMode.Acceleration);
+        // Buoyancy pulls toward the surface, but stop fighting the player when
+        // they are deliberately diving or there is nothing left to fight.
+        float submersion = Mathf.Clamp01(WaterDepth / 2f);
+        float buoyancy = wantDown ? swimBuoyancy * 0.1f : swimBuoyancy;
+        _rb.AddForce(Vector3.up * (buoyancy * submersion), ForceMode.Acceleration);
+
+        if (wantUp) _rb.AddForce(Vector3.up * swimAscend, ForceMode.Acceleration);
+        if (wantDown) _rb.AddForce(Vector3.down * swimDescend, ForceMode.Acceleration);
+
+        _rb.AddForce(-_rb.velocity * swimDrag, ForceMode.Acceleration);
     }
 }

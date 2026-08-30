@@ -41,6 +41,7 @@ Shader "Raft/WaterURP"
         _WaveD ("Wave D", Vector) = (-1, -0.2, 0.06, 3)
         _WaveSpeeds ("Wave Speeds", Vector) = (4.5, 3.2, 2.4, 1.6)
         _WaveTime ("Wave Time", Float) = 0
+        _WaveWarp ("Wave Variation", Range(0, 1)) = 0.6
     }
 
     SubShader
@@ -60,8 +61,14 @@ Shader "Raft/WaterURP"
             Tags { "LightMode" = "UniversalForward" }
 
             Blend SrcAlpha OneMinusSrcAlpha
-            ZWrite Off
-            Cull Back
+            // ZWrite On: the ocean is one transparent mesh, so with depth
+            // writes off it blends with ITSELF in triangle submission order
+            // and far crests paint over near ones. Writing depth makes the
+            // surface occlude itself correctly; it still blends over the
+            // opaque scene behind it, which is what the transparency is for.
+            ZWrite On
+            // Visible from underneath now that the player can swim.
+            Cull Off
 
             HLSLPROGRAM
             #pragma vertex vert
@@ -100,6 +107,7 @@ Shader "Raft/WaterURP"
                 float4 _WaveA, _WaveB, _WaveC, _WaveD;
                 float4 _WaveSpeeds;
                 float _WaveTime;
+                float _WaveWarp;
             CBUFFER_END
 
             struct Attributes
@@ -191,9 +199,26 @@ Shader "Raft/WaterURP"
                                       _RippleStrength));
             }
 
-            void EvaluateWaves(float2 pos, out float height, out float2 slope,
+            // Four summed sines repeat on an obvious grid. Bending the sample
+            // position first with a very low-frequency distortion (features
+            // ~200m across) makes the same waves read as an irregular sea
+            // without adding any octaves. Deliberately built from plain sines
+            // rather than hash noise so WaterSurface.SampleWaves can reproduce
+            // it exactly on the CPU and buoyancy still matches the visuals.
+            float2 WarpPosition(float2 pos, float warp)
+            {
+                if (warp <= 0.0001) return pos;
+
+                float2 offset;
+                offset.x = sin(pos.y * 0.031 + 1.7) * 6.0 + sin(pos.y * 0.0117 - 0.6) * 3.5;
+                offset.y = sin(pos.x * 0.026 + 4.2) * 6.0 + sin(pos.x * 0.0143 + 2.1) * 3.5;
+                return pos + offset * warp;
+            }
+
+            void EvaluateWaves(float2 rawPos, out float height, out float2 slope,
                                out float amplitude)
             {
+                float2 pos = WarpPosition(rawPos, _WaveWarp);
                 height = 0;
                 slope = 0;
                 amplitude = 0;
@@ -224,7 +249,8 @@ Shader "Raft/WaterURP"
                 return output;
             }
 
-            half4 frag(Varyings input) : SV_Target
+            half4 frag(Varyings input, FRONT_FACE_TYPE frontFace : FRONT_FACE_SEMANTIC)
+                : SV_Target
             {
                 float2 screenUV = input.screenPos.xy / max(input.screenPos.w, 0.0001);
 
@@ -238,6 +264,8 @@ Shader "Raft/WaterURP"
                 float2 slope;
                 EvaluateWaves(input.positionWS.xz, height, slope, amplitude);
                 float3 waveNormal = normalize(float3(-slope.x, 1, -slope.y));
+                // Seen from below the surface faces the other way.
+                waveNormal = IS_FRONT_VFACE(frontFace, waveNormal, -waveNormal);
 
                 // Thickness of water between this surface and whatever is behind it.
                 float rawDepth = SampleSceneDepth(screenUV);

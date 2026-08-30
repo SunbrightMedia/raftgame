@@ -117,6 +117,9 @@ public class DevMenu : MonoBehaviour
         AddSlider(panel, "Peak spacing", 0.25f, 4f, ref y,
             () => Water() != null ? Water().waveSpacing : 1f,
             v => { if (Water() != null) Water().waveSpacing = v; });
+        AddSlider(panel, "Variation", 0f, 1f, ref y,
+            () => Water() != null ? Water().waveVariation : 0f,
+            v => { if (Water() != null) Water().waveVariation = v; });
 
         AddHeader(panel, "World", ref y);
         AddSlider(panel, "Time of day", 0f, 24f, ref y,
@@ -210,7 +213,40 @@ public class DevMenu : MonoBehaviour
         float above = Mathf.Clamp01(Mathf.Sin(elevation * Mathf.Deg2Rad));
         sun.intensity = Mathf.Lerp(0.02f, 1.25f, above);
 
+        // Dimming the sun alone is not enough: the water reads its brightness
+        // mostly from the ambient probe and the sky reflection, so at midnight
+        // it kept glowing under a black sun. Darken the whole environment.
+        float night = Mathf.Lerp(0.03f, 1f, above);
+        RenderSettings.ambientIntensity = night;
+        RenderSettings.reflectionIntensity = night;
+
+        var sky = SkyboxInstance();
+        if (sky != null && sky.HasProperty(SkyExposure))
+            sky.SetFloat(SkyExposure, Mathf.Lerp(0.08f, 1.05f, above));
+
+        RenderSettings.fogColor = Color.Lerp(
+            new Color(0.03f, 0.05f, 0.09f), new Color(0.62f, 0.75f, 0.85f), above);
+
         _environmentDirtyAt = Time.unscaledTime + 0.15f;
+    }
+
+    static readonly int SkyExposure = Shader.PropertyToID("_Exposure");
+    Material _skyInstance;
+
+    /// <summary>
+    /// A private copy of the skybox material. Editing RenderSettings.skybox
+    /// directly would write through to the shared Sky.mat asset and those edits
+    /// survive leaving play mode - the slider would permanently darken the
+    /// project's sky.
+    /// </summary>
+    Material SkyboxInstance()
+    {
+        if (_skyInstance != null) return _skyInstance;
+        if (RenderSettings.skybox == null) return null;
+
+        _skyInstance = new Material(RenderSettings.skybox) { name = "Sky (runtime)" };
+        RenderSettings.skybox = _skyInstance;
+        return _skyInstance;
     }
 
     static float SunRotationToHour(float eulerX)

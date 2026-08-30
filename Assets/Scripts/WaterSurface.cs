@@ -37,6 +37,8 @@ public class WaterSurface : MonoBehaviour
     [Range(0f, 3f)] public float waveHeight = 1f;
     [Tooltip("Global multiplier on the distance between peaks.")]
     [Range(0.25f, 4f)] public float waveSpacing = 1f;
+    [Tooltip("Bends the wave field so the pattern stops looking like a grid.")]
+    [Range(0f, 1f)] public float waveVariation = 0.6f;
 
     [Header("Waves")]
     [Tooltip("Exactly four waves are sent to the shader; extras are CPU-only.")]
@@ -58,6 +60,7 @@ public class WaterSurface : MonoBehaviour
     };
     static readonly int SpeedsId = Shader.PropertyToID("_WaveSpeeds");
     static readonly int TimeId = Shader.PropertyToID("_WaveTime");
+    static readonly int WarpId = Shader.PropertyToID("_WaveWarp");
 
     Mesh _mesh;
     MeshRenderer _renderer;
@@ -162,6 +165,7 @@ public class WaterSurface : MonoBehaviour
 
         _block.SetVector(SpeedsId, speeds);
         _block.SetFloat(TimeId, WaveTime);
+        _block.SetFloat(WarpId, waveVariation);
         _renderer.SetPropertyBlock(_block);
     }
 
@@ -169,11 +173,29 @@ public class WaterSurface : MonoBehaviour
     public static float WaveTime =>
         Application.isPlaying ? Time.time : (float)Time.realtimeSinceStartupAsDouble;
 
+    /// <summary>
+    /// Exact CPU twin of WarpPosition in WaterURP.shader. Built from plain
+    /// sines rather than hash noise precisely so both sides agree to the last
+    /// decimal and buoyancy keeps matching what is drawn.
+    /// </summary>
+    void WarpPosition(ref float x, ref float z)
+    {
+        if (waveVariation <= 0.0001f) return;
+
+        float offsetX = Mathf.Sin(z * 0.031f + 1.7f) * 6f + Mathf.Sin(z * 0.0117f - 0.6f) * 3.5f;
+        float offsetZ = Mathf.Sin(x * 0.026f + 4.2f) * 6f + Mathf.Sin(x * 0.0143f + 2.1f) * 3.5f;
+
+        x += offsetX * waveVariation;
+        z += offsetZ * waveVariation;
+    }
+
     /// <summary>World-space water height at (x, z). Mirrors the shader.</summary>
     public float SampleWaves(float x, float z, float time)
     {
         float y = transform.position.y;
         if (waves == null) return y;
+
+        WarpPosition(ref x, ref z);
 
         for (int i = 0; i < waves.Length; i++)
         {

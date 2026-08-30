@@ -12,18 +12,28 @@ public class PickupInteractor : MonoBehaviour
     [Tooltip("Aim forgiveness. 0 = a pinpoint ray.")]
     public float aimRadius = 0.35f;
 
+    [Header("Dropping")]
+    [Tooltip("How far below the eyes items are released from.")]
+    public float dropHeightBelowEyes = 0.45f;
+    [Tooltip("Forward toss speed.")]
+    public float dropForwardSpeed = 2.6f;
+    [Tooltip("Upward lob added to the toss.")]
+    public float dropUpwardSpeed = 1.1f;
+
     public KeyCode pickupKey = KeyCode.F;
     public KeyCode dropKey = KeyCode.Q;
 
     InventorySystem _inventory;
     InventoryUI _ui;
     Camera _camera;
+    Rigidbody _body;
 
     void Start()
     {
         _inventory = GetComponent<InventorySystem>();
         _ui = GetComponent<InventoryUI>();
         _camera = GetComponentInChildren<Camera>();
+        _body = GetComponent<Rigidbody>();
     }
 
     void Update()
@@ -89,12 +99,23 @@ public class PickupInteractor : MonoBehaviour
         if (removed <= 0) return;
 
         var spawner = DebrisSpawner.Instance;
-        Vector3 forward = _camera.transform.forward;
-        Vector3 position = _camera.transform.position + forward * 1.4f;
+        Transform eye = _camera.transform;
+
+        // Release from roughly torso height, just in front of the chest.
+        Vector3 position = eye.position
+                           - Vector3.up * dropHeightBelowEyes
+                           + eye.forward * 0.45f;
+
+        // Inherit the player's motion so dropping while running throws forward
+        // rather than dropping something that hangs in the air behind you.
+        Vector3 inherited = _body != null ? _body.velocity : Vector3.zero;
+        Vector3 velocity = inherited
+                           + eye.forward * dropForwardSpeed
+                           + Vector3.up * dropUpwardSpeed;
 
         if (spawner != null)
         {
-            spawner.Drop(stack.Def, removed, position, forward);
+            spawner.Drop(stack.Def, removed, position, velocity);
         }
         else
         {

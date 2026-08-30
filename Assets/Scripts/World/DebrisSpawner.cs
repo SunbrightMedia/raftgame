@@ -77,14 +77,17 @@ public class DebrisSpawner : MonoBehaviour
         position.y = WaterSurface.GetHeight(position);
 
         ItemDef item = Items.Flotsam[Random.Range(0, Items.Flotsam.Length)];
-        var debris = FloatingDebris.Spawn(item, Random.Range(1, 4), position, debrisMaterial);
+        var debris = FloatingDebris.SpawnFloating(item, Random.Range(1, 4), position, debrisMaterial);
         _live.Add(debris);
     }
 
-    /// <summary>Drops an item into the world, e.g. from the player's hotbar.</summary>
+    /// <summary>
+    /// Drops an item into the world with real physics - it arcs, bounces off
+    /// the deck and floats once it hits the water.
+    /// </summary>
     public FloatingDebris Drop(ItemDef item, int count, Vector3 position, Vector3 velocity)
     {
-        var debris = FloatingDebris.Spawn(item, count, position, debrisMaterial, velocity);
+        var debris = FloatingDebris.SpawnDropped(item, count, position, debrisMaterial, velocity);
         _live.Add(debris);
         return debris;
     }
