@@ -42,13 +42,17 @@ Shader "Raft/GradientSky"
         _CloudCoverage ("Coverage Threshold", Range(0, 1)) = 0.50
         _CloudSoftness ("Edge Softness", Range(0.01, 0.6)) = 0.32
         _CloudScale ("Horizontal Size", Range(0.05, 3)) = 0.55
-        _CloudVerticalScale ("Vertical Squash", Range(0.2, 6)) = 2.6
+        _CloudVerticalScale ("Vertical Squash", Range(0.2, 6)) = 1.1
         _CloudWarp ("Shape Warp", Range(0, 3)) = 1.1
-        _CloudBottom ("Layer Bottom", Range(10, 600)) = 90
-        _CloudTop ("Layer Top", Range(20, 1200)) = 280
+        _CloudBottom ("Layer Bottom", Range(10, 600)) = 80
+        _CloudTop ("Layer Top", Range(20, 1200)) = 520
+        _CloudHeightVariation ("Height Variation", Range(0, 1)) = 0.75
+        _CloudMinThickness ("Min Thickness", Range(0.05, 1)) = 0.18
+        _CloudProfileScale ("Height Variation Scale", Range(0.1, 4)) = 0.8
+        _CloudTowering ("Towering", Range(0, 0.6)) = 0.26
         _CloudDensity ("Density", Range(0.1, 12)) = 3.5
         _CloudSpeed ("Drift Speed", Range(0, 20)) = 2.2
-        _CloudSteps ("March Steps", Range(4, 24)) = 10
+        _CloudSteps ("March Steps", Range(4, 24)) = 12
     }
 
     SubShader
@@ -103,6 +107,10 @@ Shader "Raft/GradientSky"
                 float _CloudWarp;
                 float _CloudBottom;
                 float _CloudTop;
+                float _CloudHeightVariation;
+                float _CloudMinThickness;
+                float _CloudProfileScale;
+                float _CloudTowering;
                 float _CloudDensity;
                 float _CloudSpeed;
                 float _CloudSteps;
@@ -169,10 +177,34 @@ Shader "Raft/GradientSky"
 
             // ---- clouds ------------------------------------------------
 
+            // Where the clouds above this patch of sky start and stop, as
+            // fractions of the slab.
+            //
+            // This is what stops the layer reading as one flat sheet. With a
+            // single fixed vertical envelope every cloud occupies exactly the
+            // same slice of the slab, so however varied their outlines are they
+            // all share a top and a bottom - which is precisely what a sheet
+            // is. Letting the base and thickness wander per column gives tall
+            // towers in one place and thin wisps in another.
+            void CloudProfile(float2 xz, out float baseHeight, out float topHeight)
+            {
+                float2 w = xz * (_CloudScale * 0.01) * _CloudProfileScale;
+                w += _Time.y * _CloudSpeed * 0.01;
+
+                float where = Noise3(float3(w, 3.7));
+                float howTall = Noise3(float3(w * 1.7 + 11.3, 8.1));
+
+                // Thickness ranges from a wisp to nearly the whole slab.
+                float thickness = lerp(_CloudMinThickness, 1.0,
+                                       howTall * _CloudHeightVariation);
+                baseHeight = lerp(0.0, 1.0 - thickness, where * _CloudHeightVariation);
+                topHeight = baseHeight + thickness;
+            }
+
             float CloudDensity(float3 p)
             {
-                // Squashing the vertical axis before sampling is what makes the
-                // shapes read as layered slabs rather than floating spheres.
+                // Squashing the vertical axis before sampling biases the shapes
+                // toward layered forms rather than spheres.
                 float3 q = p * (_CloudScale * 0.01);
                 q.y *= _CloudVerticalScale;
                 q.xz += _Time.y * _CloudSpeed * 0.01;
@@ -185,15 +217,23 @@ Shader "Raft/GradientSky"
                                      Fbm(q * 0.55 + 27.3)) - 0.5;
                 q += warp * _CloudWarp;
 
-                float density = Fbm(q);
+                float raw = Fbm(q);
 
-                // A wide threshold band is the difference between fluffy and
-                // cut out of paper.
-                density = smoothstep(_CloudCoverage, _CloudCoverage + _CloudSoftness, density);
+                // Position within THIS column's cloud, not within the slab.
+                float slab = saturate((p.y - _CloudBottom) / max(_CloudTop - _CloudBottom, 0.001));
+                float baseHeight, topHeight;
+                CloudProfile(p.xz, baseHeight, topHeight);
+                float local = (slab - baseHeight) / max(topHeight - baseHeight, 0.001);
+                if (local < 0.0 || local > 1.0) return 0.0;
 
-                // Feather the top and bottom of the slab so it has no flat lid.
-                float h = saturate((p.y - _CloudBottom) / max(_CloudTop - _CloudBottom, 0.001));
-                density *= smoothstep(0.0, 0.30, h) * (1.0 - smoothstep(0.55, 1.0, h));
+                // Raising the coverage threshold with height erodes the upper
+                // part of each cloud, so they sit wide at the base and round
+                // off toward the top instead of ending in a flat lid.
+                float threshold = _CloudCoverage + local * _CloudTowering;
+                float density = smoothstep(threshold, threshold + _CloudSoftness, raw);
+
+                // Feather both ends of the column so nothing is cut square.
+                density *= smoothstep(0.0, 0.22, local) * (1.0 - smoothstep(0.55, 1.0, local));
                 return density;
             }
 

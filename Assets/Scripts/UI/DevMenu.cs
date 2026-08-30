@@ -25,6 +25,10 @@ public class DevMenu : MonoBehaviour
     [Range(0.05f, 3f)] public float cloudScale = 0.55f;
     [Tooltip("How fuzzy the edges are.")]
     [Range(0.01f, 0.6f)] public float cloudSoftness = 0.32f;
+    [Tooltip("How much cloud height and thickness vary from place to place. "
+           + "At 0 every cloud occupies the same slice of the layer and it "
+           + "reads as a flat sheet.")]
+    [Range(0f, 1f)] public float cloudHeightVariation = 0.75f;
 
     GameObject _panel;
     readonly List<Action> _refreshers = new List<Action>();
@@ -186,6 +190,10 @@ public class DevMenu : MonoBehaviour
         AddSlider(panel, "Fuzziness", 0.01f, 0.6f, ref y,
             () => cloudSoftness,
             v => { cloudSoftness = v; ApplyCloudSettings(); });
+        AddSlider(panel, "Height variation", 0f, 1f, ref y,
+            () => cloudHeightVariation,
+            v => { cloudHeightVariation = v; ApplyCloudSettings(); },
+            v => (v * 100f).ToString("0") + "%");
 
         AddHeader(panel, "Underwater", ref y);
         AddSlider(panel, "Opacity", 0f, 100f, ref y,
@@ -385,6 +393,7 @@ public class DevMenu : MonoBehaviour
     static readonly int SkyCloudCoverage = Shader.PropertyToID("_CloudCoverage");
     static readonly int SkyCloudScale = Shader.PropertyToID("_CloudScale");
     static readonly int SkyCloudSoftness = Shader.PropertyToID("_CloudSoftness");
+    static readonly int SkyCloudHeightVariation = Shader.PropertyToID("_CloudHeightVariation");
 
     Material _skyInstance;
 
@@ -398,6 +407,7 @@ public class DevMenu : MonoBehaviour
         sky.SetFloat(SkyCloudCoverage, cloudCoverage);
         sky.SetFloat(SkyCloudScale, cloudScale);
         sky.SetFloat(SkyCloudSoftness, cloudSoftness);
+        sky.SetFloat(SkyCloudHeightVariation, cloudHeightVariation);
     }
 
     /// <summary>Inverse of the time-to-elevation mapping, for seeding the slider.</summary>
