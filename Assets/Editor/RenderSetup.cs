@@ -39,8 +39,9 @@ public static class RenderSetup
         CreatePostProfile();
 
         // Soft shadows and a sane shadow distance for an open seascape.
-        QualitySettings.shadows = ShadowQuality.All;
-        QualitySettings.shadowResolution = ShadowResolution.High;
+        // Fully qualified: URP declares its own ShadowQuality/ShadowResolution.
+        QualitySettings.shadows = UnityEngine.ShadowQuality.All;
+        QualitySettings.shadowResolution = UnityEngine.ShadowResolution.High;
         QualitySettings.anisotropicFiltering = AnisotropicFiltering.ForceEnable;
 
         AssetDatabase.SaveAssets();
@@ -86,8 +87,17 @@ public static class RenderSetup
 
         pipeline.shadowDistance = 150f;
         pipeline.shadowCascadeCount = 4;
-        pipeline.supportsSoftShadows = true;
         pipeline.supportsHDR = true;
+
+        // supportsSoftShadows is read-only on the asset, so go through the
+        // serialized backing field.
+        var so = new SerializedObject(pipeline);
+        var softShadows = so.FindProperty("m_SoftShadowsSupported");
+        if (softShadows != null)
+        {
+            softShadows.boolValue = true;
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
 
         EditorUtility.SetDirty(pipeline);
         return pipeline;
