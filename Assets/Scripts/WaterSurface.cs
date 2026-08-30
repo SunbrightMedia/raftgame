@@ -40,6 +40,14 @@ public class WaterSurface : MonoBehaviour
     [Tooltip("Bends the wave field so the pattern stops looking like a grid.")]
     [Range(0f, 1f)] public float waveVariation = 0.6f;
 
+    [Header("Style")]
+    [Tooltip("0 = realistic shading, 1 = flat banded toon water.")]
+    [Range(0f, 1f)] public float stylize = 1f;
+    [Tooltip("Flat tones the lighting is stepped into.")]
+    [Range(1f, 12f)] public float shadeBands = 4f;
+    [Tooltip("Flat bands in the shallow-to-deep colour ramp.")]
+    [Range(1f, 12f)] public float depthBands = 4f;
+
     [Header("Waves")]
     [Tooltip("Exactly four waves are sent to the shader; extras are CPU-only.")]
     public Wave[] waves =
@@ -61,6 +69,9 @@ public class WaterSurface : MonoBehaviour
     static readonly int SpeedsId = Shader.PropertyToID("_WaveSpeeds");
     static readonly int TimeId = Shader.PropertyToID("_WaveTime");
     static readonly int WarpId = Shader.PropertyToID("_WaveWarp");
+    static readonly int StylizeId = Shader.PropertyToID("_Stylize");
+    static readonly int ShadeBandsId = Shader.PropertyToID("_ShadeBands");
+    static readonly int DepthBandsId = Shader.PropertyToID("_DepthBands");
 
     Mesh _mesh;
     MeshRenderer _renderer;
@@ -166,6 +177,9 @@ public class WaterSurface : MonoBehaviour
         _block.SetVector(SpeedsId, speeds);
         _block.SetFloat(TimeId, WaveTime);
         _block.SetFloat(WarpId, waveVariation);
+        _block.SetFloat(StylizeId, stylize);
+        _block.SetFloat(ShadeBandsId, shadeBands);
+        _block.SetFloat(DepthBandsId, depthBands);
         _renderer.SetPropertyBlock(_block);
     }
 

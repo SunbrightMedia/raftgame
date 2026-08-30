@@ -19,6 +19,12 @@ Shader "Raft/WaterURP"
         _Metallic ("Metallic", Range(0, 1)) = 0.05
         _FresnelPower ("Fresnel Power", Range(0.5, 8)) = 5
         _SkyReflection ("Sky Reflection", Range(0, 1)) = 0.65
+
+        [Header(Stylisation)]
+        _Stylize ("Stylise (0 realistic, 1 toon)", Range(0, 1)) = 1
+        _ShadeBands ("Lighting Bands", Range(1, 12)) = 4
+        _DepthBands ("Depth Colour Bands", Range(1, 12)) = 4
+        _FoamHardness ("Foam Edge Hardness", Range(0, 1)) = 0.85
         _SunGlint ("Sun Glint", Range(0, 8)) = 0.6
         _DebugView ("Debug View", Float) = 0
 
@@ -92,6 +98,10 @@ Shader "Raft/WaterURP"
                 float _Metallic;
                 float _FresnelPower;
                 float _SkyReflection;
+                float _Stylize;
+                float _ShadeBands;
+                float _DepthBands;
+                float _FoamHardness;
                 float _SunGlint;
                 float _DebugView;
 
@@ -271,6 +281,15 @@ Shader "Raft/WaterURP"
                 float waterDepth = max(sceneEye - surfaceEye, 0);
 
                 float depthBlend = saturate(waterDepth / _DepthFade);
+
+                // Quantise the shallow-to-deep ramp into flat steps. This is
+                // the single biggest thing that makes stylised water read as
+                // stylised: depth becomes a few bands of solid colour, like
+                // contour lines on a chart, rather than a smooth gradient.
+                float depthBands = max(_DepthBands, 1.0);
+                float bandedDepth = floor(depthBlend * depthBands) / max(depthBands - 1.0, 1.0);
+                depthBlend = lerp(depthBlend, saturate(bandedDepth), _Stylize);
+
                 float4 water = lerp(_ShallowColor, _DeepColor, depthBlend);
 
                 float3 normalWS = RippleNormal(input.positionWS.xz, waveNormal);
@@ -297,6 +316,13 @@ Shader "Raft/WaterURP"
 
                 float foam = saturate(max(edgeFoam * edgeFoam, crestFoam));
 
+                // Snap foam to a hard edge. Soft foam reads as airbrushed;
+                // the style wants crisp shapes with a definite boundary.
+                float hardFoam = smoothstep(0.5 - (1.0 - _FoamHardness) * 0.5,
+                                            0.5 + (1.0 - _FoamHardness) * 0.5,
+                                            foam);
+                foam = lerp(foam, hardFoam, _Stylize);
+
                 float3 albedo = lerp(water.rgb, _FoamColor.rgb, foam);
                 float alpha = lerp(saturate(water.a + fresnel * 0.35), 1, foam);
 
@@ -319,6 +345,19 @@ Shader "Raft/WaterURP"
 
                 half4 color = UniversalFragmentPBR(inputData, surfaceData);
 
+                // Step the lit result into flat tones, matching how the clouds
+                // are shaded. Quantising luminance rather than N.L keeps the
+                // sky reflection and shadows inside the same set of bands, so
+                // the whole surface stays in one palette.
+                if (_Stylize > 0.001)
+                {
+                    float bands = max(_ShadeBands, 1.0);
+                    float luma = dot(color.rgb, float3(0.299, 0.587, 0.114));
+                    float stepped = floor(luma * bands) / max(bands - 1.0, 1.0);
+                    float scale = luma > 1e-4 ? saturate(stepped) / luma : 1.0;
+                    color.rgb = lerp(color.rgb, color.rgb * scale, _Stylize);
+                }
+
                 // The scene has no reflection probe, so URP's environment
                 // specular has nothing to sample and the water reads as matte
                 // paint. Reflect the view vector against the ambient probe
@@ -334,6 +373,8 @@ Shader "Raft/WaterURP"
                 Light sun = GetMainLight(inputData.shadowCoord);
                 float3 halfDir = SafeNormalize(sun.direction + viewDirWS);
                 float glint = pow(saturate(dot(normalWS, halfDir)), 220.0);
+                // A hard-edged glint shape rather than a soft bloom.
+                glint = lerp(glint, step(0.25, glint), _Stylize);
                 color.rgb += sun.color * glint * _SunGlint * sun.shadowAttenuation
                              * (1 - foam);
 

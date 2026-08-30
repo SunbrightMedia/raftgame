@@ -17,6 +17,12 @@ public class DevMenu : MonoBehaviour
     [Tooltip("Directional light driven by the time-of-day slider.")]
     public Light sun;
 
+    [Header("Water style")]
+    [Tooltip("0 = the old realistic shading, 1 = flat banded toon water.")]
+    [Range(0f, 1f)] public float waterStylize = 1f;
+    [Range(1f, 12f)] public float waterShadeBands = 4f;
+    [Range(1f, 12f)] public float waterDepthBands = 4f;
+
     [Header("Clouds")]
     [Range(0f, 1f)] public float cloudOpacity = 1f;
     [Range(0f, 1f)] public float cloudCoverage = 0.85f;
@@ -128,6 +134,19 @@ public class DevMenu : MonoBehaviour
         AddSlider(panel, "Variation", 0f, 1f, ref y,
             () => Water() != null ? Water().waveVariation : 0f,
             v => { if (Water() != null) Water().waveVariation = v; });
+
+        AddSlider(panel, "Stylise", 0f, 1f, ref y,
+            () => waterStylize,
+            v => { waterStylize = v; ApplyWaterStyle(); },
+            v => (v * 100f).ToString("0") + "%");
+        AddSlider(panel, "Colour bands", 1f, 12f, ref y,
+            () => waterDepthBands,
+            v => { waterDepthBands = Mathf.Round(v); ApplyWaterStyle(); },
+            v => Mathf.Round(v).ToString("0"));
+        AddSlider(panel, "Light bands", 1f, 12f, ref y,
+            () => waterShadeBands,
+            v => { waterShadeBands = Mathf.Round(v); ApplyWaterStyle(); },
+            v => Mathf.Round(v).ToString("0"));
 
         AddHeader(panel, "World", ref y);
         AddSlider(panel, "Time of day", 0f, 24f, ref y,
@@ -319,6 +338,8 @@ public class DevMenu : MonoBehaviour
             ApplyCloudSettings();
         }
 
+        ApplyWaterStyle();
+
         // Matching the fog to the horizon keeps the waterline from cutting a
         // hard line across the view.
         RenderSettings.fogColor = Color.Lerp(horizon, mid, 0.35f);
@@ -378,6 +399,24 @@ public class DevMenu : MonoBehaviour
     static readonly int SkySunGlowFalloff = Shader.PropertyToID("_SunGlowFalloff");
     static readonly int SkySunGlowStrength = Shader.PropertyToID("_SunGlowStrength");
     static readonly int SkyExposure = Shader.PropertyToID("_Exposure");
+    /// <summary>
+    /// Pushes the water styling to the water material.
+    ///
+    /// Written through a property block on the renderer rather than to the
+    /// material asset: WaterSurface already drives its wave parameters that
+    /// way each frame, and editing the shared Water.mat would persist these
+    /// values into the project after play mode ends.
+    /// </summary>
+    void ApplyWaterStyle()
+    {
+        var water = WaterSurface.Instance;
+        if (water == null) return;
+
+        water.stylize = waterStylize;
+        water.shadeBands = waterShadeBands;
+        water.depthBands = waterDepthBands;
+    }
+
     CloudField _clouds;
     CloudField Clouds()
     {
