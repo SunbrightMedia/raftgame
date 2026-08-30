@@ -19,7 +19,8 @@ public static class CloudMeshBuilder
     /// Builds one cloud. <paramref name="seed"/> makes the shape repeatable.
     /// </summary>
     public static Mesh Build(int seed, int blobs, int subdivisions, float bumpiness,
-                             Vector3 spread, Vector2 blobScaleRange, Vector3 squash)
+                             Vector3 spread, Vector2 blobScaleRange, Vector3 squash,
+                             float gradientCurve = 0.75f)
     {
         var random = new System.Random(seed);
 
@@ -47,6 +48,7 @@ public static class CloudMeshBuilder
             mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
 
         mesh.SetVertices(vertices);
+        mesh.SetColors(BuildHeightGradient(vertices, gradientCurve));
         mesh.SetTriangles(triangles, 0);
         // Flat facets, so normals must be per-face. Vertices are already
         // duplicated per triangle below, which makes RecalculateNormals give
@@ -54,6 +56,41 @@ public static class CloudMeshBuilder
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
         return mesh;
+    }
+
+    /// <summary>
+    /// Bakes a bright-top, dark-underside gradient into vertex colours.
+    ///
+    /// This is what carries a cloud's form. Relying on face normals alone
+    /// leaves a cloud reading as one flat silhouette, because most of its
+    /// facets point in similar enough directions to land in the same shading
+    /// band. A painted vertical ramp gives every cloud a readable top and
+    /// underside regardless of which way its facets happen to face, and the
+    /// facet lighting then adds variation on top of it.
+    /// </summary>
+    static List<Color> BuildHeightGradient(List<Vector3> vertices, float curve)
+    {
+        float minY = float.MaxValue;
+        float maxY = float.MinValue;
+
+        for (int i = 0; i < vertices.Count; i++)
+        {
+            minY = Mathf.Min(minY, vertices[i].y);
+            maxY = Mathf.Max(maxY, vertices[i].y);
+        }
+
+        float span = Mathf.Max(maxY - minY, 0.0001f);
+        var colors = new List<Color>(vertices.Count);
+
+        for (int i = 0; i < vertices.Count; i++)
+        {
+            float h = (vertices[i].y - minY) / span;
+            // Biasing the ramp keeps the lit cap broad and the shadow tight to
+            // the underside, which is how a sunlit cloud actually reads.
+            h = Mathf.Pow(h, curve);
+            colors.Add(new Color(h, h, h, 1f));
+        }
+        return colors;
     }
 
     static void AppendBlob(List<Vector3> vertices, List<int> triangles, System.Random random,
