@@ -312,6 +312,10 @@ public class DevMenu : MonoBehaviour
             cloudField.cloudMaterial.SetColor(CloudLit, litCloud);
             cloudField.cloudMaterial.SetColor(CloudShadow,
                 Color.Lerp(zenith * 1.5f, litCloud, 0.30f));
+
+            // Distant clouds fade toward the sky they sit against, not toward
+            // the sea-level fog colour.
+            cloudField.cloudMaterial.SetColor(CloudHaze, Color.Lerp(mid, horizon, 0.4f));
             ApplyCloudSettings();
         }
 
@@ -395,6 +399,7 @@ public class DevMenu : MonoBehaviour
 
     static readonly int CloudLit = Shader.PropertyToID("_LitColor");
     static readonly int CloudShadow = Shader.PropertyToID("_ShadowColor");
+    static readonly int CloudHaze = Shader.PropertyToID("_HazeColor");
 
     /// <summary>Inverse of the time-to-elevation mapping, for seeding the slider.</summary>
     static float SunRotationToHour(float eulerX)

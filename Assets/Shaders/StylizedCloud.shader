@@ -28,6 +28,12 @@ Shader "Raft/StylizedCloud"
         _RimColor ("Rim Colour", Color) = (1, 0.95, 0.88, 1)
         _RimStrength ("Rim Strength", Range(0, 2)) = 0.35
         _RimPower ("Rim Tightness", Range(0.5, 8)) = 3
+
+        [Header(Aerial Perspective)]
+        _HazeColor ("Haze Colour", Color) = (0.75, 0.70, 0.80, 1)
+        _HazeStart ("Haze Start", Float) = 500
+        _HazeRange ("Haze Range", Float) = 1600
+        _HazeStrength ("Haze Strength", Range(0, 1)) = 0.35
     }
 
     SubShader
@@ -57,7 +63,6 @@ Shader "Raft/StylizedCloud"
             #pragma vertex vert
             #pragma fragment frag
             #pragma target 3.0
-            #pragma multi_compile_fog
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
@@ -73,6 +78,10 @@ Shader "Raft/StylizedCloud"
                 float4 _RimColor;
                 float _RimStrength;
                 float _RimPower;
+                float4 _HazeColor;
+                float _HazeStart;
+                float _HazeRange;
+                float _HazeStrength;
             CBUFFER_END
 
             struct Attributes
@@ -87,8 +96,7 @@ Shader "Raft/StylizedCloud"
                 float4 positionCS : SV_POSITION;
                 float3 normalWS : TEXCOORD0;
                 float3 positionWS : TEXCOORD1;
-                float fogFactor : TEXCOORD2;
-                float gradient : TEXCOORD3;
+                float gradient : TEXCOORD2;
             };
 
             Varyings vert(Attributes input)
@@ -97,7 +105,6 @@ Shader "Raft/StylizedCloud"
                 output.positionWS = TransformObjectToWorld(input.positionOS.xyz);
                 output.positionCS = TransformWorldToHClip(output.positionWS);
                 output.normalWS = TransformObjectToWorldNormal(input.normalOS);
-                output.fogFactor = ComputeFogFactor(output.positionCS.z);
                 // Baked bright-top / dark-underside ramp from the mesh builder.
                 output.gradient = input.color.r;
                 return output;
@@ -133,7 +140,22 @@ Shader "Raft/StylizedCloud"
                 float rim = pow(1.0 - saturate(dot(viewDir, normalWS)), _RimPower);
                 color += _RimColor.rgb * (rim * _RimStrength);
 
-                color = MixFog(color, input.fogFactor);
+                // Deliberately NOT scene fog.
+                //
+                // The scene's exponential-squared fog is tuned for water at sea
+                // level: at density 0.0035 it is 86% opaque by 400 units and
+                // effectively total past 600. Clouds sit 180-420 up and out to
+                // 900 away, so scene fog was replacing almost all of them with
+                // flat fog colour - which is exactly why the distant ones
+                // collapsed into one tone while near ones kept their facets.
+                //
+                // This is a much gentler haze that only starts well past the
+                // nearest clouds, so distance reads as depth rather than
+                // erasing the shading.
+                float distance = length(input.positionWS - GetCameraPositionWS());
+                float haze = saturate((distance - _HazeStart) / max(_HazeRange, 1.0));
+                color = lerp(color, _HazeColor.rgb, haze * _HazeStrength);
+
                 return half4(color, _Opacity);
             }
             ENDHLSL
