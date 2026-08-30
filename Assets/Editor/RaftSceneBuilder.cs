@@ -1,6 +1,8 @@
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 /// <summary>
 /// Builds the whole playable scene from code so the project has no
@@ -14,9 +16,12 @@ public static class RaftSceneBuilder
     [MenuItem("Raft/Build Ocean Scene")]
     public static void BuildScene()
     {
+        RenderSetup.Setup();
+
         var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
         CreateLighting();
+        CreatePostProcessing();
         var water = CreateWater();
         var raft = CreateRaft();
         var player = CreatePlayer();
@@ -34,11 +39,13 @@ public static class RaftSceneBuilder
     }
 
     static Material MakeMaterial(string name, Color color, float smoothness, float metallic,
-        bool transparent, string shaderName = "Standard")
+        bool transparent, string shaderName = "Universal Render Pipeline/Lit")
     {
         System.IO.Directory.CreateDirectory(MaterialDir);
         string path = MaterialDir + "/" + name + ".mat";
-        var shader = Shader.Find(shaderName) ?? Shader.Find("Standard");
+        var shader = Shader.Find(shaderName)
+            ?? Shader.Find("Universal Render Pipeline/Lit")
+            ?? Shader.Find("Standard");
 
         var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
         if (mat == null)
@@ -48,19 +55,21 @@ public static class RaftSceneBuilder
         }
         mat.shader = shader;
 
-        mat.color = color;
-        mat.SetFloat("_Glossiness", smoothness);
-        mat.SetFloat("_Metallic", metallic);
+        if (mat.HasProperty("_Color")) mat.SetColor("_Color", color);
+        if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", color);
+        if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", smoothness);
+        if (mat.HasProperty("_Glossiness")) mat.SetFloat("_Glossiness", smoothness);
+        if (mat.HasProperty("_Metallic")) mat.SetFloat("_Metallic", metallic);
 
-        if (transparent && shader.name == "Standard")
+        if (transparent && mat.HasProperty("_Surface"))
         {
-            mat.SetFloat("_Mode", 3f); // Transparent
-            mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+            mat.SetFloat("_Surface", 1f); // URP Lit: transparent
+            mat.SetFloat("_Blend", 0f);   // alpha
+            mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
             mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            mat.SetInt("_ZWrite", 1);
-            mat.DisableKeyword("_ALPHATEST_ON");
-            mat.EnableKeyword("_ALPHAPREMULTIPLY_ON");
-            mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+            mat.SetInt("_ZWrite", 0);
+            mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            mat.renderQueue = (int)RenderQueue.Transparent;
         }
 
         EditorUtility.SetDirty(mat);
@@ -101,13 +110,28 @@ public static class RaftSceneBuilder
         RenderSettings.fogDensity = 0.0035f;
     }
 
+    static void CreatePostProcessing()
+    {
+        var go = new GameObject("Post Processing");
+        var volume = go.AddComponent<Volume>();
+        volume.isGlobal = true;
+        volume.priority = 0f;
+        volume.sharedProfile = RenderSetup.GetPostProfile();
+    }
+
     static GameObject CreateWater()
     {
         var go = new GameObject("Water", typeof(MeshFilter), typeof(MeshRenderer), typeof(WaterSurface));
         go.transform.position = Vector3.zero;
         var renderer = go.GetComponent<MeshRenderer>();
-        renderer.sharedMaterial =
-            MakeMaterial("Water", new Color(0.13f, 0.42f, 0.58f, 0.82f), 0.9f, 0.1f, true, "Raft/Water");
+        var water =
+            MakeMaterial("Water", new Color(0.13f, 0.42f, 0.58f, 0.82f), 0.94f, 0.05f, true, "Raft/WaterURP");
+
+        if (water.HasProperty("_ShallowColor"))
+            water.SetColor("_ShallowColor", new Color(0.22f, 0.62f, 0.68f, 0.55f));
+        if (water.HasProperty("_DeepColor"))
+            water.SetColor("_DeepColor", new Color(0.02f, 0.16f, 0.30f, 0.95f));
+        renderer.sharedMaterial = water;
 
         // The surface is displaced on the GPU, so it cannot cast or receive
         // meaningful shadows - skipping them is a straight saving.
@@ -176,6 +200,12 @@ public static class RaftSceneBuilder
         cam.farClipPlane = 1500f;
         camGo.AddComponent<AudioListener>();
         camGo.tag = "MainCamera";
+
+        var camData = camGo.AddComponent<UniversalAdditionalCameraData>();
+        camData.renderPostProcessing = true;
+        camData.antialiasing = AntialiasingMode.SubpixelMorphologicalAntiAliasing;
+        camData.antialiasingQuality = AntialiasingQuality.High;
+        camData.renderShadows = true;
 
         var look = camGo.AddComponent<MouseLook>();
         look.body = player.transform;
