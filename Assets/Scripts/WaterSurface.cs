@@ -26,7 +26,7 @@ public class WaterSurface : MonoBehaviour
     [Tooltip("Size of the water plane in world units.")]
     public float size = 400f;
     [Tooltip("Vertices per side. The mesh is static, so this is cheap.")]
-    [Range(8, 250)] public int resolution = 160;
+    [Range(8, 250)] public int resolution = 250;
     [Tooltip("Transform the water recenters on (usually the player).")]
     public Transform followTarget;
 
@@ -37,7 +37,10 @@ public class WaterSurface : MonoBehaviour
         new Wave { direction = new Vector2( 1f,  0.35f), amplitude = 0.45f, wavelength = 26f, speed = 4.5f },
         new Wave { direction = new Vector2(-0.6f, 1f),   amplitude = 0.28f, wavelength = 15f, speed = 3.2f },
         new Wave { direction = new Vector2( 0.4f, -1f),  amplitude = 0.14f, wavelength =  7f, speed = 2.4f },
-        new Wave { direction = new Vector2(-1f, -0.2f),  amplitude = 0.06f, wavelength =  3f, speed = 1.6f },
+        // Keep the shortest wavelength above roughly twice the grid cell size
+        // (400 / 249 = 1.6m here). Below that it is under-sampled and only
+        // aliases; the shader's per-pixel ripples carry finer detail.
+        new Wave { direction = new Vector2(-1f, -0.2f),  amplitude = 0.02f, wavelength = 5.5f, speed = 1.6f },
     };
 
     static readonly int[] WaveIds =

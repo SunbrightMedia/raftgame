@@ -95,10 +95,13 @@ public static class RaftSceneBuilder
             AssetDatabase.CreateAsset(sky, skyPath);
         }
         sky.SetFloat("_SunSize", 0.04f);
-        sky.SetFloat("_AtmosphereThickness", 1.1f);
+        // Thickness drives how much the procedural skybox yellows toward the
+        // horizon. Above ~1 it paints a sunset band, which under this 42-degree
+        // midday sun just looks wrong - and green, once the blue tint is over it.
+        sky.SetFloat("_AtmosphereThickness", 0.62f);
         sky.SetColor("_SkyTint", new Color(0.45f, 0.66f, 0.9f));
         sky.SetColor("_GroundColor", new Color(0.19f, 0.32f, 0.42f));
-        sky.SetFloat("_Exposure", 1.15f);
+        sky.SetFloat("_Exposure", 1.05f);
         EditorUtility.SetDirty(sky);
 
         RenderSettings.skybox = sky;
@@ -131,6 +134,17 @@ public static class RaftSceneBuilder
             water.SetColor("_ShallowColor", new Color(0.22f, 0.62f, 0.68f, 0.55f));
         if (water.HasProperty("_DeepColor"))
             water.SetColor("_DeepColor", new Color(0.02f, 0.16f, 0.30f, 0.95f));
+
+        // Foam and reflection tuning. Set explicitly rather than left to the
+        // shader defaults so rebuilding over an existing Water.mat re-applies
+        // them instead of keeping whatever was there.
+        if (water.HasProperty("_FoamDepth")) water.SetFloat("_FoamDepth", 0.15f);
+        if (water.HasProperty("_FoamCrest")) water.SetFloat("_FoamCrest", 0.55f);
+        if (water.HasProperty("_FoamCrestSharpness")) water.SetFloat("_FoamCrestSharpness", 0.45f);
+        if (water.HasProperty("_SkyReflection")) water.SetFloat("_SkyReflection", 0.65f);
+        if (water.HasProperty("_SunGlint")) water.SetFloat("_SunGlint", 0.6f);
+        if (water.HasProperty("_DebugView")) water.SetFloat("_DebugView", 0f);
+
         renderer.sharedMaterial = water;
 
         // The surface is displaced on the GPU, so it cannot cast or receive
