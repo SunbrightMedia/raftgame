@@ -18,7 +18,7 @@ public class DevMenu : MonoBehaviour
     public Light sun;
 
     [Header("Clouds")]
-    [Range(0f, 1f)] public float cloudOpacity = 1f;
+    [Range(0f, 1f)] public float cloudOpacity = 0.45f;
     [Range(0f, 1f)] public float cloudCoverage = 0.85f;
 
     GameObject _panel;

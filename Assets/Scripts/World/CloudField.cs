@@ -34,18 +34,20 @@ public class CloudField : MonoBehaviour
     [Tooltip("Overall width of a cloud.")]
     public Vector2 sizeRange = new Vector2(70f, 190f);
     [Tooltip("Lumps per cloud. More means a longer, more broken-up mass.")]
-    public Vector2Int blobRange = new Vector2Int(3, 7);
+    public Vector2Int blobRange = new Vector2Int(4, 9);
     [Tooltip("0 gives 20 big facets per lump, 1 gives 80. Lower is harsher.")]
     [Range(0, 2)] public int subdivisions = 1;
-    [Tooltip("How far vertices are pushed off the sphere.")]
-    [Range(0f, 0.8f)] public float bumpiness = 0.42f;
+    [Tooltip("How far vertices are pushed off the sphere. Facet visibility "
+           + "comes from face SIZE, not from this - push it far and the "
+           + "silhouette just goes spiky while the tris stay the same.")]
+    [Range(0f, 0.8f)] public float bumpiness = 0.14f;
     [Tooltip("Vertical squash. Clouds are much wider than they are tall.")]
     [Range(0.05f, 1f)] public float flatness = 0.34f;
     [Tooltip("Number of distinct meshes built and reused across the field.")]
     [Range(1, 24)] public int meshVariants = 10;
 
     [Header("Appearance")]
-    [Range(0f, 1f)] public float opacity = 1f;
+    [Range(0f, 1f)] public float opacity = 0.45f;
 
     Transform _root;
     Transform[] _clouds;
@@ -127,8 +129,8 @@ public class CloudField : MonoBehaviour
                 bumpiness: bumpiness,
                 // Lumps spread mostly sideways, so clouds grow long rather
                 // than tall.
-                spread: new Vector3(1.5f, 0.35f, 1.1f),
-                blobScaleRange: new Vector2(0.45f, 0.8f),
+                spread: new Vector3(1.8f, 0.30f, 1.3f),
+                blobScaleRange: new Vector2(0.50f, 0.88f),
                 squash: new Vector3(1f, flatness, 1f));
         }
     }

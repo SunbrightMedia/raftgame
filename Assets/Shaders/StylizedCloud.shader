@@ -15,10 +15,10 @@ Shader "Raft/StylizedCloud"
     {
         _LitColor ("Lit Colour", Color) = (1, 0.99, 0.96, 1)
         _ShadowColor ("Shadow Colour", Color) = (0.55, 0.60, 0.72, 1)
-        _Opacity ("Opacity", Range(0, 1)) = 1
-        _Bands ("Shading Bands", Range(1, 8)) = 3
-        _LightWrap ("Light Wrap", Range(0, 1)) = 0.45
-        _RimStrength ("Rim Light", Range(0, 1)) = 0.25
+        _Opacity ("Per-face Opacity", Range(0, 1)) = 0.45
+        _Bands ("Shading Bands", Range(1, 8)) = 5
+        _LightWrap ("Light Wrap", Range(0, 1)) = 0.22
+        _RimStrength ("Rim Light", Range(0, 1)) = 0.15
     }
 
     SubShader
@@ -37,9 +37,18 @@ Shader "Raft/StylizedCloud"
             Tags { "LightMode" = "UniversalForward" }
 
             Blend SrcAlpha OneMinusSrcAlpha
-            // ZWrite On so a cloud's own far side does not blend through its
-            // near side - the same self-blending trap the ocean surface hit.
-            ZWrite On
+            // ZWrite Off, deliberately - the opposite of the call made for the
+            // ocean, for the opposite reason.
+            //
+            // With depth writes on, only the frontmost facet of a cloud
+            // survives, so every cloud renders as one flat silhouette at a
+            // single alpha whether it is a thin wisp or a deep mass. Letting
+            // the facets blend instead means density accumulates where the
+            // cloud is thick: one overlap at 0.45 alpha reads as 0.45, three
+            // reads as 0.83. Thin edges stay translucent, cores go solid, and
+            // the internal triangles stay visible - which is what makes these
+            // read as volume rather than as cut-outs.
+            ZWrite Off
             Cull Back
 
             HLSLPROGRAM
