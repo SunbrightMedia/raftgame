@@ -1,5 +1,7 @@
 using System.Text;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 /// <summary>
 /// Dev-only hitch detector. Any frame longer than spikeThresholdMs is logged
@@ -41,6 +43,30 @@ public class PerfProbe : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F3)) _show = !_show;
     }
 
+    /// <summary>
+    /// What the renderer is ACTUALLY doing, as opposed to what the project
+    /// settings say. Aliasing complaints are impossible to diagnose from a
+    /// screenshot without knowing the real resolution and AA state, so it is
+    /// on the overlay.
+    /// </summary>
+    string GraphicsLine()
+    {
+        var pipeline = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
+        var camera = Camera.main;
+        var data = camera != null ? camera.GetComponent<UniversalAdditionalCameraData>() : null;
+
+        float scale = pipeline != null ? pipeline.renderScale : 1f;
+        int msaa = pipeline != null ? pipeline.msaaSampleCount : 1;
+
+        return string.Format(
+            "{0}x{1} @ {2:F2} scale = {3}x{4} rendered\nMSAA {5}x   post-AA {6}   quality {7}",
+            Screen.width, Screen.height, scale,
+            Mathf.RoundToInt(Screen.width * scale), Mathf.RoundToInt(Screen.height * scale),
+            msaa,
+            data != null ? data.antialiasing.ToString() : "no camera data",
+            QualitySettings.names[QualitySettings.GetQualityLevel()]);
+    }
+
     void OnGUI()
     {
         if (!_show) return;
@@ -49,7 +75,8 @@ public class PerfProbe : MonoBehaviour
            .Append((1000f / Mathf.Max(_avgMs, 0.01f)).ToString("F0")).Append(" fps)\n")
            .Append("spikes >").Append(spikeThresholdMs.ToString("F0")).Append("ms: ")
            .Append(_spikeCount).Append("  worst ").Append(_worstMs.ToString("F0")).Append("ms\n")
-           .Append("last: ").Append(_lastSpike).Append("\nF3 to hide");
-        GUI.Label(new Rect(8, 8, 460, 90), _sb.ToString());
+           .Append("last: ").Append(_lastSpike).Append('\n')
+           .Append(GraphicsLine()).Append("\nF3 to hide");
+        GUI.Label(new Rect(8, 8, 620, 130), _sb.ToString());
     }
 }

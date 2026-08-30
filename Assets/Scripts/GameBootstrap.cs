@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 /// <summary>
 /// Adds any missing runtime systems as soon as a scene loads.
@@ -18,11 +20,41 @@ public static class GameBootstrap
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void EnsureSystems()
     {
+        EnsureGraphicsQuality();
         EnsureGlobal<DevMenu>("Dev Menu");
         EnsureGlobal<UnderwaterEffect>("Underwater Effect");
         EnsureCloudField();
         EnsurePlayerSystems();
         EnsureDebrisSpawner();
+    }
+
+    /// <summary>
+    /// Forces the antialiasing settings at runtime.
+    ///
+    /// These are normally set by Raft &gt; Setup Rendering, but they live on the
+    /// pipeline asset and the camera, so a scene or asset saved before those
+    /// values changed simply keeps the old ones with nothing to indicate it.
+    /// Applying them here means pulling new code is enough.
+    /// </summary>
+    static void EnsureGraphicsQuality()
+    {
+        var pipeline = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
+        if (pipeline != null)
+        {
+            if (pipeline.msaaSampleCount < 4) pipeline.msaaSampleCount = 4;
+        }
+
+        var camera = Camera.main;
+        if (camera == null) return;
+
+        var data = camera.GetComponent<UniversalAdditionalCameraData>();
+        if (data == null) data = camera.gameObject.AddComponent<UniversalAdditionalCameraData>();
+
+        // Post-process AA is the only thing that touches the stylised band
+        // edges MSAA cannot see, so it must actually be on.
+        data.renderPostProcessing = true;
+        data.antialiasing = AntialiasingMode.SubpixelMorphologicalAntiAliasing;
+        data.antialiasingQuality = AntialiasingQuality.High;
     }
 
     static T EnsureGlobal<T>(string name) where T : Component
