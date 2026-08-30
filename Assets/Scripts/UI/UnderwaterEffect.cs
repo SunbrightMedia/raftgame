@@ -89,33 +89,49 @@ public class UnderwaterEffect : MonoBehaviour
     /// The flat overlay gives the screen its colour, but distance underwater
     /// should close in exponentially - that is what scene fog already does, per
     /// pixel and depth-correct, so drive it rather than faking a gradient.
+    ///
+    /// Order matters: the surface settings must be captured on the way IN and
+    /// restored on the way OUT. Sampling them while surfaced without restoring
+    /// first re-captures the underwater fog as the new baseline, and the fog
+    /// then never lifts.
     /// </summary>
     void ApplyFog()
     {
-        if (!IsSubmerged)
+        if (IsSubmerged)
         {
-            // Re-read the above-water settings every frame while surfaced, so
-            // changes made elsewhere (the dev menu's time-of-day slider drives
-            // fog colour) are what we restore to, not a stale snapshot.
-            _surfaceFogEnabled = RenderSettings.fog;
-            _surfaceFogMode = RenderSettings.fogMode;
-            _surfaceFogColor = RenderSettings.fogColor;
-            _surfaceFogDensity = RenderSettings.fogDensity;
-            _fogCaptured = true;
+            if (!_wasSubmerged)
+            {
+                CaptureSurfaceFog();
+                _wasSubmerged = true;
+            }
 
-            if (_wasSubmerged) _wasSubmerged = false;
+            Color tint = TintColor();
+            RenderSettings.fog = true;
+            RenderSettings.fogMode = FogMode.ExponentialSquared;
+            RenderSettings.fogColor = new Color(tint.r, tint.g, tint.b, 1f);
+            RenderSettings.fogDensity = fogDensity;
             return;
         }
 
-        if (!_fogCaptured) return;
+        if (_wasSubmerged)
+        {
+            RestoreSurfaceFog();
+            return;
+        }
 
-        _wasSubmerged = true;
-        Color tint = TintColor();
+        // Surfaced and settled: keep the baseline current, so changes made
+        // elsewhere (the dev menu drives fog colour with time of day) are what
+        // we come back to.
+        CaptureSurfaceFog();
+    }
 
-        RenderSettings.fog = true;
-        RenderSettings.fogMode = FogMode.ExponentialSquared;
-        RenderSettings.fogColor = new Color(tint.r, tint.g, tint.b, 1f);
-        RenderSettings.fogDensity = fogDensity;
+    void CaptureSurfaceFog()
+    {
+        _surfaceFogEnabled = RenderSettings.fog;
+        _surfaceFogMode = RenderSettings.fogMode;
+        _surfaceFogColor = RenderSettings.fogColor;
+        _surfaceFogDensity = RenderSettings.fogDensity;
+        _fogCaptured = true;
     }
 
     void OnDisable()
@@ -125,13 +141,13 @@ public class UnderwaterEffect : MonoBehaviour
 
     void RestoreSurfaceFog()
     {
-        if (!_fogCaptured || !_wasSubmerged) return;
+        _wasSubmerged = false;
+        if (!_fogCaptured) return;
 
         RenderSettings.fog = _surfaceFogEnabled;
         RenderSettings.fogMode = _surfaceFogMode;
         RenderSettings.fogColor = _surfaceFogColor;
         RenderSettings.fogDensity = _surfaceFogDensity;
-        _wasSubmerged = false;
     }
 
     /// <summary>

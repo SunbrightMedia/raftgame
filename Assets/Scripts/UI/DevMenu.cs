@@ -37,6 +37,10 @@ public class DevMenu : MonoBehaviour
         EnsureEventSystem();
         Build();
         _panel.SetActive(false);
+
+        // Apply once up front so lighting matches the slider from the start
+        // rather than only after it is first dragged.
+        ApplyTimeOfDay();
     }
 
     void OnDestroy()
@@ -220,26 +224,58 @@ public class DevMenu : MonoBehaviour
         float elevation = (_timeOfDay - 6f) / 12f * 180f;
         sun.transform.rotation = Quaternion.Euler(elevation, 145f, 0f);
 
-        // Below the horizon there is no sunlight to cast.
-        float above = Mathf.Clamp01(Mathf.Sin(elevation * Mathf.Deg2Rad));
+        float sinElevation = Mathf.Sin(elevation * Mathf.Deg2Rad);
+        float above = Mathf.Clamp01(sinElevation);
+
+        // Peaks as the sun crosses the horizon and falls off within ~17 degrees
+        // either side - the window where sunrise and sunset colour happens.
+        float twilight = 1f - Mathf.Clamp01(Mathf.Abs(sinElevation) / 0.30f);
+        // ...but only while the sun is still near or above the horizon, so
+        // midnight stays black instead of glowing orange.
+        float sunNearHorizon = Mathf.Clamp01((sinElevation + 0.12f) / 0.24f);
+        float warm = twilight * sunNearHorizon;
+
+        sun.color = Color.Lerp(Daylight, Ember, warm);
         sun.intensity = Mathf.Lerp(0.02f, 1.25f, above);
 
-        // Dimming the sun alone is not enough: the water reads its brightness
-        // mostly from the ambient probe and the sky reflection, so at midnight
-        // it kept glowing under a black sun. Darken the whole environment.
-        float night = Mathf.Lerp(0.03f, 1f, above);
-        RenderSettings.ambientIntensity = night;
-        RenderSettings.reflectionIntensity = night;
+        // Dimming the sun alone is not enough: the water takes most of its
+        // brightness from the ambient probe and the sky reflection, so it kept
+        // glowing under a black sun.
+        float brightness = Mathf.Lerp(0.03f, 1f, above);
+        RenderSettings.ambientIntensity = brightness;
+        RenderSettings.reflectionIntensity = brightness;
 
         var sky = SkyboxInstance();
-        if (sky != null && sky.HasProperty(SkyExposure))
-            sky.SetFloat(SkyExposure, Mathf.Lerp(0.08f, 1.05f, above));
+        if (sky != null)
+        {
+            if (sky.HasProperty(SkyExposure))
+                sky.SetFloat(SkyExposure, Mathf.Lerp(0.08f, 1.05f, above));
 
-        RenderSettings.fogColor = Color.Lerp(
-            new Color(0.03f, 0.05f, 0.09f), new Color(0.62f, 0.75f, 0.85f), above);
+            // Thicker air is what actually reddens a low sun - the procedural
+            // skybox models that, so drive it rather than painting a tint over
+            // the top. The purple comes in on the sky tint alongside it.
+            if (sky.HasProperty(SkyAtmosphere))
+                sky.SetFloat(SkyAtmosphere, Mathf.Lerp(0.62f, 1.7f, warm));
+            if (sky.HasProperty(SkyTint))
+                sky.SetColor(SkyTint, Color.Lerp(DaySkyTint, TwilightSkyTint, warm));
+        }
+
+        Color fog = Color.Lerp(NightFog, DayFog, above);
+        RenderSettings.fogColor = Color.Lerp(fog, EmberFog, warm);
 
         _environmentDirtyAt = Time.unscaledTime + 0.15f;
     }
+
+    static readonly Color Daylight = new Color(1f, 0.96f, 0.86f);
+    static readonly Color Ember = new Color(1f, 0.38f, 0.16f);
+    static readonly Color DaySkyTint = new Color(0.45f, 0.66f, 0.90f);
+    static readonly Color TwilightSkyTint = new Color(0.62f, 0.36f, 0.78f);
+    static readonly Color DayFog = new Color(0.62f, 0.75f, 0.85f);
+    static readonly Color EmberFog = new Color(0.78f, 0.40f, 0.42f);
+    static readonly Color NightFog = new Color(0.04f, 0.05f, 0.11f);
+
+    static readonly int SkyAtmosphere = Shader.PropertyToID("_AtmosphereThickness");
+    static readonly int SkyTint = Shader.PropertyToID("_SkyTint");
 
     static readonly int SkyExposure = Shader.PropertyToID("_Exposure");
     Material _skyInstance;
