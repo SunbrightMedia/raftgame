@@ -24,6 +24,13 @@ public class FloatingDebris : MonoBehaviour
     [Tooltip("Drift speed in metres per second.")]
     public float driftSpeed = 0.35f;
 
+    // Dropped items want to feel like waterlogged timber, not polystyrene:
+    // heavy enough to shove things, and enough angular drag that they stop
+    // tumbling shortly after they land.
+    const float DropMass = 12f;
+    const float DropAngularDrag = 2.5f;
+    const float DropDrag = 0.15f;
+
     Vector3 _driftDirection;
     float _spinSpeed;
     float _bobPhase;
@@ -52,10 +59,12 @@ public class FloatingDebris : MonoBehaviour
         debris._collider.isTrigger = false;
 
         var body = debris.gameObject.AddComponent<Rigidbody>();
-        body.mass = 2f;
+        body.mass = DropMass;
+        body.drag = DropDrag;
+        body.angularDrag = DropAngularDrag;
         body.interpolation = RigidbodyInterpolation.Interpolate;
         body.velocity = velocity;
-        body.angularVelocity = Random.insideUnitSphere * 3f;
+        body.angularVelocity = Random.insideUnitSphere * 1.2f;
         debris._body = body;
 
         return debris;
@@ -149,8 +158,22 @@ public class FloatingDebris : MonoBehaviour
             position += _driftDirection * step;
         }
 
-        position.y = WaterSurface.GetHeight(position) + floatOffset
-                     + Mathf.Sin(Time.time * 1.3f + _bobPhase) * 0.02f;
+        Vector3 candidate = position;
+        candidate.y = WaterSurface.GetHeight(position) + floatOffset
+                      + Mathf.Sin(Time.time * 1.3f + _bobPhase) * 0.02f;
+
+        // The raft only follows part of the wave height, so crests genuinely
+        // pass through the deck. An item pinned to the surface would ride that
+        // crest straight through the raft, so when the swell would push it into
+        // something solid, hold its height and steer out instead.
+        if (IsBlocked(candidate))
+        {
+            candidate.y = position.y;
+            SteerAwayFrom(candidate);
+            if (IsBlocked(candidate)) candidate = position;
+        }
+
+        position = candidate;
         transform.position = position;
 
         // Lie along the surface rather than staying stubbornly level.
@@ -158,6 +181,25 @@ public class FloatingDebris : MonoBehaviour
         Quaternion align = Quaternion.FromToRotation(Vector3.up, normal) * transform.rotation;
         transform.rotation = Quaternion.Slerp(transform.rotation, align, 4f * Time.deltaTime);
         transform.Rotate(Vector3.up, _spinSpeed * Time.deltaTime, Space.Self);
+    }
+
+    /// <summary>True if this item would intersect solid geometry there.</summary>
+    bool IsBlocked(Vector3 position)
+    {
+        return Physics.CheckBox(position, transform.localScale * 0.45f, transform.rotation,
+                                ~0, QueryTriggerInteraction.Ignore);
+    }
+
+    /// <summary>Points the drift away from whatever is crowding this position.</summary>
+    void SteerAwayFrom(Vector3 position)
+    {
+        var hits = Physics.OverlapBox(position, transform.localScale * 0.5f, transform.rotation,
+                                      ~0, QueryTriggerInteraction.Ignore);
+        if (hits.Length == 0) return;
+
+        Vector3 away = position - hits[0].ClosestPoint(position);
+        away.y = 0f;
+        _driftDirection = away.sqrMagnitude > 0.0001f ? away.normalized : RandomHeading();
     }
 
     /// <summary>

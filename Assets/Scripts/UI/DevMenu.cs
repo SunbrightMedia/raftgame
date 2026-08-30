@@ -168,6 +168,10 @@ public class DevMenu : MonoBehaviour
             () => Underwater() != null ? Underwater().saturation : 0f,
             v => { if (Underwater() != null) Underwater().saturation = v; },
             v => v.ToString("0") + "%");
+        AddSlider(panel, "Fog density", 0f, 0.5f, ref y,
+            () => Underwater() != null ? Underwater().fogDensity : 0f,
+            v => { if (Underwater() != null) Underwater().fogDensity = v; },
+            v => v.ToString("0.000"));
 
         // Size the panel to whatever was added rather than a magic number, so
         // adding a slider never silently clips the bottom of the list.

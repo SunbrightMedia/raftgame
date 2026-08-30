@@ -21,11 +21,22 @@ public class UnderwaterEffect : MonoBehaviour
     [Tooltip("0 = grey, 100 = fully saturated hue.")]
     [Range(0f, 100f)] public float saturation = 62f;
 
+    [Tooltip("Exponential-squared fog density while submerged. Higher closes "
+           + "visibility in faster.")]
+    [Range(0f, 0.5f)] public float fogDensity = 0.08f;
+
     /// <summary>True while the camera is below the surface.</summary>
     public bool IsSubmerged { get; private set; }
 
     Camera _camera;
     Image _overlay;
+
+    bool _wasSubmerged;
+    bool _fogCaptured;
+    bool _surfaceFogEnabled;
+    FogMode _surfaceFogMode;
+    Color _surfaceFogColor;
+    float _surfaceFogDensity;
 
     void Start()
     {
@@ -70,6 +81,57 @@ public class UnderwaterEffect : MonoBehaviour
 
         _overlay.enabled = IsSubmerged;
         if (IsSubmerged) _overlay.color = TintColor();
+
+        ApplyFog();
+    }
+
+    /// <summary>
+    /// The flat overlay gives the screen its colour, but distance underwater
+    /// should close in exponentially - that is what scene fog already does, per
+    /// pixel and depth-correct, so drive it rather than faking a gradient.
+    /// </summary>
+    void ApplyFog()
+    {
+        if (!IsSubmerged)
+        {
+            // Re-read the above-water settings every frame while surfaced, so
+            // changes made elsewhere (the dev menu's time-of-day slider drives
+            // fog colour) are what we restore to, not a stale snapshot.
+            _surfaceFogEnabled = RenderSettings.fog;
+            _surfaceFogMode = RenderSettings.fogMode;
+            _surfaceFogColor = RenderSettings.fogColor;
+            _surfaceFogDensity = RenderSettings.fogDensity;
+            _fogCaptured = true;
+
+            if (_wasSubmerged) _wasSubmerged = false;
+            return;
+        }
+
+        if (!_fogCaptured) return;
+
+        _wasSubmerged = true;
+        Color tint = TintColor();
+
+        RenderSettings.fog = true;
+        RenderSettings.fogMode = FogMode.ExponentialSquared;
+        RenderSettings.fogColor = new Color(tint.r, tint.g, tint.b, 1f);
+        RenderSettings.fogDensity = fogDensity;
+    }
+
+    void OnDisable()
+    {
+        RestoreSurfaceFog();
+    }
+
+    void RestoreSurfaceFog()
+    {
+        if (!_fogCaptured || !_wasSubmerged) return;
+
+        RenderSettings.fog = _surfaceFogEnabled;
+        RenderSettings.fogMode = _surfaceFogMode;
+        RenderSettings.fogColor = _surfaceFogColor;
+        RenderSettings.fogDensity = _surfaceFogDensity;
+        _wasSubmerged = false;
     }
 
     /// <summary>

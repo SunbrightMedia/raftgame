@@ -61,14 +61,14 @@ Shader "Raft/WaterURP"
             Tags { "LightMode" = "UniversalForward" }
 
             Blend SrcAlpha OneMinusSrcAlpha
-            // ZWrite On: the ocean is one transparent mesh, so with depth
-            // writes off it blends with ITSELF in triangle submission order
-            // and far crests paint over near ones. Writing depth makes the
-            // surface occlude itself correctly; it still blends over the
-            // opaque scene behind it, which is what the transparency is for.
-            ZWrite On
-            // Visible from underneath now that the player can swim.
-            Cull Off
+            // ZWrite stays Off. Turning it On does fix the surface blending
+            // with itself, but it also made the whole ocean render as solid
+            // white foam: the shoreline-foam term reads _CameraDepthTexture,
+            // and once the water writes depth that sample can come back as the
+            // water's own surface, so waterDepth collapses to ~0 and edgeFoam
+            // saturates everywhere. Needs a render to confirm and fix properly.
+            ZWrite Off
+            Cull Back
 
             HLSLPROGRAM
             #pragma vertex vert
@@ -249,8 +249,7 @@ Shader "Raft/WaterURP"
                 return output;
             }
 
-            half4 frag(Varyings input, FRONT_FACE_TYPE frontFace : FRONT_FACE_SEMANTIC)
-                : SV_Target
+            half4 frag(Varyings input) : SV_Target
             {
                 float2 screenUV = input.screenPos.xy / max(input.screenPos.w, 0.0001);
 
@@ -264,8 +263,6 @@ Shader "Raft/WaterURP"
                 float2 slope;
                 EvaluateWaves(input.positionWS.xz, height, slope, amplitude);
                 float3 waveNormal = normalize(float3(-slope.x, 1, -slope.y));
-                // Seen from below the surface faces the other way.
-                waveNormal = IS_FRONT_VFACE(frontFace, waveNormal, -waveNormal);
 
                 // Thickness of water between this surface and whatever is behind it.
                 float rawDepth = SampleSceneDepth(screenUV);
