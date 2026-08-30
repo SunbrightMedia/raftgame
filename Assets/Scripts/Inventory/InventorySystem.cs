@@ -39,6 +39,7 @@ public class InventorySystem : MonoBehaviour
         Inventory.Add(Items.Plank, 8);
         Inventory.Add(Items.Rope, 5);
         Inventory.Add(Items.Scrap, 3);
+        Inventory.Add(Items.Torch, 2);
     }
 
     void OnDestroy()

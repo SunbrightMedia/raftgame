@@ -139,6 +139,13 @@ public class DevMenu : MonoBehaviour
             v => { if (Player() != null) Player().sprintSpeed = v; });
 
         AddHeader(panel, "Raft", ref y);
+        // How much of the wave height the deck actually follows. At less than
+        // 100% crests pass straight through the deck, which is the root cause
+        // behind items being washed about on the raft.
+        AddSlider(panel, "Follow waves", 0f, 100f, ref y,
+            () => Raft() != null ? Raft().bobAmount * 100f : 0f,
+            v => { if (Raft() != null) Raft().bobAmount = v / 100f; },
+            v => v.ToString("0") + "%");
         AddSlider(panel, "Tilt with waves", 0f, 100f, ref y,
             () => Raft() != null && Raft().tiltWithWaves
                   ? Raft().maxTilt / MaxTiltDegrees * 100f

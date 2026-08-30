@@ -86,6 +86,20 @@ public class FloatingDebris : MonoBehaviour
         block.SetColor("_Color", item.Color);
         renderer.SetPropertyBlock(block);
 
+        if (item.EmitsLight)
+        {
+            var lightGo = new GameObject("Light");
+            lightGo.transform.SetParent(go.transform, false);
+            // Sit the flame just clear of the body so it is not buried inside it.
+            lightGo.transform.localPosition = new Vector3(0f, 1.2f, 0f);
+            var light = lightGo.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.color = item.LightColor;
+            light.range = item.LightRange;
+            light.intensity = item.LightIntensity;
+            light.shadows = LightShadows.None;
+        }
+
         var debris = go.AddComponent<FloatingDebris>();
         debris.Item = item;
         debris.Count = count;
@@ -139,6 +153,30 @@ public class FloatingDebris : MonoBehaviour
         EnterFloating(heading.sqrMagnitude > 0.01f ? heading.normalized : RandomHeading());
     }
 
+    /// <summary>
+    /// Puts the item back under physics control, sitting on the surface it
+    /// found. From here CheckSplashdown only refloats it once it is genuinely
+    /// clear of solid ground again.
+    /// </summary>
+    void RestOn(RaycastHit ground)
+    {
+        Mode = State.Falling;
+        if (_collider != null) _collider.isTrigger = false;
+
+        Vector3 position = transform.position;
+        position.y = ground.point.y + transform.localScale.y * 0.5f + 0.02f;
+        transform.position = position;
+
+        if (_body == null)
+        {
+            _body = gameObject.AddComponent<Rigidbody>();
+            _body.mass = DropMass;
+            _body.drag = DropDrag;
+            _body.angularDrag = DropAngularDrag;
+            _body.interpolation = RigidbodyInterpolation.Interpolate;
+        }
+    }
+
     void EnterFloating(Vector3 heading)
     {
         Mode = State.Floating;
@@ -150,6 +188,23 @@ public class FloatingDebris : MonoBehaviour
     void FloatOnWaves()
     {
         Vector3 position = transform.position;
+
+        // Standing on something? Stop tracking the water and hand the item back
+        // to physics.
+        //
+        // Waves swing about +/-0.9m while the raft slab only spans -0.08 to
+        // 0.28, so an item pinned to the surface passes cleanly BELOW the deck
+        // in every trough and above it on every crest. Testing for overlap only
+        // catches the sliver in between, which is why items appeared to blink
+        // in and out with the swell. Anything resting on the deck has to leave
+        // the water-tracking path entirely.
+        if (Physics.Raycast(position + Vector3.up * 0.05f, Vector3.down,
+                            out RaycastHit ground, transform.localScale.y * 0.5f + 0.4f,
+                            ~0, QueryTriggerInteraction.Ignore))
+        {
+            RestOn(ground);
+            return;
+        }
 
         // Deflect off solid geometry rather than drifting through the raft.
         float step = driftSpeed * Time.deltaTime;

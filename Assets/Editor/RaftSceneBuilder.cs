@@ -233,6 +233,7 @@ public static class RaftSceneBuilder
         player.AddComponent<FirstPersonController>();
         player.AddComponent<InventorySystem>();   // hotbar + backpack (E)
         player.AddComponent<PickupInteractor>();  // F to pick up, Q to drop
+        player.AddComponent<HeldLight>();         // torches light the way
 
         var camGo = new GameObject("PlayerCamera");
         camGo.transform.SetParent(player.transform, false);

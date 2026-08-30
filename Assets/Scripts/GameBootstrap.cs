@@ -41,6 +41,9 @@ public static class GameBootstrap
 
         if (player.GetComponent<PickupInteractor>() == null)
             player.gameObject.AddComponent<PickupInteractor>();
+
+        if (player.GetComponent<HeldLight>() == null)
+            player.gameObject.AddComponent<HeldLight>();
     }
 
     static void EnsureDebrisSpawner()
