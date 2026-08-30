@@ -221,58 +221,91 @@ public class DevMenu : MonoBehaviour
         if (sun == null) return;
 
         // 06:00 puts the sun on the horizon, 12:00 overhead, 18:00 setting.
-        float elevation = (_timeOfDay - 6f) / 12f * 180f;
-        sun.transform.rotation = Quaternion.Euler(elevation, 145f, 0f);
+        float rotation = (_timeOfDay - 6f) / 12f * 180f;
+        sun.transform.rotation = Quaternion.Euler(rotation, 145f, 0f);
 
-        float sinElevation = Mathf.Sin(elevation * Mathf.Deg2Rad);
-        float above = Mathf.Clamp01(sinElevation);
+        // True solar altitude in degrees, -90 (midnight) to +90 (noon). Going
+        // through asin(sin()) folds the 0-360 rotation back into a real angle,
+        // so 18:00 reads as 0 degrees rather than 180.
+        float altitude = Mathf.Asin(Mathf.Sin(rotation * Mathf.Deg2Rad)) * Mathf.Rad2Deg;
 
-        // Peaks as the sun crosses the horizon and falls off within ~17 degrees
-        // either side - the window where sunrise and sunset colour happens.
-        float twilight = 1f - Mathf.Clamp01(Mathf.Abs(sinElevation) / 0.30f);
-        // ...but only while the sun is still near or above the horizon, so
-        // midnight stays black instead of glowing orange.
-        float sunNearHorizon = Mathf.Clamp01((sinElevation + 0.12f) / 0.24f);
-        float warm = twilight * sunNearHorizon;
+        // Bands taken from how photographers actually describe the light:
+        //   golden hour   sun between -4 and +6 degrees   warm, 3000-4000K
+        //   blue hour     sun between -4 and -6 degrees   deep blue, no direct sun
+        //   civil dusk    sun at -6 degrees               daylight effectively gone
+        // Brightness saturates by ~8 degrees. The previous version drove
+        // brightness straight off sin(altitude), which dimmed an ordinary
+        // 42-degree midday sun to 67% and washed the whole day out.
+        float day = Mathf.Clamp01(Mathf.InverseLerp(-6f, 8f, altitude));
+        float golden = Band(altitude, -8f, -3f, 5f, 13f);
+        float blue = Band(altitude, -14f, -8f, -5f, 1f);
 
-        sun.color = Color.Lerp(Daylight, Ember, warm);
-        sun.intensity = Mathf.Lerp(0.02f, 1.25f, above);
+        sun.color = Color.Lerp(Daylight, GoldenLight, golden);
+        sun.intensity = Mathf.Lerp(0f, 1.25f, day);
 
         // Dimming the sun alone is not enough: the water takes most of its
         // brightness from the ambient probe and the sky reflection, so it kept
         // glowing under a black sun.
-        float brightness = Mathf.Lerp(0.03f, 1f, above);
-        RenderSettings.ambientIntensity = brightness;
-        RenderSettings.reflectionIntensity = brightness;
+        // Blue hour is dim but far from black - there is still plenty of
+        // skylight with the sun just under the horizon, so lift the floor
+        // rather than letting it fall straight to night.
+        float ambient = Mathf.Lerp(0.04f, 1f, day) + blue * 0.14f;
+        RenderSettings.ambientIntensity = ambient;
+        RenderSettings.reflectionIntensity = ambient;
 
         var sky = SkyboxInstance();
         if (sky != null)
         {
             if (sky.HasProperty(SkyExposure))
-                sky.SetFloat(SkyExposure, Mathf.Lerp(0.08f, 1.05f, above));
+                sky.SetFloat(SkyExposure, Mathf.Lerp(0.10f, 1.05f, day) + blue * 0.18f);
 
-            // Thicker air is what actually reddens a low sun - the procedural
-            // skybox models that, so drive it rather than painting a tint over
-            // the top. The purple comes in on the sky tint alongside it.
+            // A low sun's light travels through far more atmosphere, which is
+            // what scatters out the blue and leaves the reds. The procedural
+            // skybox models exactly that, so thicken the air through golden
+            // hour instead of painting an orange tint over the top.
             if (sky.HasProperty(SkyAtmosphere))
-                sky.SetFloat(SkyAtmosphere, Mathf.Lerp(0.62f, 1.7f, warm));
+                sky.SetFloat(SkyAtmosphere, Mathf.Lerp(0.62f, 1.65f, golden));
+
             if (sky.HasProperty(SkyTint))
-                sky.SetColor(SkyTint, Color.Lerp(DaySkyTint, TwilightSkyTint, warm));
+            {
+                Color tint = Color.Lerp(DaySkyTint, SunsetSkyTint, golden);
+                tint = Color.Lerp(tint, BlueHourSkyTint, blue);
+                sky.SetColor(SkyTint, tint);
+            }
         }
 
-        Color fog = Color.Lerp(NightFog, DayFog, above);
-        RenderSettings.fogColor = Color.Lerp(fog, EmberFog, warm);
+        Color fog = Color.Lerp(NightFog, DayFog, day);
+        fog = Color.Lerp(fog, EmberFog, golden);
+        fog = Color.Lerp(fog, BlueHourFog, blue);
+        RenderSettings.fogColor = fog;
 
         _environmentDirtyAt = Time.unscaledTime + 0.15f;
     }
 
-    static readonly Color Daylight = new Color(1f, 0.96f, 0.86f);
-    static readonly Color Ember = new Color(1f, 0.38f, 0.16f);
+    /// <summary>
+    /// Trapezoid: ramps in over [inStart, inEnd], holds at 1, ramps out over
+    /// [outStart, outEnd]. Keeps the light bands readable as the angles they
+    /// actually are.
+    /// </summary>
+    static float Band(float x, float inStart, float inEnd, float outStart, float outEnd)
+    {
+        return Mathf.Clamp01(Mathf.InverseLerp(inStart, inEnd, x))
+             * (1f - Mathf.Clamp01(Mathf.InverseLerp(outStart, outEnd, x)));
+    }
+
+    // Sun colour by rough colour temperature: ~5500K at midday, ~3200K through
+    // golden hour.
+    static readonly Color Daylight = new Color(1f, 0.96f, 0.90f);
+    static readonly Color GoldenLight = new Color(1f, 0.66f, 0.34f);
+
     static readonly Color DaySkyTint = new Color(0.45f, 0.66f, 0.90f);
-    static readonly Color TwilightSkyTint = new Color(0.62f, 0.36f, 0.78f);
+    static readonly Color SunsetSkyTint = new Color(0.86f, 0.42f, 0.55f);
+    static readonly Color BlueHourSkyTint = new Color(0.26f, 0.32f, 0.70f);
+
     static readonly Color DayFog = new Color(0.62f, 0.75f, 0.85f);
-    static readonly Color EmberFog = new Color(0.78f, 0.40f, 0.42f);
-    static readonly Color NightFog = new Color(0.04f, 0.05f, 0.11f);
+    static readonly Color EmberFog = new Color(0.88f, 0.50f, 0.36f);
+    static readonly Color BlueHourFog = new Color(0.20f, 0.25f, 0.45f);
+    static readonly Color NightFog = new Color(0.03f, 0.04f, 0.09f);
 
     static readonly int SkyAtmosphere = Shader.PropertyToID("_AtmosphereThickness");
     static readonly int SkyTint = Shader.PropertyToID("_SkyTint");
