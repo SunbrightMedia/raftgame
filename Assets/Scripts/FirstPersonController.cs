@@ -47,7 +47,7 @@ public class FirstPersonController : MonoBehaviour
         CheckGround();
         CheckWater();
 
-        Vector2 input = InventorySystem.IsOpen
+        Vector2 input = GameUI.BlocksGameplay
             ? Vector2.zero
             : new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         if (input.sqrMagnitude > 1f) input.Normalize();
@@ -89,7 +89,8 @@ public class FirstPersonController : MonoBehaviour
 
     void Walk(Vector2 input)
     {
-        float speed = Input.GetKey(KeyCode.LeftShift) ? sprintSpeed : walkSpeed;
+        bool sprinting = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        float speed = sprinting ? sprintSpeed : walkSpeed;
         Vector3 wish = (transform.forward * input.y + transform.right * input.x) * speed;
         Vector3 target = _platformVelocity + wish;
 
@@ -101,7 +102,7 @@ public class FirstPersonController : MonoBehaviour
         float control = IsGrounded ? acceleration : acceleration * 0.25f;
         _rb.AddForce(delta * control, ForceMode.Acceleration);
 
-        if (IsGrounded && !InventorySystem.IsOpen && Input.GetKey(KeyCode.Space))
+        if (IsGrounded && !GameUI.BlocksGameplay && Input.GetKey(KeyCode.Space))
         {
             float jumpVelocity = Mathf.Sqrt(2f * Mathf.Abs(Physics.gravity.y) * jumpHeight);
             _rb.velocity = new Vector3(velocity.x, _platformVelocity.y + jumpVelocity, velocity.z);

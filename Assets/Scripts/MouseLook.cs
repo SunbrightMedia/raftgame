@@ -37,7 +37,7 @@ public class MouseLook : MonoBehaviour
 
     void Update()
     {
-        if (InventorySystem.IsOpen) return; // inventory owns the cursor
+        if (GameUI.BlocksGameplay) return; // a panel owns the cursor
 
         if (Input.GetKeyDown(KeyCode.Escape)) CaptureCursor(false);
         else if (Input.GetMouseButtonDown(0) && lockCursor && Cursor.lockState != CursorLockMode.Locked)

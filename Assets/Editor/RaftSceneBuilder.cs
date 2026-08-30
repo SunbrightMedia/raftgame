@@ -26,6 +26,8 @@ public static class RaftSceneBuilder
         var raft = CreateRaft();
         var player = CreatePlayer();
         water.GetComponent<WaterSurface>().followTarget = player.transform;
+        CreateDebris(player.transform);
+        CreateDevMenu();
 
         Physics.gravity = new Vector3(0f, -9.81f, 0f);
 
@@ -157,6 +159,23 @@ public static class RaftSceneBuilder
         return go;
     }
 
+    static void CreateDebris(Transform player)
+    {
+        var go = new GameObject("Debris Spawner");
+        var spawner = go.AddComponent<DebrisSpawner>();
+        spawner.followTarget = player;
+        // Colour comes from a per-item property block, so one material serves
+        // every piece of flotsam.
+        spawner.debrisMaterial =
+            MakeMaterial("Debris", Color.white, 0.15f, 0f, false, "Raft/FacetedWood");
+    }
+
+    static void CreateDevMenu()
+    {
+        var go = new GameObject("Dev Menu");
+        go.AddComponent<DevMenu>().sun = RenderSettings.sun;
+    }
+
     static GameObject CreateRaft()
     {
         var raft = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -164,7 +183,8 @@ public static class RaftSceneBuilder
         raft.transform.position = new Vector3(0f, 0.1f, 0f);
         raft.transform.localScale = new Vector3(6f, 0.35f, 6f);
         raft.GetComponent<MeshRenderer>().sharedMaterial =
-            MakeMaterial("RaftWood", new Color(0.55f, 0.38f, 0.22f), 0.15f, 0f, false);
+            MakeMaterial("RaftWood", new Color(0.55f, 0.38f, 0.22f), 0.15f, 0f, false,
+                "Raft/FacetedWood");
 
         var rb = raft.AddComponent<Rigidbody>();
         rb.mass = 400f;
@@ -207,7 +227,8 @@ public static class RaftSceneBuilder
         rb.freezeRotation = true;
 
         player.AddComponent<FirstPersonController>();
-        player.AddComponent<InventorySystem>(); // hotbar + backpack (E)
+        player.AddComponent<InventorySystem>();   // hotbar + backpack (E)
+        player.AddComponent<PickupInteractor>();  // F to pick up, Q to drop
 
         var camGo = new GameObject("PlayerCamera");
         camGo.transform.SetParent(player.transform, false);

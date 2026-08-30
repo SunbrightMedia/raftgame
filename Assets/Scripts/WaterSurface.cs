@@ -30,6 +30,14 @@ public class WaterSurface : MonoBehaviour
     [Tooltip("Transform the water recenters on (usually the player).")]
     public Transform followTarget;
 
+    [Header("Wave tuning")]
+    [Tooltip("Global multiplier on how fast the waves travel.")]
+    [Range(0f, 3f)] public float waveSpeed = 1f;
+    [Tooltip("Global multiplier on wave height.")]
+    [Range(0f, 3f)] public float waveHeight = 1f;
+    [Tooltip("Global multiplier on the distance between peaks.")]
+    [Range(0.25f, 4f)] public float waveSpacing = 1f;
+
     [Header("Waves")]
     [Tooltip("Exactly four waves are sent to the shader; extras are CPU-only.")]
     public Wave[] waves =
@@ -147,8 +155,9 @@ public class WaterSurface : MonoBehaviour
         {
             Wave w = i < waves.Length ? waves[i] : default;
             Vector2 d = w.direction.sqrMagnitude > 0.0001f ? w.direction.normalized : Vector2.right;
-            _block.SetVector(WaveIds[i], new Vector4(d.x, d.y, w.amplitude, w.wavelength));
-            speeds[i] = w.speed;
+            _block.SetVector(WaveIds[i],
+                new Vector4(d.x, d.y, w.amplitude * waveHeight, w.wavelength * waveSpacing));
+            speeds[i] = w.speed * waveSpeed;
         }
 
         _block.SetVector(SpeedsId, speeds);
@@ -169,10 +178,12 @@ public class WaterSurface : MonoBehaviour
         for (int i = 0; i < waves.Length; i++)
         {
             Wave w = waves[i];
-            if (w.wavelength <= 0.0001f) continue;
+            float wavelength = w.wavelength * waveSpacing;
+            if (wavelength <= 0.0001f) continue;
             Vector2 d = w.direction.sqrMagnitude > 0.0001f ? w.direction.normalized : Vector2.right;
-            float k = 2f * Mathf.PI / w.wavelength;
-            y += w.amplitude * Mathf.Sin((d.x * x + d.y * z) * k + time * w.speed);
+            float k = 2f * Mathf.PI / wavelength;
+            y += w.amplitude * waveHeight
+                 * Mathf.Sin((d.x * x + d.y * z) * k + time * w.speed * waveSpeed);
         }
         return y;
     }

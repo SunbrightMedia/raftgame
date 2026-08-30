@@ -26,6 +26,8 @@ public class InventoryUI : MonoBehaviour
     Image _heldIcon;
     Text _heldCount;
     RectTransform _heldRect;
+    Text _prompt;
+    Image _crosshair;
 
     class SlotView
     {
@@ -62,6 +64,12 @@ public class InventoryUI : MonoBehaviour
 
         if (open && _heldRect != null && !_system.Held.IsEmpty)
             _heldRect.position = Input.mousePosition;
+
+        if (_crosshair != null)
+        {
+            bool wantCrosshair = !GameUI.BlocksGameplay;
+            if (_crosshair.enabled != wantCrosshair) _crosshair.enabled = wantCrosshair;
+        }
     }
 
     static void EnsureEventSystem()
@@ -85,6 +93,7 @@ public class InventoryUI : MonoBehaviour
 
         _slots = new SlotView[InventorySystem.Size];
 
+        BuildCrosshairAndPrompt(canvasGo.transform);
         BuildHotbar(canvasGo.transform);
         BuildPanel(canvasGo.transform);
         BuildHeldStack(canvasGo.transform);
@@ -197,6 +206,37 @@ public class InventoryUI : MonoBehaviour
 
         _slots[index] = new SlotView { Background = bg, Icon = icon, Count = count };
         return rect;
+    }
+
+    void BuildCrosshairAndPrompt(Transform canvas)
+    {
+        var dot = NewRect("Crosshair", canvas);
+        dot.anchorMin = dot.anchorMax = new Vector2(0.5f, 0.5f);
+        dot.pivot = new Vector2(0.5f, 0.5f);
+        dot.anchoredPosition = Vector2.zero;
+        dot.sizeDelta = new Vector2(5f, 5f);
+        _crosshair = dot.gameObject.AddComponent<Image>();
+        _crosshair.color = new Color(1f, 1f, 1f, 0.65f);
+        _crosshair.raycastTarget = false;
+
+        var prompt = NewRect("Prompt", canvas);
+        prompt.anchorMin = prompt.anchorMax = new Vector2(0.5f, 0.5f);
+        prompt.pivot = new Vector2(0.5f, 1f);
+        prompt.anchoredPosition = new Vector2(0f, -48f);
+        prompt.sizeDelta = new Vector2(700f, 32f);
+        _prompt = prompt.gameObject.AddComponent<Text>();
+        _prompt.font = _font;
+        _prompt.fontSize = 20;
+        _prompt.alignment = TextAnchor.MiddleCenter;
+        _prompt.color = new Color(0.95f, 0.95f, 0.95f);
+        _prompt.raycastTarget = false;
+        _prompt.text = string.Empty;
+    }
+
+    /// <summary>Shows an interaction hint under the crosshair. Empty hides it.</summary>
+    public void SetPrompt(string text)
+    {
+        if (_prompt != null) _prompt.text = text ?? string.Empty;
     }
 
     void BuildHeldStack(Transform canvas)
