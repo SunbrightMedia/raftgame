@@ -29,6 +29,9 @@ public static class RaftSceneBuilder
 
         Physics.gravity = new Vector3(0f, -9.81f, 0f);
 
+        // Dev overlay: frame time + hitch log (F3 toggles). Remove for release.
+        new GameObject("Perf Probe", typeof(PerfProbe));
+
         System.IO.Directory.CreateDirectory("Assets/Scenes");
         EditorSceneManager.SaveScene(scene, ScenePath);
 
