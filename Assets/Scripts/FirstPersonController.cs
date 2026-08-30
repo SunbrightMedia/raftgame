@@ -67,9 +67,14 @@ public class FirstPersonController : MonoBehaviour
             if (hit.collider.transform.root != transform)
             {
                 IsGrounded = true;
-                var platform = hit.rigidbody;
-                if (platform != null && !platform.isKinematic)
-                    _platformVelocity = platform.GetPointVelocity(hit.point);
+
+                // Anchored platforms (the raft) are kinematic, so their
+                // rigidbody reports no velocity - ask the component instead.
+                var raft = hit.collider.GetComponentInParent<RaftPlatform>();
+                if (raft != null)
+                    _platformVelocity = raft.GetPointVelocity(hit.point);
+                else if (hit.rigidbody != null && !hit.rigidbody.isKinematic)
+                    _platformVelocity = hit.rigidbody.GetPointVelocity(hit.point);
             }
         }
     }

@@ -2,6 +2,11 @@ using UnityEngine;
 
 /// <summary>
 /// First-person look. Yaw turns the body, pitch tilts the camera only.
+/// When the body has a Rigidbody, yaw is written to Rigidbody.rotation in
+/// FixedUpdate. Writing transform.rotation from Update on an interpolated
+/// rigidbody gets overwritten by the interpolator every physics step, which
+/// feels like the view is dragging itself back on a spring. (MoveRotation is
+/// not used because the player freezes rotation, and constraints suppress it.)
 /// </summary>
 public class MouseLook : MonoBehaviour
 {
@@ -12,39 +17,54 @@ public class MouseLook : MonoBehaviour
     public float maxPitch = 85f;
     public bool lockCursor = true;
 
+    /// <summary>Current yaw in degrees.</summary>
+    public float Yaw { get; private set; }
+
     float _pitch;
+    Rigidbody _bodyRigidbody;
 
     void Start()
     {
         if (body == null && transform.parent != null) body = transform.parent;
-        if (lockCursor)
+        if (body != null)
         {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            Yaw = body.eulerAngles.y;
+            _bodyRigidbody = body.GetComponent<Rigidbody>();
         }
+
+        if (lockCursor) CaptureCursor(true);
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
-        else if (Input.GetMouseButtonDown(0) && Cursor.lockState != CursorLockMode.Locked && lockCursor)
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
+        if (Input.GetKeyDown(KeyCode.Escape)) CaptureCursor(false);
+        else if (Input.GetMouseButtonDown(0) && lockCursor && Cursor.lockState != CursorLockMode.Locked)
+            CaptureCursor(true);
 
         if (lockCursor && Cursor.lockState != CursorLockMode.Locked) return;
 
-        float mx = Input.GetAxisRaw("Mouse X") * sensitivity;
-        float my = Input.GetAxisRaw("Mouse Y") * sensitivity;
+        Yaw += Input.GetAxisRaw("Mouse X") * sensitivity;
+        _pitch = Mathf.Clamp(_pitch - Input.GetAxisRaw("Mouse Y") * sensitivity, minPitch, maxPitch);
 
-        if (body != null) body.Rotate(Vector3.up, mx, Space.Self);
-
-        _pitch = Mathf.Clamp(_pitch - my, minPitch, maxPitch);
         transform.localRotation = Quaternion.Euler(_pitch, 0f, 0f);
+
+        // No rigidbody: nothing else owns the transform, so write it here.
+        if (body != null && _bodyRigidbody == null)
+            body.rotation = Quaternion.Euler(0f, Yaw, 0f);
+    }
+
+    void FixedUpdate()
+    {
+        if (_bodyRigidbody != null)
+        {
+            _bodyRigidbody.rotation = Quaternion.Euler(0f, Yaw, 0f);
+            _bodyRigidbody.angularVelocity = Vector3.zero;
+        }
+    }
+
+    void CaptureCursor(bool capture)
+    {
+        Cursor.lockState = capture ? CursorLockMode.Locked : CursorLockMode.None;
+        Cursor.visible = !capture;
     }
 }

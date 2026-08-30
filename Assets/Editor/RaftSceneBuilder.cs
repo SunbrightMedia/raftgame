@@ -33,22 +33,26 @@ public static class RaftSceneBuilder
         Debug.Log("Ocean scene built at " + ScenePath + ". Press Play.");
     }
 
-    static Material MakeMaterial(string name, Color color, float smoothness, float metallic, bool transparent)
+    static Material MakeMaterial(string name, Color color, float smoothness, float metallic,
+        bool transparent, string shaderName = "Standard")
     {
         System.IO.Directory.CreateDirectory(MaterialDir);
         string path = MaterialDir + "/" + name + ".mat";
+        var shader = Shader.Find(shaderName) ?? Shader.Find("Standard");
+
         var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
         if (mat == null)
         {
-            mat = new Material(Shader.Find("Standard"));
+            mat = new Material(shader);
             AssetDatabase.CreateAsset(mat, path);
         }
+        mat.shader = shader;
 
         mat.color = color;
         mat.SetFloat("_Glossiness", smoothness);
         mat.SetFloat("_Metallic", metallic);
 
-        if (transparent)
+        if (transparent && shader.name == "Standard")
         {
             mat.SetFloat("_Mode", 3f); // Transparent
             mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
@@ -101,8 +105,14 @@ public static class RaftSceneBuilder
     {
         var go = new GameObject("Water", typeof(MeshFilter), typeof(MeshRenderer), typeof(WaterSurface));
         go.transform.position = Vector3.zero;
-        go.GetComponent<MeshRenderer>().sharedMaterial =
-            MakeMaterial("Water", new Color(0.13f, 0.42f, 0.58f, 0.82f), 0.9f, 0.1f, true);
+        var renderer = go.GetComponent<MeshRenderer>();
+        renderer.sharedMaterial =
+            MakeMaterial("Water", new Color(0.13f, 0.42f, 0.58f, 0.82f), 0.9f, 0.1f, true, "Raft/Water");
+
+        // The surface is displaced on the GPU, so it cannot cast or receive
+        // meaningful shadows - skipping them is a straight saving.
+        renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        renderer.receiveShadows = false;
         return go;
     }
 
@@ -110,23 +120,26 @@ public static class RaftSceneBuilder
     {
         var raft = GameObject.CreatePrimitive(PrimitiveType.Cube);
         raft.name = "Raft";
-        raft.transform.position = new Vector3(0f, 0.5f, 0f);
+        raft.transform.position = new Vector3(0f, 0.1f, 0f);
         raft.transform.localScale = new Vector3(6f, 0.35f, 6f);
         raft.GetComponent<MeshRenderer>().sharedMaterial =
             MakeMaterial("RaftWood", new Color(0.55f, 0.38f, 0.22f), 0.15f, 0f, false);
 
         var rb = raft.AddComponent<Rigidbody>();
         rb.mass = 400f;
+        rb.isKinematic = true;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
 
-        raft.AddComponent<Buoyancy>();
+        // Anchored: the raft rides the swell but never drifts or spins.
+        // Swap this for Buoyancy if you want a free-floating raft.
+        raft.AddComponent<RaftPlatform>();
         return raft;
     }
 
     static GameObject CreatePlayer()
     {
         var player = new GameObject("Player");
-        player.transform.position = new Vector3(0f, 2.5f, 0f);
+        player.transform.position = new Vector3(0f, 1.5f, 0f);
 
         var capsule = player.AddComponent<CapsuleCollider>();
         capsule.height = 1.8f;

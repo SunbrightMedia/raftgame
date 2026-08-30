@@ -1,10 +1,13 @@
 using UnityEngine;
 
 /// <summary>
-/// Procedural ocean: builds a grid mesh and animates it with a sum of
-/// directional sine waves. The same wave function is exposed statically so
-/// gameplay code (buoyancy, VFX) samples exactly what the player sees.
+/// Procedural ocean. The mesh is a flat grid built once; all wave motion
+/// happens in the vertex shader (Raft/Water), so the per-frame CPU cost is
+/// a handful of material properties rather than tens of thousands of
+/// vertices. <see cref="SampleWaves"/> mirrors the shader's wave function so
+/// gameplay code samples exactly the surface that gets drawn.
 /// </summary>
+[ExecuteAlways]
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class WaterSurface : MonoBehaviour
 {
@@ -22,13 +25,14 @@ public class WaterSurface : MonoBehaviour
     [Header("Mesh")]
     [Tooltip("Size of the water plane in world units.")]
     public float size = 400f;
-    [Tooltip("Vertices per side. Higher = smoother waves, heavier mesh.")]
+    [Tooltip("Vertices per side. The mesh is static, so this is cheap.")]
     [Range(8, 250)] public int resolution = 160;
     [Tooltip("Transform the water recenters on (usually the player).")]
     public Transform followTarget;
 
     [Header("Waves")]
-    public Wave[] waves = new[]
+    [Tooltip("Exactly four waves are sent to the shader; extras are CPU-only.")]
+    public Wave[] waves =
     {
         new Wave { direction = new Vector2( 1f,  0.35f), amplitude = 0.45f, wavelength = 26f, speed = 4.5f },
         new Wave { direction = new Vector2(-0.6f, 1f),   amplitude = 0.28f, wavelength = 15f, speed = 3.2f },
@@ -36,15 +40,26 @@ public class WaterSurface : MonoBehaviour
         new Wave { direction = new Vector2(-1f, -0.2f),  amplitude = 0.06f, wavelength =  3f, speed = 1.6f },
     };
 
+    static readonly int[] WaveIds =
+    {
+        Shader.PropertyToID("_WaveA"), Shader.PropertyToID("_WaveB"),
+        Shader.PropertyToID("_WaveC"), Shader.PropertyToID("_WaveD"),
+    };
+    static readonly int SpeedsId = Shader.PropertyToID("_WaveSpeeds");
+    static readonly int TimeId = Shader.PropertyToID("_WaveTime");
+
     Mesh _mesh;
-    Vector3[] _baseVerts;
-    Vector3[] _verts;
-    Vector3[] _normals;
+    MeshRenderer _renderer;
+    MaterialPropertyBlock _block;
     float _cellSize;
+    int _builtResolution;
+    float _builtSize;
 
     void OnEnable()
     {
         Instance = this;
+        _renderer = GetComponent<MeshRenderer>();
+        _block = new MaterialPropertyBlock();
         BuildMesh();
     }
 
@@ -57,12 +72,14 @@ public class WaterSurface : MonoBehaviour
     {
         int n = Mathf.Max(2, resolution);
         _cellSize = size / (n - 1);
+        _builtResolution = n;
+        _builtSize = size;
 
-        _mesh = new Mesh { name = "Water", indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+        if (_mesh == null)
+            _mesh = new Mesh { name = "Water", indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+        _mesh.Clear();
 
-        _baseVerts = new Vector3[n * n];
-        _verts = new Vector3[n * n];
-        _normals = new Vector3[n * n];
+        var verts = new Vector3[n * n];
         var uvs = new Vector2[n * n];
         var tris = new int[(n - 1) * (n - 1) * 6];
 
@@ -70,9 +87,8 @@ public class WaterSurface : MonoBehaviour
         {
             for (int x = 0; x < n; x++, i++)
             {
-                _baseVerts[i] = new Vector3(x * _cellSize - size * 0.5f, 0f, z * _cellSize - size * 0.5f);
+                verts[i] = new Vector3(x * _cellSize - size * 0.5f, 0f, z * _cellSize - size * 0.5f);
                 uvs[i] = new Vector2((float)x / (n - 1), (float)z / (n - 1));
-                _normals[i] = Vector3.up;
             }
         }
 
@@ -81,21 +97,27 @@ public class WaterSurface : MonoBehaviour
             for (int x = 0; x < n - 1; x++)
             {
                 int i = z * n + x;
-                tris[t++] = i;         tris[t++] = i + n;     tris[t++] = i + 1;
-                tris[t++] = i + 1;     tris[t++] = i + n;     tris[t++] = i + n + 1;
+                tris[t++] = i;     tris[t++] = i + n; tris[t++] = i + 1;
+                tris[t++] = i + 1; tris[t++] = i + n; tris[t++] = i + n + 1;
             }
         }
 
-        _mesh.vertices = _baseVerts;
+        _mesh.vertices = verts;
         _mesh.uv = uvs;
         _mesh.triangles = tris;
-        _mesh.normals = _normals;
+        _mesh.normals = null;
+
+        // Vertices move in the shader, so pad the bounds or the mesh gets
+        // culled at grazing angles.
+        _mesh.bounds = new Bounds(Vector3.zero, new Vector3(size, 20f, size));
+
         GetComponent<MeshFilter>().sharedMesh = _mesh;
     }
 
     void LateUpdate()
     {
-        if (_mesh == null) BuildMesh();
+        if (_mesh == null || _builtResolution != Mathf.Max(2, resolution) || !Mathf.Approximately(_builtSize, size))
+            BuildMesh();
 
         // Keep the grid under the player, snapped to whole cells so the
         // world-space wave pattern never visibly slides.
@@ -108,25 +130,34 @@ public class WaterSurface : MonoBehaviour
                 Mathf.Round(p.z / _cellSize) * _cellSize);
         }
 
-        float t = Time.time;
-        Vector3 origin = transform.position;
-
-        for (int i = 0; i < _baseVerts.Length; i++)
-        {
-            Vector3 v = _baseVerts[i];
-            float wx = v.x + origin.x;
-            float wz = v.z + origin.z;
-            v.y = SampleWaves(wx, wz, t) - origin.y;
-            _verts[i] = v;
-            _normals[i] = SampleNormal(wx, wz, t);
-        }
-
-        _mesh.vertices = _verts;
-        _mesh.normals = _normals;
-        _mesh.RecalculateBounds();
+        PushToShader();
     }
 
-    /// <summary>World-space water height at (x, z) for the given time.</summary>
+    void PushToShader()
+    {
+        if (_renderer == null) return;
+
+        _renderer.GetPropertyBlock(_block);
+
+        var speeds = Vector4.zero;
+        for (int i = 0; i < WaveIds.Length; i++)
+        {
+            Wave w = i < waves.Length ? waves[i] : default;
+            Vector2 d = w.direction.sqrMagnitude > 0.0001f ? w.direction.normalized : Vector2.right;
+            _block.SetVector(WaveIds[i], new Vector4(d.x, d.y, w.amplitude, w.wavelength));
+            speeds[i] = w.speed;
+        }
+
+        _block.SetVector(SpeedsId, speeds);
+        _block.SetFloat(TimeId, WaveTime);
+        _renderer.SetPropertyBlock(_block);
+    }
+
+    /// <summary>Clock the shader and the physics sampling share.</summary>
+    public static float WaveTime =>
+        Application.isPlaying ? Time.time : (float)Time.realtimeSinceStartupAsDouble;
+
+    /// <summary>World-space water height at (x, z). Mirrors the shader.</summary>
     public float SampleWaves(float x, float z, float time)
     {
         float y = transform.position.y;
@@ -143,20 +174,25 @@ public class WaterSurface : MonoBehaviour
         return y;
     }
 
-    Vector3 SampleNormal(float x, float z, float time)
-    {
-        const float e = 0.35f;
-        float hL = SampleWaves(x - e, z, time);
-        float hR = SampleWaves(x + e, z, time);
-        float hD = SampleWaves(x, z - e, time);
-        float hU = SampleWaves(x, z + e, time);
-        return new Vector3(hL - hR, 2f * e, hD - hU).normalized;
-    }
-
-    /// <summary>Convenience: current water height at a world position.</summary>
+    /// <summary>Current water height at a world position.</summary>
     public static float GetHeight(Vector3 worldPos)
     {
         if (Instance == null) return 0f;
-        return Instance.SampleWaves(worldPos.x, worldPos.z, Time.time);
+        return Instance.SampleWaves(worldPos.x, worldPos.z, WaveTime);
+    }
+
+    /// <summary>Surface normal at a world position, from finite differences.</summary>
+    public static Vector3 GetNormal(Vector3 worldPos)
+    {
+        if (Instance == null) return Vector3.up;
+
+        const float e = 0.5f;
+        float t = WaveTime;
+        var w = Instance;
+        float hL = w.SampleWaves(worldPos.x - e, worldPos.z, t);
+        float hR = w.SampleWaves(worldPos.x + e, worldPos.z, t);
+        float hD = w.SampleWaves(worldPos.x, worldPos.z - e, t);
+        float hU = w.SampleWaves(worldPos.x, worldPos.z + e, t);
+        return new Vector3(hL - hR, 2f * e, hD - hU).normalized;
     }
 }
