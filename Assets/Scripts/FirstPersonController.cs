@@ -47,7 +47,9 @@ public class FirstPersonController : MonoBehaviour
         CheckGround();
         CheckWater();
 
-        Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        Vector2 input = InventorySystem.IsOpen
+            ? Vector2.zero
+            : new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         if (input.sqrMagnitude > 1f) input.Normalize();
 
         if (IsSwimming) Swim(input);
@@ -99,7 +101,7 @@ public class FirstPersonController : MonoBehaviour
         float control = IsGrounded ? acceleration : acceleration * 0.25f;
         _rb.AddForce(delta * control, ForceMode.Acceleration);
 
-        if (IsGrounded && Input.GetKey(KeyCode.Space))
+        if (IsGrounded && !InventorySystem.IsOpen && Input.GetKey(KeyCode.Space))
         {
             float jumpVelocity = Mathf.Sqrt(2f * Mathf.Abs(Physics.gravity.y) * jumpHeight);
             _rb.velocity = new Vector3(velocity.x, _platformVelocity.y + jumpVelocity, velocity.z);

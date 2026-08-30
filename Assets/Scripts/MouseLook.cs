@@ -37,6 +37,8 @@ public class MouseLook : MonoBehaviour
 
     void Update()
     {
+        if (InventorySystem.IsOpen) return; // inventory owns the cursor
+
         if (Input.GetKeyDown(KeyCode.Escape)) CaptureCursor(false);
         else if (Input.GetMouseButtonDown(0) && lockCursor && Cursor.lockState != CursorLockMode.Locked)
             CaptureCursor(true);

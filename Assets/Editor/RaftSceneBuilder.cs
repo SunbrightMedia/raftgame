@@ -207,6 +207,7 @@ public static class RaftSceneBuilder
         rb.freezeRotation = true;
 
         player.AddComponent<FirstPersonController>();
+        player.AddComponent<InventorySystem>(); // hotbar + backpack (E)
 
         var camGo = new GameObject("PlayerCamera");
         camGo.transform.SetParent(player.transform, false);

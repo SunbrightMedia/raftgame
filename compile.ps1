@@ -78,6 +78,17 @@ if ($reportErrors) {
     Write-Host ''
 }
 
+# Unity may compile more than once in a run (e.g. new scripts imported after
+# the first pass): early-pass CS errors can appear in the log even though the
+# final compile succeeded. When CompileCheck ran and reported success, trust
+# that final verdict; the log scan is the fallback for hard failures where
+# -executeMethod never ran at all.
+$reportedOk = ($reportErrors | Where-Object { $_ -match '^COMPILE OK' }).Count -gt 0
+if ($reportedOk -and $unityExit -eq 0) {
+    if ($csErrors) { Write-Host "(ignoring $($csErrors.Count) stale early-pass CS error(s); final compile succeeded)" -ForegroundColor DarkGray }
+    $csErrors = @()
+}
+
 $failed = ($csErrors.Count -gt 0) -or ($shaderLogErrors.Count -gt 0) -or ($unityExit -ne 0)
 
 if ($failed) {
