@@ -174,6 +174,10 @@ public static class RaftSceneBuilder
     {
         var go = new GameObject("Dev Menu");
         go.AddComponent<DevMenu>().sun = RenderSettings.sun;
+
+        // GameBootstrap also creates this at runtime if a scene predates it;
+        // placing it here keeps it visible in the saved scene.
+        new GameObject("Underwater Effect", typeof(UnderwaterEffect));
     }
 
     static GameObject CreateRaft()

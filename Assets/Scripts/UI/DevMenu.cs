@@ -134,7 +134,45 @@ public class DevMenu : MonoBehaviour
         AddSlider(panel, "Sprint speed", 1f, 20f, ref y,
             () => Player() != null ? Player().sprintSpeed : 7f,
             v => { if (Player() != null) Player().sprintSpeed = v; });
+
+        AddHeader(panel, "Raft", ref y);
+        AddSlider(panel, "Tilt with waves", 0f, 100f, ref y,
+            () => Raft() != null && Raft().tiltWithWaves
+                  ? Raft().maxTilt / MaxTiltDegrees * 100f
+                  : 0f,
+            v =>
+            {
+                if (Raft() == null) return;
+                Raft().maxTilt = v / 100f * MaxTiltDegrees;
+                Raft().tiltWithWaves = v > 0.5f;
+            },
+            v => v.ToString("0") + "%");
+
+        AddHeader(panel, "Underwater", ref y);
+        AddSlider(panel, "Opacity", 0f, 100f, ref y,
+            () => Underwater() != null ? Underwater().opacity : 0f,
+            v => { if (Underwater() != null) Underwater().opacity = v; },
+            v => v.ToString("0") + "%");
+        AddSlider(panel, "Hue", 0f, 360f, ref y,
+            () => Underwater() != null ? Underwater().hue : 0f,
+            v => { if (Underwater() != null) Underwater().hue = v; },
+            v => v.ToString("0") + " deg");
+        AddSlider(panel, "Brightness", 0f, 100f, ref y,
+            () => Underwater() != null ? Underwater().brightness : 50f,
+            v => { if (Underwater() != null) Underwater().brightness = v; },
+            v => v.ToString("0") + "  (0 black / 50 hue / 100 white)");
+        AddSlider(panel, "Saturation", 0f, 100f, ref y,
+            () => Underwater() != null ? Underwater().saturation : 0f,
+            v => { if (Underwater() != null) Underwater().saturation = v; },
+            v => v.ToString("0") + "%");
+
+        // Size the panel to whatever was added rather than a magic number, so
+        // adding a slider never silently clips the bottom of the list.
+        panel.sizeDelta = new Vector2(panel.sizeDelta.x, -y + 14f);
     }
+
+    // RaftPlatform blends the surface normal by maxTilt/30, so 30 is "full".
+    const float MaxTiltDegrees = 30f;
 
     static WaterSurface Water() => WaterSurface.Instance;
 
@@ -143,6 +181,20 @@ public class DevMenu : MonoBehaviour
     {
         if (_player == null) _player = UnityEngine.Object.FindObjectOfType<FirstPersonController>();
         return _player;
+    }
+
+    RaftPlatform _raft;
+    RaftPlatform Raft()
+    {
+        if (_raft == null) _raft = UnityEngine.Object.FindObjectOfType<RaftPlatform>();
+        return _raft;
+    }
+
+    UnderwaterEffect _underwater;
+    UnderwaterEffect Underwater()
+    {
+        if (_underwater == null) _underwater = UnityEngine.Object.FindObjectOfType<UnderwaterEffect>();
+        return _underwater;
     }
 
     void ApplyTimeOfDay()
