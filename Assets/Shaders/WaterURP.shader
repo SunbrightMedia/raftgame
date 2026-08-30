@@ -134,6 +134,32 @@ Shader "Raft/WaterURP"
                 amplitude += wave.z;
             }
 
+            // Cheap value noise. Everything below exists to break up
+            // periodicity: four summed sines are perfectly regular, and the
+            // eye locks onto the repeating glint grid and foam rings instantly.
+            float Hash(float2 p)
+            {
+                return frac(sin(dot(p, float2(127.1, 311.7))) * 43758.5453);
+            }
+
+            float ValueNoise(float2 p)
+            {
+                float2 i = floor(p);
+                float2 f = frac(p);
+                float2 u = f * f * (3.0 - 2.0 * f);
+                return lerp(lerp(Hash(i), Hash(i + float2(1, 0)), u.x),
+                            lerp(Hash(i + float2(0, 1)), Hash(i + float2(1, 1)), u.x), u.y);
+            }
+
+            // Two octaves drifting in different directions, so foam patches
+            // form and dissolve instead of scrolling as one sheet.
+            float FoamNoise(float2 p, float t)
+            {
+                float n = ValueNoise(p * 0.35 + float2(t * 0.13, t * 0.07));
+                n += 0.5 * ValueNoise(p * 1.1 + float2(-t * 0.09, t * 0.16));
+                return n / 1.5;
+            }
+
             // Small crossed ripples layered on top of the displaced surface.
             // Cheaper and sharper than displacing geometry this finely.
             float3 RippleNormal(float2 pos, float3 baseNormal)
@@ -154,7 +180,10 @@ Shader "Raft/WaterURP"
                 {
                     float k = freqs[i] * _RippleScale;
                     float phase = dot(dirs[i], pos) * k + t * (1.0 + i * 0.37);
-                    slope += dirs[i] * (amps[i] * k * cos(phase));
+                    // Fade each ripple train in and out across the surface so
+                    // the glint pattern never repeats on a visible grid.
+                    float gust = 0.45 + 1.1 * ValueNoise(pos * 0.13 + i * 7.31 + t * 0.05);
+                    slope += dirs[i] * (amps[i] * k * gust * cos(phase));
                 }
 
                 float3 perturbed = normalize(float3(-slope.x, 1, -slope.y));
@@ -234,6 +263,12 @@ Shader "Raft/WaterURP"
                 // Only the steep faces of a crest actually break into foam;
                 // gating on slope keeps it off flat water.
                 crestFoam *= saturate(length(slope) * 1.5);
+
+                // Break the analytic band into drifting patches - without this
+                // the foam is a soft ring around every crest.
+                float foamN = FoamNoise(input.positionWS.xz, _WaveTime);
+                crestFoam *= smoothstep(0.35, 0.72, foamN);
+                edgeFoam *= 0.55 + 0.45 * foamN;
 
                 float foam = saturate(max(edgeFoam * edgeFoam, crestFoam));
 
