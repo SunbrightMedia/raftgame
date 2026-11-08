@@ -55,6 +55,27 @@ function noise(g: CanvasRenderingContext2D, w: number, h: number, rnd: () => num
   g.putImageData(img, 0, 0);
 }
 
+/**
+ * Smooth tiling value noise in 0..1: random values on a `cells`×`cells` grid,
+ * bicubic-smoothed and wrapped so the result tiles.
+ */
+function valueNoise(w: number, h: number, cells: number, rnd: () => number): Float32Array {
+  const grid = Array.from({ length: cells * cells }, () => rnd());
+  const out = new Float32Array(w * h);
+  const sm = (t: number) => t * t * (3 - 2 * t);
+  for (let y = 0; y < h; y++) {
+    const gy = (y / h) * cells, y0 = Math.floor(gy), ty = sm(gy - y0);
+    for (let x = 0; x < w; x++) {
+      const gx = (x / w) * cells, x0 = Math.floor(gx), tx = sm(gx - x0);
+      const at = (i: number, j: number) => grid[((j + cells) % cells) * cells + ((i + cells) % cells)];
+      const a = at(x0, y0) + (at(x0 + 1, y0) - at(x0, y0)) * tx;
+      const b = at(x0, y0 + 1) + (at(x0 + 1, y0 + 1) - at(x0, y0 + 1)) * tx;
+      out[y * w + x] = a + (b - a) * ty;
+    }
+  }
+  return out;
+}
+
 /** Soft vertical streaks: water stains, sun fade, grime collecting low. */
 function wear(g: CanvasRenderingContext2D, w: number, h: number, rnd: () => number, strength: number): void {
   for (let i = 0; i < 6; i++) {
@@ -272,17 +293,49 @@ const DEFS: Record<string, Def> = {
       noise(g, w, h, rnd, 10);
     },
   },
-  // Patterned band around a round ottoman: small diamonds and dots on dark.
+  // Patterned band around a round ottoman: muted stripes with a row of dark beads.
   'house/ottoman_band': {
-    px: [64, 32], world: [16, 8], material: 'fabric',
+    px: [128, 64], world: [16, 8], material: 'fabric', raw: true,
     paint: (g, w, h, rnd) => {
-      g.fillStyle = '#3d3a2a'; g.fillRect(0, 0, w, h);
-      for (let x = 4; x < w; x += 16) {
-        g.fillStyle = '#c98f74'; g.beginPath(); g.moveTo(x, h / 2 - 6); g.lineTo(x + 5, h / 2); g.lineTo(x, h / 2 + 6); g.lineTo(x - 5, h / 2); g.fill();
-        g.fillStyle = '#7fa59a'; g.fillRect(x + 8, h / 2 - 2, 3, 3);
+      const stripes: [number, string][] = [[0, '#b99a86'], [10, '#d8c6ae'], [16, '#9b8f63'], [22, '#c79a8f'], [40, '#d8c6ae'], [46, '#9b8f63'], [52, '#b99a86']];
+      stripes.forEach(([y, c], i) => { g.fillStyle = c; g.fillRect(0, y, w, (stripes[i + 1]?.[0] ?? h) - y); });
+      g.fillStyle = '#3b3326';
+      for (let x = 4; x < w; x += 8) { g.beginPath(); g.arc(x, 56, 2.2, 0, Math.PI * 2); g.fill(); g.beginPath(); g.arc(x, 6, 1.6, 0, Math.PI * 2); g.fill(); }
+      noise(g, w, h, rnd, 6);
+    },
+  },
+  // Plush wall-to-wall carpet, neutral grey: recoloured per room (textures/variants.json).
+  // Soft on purpose: up close a cut-pile carpet is a fine haze with gentle
+  // mottling and traffic wear, not crunchy speckles. Bypasses the crusher.
+  'house/carpet_plush': {
+    px: [256, 256], world: [48, 48], material: 'carpet', raw: true,
+    paint: (g, w, h, rnd) => {
+      const mottle = valueNoise(w, h, 4, rnd), mid = valueNoise(w, h, 16, rnd), fine = valueNoise(w, h, 64, rnd);
+      const img = g.createImageData(w, h);
+      for (let i = 0; i < w * h; i++) {
+        const v = 128 + (mottle[i] - 0.5) * 22 + (mid[i] - 0.5) * 14 + (fine[i] - 0.5) * 16 + (rnd() - 0.5) * 10;
+        img.data[i * 4] = img.data[i * 4 + 1] = img.data[i * 4 + 2] = v;
+        img.data[i * 4 + 3] = 255;
       }
-      g.fillStyle = '#b8a77a'; g.fillRect(0, 2, w, 2); g.fillRect(0, h - 4, w, 2);
-      noise(g, w, h, rnd, 8);
+      g.putImageData(img, 0, 0);
+    },
+  },
+  // Woven upholstery fabric, neutral: a fine basket weave with soft slubs.
+  'house/upholstery': {
+    px: [128, 128], world: [8, 8], material: 'fabric', raw: true,
+    paint: (g, w, h, rnd) => {
+      const slub = valueNoise(w, h, 8, rnd);
+      const img = g.createImageData(w, h);
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        const i = y * w + x;
+        // Over-under threads: alternate which direction is on top every 2px.
+        const warp = ((x >> 1) + (y >> 2)) % 2 === 0;
+        const thread = warp ? Math.sin((y % 4) * Math.PI / 4) : Math.sin((x % 4) * Math.PI / 4);
+        const v = 120 + thread * 16 + (slub[i] - 0.5) * 18 + (rnd() - 0.5) * 8;
+        img.data[i * 4] = img.data[i * 4 + 1] = img.data[i * 4 + 2] = v;
+        img.data[i * 4 + 3] = 255;
+      }
+      g.putImageData(img, 0, 0);
     },
   },
   // Polished chrome: banded reflections.

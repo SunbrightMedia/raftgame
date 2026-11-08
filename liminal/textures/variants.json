@@ -3,15 +3,15 @@
   "variants": [
     {
       "name": "pmp/carpet_royal",
-      "from": "office/carpet_blue",
-      "color": "#2a4291",
-      "contrast": 0.35
+      "from": "house/carpet_plush",
+      "color": "#2b4590",
+      "contrast": 1
     },
     {
       "name": "pmp/carpet_salmon",
-      "from": "office/carpet_blue",
-      "color": "#d08680",
-      "contrast": 0.35
+      "from": "house/carpet_plush",
+      "color": "#d48a83",
+      "contrast": 0.9
     },
     {
       "name": "pmp/paint_mint",
@@ -33,9 +33,9 @@
     },
     {
       "name": "pmp/fabric_green",
-      "from": "office/carpet_blue",
-      "color": "#6b7a45",
-      "contrast": 0.6
+      "from": "house/upholstery",
+      "color": "#6f7548",
+      "contrast": 1
     },
     {
       "name": "pmp/bar_front",
