@@ -14,6 +14,9 @@ export interface PanelHooks {
 
 type Row = { refresh(): void; matches(q: string): boolean; el: HTMLElement };
 
+/** Settings shown again at the top of the panel, for quick tuning. [category, key] */
+const PINNED: [string, string][] = [['light', 'aoCurve'], ['camera', 'edgeDark'], ['camera', 'fringe']];
+
 /**
  * The live tweak panel, generated entirely from the settings schema.
  * Changed values are highlighted and get a ↺ reset button, so you can always
@@ -106,6 +109,21 @@ export class DebugPanel {
 
     const body = el('div', 'dbg-body');
     this.root.append(body);
+    // Pinned: settings currently being tuned, always at the top.
+    const sch = SETTINGS as Schema;
+    const pinned = document.createElement('details');
+    pinned.open = true;
+    const ps = document.createElement('summary');
+    ps.textContent = '★ Pinned';
+    pinned.append(ps);
+    for (const [c, k] of PINNED) {
+      const d = sch[c]?.defs[k];
+      if (!d) continue;
+      const row = this.row(c, k, d);
+      this.rows.push(row);
+      pinned.append(row.el);
+    }
+    body.append(pinned);
     for (const [cKey, cat] of Object.entries(SETTINGS as Schema)) body.append(this.category(cKey, cat.label, cat.help, cat.defs));
 
     this.textBox = document.createElement('textarea');

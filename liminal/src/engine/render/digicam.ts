@@ -38,6 +38,7 @@ export interface CameraParams {
   glare: number;
   glareSpread: number;
   fringe: number;
+  edgeDark: number;
   aberration: number;
   softness: number;
   softnessH: number;
@@ -135,7 +136,7 @@ export class Digicam {
     // highlight response, sRGB.
     this.developPass = pass(/* glsl */ `
       uniform sampler2D src; uniform sampler2D glare; uniform vec2 texel; uniform vec3 wb; uniform float aspect;
-      uniform float gain, clip, saturation, artifacts, glareAmt, glareNorm, fringe, fringeWidth, aberration, vignette, fisheye, blownTint, knee, rolloff, blackStretch, softness, sharpen;
+      uniform float gain, clip, saturation, artifacts, glareAmt, glareNorm, fringe, fringeWidth, aberration, vignette, fisheye, blownTint, knee, rolloff, blackStretch, softness, sharpen, edgeDark;
       varying vec2 vUv;
       vec3 tap(vec2 uv) {
         vec2 d = (uv - 0.5) * aberration * 0.006;
@@ -189,14 +190,20 @@ export class Digicam {
         if (artifacts > 0.5) {
           vec2 v0 = vUv - 0.5;
           c *= 1.0 - vignette * dot(v0, v0) * 1.6;
-          // Purple fringe at blown edges (the original, which the user picked).
+          // Lamp edge, as in the reference footage: blown core, a SHARP DARK line
+          // hugging it (fixed ~1 px, so it shows near and far, and is applied
+          // after the glare so the glow can't fill it in), then the purple fringe
+          // just outside (the original fringe, which the user picked).
           float self = smoothstep(clip * 0.7, clip, lumAt(uv));
-          float nb = 0.0;
+          float near = 0.0, nb = 0.0;
           for (int i = 0; i < 8; i++) {
-            float a = float(i) * 0.785398;
-            nb = max(nb, smoothstep(clip, clip * 1.6, lumAt(uv + vec2(cos(a), sin(a)) * texel * 1.6)));
+            vec2 dir = vec2(cos(float(i) * 0.785398), sin(float(i) * 0.785398)) * texel;
+            near = max(near, smoothstep(clip, clip * 1.6, lumAt(uv + dir * 1.1)));
+            nb = max(nb, smoothstep(clip, clip * 1.6, lumAt(uv + dir * 2.4)));
           }
-          c += vec3(0.55, 0.25, 1.0) * fringe * nb * (1.0 - self);
+          float ring = edgeDark * near * (1.0 - self);
+          c *= 1.0 - ring;
+          c += vec3(0.55, 0.25, 1.0) * fringe * nb * (1.0 - self) * (1.0 - ring);
         }
         // Sensor response, hue-preserving: compress by the brightest channel so an
         // overexposed glow keeps its hue instead of sliding through yellow
@@ -216,7 +223,7 @@ export class Digicam {
       }`, {
       src: { value: null }, glare: { value: null }, texel: { value: new THREE.Vector2() }, wb: { value: new THREE.Vector3(1, 1, 1) }, aspect: { value: 1 },
       gain: { value: 1 }, clip: { value: 1 }, saturation: { value: 1 }, artifacts: { value: 1 }, glareAmt: { value: 0 }, glareNorm: { value: 1 },
-      fringe: { value: 0 }, fringeWidth: { value: 2 }, aberration: { value: 0 }, vignette: { value: 0 }, fisheye: { value: 0 }, blownTint: { value: 0 }, softness: { value: 0 }, sharpen: { value: 0 }, knee: { value: 0.55 }, rolloff: { value: 2.5 }, blackStretch: { value: 0 },
+      fringe: { value: 0 }, fringeWidth: { value: 2 }, aberration: { value: 0 }, vignette: { value: 0 }, fisheye: { value: 0 }, blownTint: { value: 0 }, softness: { value: 0 }, sharpen: { value: 0 }, edgeDark: { value: 0 }, knee: { value: 0.55 }, rolloff: { value: 2.5 }, blackStretch: { value: 0 },
     });
     // Recording: the picture as a video/JPEG encoder stores it, as luma + chroma.
     // (ntsc-rs's signal model as reference, not its tape damage.) Luma gets lens
@@ -362,7 +369,7 @@ export class Digicam {
     f.aspect.value = src.width / src.height;
     f.wb.value.copy(wb);
     f.gain.value = this.exposure; f.clip.value = p.clip; f.saturation.value = p.saturation; f.artifacts.value = p.artifacts ? 1 : 0;
-    f.glareAmt.value = Math.max(0, p.glare); f.fringe.value = p.fringe; f.softness.value = p.softness; f.sharpen.value = p.sharpen; f.aberration.value = p.aberration;
+    f.glareAmt.value = Math.max(0, p.glare); f.fringe.value = p.fringe; f.softness.value = p.softness; f.sharpen.value = p.sharpen; f.edgeDark.value = p.edgeDark; f.aberration.value = p.aberration;
     f.vignette.value = p.vignette; f.fisheye.value = p.fisheye; f.blownTint.value = p.blownTint; f.knee.value = p.knee; f.rolloff.value = p.rolloff; f.blackStretch.value = p.blackStretch;
     gl.setRenderTarget(this.developed);
     gl.render(this.developPass.scene, this.cam);
