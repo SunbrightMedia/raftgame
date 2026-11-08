@@ -43,7 +43,7 @@ waiting for the user to confirm or reject.
   sweeping curve (the pink carpet's arc into the blue room) instead of
   stopping at the wall line. *Engine: needs curved floor regions or
   decals, since box brushes can't do this yet.*
-- **No threshold strips at transitions.** (claude, unconfirmed) Carpet meets
+- **No threshold strips at transitions.** (claude, confirmed) Carpet meets
   carpet directly.
 
 ## Walls and trim
@@ -57,16 +57,16 @@ waiting for the user to confirm or reject.
   still get door-style trim (casing) around them.
 - **No crown molding.** (user) The wall meets the ceiling bare.
 - **Six-panel white doors** (colonial style, brass/gold knob) set in plain
-  casing. (claude, unconfirmed: from the photo)
+  casing. (claude, confirmed)
 - **Small details sell it:** beige/almond rocker light switches at about
-  48", cased openings wider than a normal door. (claude, unconfirmed)
+  48", cased openings wider than a normal door. (claude, confirmed)
 
 ## Ceilings and lighting
 
 - **Pot lights (recessed cans) are the default light source.** (user)
   Small, round, evenly spaced, warm white. Not fluorescent panels: those
   are for offices only.
-- **Dropped soffits / bulkheads with cove lighting.** (claude, unconfirmed)
+- **Dropped soffits / bulkheads with cove lighting.** (claude, confirmed)
   The pink room has a lowered ceiling band with a hidden light strip
   washing the ceiling above it: a glowing tray ceiling. Very 90s.
 - **Flat white or off-white ceilings,** smooth drywall in houses (acoustic
@@ -93,17 +93,22 @@ waiting for the user to confirm or reject.
 - **Upholstery in the room's colour family:** the green room has green
   sofas and a round green ottoman. (user) Furniture is part of a room's
   palette, not decoration on top of it.
-- **Chrome bar stools with burgundy vinyl seats.** (claude, unconfirmed)
+- **Chrome bar stools with burgundy vinyl seats.** (claude, confirmed)
 - **Rooms are under-furnished:** few objects, lots of floor. Emptiness is
-  part of the feel. (claude, unconfirmed)
+  part of the feel. (claude, confirmed: "amazing")
 
 ## The photograph itself
 
-(claude, unconfirmed) The references are film photos, and the camera is
+(claude, confirmed) The references are film photos, and the camera is
 part of the style. The post-processing pass should emulate it: warm colour
 cast, slightly lifted blacks, soft highlights, mild grain, gentle vignette,
 slight softness. The scan look should be tunable in the panel like
 everything else.
+
+**Never a generic "VHS filter".** (user) No scan lines, tracking
+noise, chromatic-aberration smears or fake timestamps: those look terrible
+and carry no nostalgia. The target is a *film photo scan*, subtle enough
+that you notice the mood before the effect.
 
 ---
 
