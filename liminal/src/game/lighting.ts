@@ -50,7 +50,7 @@ export class Lighting {
       if (t.emissive && t.emissive.castsLight) emissive[f.tex] = { color: kelvinToLinear(t.emissive.kelvin), luminance: t.emissive.luminance };
     }
 
-    const lights: BakeLight[] = level.map.entities.filter((e) => e.class === 'light').map((e) => lightFromEntity(e.origin, e.props ?? {}));
+    const lights = mapLights(level);
 
     const input: BakeInput = {
       faces: level.faces,
@@ -117,4 +117,22 @@ export function lightFromEntity(origin: [number, number, number], p: Props): Bak
     return { pos: origin, color, I0: num('lumens', 400) / Math.PI, dir: [0, 0, type === 'down' ? -1 : 1], n: 1 };
   }
   return { pos: origin, color, I0: num('lumens', 800) / (4 * Math.PI) };
+}
+
+/** Most per-pixel lights the world shader takes (cans and bulbs beyond this are baked). */
+export const MAX_DYNAMIC = 32;
+
+/**
+ * All of a map's lights. Cans and bare bulbs (the first MAX_DYNAMIC) are
+ * marked dynamic: the shader draws their direct light per pixel so beam edges
+ * (the scallops) stay crisp; the bake handles their shadows and bounce.
+ */
+export function mapLights(level: Level): BakeLight[] {
+  let dyn = 0;
+  return level.map.entities.filter((e) => e.class === 'light').map((e) => {
+    const l = lightFromEntity(e.origin, e.props ?? {});
+    const t = (e.props ?? {}).type ?? 'bulb';
+    if ((t === 'can' || t === 'bulb') && dyn < MAX_DYNAMIC) { l.dynamic = true; dyn++; }
+    return l;
+  });
 }

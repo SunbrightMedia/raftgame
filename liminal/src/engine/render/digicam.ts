@@ -84,9 +84,10 @@ export class Digicam {
     this.brightPass = pass(/* glsl */ `
       uniform sampler2D src; uniform vec2 srcTexel; uniform float threshold; uniform float gain; uniform vec3 wb; varying vec2 vUv;
       vec3 bright(vec2 uv) {
+        // Only the energy beyond the threshold glows: a lamp lens (far past white)
+        // glows, a merely bright ceiling barely does.
         vec3 c = texture2D(src, uv).rgb * gain * wb;
-        float l = max(c.r, max(c.g, c.b));
-        return min(c, vec3(8.0)) * smoothstep(threshold, threshold + 0.3, l);
+        return min(max(c - threshold, 0.0), vec3(4.0));
       }
       void main() {
         // Average the whole 4×4 block this texel covers (four bilinear taps), so
@@ -115,6 +116,7 @@ export class Digicam {
         vec2 o = texel * r;
         return (tap(uv) * 4.0 + tap(uv + vec2(o.x, 0.0)) + tap(uv - vec2(o.x, 0.0)) + tap(uv + vec2(0.0, o.y)) + tap(uv - vec2(0.0, o.y))) / 8.0;
       }
+      float lumAt(vec2 uv) { return dot(texture2D(src, uv).rgb * gain * wb, vec3(0.2126, 0.7152, 0.0722)); }
       vec3 toSRGB(vec3 c) { return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c)); }
       void main() {
         vec3 c;
@@ -131,11 +133,16 @@ export class Digicam {
         c *= gain * wb;
         if (artifacts > 0.5) { vec2 v0 = vUv - 0.5; c *= 1.0 - vignette * dot(v0, v0) * 1.6; }
         if (artifacts > 0.5) {
-          vec3 g = texture2D(glow, vUv).rgb;
-          float gl = max(g.r, max(g.g, g.b));
-          float l0 = dot(c, vec3(0.2126, 0.7152, 0.0722));
-          c += g * bloom;
-          c += vec3(0.55, 0.25, 1.0) * fringe * max(0.0, gl - l0) * (1.0 - smoothstep(0.6, 1.0, l0));
+          c += texture2D(glow, vUv).rgb * bloom;
+          // Purple fringe: a thin line just outside blown highlights (sensor
+          // blooming/lens fringing), checked at full resolution, not a haze.
+          float self = smoothstep(clip * 0.7, clip, lumAt(vUv));
+          float nb = 0.0;
+          for (int i = 0; i < 8; i++) {
+            float a = float(i) * 0.785398;
+            nb = max(nb, smoothstep(clip, clip * 1.6, lumAt(vUv + vec2(cos(a), sin(a)) * texel * 1.6)));
+          }
+          c += vec3(0.55, 0.25, 1.0) * fringe * nb * (1.0 - self);
         }
         // Sensor response: linear to the knee, a short shoulder, flat clipped white.
         float knee = 0.72 * clip;

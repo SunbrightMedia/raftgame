@@ -124,7 +124,7 @@ export const SETTINGS = {
       flashHeight: num('Flash above lens', 3, 0, 12, 0.5, undefined, 'u'),
       artifacts: bool('Sensor & JPEG artifacts', true, 'The medium on top: glow and fringing around blown highlights, softness with sharpening halos, banding, shadow noise, vignette. Off = a clean exposure.'),
       bloom: num('Glow', 0.5, 0, 3, 0.01, 'Soft bleed around blown highlights.'),
-      bloomThreshold: num('Glow threshold', 2.5, 0.5, 20, 0.1, 'How far past white something must be to glow (×clip). High = only light sources glow, as in the references.'),
+      bloomThreshold: num('Glow threshold', 1.5, 0.5, 20, 0.1, 'Only light beyond this (×clip) glows, in proportion to how far past it is: lamp lenses glow, bright walls do not.'),
       bloomRadius: num('Glow radius', 1.0, 0.25, 6, 0.05),
       fringe: num('Purple fringe', 0.5, 0, 3, 0.01, 'Purple/blue halo only where blown highlights meet darker edges.'),
       aberration: num('Chromatic aberration', 0, 0, 4, 0.05, 'Red/blue split toward the frame edges. Off by default: a filter cliché.'),

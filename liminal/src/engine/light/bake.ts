@@ -34,6 +34,12 @@ export interface BakeLight {
   cutoffDeg?: number;
   /** Softness of the cutoff edge. */
   softDeg?: number;
+  /**
+   * Direct light from this light is drawn per pixel by the shader (exact beam
+   * edges, e.g. a can's scallop), so the lightmap stores only its bounce and
+   * how shadowed each spot is (alpha channel), not its direct light.
+   */
+  dynamic?: boolean;
 }
 
 /** A light-emitting surface: its luminance in cd/m² (e.g. a fluorescent troffer ≈ 2000). */
@@ -75,7 +81,11 @@ export interface BakeInput {
 }
 
 export interface BakeOutput {
-  /** RGBA float, irradiance in lux (alpha unused). */
+  /**
+   * RGBA float. RGB: irradiance in lux from baked lights' direct light plus
+   * all indirect light. A: fraction of the dynamic lights' direct light that
+   * reaches this spot (1 = unshadowed).
+   */
   pixels: Float32Array;
   width: number;
   height: number;
@@ -117,6 +127,10 @@ interface FaceSamples {
   total: Float32Array;
   /** Ambient occlusion per luxel (3 channels, all equal), 1 = open. */
   ao: Float32Array;
+  /** Direct light from dynamic lights (already included in `direct`). */
+  dynDirect: Float32Array;
+  /** Shadowed/unshadowed ratio of dynamic lights' direct light (3 equal channels). */
+  shadow: Float32Array;
   emitting: boolean;
 }
 
@@ -164,6 +178,7 @@ export function bake(input: BakeInput): BakeOutput {
       stepS: f.width / (rect.w - 1), stepT: f.height / (rect.h - 1),
       pos: new Float64Array(n * 3), valid: new Uint8Array(n),
       direct: new Float32Array(n * 3), total: new Float32Array(n * 3), ao: new Float32Array(n * 3).fill(1),
+      dynDirect: new Float32Array(n * 3), shadow: new Float32Array(n * 3).fill(1),
       emitting: !!input.emissive[f.tex],
     };
     for (let j = 0; j < rect.h; j++) {
@@ -199,7 +214,7 @@ export function bake(input: BakeInput): BakeOutput {
     for (let k = 0; k < fs.valid.length; k++) {
       if (!fs.valid[k]) continue;
       const px = fs.pos[k * 3], py = fs.pos[k * 3 + 1], pz = fs.pos[k * 3 + 2];
-      let r = 0, g = 0, b = 0;
+      let r = 0, g = 0, b = 0, dr = 0, dg = 0, db = 0, unshadowed = 0, lit = 0;
       for (const li of cand) {
         const l = lights[li];
         const dx = l.pos[0] - px, dy = l.pos[1] - py, dz = l.pos[2] - pz;
@@ -210,13 +225,18 @@ export function bake(input: BakeInput): BakeOutput {
         if (ndotl <= 0) continue;
         const I = intensityToward(l, -dx / d, -dy / d, -dz / d);
         if (I <= 0) continue;
-        if (occluded(lightBoxes[li], px, py, pz, l.pos[0], l.pos[1], l.pos[2])) continue;
         // E = I·cosθ / d²  (lux, with d in metres)
         const dm = d * INCH;
         const w = (I * ndotl) / (dm * dm);
+        if (l.dynamic) unshadowed += w;
+        if (occluded(lightBoxes[li], px, py, pz, l.pos[0], l.pos[1], l.pos[2])) continue;
         r += l.color[0] * w; g += l.color[1] * w; b += l.color[2] * w;
+        if (l.dynamic) { lit += w; dr += l.color[0] * w; dg += l.color[1] * w; db += l.color[2] * w; }
       }
       fs.direct[k * 3] = r; fs.direct[k * 3 + 1] = g; fs.direct[k * 3 + 2] = b;
+      fs.dynDirect[k * 3] = dr; fs.dynDirect[k * 3 + 1] = dg; fs.dynDirect[k * 3 + 2] = db;
+      const sh = unshadowed > 1e-6 ? lit / unshadowed : 1;
+      fs.shadow[k * 3] = fs.shadow[k * 3 + 1] = fs.shadow[k * 3 + 2] = sh;
     }
   }
 
@@ -284,6 +304,8 @@ export function bake(input: BakeInput): BakeOutput {
     dilate(fs, fs.total);
     dilate(fs, fs.direct);
     dilate(fs, fs.ao);
+    dilate(fs, fs.dynDirect);
+    dilate(fs, fs.shadow);
     const { rect } = fs;
     for (let j = 0; j < rect.h; j++) {
       for (let i = 0; i < rect.w; i++) {
@@ -294,9 +316,10 @@ export function bake(input: BakeInput): BakeOutput {
         const ao = fs.ao[k * 3], aoDirect = 1 - (1 - ao) * 0.35;
         for (let c = 0; c < 3; c++) {
           const direct = fs.direct[k * 3 + c], indirect = fs.total[k * 3 + c] - direct;
-          pixels[o + c] = direct * aoDirect + (indirect + p.ambient[c]) * ao;
+          const bakedDirect = direct - fs.dynDirect[k * 3 + c]; // dynamic lights are drawn per pixel
+          pixels[o + c] = bakedDirect * aoDirect + (indirect + p.ambient[c]) * ao;
         }
-        pixels[o + 3] = 1;
+        pixels[o + 3] = fs.shadow[k * 3];
       }
     }
   }

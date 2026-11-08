@@ -208,11 +208,12 @@ export interface LightmapLayout { width: number; height: number; luxel: number; 
  * simple shelf packer. 16 units per luxel is Source's default lightmap scale.
  */
 export function layoutLightmap(faces: Face[], luxel: number, maxWidth = 2048): LightmapLayout {
-  const items = faces.map((f) => ({
-    id: f.id,
-    w: Math.max(2, Math.ceil(f.width / luxel) + 1),
-    h: Math.max(2, Math.ceil(f.height / luxel) + 1),
-  }));
+  const items = faces.map((f) => {
+    // Thin faces (baseboards, casing, counter edges) get finer luxels so they
+    // have at least ~4 samples across, instead of one blurry/dotted row.
+    const l = Math.max(1, Math.min(luxel, Math.min(f.width, f.height) / 3));
+    return { id: f.id, w: Math.max(2, Math.ceil(f.width / l) + 1), h: Math.max(2, Math.ceil(f.height / l) + 1) };
+  });
   items.sort((a, b) => b.h - a.h || b.w - a.w);
   const total = items.reduce((s, i) => s + i.w * i.h, 0);
   const width = Math.min(maxWidth, Math.max(256, 2 ** Math.ceil(Math.log2(Math.sqrt(total) * 1.15))));

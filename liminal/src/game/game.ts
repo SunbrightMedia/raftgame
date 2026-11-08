@@ -11,7 +11,7 @@ import { angleVectors } from '../engine/vec3';
 import { Input } from './input';
 import { Level } from './level';
 import { Player } from './player';
-import { Lighting } from './lighting';
+import { Lighting, mapLights, MAX_DYNAMIC } from './lighting';
 
 /**
  * Owns the play loop: fixed-rate physics ticks, per-frame mouse look,
@@ -51,7 +51,23 @@ export class Game {
     this.config.onChange(() => this.applySettings());
   }
 
+  /** Cans and bulbs drawn per pixel by the world shader (see mapLights). */
+  private uploadDynamicLights(): void {
+    if (!this.level) return;
+    const dyn = mapLights(this.level).filter((l) => l.dynamic).slice(0, MAX_DYNAMIC);
+    const u = worldUniforms;
+    u.dynCount.value = dyn.length;
+    dyn.forEach((l, i) => {
+      u.dynPos.value[i].set(...l.pos);
+      u.dynColor.value[i].set(l.color[0] * l.I0, l.color[1] * l.I0, l.color[2] * l.I0);
+      const c = l.cutoffDeg ?? 180, sd = l.softDeg ?? 2;
+      const cos = (deg: number) => Math.cos((Math.min(180, Math.max(0, deg)) * Math.PI) / 180);
+      u.dynBeam.value[i].set(l.dir ? -1 : 0, l.n ?? 1, cos(c - sd), cos(c + sd));
+    });
+  }
+
   private updateLightUniforms(s: Settings): void {
+    worldUniforms.lightScale.value = s.light.lightScale;
     const lm = this.level?.lightmap;
     worldUniforms.lightmapOn.value = s.light.enabled && lm ? 1 : 0;
 
@@ -117,6 +133,7 @@ export class Game {
     this.scene.add(level.root);
     worldUniforms.lightmapOn.value = 0;
     this.applySettings();
+    this.uploadDynamicLights();
     this.lighting.request(level, this.settings, this.textures, true);
     if (this.player) this.player.setLevel(level);
     else this.player = new Player(level, this.settings);

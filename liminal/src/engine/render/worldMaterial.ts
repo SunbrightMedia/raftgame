@@ -19,6 +19,13 @@ export const worldUniforms = {
   flashPos: { value: new THREE.Vector3() },
   flashColor: { value: new THREE.Vector3(1, 1, 1) },
   flashCandela: { value: 25 },
+  // Per-pixel lights (cans, bulbs): position, colour × peak candela, and beam
+  // (dir.z: -1 down / 0 bare bulb; cos-power n; cutoff and soft edge in cos).
+  dynCount: { value: 0 },
+  dynPos: { value: Array.from({ length: 32 }, () => new THREE.Vector3()) },
+  dynColor: { value: Array.from({ length: 32 }, () => new THREE.Vector3()) },
+  dynBeam: { value: Array.from({ length: 32 }, () => new THREE.Vector4()) },
+  lightScale: { value: 1 },
 };
 
 /**
@@ -68,6 +75,11 @@ export function makeWorldMaterial(map: THREE.Texture, source?: { luminance: numb
       uniform vec3 flashPos;
       uniform vec3 flashColor;
       uniform float flashCandela;
+      uniform int dynCount;
+      uniform vec3 dynPos[32];
+      uniform vec3 dynColor[32];
+      uniform vec4 dynBeam[32];
+      uniform float lightScale;
       uniform float isSource;
       uniform vec3 sourceLum;
       varying vec3 vWorld;
@@ -81,10 +93,37 @@ export function makeWorldMaterial(map: THREE.Texture, source?: { luminance: numb
         vec3 rho = toLinear(texture2D(map, vUv).rgb);
         vec3 L;
         if (isSource > 0.5) {
-          L = rho * sourceLum;
+          // Clamp below the half-float frame buffer's max (65504): a 2700 K lens's
+          // red channel overflowed into Inf/NaN and turned the glow cyan. Still
+          // thousands of times past white, so it blows out exactly the same.
+          L = min(rho * sourceLum, vec3(30000.0));
         } else {
           // Irradiance in lux.
-          vec3 E = lightmapOn > 0.5 ? texture2D(lightmap, vLm).rgb : vec3(300.0 * mix(1.0, vShade, faceShade));
+          vec4 lm = texture2D(lightmap, vLm);
+          vec3 E = lightmapOn > 0.5 ? lm.rgb : vec3(300.0 * mix(1.0, vShade, faceShade));
+          if (lightmapOn > 0.5) {
+            // Direct light from cans/bulbs, exact per pixel, times the baked shadow fraction.
+            vec3 n = normalize(vNormal);
+            vec3 dyn = vec3(0.0);
+            for (int i = 0; i < 32; i++) {
+              if (i >= dynCount) break;
+              vec3 toL = dynPos[i] - vWorld;
+              float d = length(toL);
+              vec3 u = toL / max(d, 0.001);
+              float ndl = dot(n, u);
+              if (ndl <= 0.0) continue;
+              vec4 bm = dynBeam[i];
+              float I = 1.0;
+              if (bm.x < -0.5) {
+                float c = u.z; // cosine between the downward beam and the direction to this point
+                if (c <= 0.0) continue;
+                I = pow(c, bm.y) * smoothstep(bm.w, bm.z, c);
+              }
+              float dm = d * 0.0254;
+              dyn += dynColor[i] * I * ndl / max(dm * dm, 0.0025);
+            }
+            E += dyn * lightScale * lm.a;
+          }
           if (flashOn > 0.5) {
             vec3 toL = flashPos - vWorld;
             float d = length(toL);

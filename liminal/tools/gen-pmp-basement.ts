@@ -257,10 +257,10 @@ function casingY(o0: number, o1: number, height: number, faceX: number, dir: 1 |
   box([6, 396, SZ0], [300, 420, SZ1], WARM);
   box([6, 246, SZ0], [30, 396, SZ1], WARM);
   box([276, 246, SZ0], [300, 396, SZ1], WARM);
-  // Cove: a warm-white strip hidden on the soffit, 14" below the tray ceiling,
-  // modelled as one up-facing emitter per foot at ~150 lm/ft (3000 K): an
-  // assumption, typical of a 90s fluorescent/incandescent cove.
-  const cove = (x: number, y: number) => entities.push({ id: 5000 + entities.length, class: 'light', origin: [x, y, SZ1 + 1], props: { type: 'up', lumens: 150, kelvin: 3000 } });
+  // Cove: incandescent rope light hidden on the soffit, 14" below the tray
+  // ceiling: the usual 90s cove product, ~30 lm per foot at ~2600 K. One
+  // up-facing emitter per foot.
+  const cove = (x: number, y: number) => entities.push({ id: 5000 + entities.length, class: 'light', origin: [x, y, SZ1 + 1], props: { type: 'up', lumens: 30, kelvin: 2600 } });
   for (let x = 36; x <= 270; x += 12) { cove(x, 243); cove(x, 399); }
   for (let y = 258; y <= 384; y += 12) { cove(33, y); cove(273, y); }
   for (const [x, y] of [[70, 290], [150, 290], [230, 290], [70, 350], [150, 350], [230, 350]]) potLight(x, y, 112);
