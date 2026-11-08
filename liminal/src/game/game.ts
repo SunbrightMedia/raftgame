@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import type { Storage } from '../data/storage';
 import type { ConfigStore } from '../data/config';
-import { type Settings, DEFAULT_SETTINGS, cloneSettings, applyPatch, diffSettings } from '../data/settings';
+import { type Settings, DEFAULT_SETTINGS, cloneSettings } from '../data/settings';
 import { parseMap, type MapFile } from '../data/map';
 import { LowResRenderer } from '../engine/render/renderer';
 import { TextureRegistry } from '../engine/render/textures';
@@ -142,10 +142,8 @@ export class Game {
   get settings(): Settings { return this.effective; }
 
   private computeEffective(): void {
-    const e = cloneSettings(DEFAULT_SETTINGS);
-    if (this.level?.map.settings) applyPatch(e, this.level.map.settings);
-    applyPatch(e, diffSettings(this.config.values));
-    this.effective = e;
+    // The config store already layers defaults ⊕ map ⊕ the user's overrides.
+    this.effective = cloneSettings(this.config.values);
   }
 
   applySettings(): void {
@@ -195,6 +193,7 @@ export class Game {
       this.level.dispose();
     }
     this.level = level;
+    this.config.setMapSettings(map.settings);
     this.scene.add(level.root);
     worldUniforms.lightmapOn.value = 0;
     this.applySettings();

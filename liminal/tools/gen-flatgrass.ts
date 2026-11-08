@@ -13,7 +13,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { type BrushDef, type EntityDef, MAP_FORMAT, MAP_VERSION, serializeMap } from '../src/data/map';
 
 type Src = { type: 'box'; min: number[]; max: number[]; tex: string; faces: Record<string, { tex: string }> }
-  | { type: 'prism'; points: [number, number][]; z0: number; z1: number; tex: string; faces: Record<string, { tex: string }> };
+  | { type: 'prism'; axis?: 'x' | 'y'; points: [number, number][]; z0: number; z1: number; tex: string; faces: Record<string, { tex: string }> };
 const geo = JSON.parse(readFileSync(new URL('./flatgrass.geometry.json', import.meta.url), 'utf8')) as { brushes: Src[] };
 
 const brushes: BrushDef[] = [];
@@ -22,9 +22,12 @@ for (const b of geo.brushes) {
   const faces = Object.keys(b.faces).length ? { faces: b.faces } : {};
   if (b.type === 'box') brushes.push({ id: id++, type: 'box', min: b.min, max: b.max, tex: b.tex, ...faces } as BrushDef);
   else {
-    const xs = b.points.map((p) => p[0]), ys = b.points.map((p) => p[1]);
-    brushes.push({ id: id++, type: 'prism', points: b.points, z0: b.z0, z1: b.z1, tex: b.tex,
-      min: [Math.min(...xs), Math.min(...ys), b.z0], max: [Math.max(...xs), Math.max(...ys), b.z1], ...faces } as BrushDef);
+    const as = b.points.map((p) => p[0]), bs = b.points.map((p) => p[1]);
+    const lo = [Math.min(...as), Math.min(...bs), b.z0], hi = [Math.max(...as), Math.max(...bs), b.z1];
+    // Sideways prisms (axis "y": points are (z, x)): world bounds are reordered. parseMap recomputes these anyway.
+    const w = (v: number[]) => (b.axis === 'y' ? [v[1], v[2], v[0]] : v);
+    brushes.push({ id: id++, type: 'prism', ...(b.axis ? { axis: b.axis } : {}), points: b.points, z0: b.z0, z1: b.z1, tex: b.tex,
+      min: w(lo), max: w(hi), ...faces } as BrushDef);
   }
 }
 

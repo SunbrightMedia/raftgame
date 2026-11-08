@@ -1,5 +1,5 @@
 import type { Def, Schema } from '../data/schema';
-import { SETTINGS, DEFAULT_SETTINGS, PRESETS, diffSettings } from '../data/settings';
+import { SETTINGS, PRESETS } from '../data/settings';
 import type { ConfigStore } from '../data/config';
 
 export interface PanelHooks {
@@ -64,7 +64,7 @@ export class DebugPanel {
     bar.append(
       presets,
       button('Copy changes', 'Copy every non-default value as JSON (handy for sharing a tuning)', () => {
-        const text = JSON.stringify(diffSettings(this.config.values), null, 2);
+        const text = JSON.stringify(this.config.overrides, null, 2);
         // Called inside the click so the clipboard is allowed; fall back to a selectable box.
         navigator.clipboard.writeText(text).then(() => this.flash('copied'), () => this.showText(text));
       }),
@@ -199,15 +199,16 @@ export class DebugPanel {
 
   private row(cKey: string, key: string, d: Def): Row {
     const vals = this.config.values as unknown as Record<string, Record<string, unknown>>;
-    const defs = DEFAULT_SETTINGS as unknown as Record<string, Record<string, unknown>>;
+    // "Changed" = differs from what this map intends (defaults ⊕ map settings).
+    const base = () => (this.config.base as unknown as Record<string, Record<string, unknown>>)[cKey][key];
     const get = () => vals[cKey][key];
-    const set = (v: unknown) => { vals[cKey][key] = v; this.config.changed(); mark(); };
+    const set = (v: unknown) => { this.config.set(cKey, key, v); mark(); };
 
     const rowEl = el('div', 'dbg-row');
     const lab = el('label', 'dbg-label', d.label + ('unit' in d && d.unit ? ` (${d.unit})` : ''));
     lab.title = `${cKey}.${key}${d.help ? '\n\n' + d.help : ''}\n\ndefault: ${String(d.default)}`;
     const ctl = el('div', 'dbg-ctl');
-    const reset = button('↺', 'Reset to default', () => { set(defs[cKey][key]); refresh(); });
+    const reset = button('↺', 'Reset to this map\'s value (or the default)', () => { this.config.reset(cKey, key); refresh(); });
     reset.className = 'dbg-reset';
     rowEl.append(lab, ctl, reset);
 
@@ -242,7 +243,7 @@ export class DebugPanel {
       ctl.append(c);
       refresh = () => { c.value = get() as string; mark(); };
     }
-    function mark() { rowEl.classList.toggle('changed', get() !== defs[cKey][key]); }
+    const mark = () => rowEl.classList.toggle('changed', get() !== base());
     refresh();
     const hay = `${cKey}.${key} ${d.label} ${d.help ?? ''}`.toLowerCase();
     return { el: rowEl, refresh, matches: (q) => hay.includes(q) };
