@@ -15,7 +15,7 @@ export interface PanelHooks {
 type Row = { refresh(): void; matches(q: string): boolean; el: HTMLElement };
 
 /** Settings shown again at the top of the panel, for quick tuning. [category, key] */
-const PINNED: [string, string][] = [['camera', 'lampGlow'], ['camera', 'surfaceHue'], ['camera', 'whiteBalanceK'], ['camera', 'tint'], ['light', 'extraBounces'], ['camera', 'chromaBlur'], ['camera', 'softnessH'], ['camera', 'brightness'], ['camera', 'contrast'], ['camera', 'blackCrush'], ['light', 'aoCurve'], ['camera', 'edgeDark'], ['camera', 'fringe']];
+const PINNED: [string, string][] = [['camera', 'grain'], ['camera', 'grainSize'], ['camera', 'grainRate'], ['camera', 'lampGlow'], ['camera', 'surfaceHue'], ['camera', 'whiteBalanceK'], ['camera', 'tint'], ['light', 'extraBounces'], ['camera', 'chromaBlur'], ['camera', 'softnessH'], ['camera', 'brightness'], ['camera', 'contrast'], ['camera', 'blackCrush'], ['light', 'aoCurve'], ['camera', 'edgeDark'], ['camera', 'fringe']];
 
 /**
  * The live tweak panel, generated entirely from the settings schema.

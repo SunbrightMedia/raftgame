@@ -71,6 +71,13 @@ export function facePoint(f: Face, s: number, t: number, lift = 0): Axis {
   ];
 }
 
+/** A prism's local (a, b, w) → world, for its extrusion axis (cyclic, so handedness is kept). */
+export function prismFrame(b: { axis?: 'x' | 'y' | 'z' }): (v: Axis) => Axis {
+  if (b.axis === 'y') return (v) => [v[1], v[2], v[0]];
+  if (b.axis === 'x') return (v) => [v[2], v[0], v[1]];
+  return (v) => v;
+}
+
 /** Planes of any brush. Box: 6 axial. Prism: one per side, then top, then bottom. */
 export function solidPlanes(b: BrushDef): SolidPlanes {
   const planes: SolidPlanes['planes'] = [];
@@ -83,13 +90,15 @@ export function solidPlanes(b: BrushDef): SolidPlanes {
     );
   } else {
     const pts = b.points;
+    const W = prismFrame(b);
     pts.forEach(([x0, y0], k) => {
       const [x1, y1] = pts[(k + 1) % pts.length];
       const len = Math.hypot(x1 - x0, y1 - y0) || 1;
-      const n: Axis = [(y1 - y0) / len, -(x1 - x0) / len, 0]; // outward for CCW
-      planes.push({ n, d: n[0] * x0 + n[1] * y0, face: k });
+      const n = W([(y1 - y0) / len, -(x1 - x0) / len, 0]); // outward for CCW
+      const p0 = W([x0, y0, 0]);
+      planes.push({ n, d: n[0] * p0[0] + n[1] * p0[1] + n[2] * p0[2], face: k });
     });
-    planes.push({ n: [0, 0, 1], d: b.z1, face: pts.length }, { n: [0, 0, -1], d: -b.z0, face: pts.length + 1 });
+    planes.push({ n: W([0, 0, 1]), d: b.z1, face: pts.length }, { n: W([0, 0, -1]), d: -b.z0, face: pts.length + 1 });
   }
   return { brushId: b.id, planes, min: [...b.min], max: [...b.max] };
 }
@@ -145,6 +154,7 @@ function prismFaces(b: PrismBrushDef): Face[] {
   const pts = b.points;
   const h = b.z1 - b.z0;
   const solid = b.solid !== false;
+  const W = prismFrame(b);
   const sideN = (k: number): Axis => {
     const [a0, b0] = pts[(k + pts.length) % pts.length], [a1, b1] = pts[(k + 1) % pts.length];
     const l = Math.hypot(a1 - a0, b1 - b0) || 1;
@@ -160,18 +170,43 @@ function prismFaces(b: PrismBrushDef): Face[] {
     const [x1, y1] = pts[(k + 1) % pts.length];
     const len = Math.hypot(x1 - x0, y1 - y0);
     if (len < 1e-6) return;
-    const r: Axis = [(x1 - x0) / len, (y1 - y0) / len, 0];
-    const n: Axis = [r[1], -r[0], 0];
-    const nA = edgeN(n, sideN(k - 1)), nB = edgeN(n, sideN(k + 1));
-    const smooth = nA !== n || nB !== n;
+    const lr: Axis = [(x1 - x0) / len, (y1 - y0) / len, 0];
+    const ln: Axis = [lr[1], -lr[0], 0];
+    const nA = edgeN(ln, sideN(k - 1)), nB = edgeN(ln, sideN(k + 1));
+    const smooth = nA !== ln || nB !== ln;
+    const r = W(lr), n = W(ln);
     const ft = faceTex(b, `side${k}`);
     out.push({
       id: faceId(b.id, k), brushId: b.id, key: `side${k}`, tex: ft.tex, scale: ft.scale, offset: ft.offset, rot: ft.rot,
-      n, r, u: [0, 0, 1], origin: [x0, y0, b.z0], width: len, height: h,
-      shade: 0.7 + 0.2 * Math.abs(n[1]) + 0.1 * Math.max(0, n[0]), solid,
-      ...(smooth ? { nS: [nA, nB] as [Axis, Axis] } : {}),
+      n, r, u: W([0, 0, 1]), origin: W([x0, y0, b.z0]), width: len, height: h,
+      shade: 0.7 + 0.2 * Math.abs(n[1]) + 0.1 * Math.max(0, n[0]) + 0.1 * n[2], solid,
+      ...(smooth ? { nS: [W(nA), W(nB)] as [Axis, Axis] } : {}),
     });
   });
+  if (b.axis === 'x' || b.axis === 'y') {
+    // Ends of a sideways prism: polygons in the axial frame of their direction.
+    for (const top of [true, false]) {
+      const key = top ? 'pz' : 'nz'; // authoring keys: pz = the z1 end, nz = the z0 end
+      const fr = FACE_FRAMES[(b.axis === 'x' ? (top ? 'px' : 'nx') : (top ? 'py' : 'ny')) as FaceKey];
+      const w = top ? b.z1 : b.z0;
+      const P = pts.map(([pa, pb]) => W([pa, pb, w]));
+      const S = P.map((p) => p[0] * fr.r[0] + p[1] * fr.r[1] + p[2] * fr.r[2]);
+      const T = P.map((p) => p[0] * fr.u[0] + p[1] * fr.u[1] + p[2] * fr.u[2]);
+      const s0 = Math.min(...S), t0 = Math.min(...T);
+      let poly = S.map((sv, i) => [sv - s0, T[i] - t0] as [number, number]);
+      let area = 0;
+      for (let i = 0; i < poly.length; i++) { const [ax, ay] = poly[i], [bx, by] = poly[(i + 1) % poly.length]; area += ax * by - bx * ay; }
+      if (area < 0) poly = poly.reverse(); // counter-clockwise seen from outside
+      const axisV = W([0, 0, 1]);
+      const origin: Axis = [0, 1, 2].map((i) => fr.r[i] * s0 + fr.u[i] * t0 + axisV[i] * w) as Axis;
+      const ft = faceTex(b, key);
+      out.push({
+        id: faceId(b.id, pts.length + (top ? 0 : 1)), brushId: b.id, key, tex: ft.tex, scale: ft.scale, offset: ft.offset, rot: ft.rot,
+        n: fr.n, r: fr.r, u: fr.u, origin, width: Math.max(...S) - s0, height: Math.max(...T) - t0, poly, shade: fr.shade, solid,
+      });
+    }
+    return out;
+  }
   // Top and bottom: polygon faces in the same frames as box tops/bottoms.
   const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
   const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);

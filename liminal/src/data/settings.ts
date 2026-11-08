@@ -169,6 +169,7 @@ export const SETTINGS = {
       banding: num('Compression banding', 64, 0, 256, 1, 'Colour steps in smooth gradients. 0 = off; lower = more banding.'),
       grain: num('Film grain', 0, 0, 1, 0.01, 'Grain over the whole picture, bright areas included (unlike sensor noise, which lives in the shadows). Phone photos re-saved many times.'),
       grainSize: num('Grain size', 1.6, 1, 4, 0.1, 'Grain clump size in pixels.', 'px'),
+      grainRate: num('Grain motion', 0, 0, 30, 0.5, 'How often the grain pattern changes. 0 = it holds still.', 'Hz'),
       noise: num('Sensor noise', 0.25, 0, 2, 0.01, 'Chroma noise, mostly in shadows.'),
       blackLift: num('Black lift', 0.025, 0, 0.3, 0.005, 'Milky, slightly lifted blacks.'),
       vignette: num('Vignette', 0.3, 0, 2, 0.01),

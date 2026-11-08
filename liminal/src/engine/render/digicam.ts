@@ -56,6 +56,7 @@ export interface CameraParams {
   surfaceHue: number;
   grain: number;
   grainSize: number;
+  grainRate: number;
   lampGlow: number;
   tint: number;
   fisheye: number;
@@ -91,6 +92,7 @@ export class Digicam {
   private encodePass;
   private developed: THREE.WebGLRenderTarget | null = null;
   private frame = 0;
+  private grainStep = -1;
   private last = performance.now();
   private target = 0.05;
   /** Current exposure multiplier (radiance → 0..1 scene-referred). */
@@ -258,10 +260,11 @@ export class Digicam {
     // bandwidth, so colour bleeds sideways past edges.
     this.encodePass = pass(/* glsl */ `
       uniform sampler2D src; uniform vec2 texel;
-      uniform float artifacts, softness, softH, sharpen, sharpenLimit, chroma, warmSat, shadowTint, banding, noise, grain, grainSize, blackLift, seed;
+      uniform float artifacts, softness, softH, sharpen, sharpenLimit, chroma, warmSat, shadowTint, banding, noise, grain, grainSize, grainSeed, blackLift, seed;
       varying vec2 vUv;
       float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233)) + seed) * 43758.5453); }
       float Y(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
+      float ghash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233)) + grainSeed) * 43758.5453); }
       // Gaussian luma blur, sigma ≈ half the given radius (matching the old
       // 5-tap lens softness): 7 taps across, 3 down.
       float lumaBlur(vec2 uv, float sx, float sy) {
@@ -307,8 +310,8 @@ export class Digicam {
           // Film grain: clumpy, a little colour, the same strength at every brightness.
           if (grain > 0.0) {
             vec2 gp = floor(vUv / texel / grainSize);
-            vec3 gn = vec3(hash(gp + 3.1), hash(gp + 9.7), hash(gp + 23.3)) - 0.5;
-            float gl = hash(gp + 51.9) - 0.5;
+            vec3 gn = vec3(ghash(gp + 3.1), ghash(gp + 9.7), ghash(gp + 23.3)) - 0.5;
+            float gl = ghash(gp + 51.9) - 0.5;
             c += (gl * 0.8 + (gn - dot(gn, vec3(0.333))) * 0.5) * grain * 0.35;
           }
           if (banding > 1.0) c = floor(c * banding + 0.5) / banding;
@@ -317,7 +320,7 @@ export class Digicam {
       }`, {
       src: { value: null }, texel: { value: new THREE.Vector2() },
       artifacts: { value: 1 }, softness: { value: 0 }, softH: { value: 0 }, sharpen: { value: 0 }, sharpenLimit: { value: 0 },
-      chroma: { value: 0 }, warmSat: { value: 0 }, shadowTint: { value: 0 }, banding: { value: 0 }, noise: { value: 0 }, grain: { value: 0 }, grainSize: { value: 1.6 }, blackLift: { value: 0 }, seed: { value: 0 },
+      chroma: { value: 0 }, warmSat: { value: 0 }, shadowTint: { value: 0 }, banding: { value: 0 }, noise: { value: 0 }, grain: { value: 0 }, grainSize: { value: 1.6 }, grainSeed: { value: 0 }, blackLift: { value: 0 }, seed: { value: 0 },
     });
   }
 
@@ -417,7 +420,12 @@ export class Digicam {
     e.softness.value = p.softness; e.softH.value = p.softnessH;
     e.sharpen.value = 0; e.sharpenLimit.value = 0;
     e.chroma.value = p.chromaBlur; e.warmSat.value = p.warmSaturation; e.shadowTint.value = p.shadowTint;
-    e.banding.value = p.banding; e.noise.value = p.noise; e.grain.value = p.grain; e.grainSize.value = p.grainSize; e.blackLift.value = p.blackLift;
+    e.banding.value = p.banding; e.noise.value = p.noise; e.grain.value = p.grain; e.grainSize.value = p.grainSize;
+    // Grain motion: 0 = the grain holds still; otherwise a new grain pattern this many times a second.
+    if (p.grainRate > 0) {
+      const step = Math.floor(performance.now() / (1000 / p.grainRate));
+      if (step !== this.grainStep) { this.grainStep = step; e.grainSeed.value = (step % 997) * 0.731; }
+    } else e.grainSeed.value = 0; e.blackLift.value = p.blackLift;
     e.seed.value = (this.frame++ % 997) * 0.731;
     gl.setRenderTarget(out);
     gl.render(this.encodePass.scene, this.cam);

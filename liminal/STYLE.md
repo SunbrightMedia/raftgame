@@ -19,6 +19,22 @@ These come from the user's feedback on built rooms. They are not
 suggestions: every room, prop and generator rule must follow them without
 the user having to say them again.
 
+- **Curves are curves.** Never approximate a curved surface with stacked
+  boxes or stair-steps, and never ship a curve with so few segments that its
+  outline reads as a polygon (≥ 24 segments per quarter circle on anything
+  large). Use prisms along whatever axis the curve runs (`axis: "x" | "y"`).
+  Check curves up close before showing anything.
+- **No visible texture grids.** Repeating textures must not line up into a
+  grid at any viewing distance: scale textures with the structure, prefer
+  low-contrast materials on big surfaces, use Texture repeat breakup on large
+  floors.
+- **Study the reference before building, and compare against it.** Measure
+  the reference photo (colours, gradients, framing, camera position) first,
+  build to the measurements, then show a side-by-side with the reference from
+  the same viewpoint. Don't judge from my own screenshots alone.
+- **Suggest first when asked to suggest.** If the user asks for a suggestion
+  before fixes, reply with the suggestion and wait; change nothing.
+
 **Overall target**
 - **Source-engine liminal, not Minecraft retro.** Textures smooth and fairly
   high resolution (HL2/GMod-era), no colour-palette crushing by default, no

@@ -57,6 +57,13 @@ export interface PrismBrushDef {
   points: [number, number][];
   z0: number;
   z1: number;
+  /**
+   * Extrusion axis (default "z": points are (x, y), z0..z1 along z). For
+   * shapes that run sideways, like a tunnel's curved ceiling: "y" = points
+   * are (z, x), extruded along y from z0 to z1; "x" = points are (y, z),
+   * extruded along x. (Cyclic orders keep the outline's winding meaning.)
+   */
+  axis?: 'x' | 'y' | 'z';
   tex?: string;
   faces?: Record<string, FaceTex>;
   group?: string;
@@ -165,19 +172,24 @@ function parsePrism(r: Record<string, unknown>, i: number): PrismBrushDef {
     const [ax, ay] = points[k], [bx, by] = points[(k + 1) % points.length], [cx, cy] = points[(k + 2) % points.length];
     if ((bx - ax) * (cy - by) - (by - ay) * (cx - bx) < -1e-6) throw new MapError(`brush #${i}: prism outline must be convex`);
   }
-  const xs = points.map((p) => p[0]), ys = points.map((p) => p[1]);
+  const as = points.map((p) => p[0]), bs = points.map((p) => p[1]);
+  const axis = r.axis === 'x' || r.axis === 'y' ? r.axis : 'z';
+  const lo: V3 = [Math.min(...as), Math.min(...bs), r.z0], hi: V3 = [Math.max(...as), Math.max(...bs), r.z1];
+  // Local (a, b, w) → world: z: (a, b, w); y: (b, w, a); x: (w, a, b).
+  const toW = (v: V3): V3 => (axis === 'z' ? v : axis === 'y' ? [v[1], v[2], v[0]] : [v[2], v[0], v[1]]);
   return {
     id: typeof r.id === 'number' ? r.id : i + 1,
     type: 'prism',
     points,
     z0: r.z0, z1: r.z1,
+    ...(axis !== 'z' ? { axis } : {}),
     tex: typeof r.tex === 'string' ? r.tex : undefined,
     faces: (r.faces && typeof r.faces === 'object' ? r.faces : undefined) as PrismBrushDef['faces'],
     group: typeof r.group === 'string' ? r.group : undefined,
     material: typeof r.material === 'string' ? r.material : undefined,
     solid: r.solid === false ? false : undefined,
-    min: [Math.min(...xs), Math.min(...ys), r.z0],
-    max: [Math.max(...xs), Math.max(...ys), r.z1],
+    min: toW(lo),
+    max: toW(hi),
   };
 }
 
