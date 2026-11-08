@@ -16,7 +16,9 @@ export interface TexEntry {
 
 interface Source {
   name: string;
-  image: CanvasImageSource;
+  /** Decoded lazily (see prepare): a map only pays for the textures it uses. */
+  image: CanvasImageSource | null;
+  url?: string;
   imgW: number;
   imgH: number;
   worldW: number;
@@ -24,10 +26,12 @@ interface Source {
   material: string;
   emissive?: TexImage['emissive'];
   raw: boolean;
+  /** Already low-colour pixel art (Freedoom): keep native pixels, only grade it. */
+  pixelart: boolean;
   credit?: string;
 }
 
-interface ManifestEntry { name: string; file: string; size: [number, number]; material?: string; credit?: string }
+interface ManifestEntry { name: string; file: string; size: [number, number]; material?: string; credit?: string; pixelart?: boolean }
 
 /**
  * Name → texture. Sources, highest priority first:
@@ -57,25 +61,40 @@ export class TextureRegistry {
       const t = makeDevTexture(n)!;
       this.sources.set(n, {
         name: n, image: t.canvas, imgW: t.canvas.width, imgH: t.canvas.height,
-        worldW: t.worldW, worldH: t.worldH, material: t.material, emissive: t.emissive, raw: !!t.raw,
+        worldW: t.worldW, worldH: t.worldH, material: t.material, emissive: t.emissive, raw: !!t.raw, pixelart: false,
       });
     }
 
-    await Promise.all(Object.entries(urls).map(async ([path, url]) => {
+    for (const [path, url] of Object.entries(urls)) {
       const rel = path.replace(/^.*?textures\//, '');
       const m = byFile.get(rel);
       const name = m?.name ?? rel.replace(/\.(png|jpe?g)$/i, '');
+      this.sources.set(name, {
+        name, image: null, url, imgW: 0, imgH: 0,
+        worldW: m?.size[0] ?? 0, worldH: m?.size[1] ?? 0,
+        material: m?.material ?? 'default', raw: false, pixelart: !!m?.pixelart, credit: m?.credit,
+      });
+    }
+  }
+
+  /** Decode the images for these textures (call before building meshes that use them). */
+  async prepare(names: Iterable<string>): Promise<void> {
+    await Promise.all([...new Set(names)].map(async (n) => {
+      const src = this.sources.get(n);
+      if (!src || src.image || !src.url) return;
       try {
         const img = new Image();
-        img.src = url;
+        img.src = src.url;
         await img.decode();
-        this.sources.set(name, {
-          name, image: img, imgW: img.naturalWidth, imgH: img.naturalHeight,
-          worldW: m?.size[0] ?? img.naturalWidth, worldH: m?.size[1] ?? img.naturalHeight,
-          material: m?.material ?? 'default', raw: false, credit: m?.credit,
-        });
+        src.image = img;
+        src.imgW = img.naturalWidth;
+        src.imgH = img.naturalHeight;
+        // Unlisted files: 1 pixel = 1 unit.
+        if (!src.worldW) { src.worldW = img.naturalWidth; src.worldH = img.naturalHeight; }
+        this.entries.get(n)?.texture.dispose();
+        this.entries.delete(n);
       } catch (e) {
-        console.warn(`texture ${rel} failed to load`, e);
+        console.warn(`texture ${n} failed to load`, e);
       }
     }));
   }
@@ -87,7 +106,8 @@ export class TextureRegistry {
   get(name: string): TexEntry {
     let e = this.entries.get(name);
     if (!e) {
-      e = this.build(this.sources.get(name) ?? this.sources.get('missing')!, name);
+      const src = this.sources.get(name);
+      e = this.build(src?.image ? src : this.sources.get('missing')!, name);
       this.entries.set(name, e);
     }
     return e;
@@ -115,7 +135,16 @@ export class TextureRegistry {
     if (src.raw || !p) {
       canvas = document.createElement('canvas');
       canvas.width = src.imgW; canvas.height = src.imgH;
-      canvas.getContext('2d')!.drawImage(src.image, 0, 0);
+      canvas.getContext('2d')!.drawImage(src.image!, 0, 0);
+    } else if (src.pixelart) {
+      // Native pixels, graded only: resampling or re-paletting would wreck hand-made Doom art.
+      canvas = document.createElement('canvas');
+      canvas.width = src.imgW; canvas.height = src.imgH;
+      const g = canvas.getContext('2d', { willReadFrequently: true })!;
+      g.drawImage(src.image!, 0, 0);
+      const img = g.getImageData(0, 0, canvas.width, canvas.height);
+      grade(img.data, p);
+      g.putImageData(img, 0, 0);
     } else {
       canvas = this.crush(src, p);
     }
@@ -138,7 +167,7 @@ export class TextureRegistry {
     const g = canvas.getContext('2d', { willReadFrequently: true })!;
     g.imageSmoothingEnabled = true;
     g.imageSmoothingQuality = 'high';
-    g.drawImage(src.image, 0, 0, w, h);
+    g.drawImage(src.image!, 0, 0, w, h);
     const img = g.getImageData(0, 0, w, h);
     grade(img.data, p);
     sharpen(img.data, w, h, p.sharpen);
@@ -156,7 +185,7 @@ export class TextureRegistry {
     if (this.sharedPalette) return this.sharedPalette;
     const samples: number[] = [];
     for (const s of this.sources.values()) {
-      if (s.raw || s.emissive) continue;
+      if (s.raw || s.emissive || s.pixelart || !s.image) continue;
       const c = document.createElement('canvas');
       c.width = 48; c.height = 48;
       const g = c.getContext('2d', { willReadFrequently: true })!;

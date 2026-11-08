@@ -84,10 +84,11 @@ export class Game {
     const text = await this.storage.read(path);
     if (text === null) throw new Error(`map not found: ${path}`);
     this.mapPath = path;
-    this.setMap(parseMap(JSON.parse(text)), path);
+    await this.setMap(parseMap(JSON.parse(text)), path);
   }
 
-  setMap(map: MapFile, label: string): void {
+  async setMap(map: MapFile, label: string): Promise<void> {
+    await this.textures.prepare(map.brushes.flatMap((b) => [b.tex ?? 'dev/gray', ...Object.values(b.faces ?? {}).map((f) => f?.tex ?? '')]).filter(Boolean));
     const level = new Level(map, this.textures);
     if (this.level) {
       this.scene.remove(this.level.root);

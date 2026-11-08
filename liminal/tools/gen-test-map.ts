@@ -65,7 +65,7 @@ const WALL = 'office/plaster', CARPET = 'office/carpet_blue', CEIL = 'office/cei
   slabs(X0 - W, Y0 - W, X1 + W, Y1 + W, 0, H, CARPET, CEIL);
   wall('x', X0 - W, X1 + W, Y0 - W, W, 0, H, WALL);
   wall('x', X0 - W, X1 + W, Y1, W, 0, H, WALL, [[704, 800, 96]]); // door north → long corridor
-  wall('y', Y0, Y1, X0 - W, W, 0, H, WALL);
+  wall('y', Y0, Y1, X0 - W, W, 0, H, WALL, [[448, 576, 96]]); // door west → arcade
   wall('y', Y0, Y1, X1, W, 0, H, WALL, [[448, 576, 104]]); // door east → test hall
 
   // Pillars on a 384 grid.
@@ -89,14 +89,15 @@ const WALL = 'office/plaster', CARPET = 'office/carpet_blue', CEIL = 'office/cei
 // (Milestone 4 makes it longer than it should be.)
 {
   const X0 = 704, X1 = 800, Y0 = 1040, Y1 = 3088, H = 96;
-  slabs(X0 - W, Y0, X1 + W, Y1, 0, H, 'office/carpet_yellow', 'office/ceiling_vent');
-  wall('y', Y0, Y1, X0 - W, W, 0, H, 'house/wallpaper_motif');
-  wall('y', Y0, Y1, X1, W, 0, H, 'house/wallpaper_motif');
+  // Backrooms Level 0: the CC0 Backrooms pack's wallpaper, carpet and ceiling.
+  slabs(X0 - W, Y0, X1 + W, Y1, 0, H, 'liminal/backrooms_carpet', 'liminal/backrooms_ceiling');
+  wall('y', Y0, Y1, X0 - W, W, 0, H, 'liminal/backrooms_wallpaper');
+  wall('y', Y0, Y1, X1, W, 0, H, 'liminal/backrooms_wallpaper');
   for (let y = Y0 + 128; y < Y1; y += 256) lightPanel(X0 + 24, y - 24, X1 - 24, y + 24, H);
   // End room.
   // End room: a suburban kitchen, lit by one warm lamp instead of fluorescents.
   const R0x = 560, R1x = 944, R0y = Y1, R1y = Y1 + 384, RH = 104;
-  const PAPER = 'house/wallpaper_stripe';
+  const PAPER = 'wallpaper/stripe_sprigs_1910s'; // a real 1910s wallpaper (Cooper Hewitt, CC0)
   slabs(R0x - W, R0y, R1x + W, R1y + W, 0, RH, 'house/tile_checker', 'office/plaster');
   wall('x', R0x - W, R1x + W, R0y - W, W, 0, RH, PAPER, [[X0, X1, H]]);
   wall('x', R0x - W, R1x + W, R1y, W, 0, RH, PAPER);
@@ -108,6 +109,19 @@ const WALL = 'office/plaster', CARPET = 'office/carpet_blue', CEIL = 'office/cei
   box([R0x + 152, R0y + 152, 28], [R0x + 232, R0y + 232, 30], 'house/woodfloor');
   box([R0x + 188, R0y + 188, 0], [R0x + 196, R0y + 196, 28], 'house/woodfloor');
   entities.push({ id: 2000, class: 'light', origin: [R0x + 192, R0y + 192, RH - 14], props: { color: '#ffcf8f', intensity: 1.6, fifty: 120 } });
+}
+
+// ---------------------------------------------------------------- the arcade
+// West of the office: a dead mall arcade. Neon carpet, brown walls, low light.
+{
+  const X0 = -528, X1 = -16, Y0 = 256, Y1 = 768, H = 112;
+  slabs(X0 - W, Y0 - W, X1, Y1 + W, 0, H, 'mall/arcade_carpet_dark', 'liminal/backrooms_ceiling2');
+  wall('x', X0 - W, X1, Y0 - W, W, 0, H, 'liminal/painted_wall_brown');
+  wall('x', X0 - W, X1, Y1, W, 0, H, 'liminal/painted_wall_brown');
+  wall('y', Y0, Y1, X0 - W, W, 0, H, 'liminal/painted_wall_brown');
+  // Cabinet-sized blocks along the walls, where the machines used to be.
+  for (let y = Y0 + 32; y < Y1 - 64; y += 64) box([X0, y, 0], [X0 + 32, y + 40, 72], 'freedoom/flat/CEIL5_1', { faces: { px: { tex: 'freedoom/COMPSTA1' } } });
+  lightPanel(X0 + 232, Y0 + 208, X0 + 280, Y0 + 304, H);
 }
 
 // ------------------------------------------------------------- movement test hall
@@ -122,7 +136,7 @@ const WALL = 'office/plaster', CARPET = 'office/carpet_blue', CEIL = 'office/cei
   slabs(X0, Y0 - W, X1 + W, Y1 + W, 0, H, 'ind/concrete_floor', 'ind/concrete_forms');
   wall('x', X0, X1 + W, Y0 - W, W, 0, H, 'ind/cinderblock');
   wall('x', X0, X1 + W, Y1, W, 0, H, 'ind/cinderblock');
-  wall('y', Y0, Y1, X1, W, 0, H, 'ind/cinderblock');
+  wall('y', Y0, Y1, X1, W, 0, H, 'freedoom/BROWN1'); // Freedoom techbase panels on the far wall
   // The office's east wall is only 112 tall; close the hall above it.
   box([1536, -16, 112], [1552, 1040, H], 'ind/cinderblock');
   // Cold work lights up in the rafters.

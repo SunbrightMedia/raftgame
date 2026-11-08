@@ -36,7 +36,7 @@ async function boot(): Promise<void> {
 
   async function loadDropped(f: File): Promise<void> {
     try {
-      game.setMap(parseMap(JSON.parse(await f.text())), f.name);
+      await game.setMap(parseMap(JSON.parse(await f.text())), f.name);
     } catch (e) {
       showError(`${f.name}: ${(e as Error).message}`);
     }

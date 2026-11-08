@@ -1,0 +1,468 @@
+{
+  "_comment": "Hand-picked CC0 textures from other free projects, imported by tools/fetch_cc0.py. size = world inches per repeat. crop = [x0,y0,x1,y1] fractions of the source (for scans of physical samples). seamless = blend edges so it tiles.",
+  "textures": [
+    {
+      "name": "liminal/backrooms_wallpaper",
+      "archive": "https://opengameart.org/sites/default/files/backrooms.tar_1.gz",
+      "member": "wallpaper/wallpaper_color.png",
+      "size": 48,
+      "material": "plaster",
+      "credit": "Backrooms PBR texture pack by methodical pixel",
+      "page": "https://opengameart.org/content/backrooms-pbr-texture-pack"
+    },
+    {
+      "name": "liminal/backrooms_carpet",
+      "archive": "https://opengameart.org/sites/default/files/backrooms.tar_1.gz",
+      "member": "carpet/carpet_color.png",
+      "size": 64,
+      "material": "carpet",
+      "credit": "Backrooms PBR texture pack by methodical pixel",
+      "page": "https://opengameart.org/content/backrooms-pbr-texture-pack"
+    },
+    {
+      "name": "liminal/backrooms_ceiling",
+      "archive": "https://opengameart.org/sites/default/files/backrooms.tar_1.gz",
+      "member": "ceiling_tiles/ceiling_tiles_color.png",
+      "size": 96,
+      "material": "ceiling",
+      "credit": "Backrooms PBR texture pack by methodical pixel",
+      "page": "https://opengameart.org/content/backrooms-pbr-texture-pack"
+    },
+    {
+      "name": "liminal/backrooms_ceiling2",
+      "archive": "https://opengameart.org/sites/default/files/backrooms.tar_1.gz",
+      "member": "ceiling_tiles_2/ceiling_tiles_2_color.png",
+      "size": 48,
+      "material": "ceiling",
+      "credit": "Backrooms PBR texture pack by methodical pixel",
+      "page": "https://opengameart.org/content/backrooms-pbr-texture-pack"
+    },
+    {
+      "name": "liminal/painted_wall_yellow",
+      "archive": "https://opengameart.org/sites/default/files/backrooms.tar_1.gz",
+      "member": "painted_wall/painted_wall_color.png",
+      "size": 96,
+      "material": "plaster",
+      "credit": "Backrooms PBR texture pack by methodical pixel",
+      "page": "https://opengameart.org/content/backrooms-pbr-texture-pack"
+    },
+    {
+      "name": "liminal/painted_wall_brown",
+      "archive": "https://opengameart.org/sites/default/files/backrooms.tar_1.gz",
+      "member": "painted_wall_2/painted_wall_2_color.png",
+      "size": 96,
+      "material": "plaster",
+      "credit": "Backrooms PBR texture pack by methodical pixel",
+      "page": "https://opengameart.org/content/backrooms-pbr-texture-pack"
+    },
+    {
+      "name": "liminal/pool_tiles",
+      "archive": "https://opengameart.org/sites/default/files/backrooms.tar_1.gz",
+      "member": "pool_tiles/pool_tiles_color.png",
+      "size": 32,
+      "material": "tile",
+      "credit": "Backrooms PBR texture pack by methodical pixel",
+      "page": "https://opengameart.org/content/backrooms-pbr-texture-pack"
+    },
+    {
+      "name": "liminal/dirty_yellow_tiles",
+      "url": "https://opengameart.org/sites/default/files/dirtyyellowfloor.png",
+      "size": 48,
+      "material": "tile",
+      "credit": "Dirty yellow tiles by GrEmlin",
+      "page": "https://opengameart.org/content/dirty-yellow-tiles"
+    },
+    {
+      "name": "mall/arcade_carpet_1",
+      "archive": "https://opengameart.org/sites/default/files/arcade_carpet_textures_-_1.zip",
+      "member": "arcade_carpet_1_512.png",
+      "size": 64,
+      "material": "carpet",
+      "credit": "Arcade carpet textures by Luckius",
+      "page": "https://opengameart.org/content/arcade-carpet-textures"
+    },
+    {
+      "name": "mall/arcade_carpet_2",
+      "archive": "https://opengameart.org/sites/default/files/arcade_carpet_textures_-_1.zip",
+      "member": "arcade_carpet_2_512.png",
+      "size": 64,
+      "material": "carpet",
+      "credit": "Arcade carpet textures by Luckius",
+      "page": "https://opengameart.org/content/arcade-carpet-textures"
+    },
+    {
+      "name": "mall/arcade_carpet_3",
+      "archive": "https://opengameart.org/sites/default/files/arcade_carpet_textures_-_1.zip",
+      "member": "arcade_carpet_3_512.png",
+      "size": 64,
+      "material": "carpet",
+      "credit": "Arcade carpet textures by Luckius",
+      "page": "https://opengameart.org/content/arcade-carpet-textures"
+    },
+    {
+      "name": "mall/arcade_carpet_dark",
+      "archive": "https://opengameart.org/sites/default/files/arcade_carpet_textures_-_1.zip",
+      "member": "Arcade Carpet Textures - 1/arcade_carpet_512.png",
+      "size": 64,
+      "material": "carpet",
+      "credit": "Arcade carpet textures by Luckius",
+      "page": "https://opengameart.org/content/arcade-carpet-textures"
+    },
+    {
+      "name": "mall/arcade_carpet_blue",
+      "archive": "https://opengameart.org/sites/default/files/arcade_carpet_textures_-_1.zip",
+      "member": "carpet_2_512.png",
+      "size": 64,
+      "material": "carpet",
+      "credit": "Arcade carpet textures by Luckius",
+      "page": "https://opengameart.org/content/arcade-carpet-textures"
+    },
+    {
+      "name": "mall/arcade_floor_neon",
+      "url": "https://opengameart.org/sites/default/files/arcadefloor.png",
+      "size": 96,
+      "material": "carpet",
+      "credit": "Arcade floor (neon) by Fupi",
+      "page": "https://opengameart.org/content/arcade-floor-neon"
+    },
+    {
+      "name": "mall/tile_checker_bw",
+      "archive": "https://opengameart.org/sites/default/files/sbs_-_mini_texture_pack_1_-_floor_tiles_256x256.zip",
+      "member": "BW_Marble_Tile_01-256x256.png",
+      "size": 48,
+      "material": "tile",
+      "credit": "Tile floor textures by Screaming Brain Studios",
+      "page": "https://opengameart.org/content/200-tile-floor-textures"
+    },
+    {
+      "name": "mall/tile_checker_small",
+      "archive": "https://opengameart.org/sites/default/files/sbs_-_mini_texture_pack_1_-_floor_tiles_256x256.zip",
+      "member": "BW_Marble_Tile_03-256x256.png",
+      "size": 48,
+      "material": "tile",
+      "credit": "Tile floor textures by Screaming Brain Studios",
+      "page": "https://opengameart.org/content/200-tile-floor-textures"
+    },
+    {
+      "name": "mall/tile_checker_beige",
+      "archive": "https://opengameart.org/sites/default/files/sbs_-_mini_texture_pack_1_-_floor_tiles_256x256.zip",
+      "member": "WO_Marble_Tile_01-256x256.png",
+      "size": 48,
+      "material": "tile",
+      "credit": "Tile floor textures by Screaming Brain Studios",
+      "page": "https://opengameart.org/content/200-tile-floor-textures"
+    },
+    {
+      "name": "mall/tile_diamond_bw",
+      "archive": "https://opengameart.org/sites/default/files/sbs_-_mini_texture_pack_1_-_floor_tiles_256x256.zip",
+      "member": "BW_Marble_Tile_07-256x256.png",
+      "size": 48,
+      "material": "tile",
+      "credit": "Tile floor textures by Screaming Brain Studios",
+      "page": "https://opengameart.org/content/200-tile-floor-textures"
+    },
+    {
+      "name": "mall/tile_diamond_tri",
+      "archive": "https://opengameart.org/sites/default/files/sbs_-_mini_texture_pack_1_-_floor_tiles_256x256.zip",
+      "member": "Tri_Marble_Tile_03-256x256.png",
+      "size": 48,
+      "material": "tile",
+      "credit": "Tile floor textures by Screaming Brain Studios",
+      "page": "https://opengameart.org/content/200-tile-floor-textures"
+    },
+    {
+      "name": "office/ceiling_speckle",
+      "archive": "https://opengameart.org/sites/default/files/ceiling_tile_04.zip",
+      "member": "ceiling_tile_border_04.png",
+      "size": 24,
+      "material": "ceiling",
+      "credit": "Ceiling tile texture by para",
+      "page": "https://opengameart.org/content/ceiling-tile-texture"
+    },
+    {
+      "name": "house/carpet_shag",
+      "url": "https://opengameart.org/sites/default/files/carpet_-_starninjas.jpg",
+      "size": 48,
+      "material": "carpet",
+      "credit": "Seamless carpet by StarNinjas",
+      "page": "https://opengameart.org/content/seamless-carpet"
+    },
+    {
+      "name": "house/wall_beige",
+      "archive": "https://opengameart.org/sites/default/files/interior_textures.zip",
+      "member": "Beigewall_Texture.png",
+      "size": 64,
+      "material": "plaster",
+      "credit": "Interior textures by PucciGames",
+      "page": "https://opengameart.org/content/interior-textures"
+    },
+    {
+      "name": "house/wall_beige2",
+      "archive": "https://opengameart.org/sites/default/files/interior_textures.zip",
+      "member": "Beigewall2_Texture.png",
+      "size": 64,
+      "material": "plaster",
+      "credit": "Interior textures by PucciGames",
+      "page": "https://opengameart.org/content/interior-textures"
+    },
+    {
+      "name": "house/wall_orange",
+      "archive": "https://opengameart.org/sites/default/files/interior_textures.zip",
+      "member": "Orangewall_Texture.jpg",
+      "size": 64,
+      "material": "plaster",
+      "credit": "Interior textures by PucciGames",
+      "page": "https://opengameart.org/content/interior-textures"
+    },
+    {
+      "name": "house/paneling_red",
+      "archive": "https://opengameart.org/sites/default/files/interior_textures.zip",
+      "member": "Redplanks_Texture.png",
+      "size": 64,
+      "material": "wood",
+      "credit": "Interior textures by PucciGames",
+      "page": "https://opengameart.org/content/interior-textures"
+    },
+    {
+      "name": "house/parquet",
+      "archive": "https://opengameart.org/sites/default/files/interior_textures.zip",
+      "member": "Woodwall2_Texture.png",
+      "size": 48,
+      "material": "wood",
+      "credit": "Interior textures by PucciGames",
+      "page": "https://opengameart.org/content/interior-textures"
+    },
+    {
+      "name": "house/parquet_red",
+      "archive": "https://opengameart.org/sites/default/files/interior_textures.zip",
+      "member": "Woodwall3_Texture.png",
+      "size": 48,
+      "material": "wood",
+      "credit": "Interior textures by PucciGames",
+      "page": "https://opengameart.org/content/interior-textures"
+    },
+    {
+      "name": "house/rug_orange",
+      "archive": "https://opengameart.org/sites/default/files/interior_textures.zip",
+      "member": "Rug5_Texture.png",
+      "size": 64,
+      "material": "carpet",
+      "credit": "Interior textures by PucciGames",
+      "page": "https://opengameart.org/content/interior-textures"
+    },
+    {
+      "name": "wallpaper/stripe_sprigs_1910s",
+      "url": "https://ids.si.edu/ids/deliveryService?id=CHSDM-0B9A3533226E2-000001&max=1024",
+      "crop": [
+        0.1,
+        0.1,
+        0.9,
+        0.9
+      ],
+      "seamless": true,
+      "size": 24,
+      "material": "plaster",
+      "credit": "Sidewall, 1910s. Cooper Hewitt, Smithsonian Design Museum",
+      "page": "https://collection.cooperhewitt.org/view/objects/asitem/id/156602",
+      "stripes": true
+    },
+    {
+      "name": "wallpaper/stripe_gold_1900s",
+      "url": "https://ids.si.edu/ids/deliveryService?id=CHSDM-1972-42-118MattFlynn&max=1024",
+      "crop": [
+        0.12,
+        0.1,
+        0.88,
+        0.85
+      ],
+      "seamless": true,
+      "size": 24,
+      "material": "plaster",
+      "credit": "Sidewall, 1900s. Cooper Hewitt, Smithsonian Design Museum",
+      "page": "https://collection.cooperhewitt.org/view/objects/asitem/id/281426",
+      "stripes": true
+    },
+    {
+      "name": "wallpaper/stripe_blue_1910s",
+      "url": "https://ids.si.edu/ids/deliveryService?id=CHSDM-1CC9783DFE252-000001&max=1024",
+      "crop": [
+        0.08,
+        0.06,
+        0.92,
+        0.94
+      ],
+      "seamless": true,
+      "size": 24,
+      "material": "plaster",
+      "credit": "Border or sidewall, 1910s. Cooper Hewitt, Smithsonian Design Museum",
+      "page": "https://collection.cooperhewitt.org/view/objects/asitem/id/160454",
+      "stripes": true
+    },
+    {
+      "name": "wallpaper/pinstripe_brown_1910s",
+      "url": "https://ids.si.edu/ids/deliveryService?id=CHSDM-161574_01-000001&max=1024",
+      "crop": [
+        0.1,
+        0.1,
+        0.9,
+        0.9
+      ],
+      "seamless": true,
+      "size": 24,
+      "material": "plaster",
+      "credit": "Sidewall, 1910s. Cooper Hewitt, Smithsonian Design Museum",
+      "page": "https://collection.cooperhewitt.org/view/objects/asitem/id/161574",
+      "stripes": true
+    },
+    {
+      "name": "wallpaper/fleur_cream_1900s",
+      "url": "https://ids.si.edu/ids/deliveryService?id=CHSDM-6780C4E319E02-000001&max=1024",
+      "crop": [
+        0.1,
+        0.12,
+        0.9,
+        0.88
+      ],
+      "seamless": true,
+      "size": 24,
+      "material": "plaster",
+      "credit": "Sidewall, 1900s. Cooper Hewitt, Smithsonian Design Museum",
+      "page": "https://collection.cooperhewitt.org/view/objects/asitem/id/151077"
+    },
+    {
+      "name": "wallpaper/damask_brown_1920s",
+      "url": "https://ids.si.edu/ids/deliveryService?id=CHSDM-3D918D26BF722-000001&max=1024",
+      "crop": [
+        0.1,
+        0.1,
+        0.9,
+        0.9
+      ],
+      "seamless": true,
+      "size": 24,
+      "material": "plaster",
+      "credit": "Sidewall samples, 1920s. Cooper Hewitt, Smithsonian Design Museum",
+      "page": "https://collection.cooperhewitt.org/view/objects/asitem/id/148394"
+    },
+    {
+      "name": "wallpaper/laurel_gold_1920s",
+      "url": "https://ids.si.edu/ids/deliveryService?id=CHSDM-F415731536502-000001&max=1024",
+      "crop": [
+        0.1,
+        0.1,
+        0.9,
+        0.9
+      ],
+      "seamless": true,
+      "size": 24,
+      "material": "plaster",
+      "credit": "Sidewall samples, 1920s. Cooper Hewitt, Smithsonian Design Museum",
+      "page": "https://collection.cooperhewitt.org/view/objects/asitem/id/148393"
+    },
+    {
+      "name": "wallpaper/floral_beige_1920s",
+      "url": "https://ids.si.edu/ids/deliveryService?id=CHSDM-8389397DD0712-000001&max=1024",
+      "crop": [
+        0.12,
+        0.12,
+        0.88,
+        0.88
+      ],
+      "seamless": true,
+      "size": 24,
+      "material": "plaster",
+      "credit": "Sidewall, 1920s. Cooper Hewitt, Smithsonian Design Museum",
+      "page": "https://collection.cooperhewitt.org/view/objects/asitem/id/146512"
+    },
+    {
+      "name": "wallpaper/roses_1910s",
+      "url": "https://ids.si.edu/ids/deliveryService?id=CHSDM-161442_01-000001&max=1024",
+      "crop": [
+        0.1,
+        0.08,
+        0.9,
+        0.92
+      ],
+      "seamless": true,
+      "size": 24,
+      "material": "plaster",
+      "credit": "Sidewall, 1910s. Cooper Hewitt, Smithsonian Design Museum",
+      "page": "https://collection.cooperhewitt.org/view/objects/asitem/id/161442"
+    },
+    {
+      "name": "wallpaper/grapes_1900s",
+      "url": "https://ids.si.edu/ids/deliveryService?id=CHSDM-chw816&max=1024",
+      "crop": [
+        0.08,
+        0.08,
+        0.92,
+        0.92
+      ],
+      "seamless": true,
+      "size": 24,
+      "material": "plaster",
+      "credit": "Sidewall sample, 1900s. Cooper Hewitt, Smithsonian Design Museum",
+      "page": "https://collection.cooperhewitt.org/view/objects/asitem/id/182732"
+    },
+    {
+      "name": "wallpaper/leaves_pale_1900s",
+      "url": "https://ids.si.edu/ids/deliveryService?id=CHSDM-CHP5855&max=1024",
+      "crop": [
+        0.1,
+        0.1,
+        0.9,
+        0.9
+      ],
+      "seamless": true,
+      "size": 24,
+      "material": "plaster",
+      "credit": "Sidewall sample, 1900s. Cooper Hewitt, Smithsonian Design Museum",
+      "page": "https://collection.cooperhewitt.org/view/objects/asitem/id/182715"
+    },
+    {
+      "name": "wallpaper/floral_green_1900s",
+      "url": "https://ids.si.edu/ids/deliveryService?id=CHSDM-chw845&max=1024",
+      "crop": [
+        0.1,
+        0.1,
+        0.9,
+        0.9
+      ],
+      "seamless": true,
+      "size": 24,
+      "material": "plaster",
+      "credit": "Sidewall sample, 1900s. Cooper Hewitt, Smithsonian Design Museum",
+      "page": "https://collection.cooperhewitt.org/view/objects/asitem/id/182747"
+    },
+    {
+      "name": "wallpaper/floral_pale_1900s",
+      "url": "https://ids.si.edu/ids/deliveryService?id=CHSDM-5D903DEB26A82-000001&max=1024",
+      "crop": [
+        0.1,
+        0.1,
+        0.9,
+        0.9
+      ],
+      "seamless": true,
+      "size": 24,
+      "material": "plaster",
+      "credit": "Sidewall, 1900s. Cooper Hewitt, Smithsonian Design Museum",
+      "page": "https://collection.cooperhewitt.org/view/objects/asitem/id/149236"
+    },
+    {
+      "name": "wallpaper/damask_green",
+      "url": "https://ids.si.edu/ids/deliveryService?id=CHSDM-E9455D8519E32-000001&max=1024",
+      "crop": [
+        0.1,
+        0.1,
+        0.9,
+        0.9
+      ],
+      "seamless": true,
+      "size": 24,
+      "material": "plaster",
+      "credit": "Sidewall, 1800s. Cooper Hewitt, Smithsonian Design Museum",
+      "page": "https://collection.cooperhewitt.org/view/objects/asitem/id/156414"
+    }
+  ]
+}

@@ -46,11 +46,13 @@ for e in entries:
         'credit': f'{aid} from ambientCG.com', 'url': f'https://ambientcg.com/a/{aid}', 'license': 'CC0 1.0',
     })
 
-json.dump({'format': 'liminal-textures', 'version': 1, 'textures': index}, open(os.path.join(ROOT, 'textures', 'index.json'), 'w'), indent=1)
-with open(os.path.join(ROOT, 'CREDITS.md'), 'w') as f:
-    f.write('# Credits\n\nAll third-party assets are CC0 1.0 (public domain). Credit is not required but given anyway.\n\n')
-    f.write('Procedural textures (dev/*, wallpapers, paneling, vinyl tile, light panels) are generated in code: `src/engine/render/devTextures.ts`.\n\n')
-    f.write('| texture | source | licence |\n|---|---|---|\n')
-    for t in index:
-        f.write(f"| `{t['name']}` | [{t['credit']}]({t['url']}) | {t['license']} |\n")
-print(len(index), 'textures in index')
+# Keep entries other importers own (fetch_freedoom.py, fetch_cc0.py...).
+idx_path = os.path.join(ROOT, 'textures', 'index.json')
+others = []
+if os.path.exists(idx_path):
+    others = [t for t in json.load(open(idx_path))['textures'] if 'ambientCG' not in t.get('credit', '')]
+index_all = index + others
+json.dump({'format': 'liminal-textures', 'version': 1, 'textures': index_all}, open(idx_path, 'w'), indent=1)
+from credits import write_credits
+write_credits()
+print(len(index), 'ambientCG textures,', len(index_all), 'total in index')
