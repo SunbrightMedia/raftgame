@@ -1,0 +1,149 @@
+{
+  "_comment": "CC0 photo textures fetched by tools/fetch_textures.py. size = real-world inches one repeat covers (1 unit = 1 inch). Edit and re-run to change the set.",
+  "textures": [
+    {
+      "name": "office/carpet_blue",
+      "ambientcg": "Carpet012",
+      "size": 48,
+      "material": "carpet"
+    },
+    {
+      "name": "office/carpet_yellow",
+      "ambientcg": "Carpet011",
+      "size": 48,
+      "material": "carpet"
+    },
+    {
+      "name": "office/carpet_pattern",
+      "ambientcg": "Carpet005",
+      "size": 64,
+      "material": "carpet"
+    },
+    {
+      "name": "office/carpet_beige",
+      "ambientcg": "Carpet008",
+      "size": 64,
+      "material": "carpet"
+    },
+    {
+      "name": "office/ceiling",
+      "ambientcg": "OfficeCeiling001",
+      "size": 144,
+      "material": "ceiling"
+    },
+    {
+      "name": "office/ceiling_vent",
+      "ambientcg": "OfficeCeiling006",
+      "size": 144,
+      "material": "ceiling"
+    },
+    {
+      "name": "office/plaster",
+      "ambientcg": "Plaster001",
+      "size": 96,
+      "material": "plaster"
+    },
+    {
+      "name": "office/plaster_worn",
+      "ambientcg": "Plaster007",
+      "size": 96,
+      "material": "plaster"
+    },
+    {
+      "name": "house/tile_checker",
+      "ambientcg": "Tiles074",
+      "size": 96,
+      "material": "tile"
+    },
+    {
+      "name": "house/tile_white",
+      "ambientcg": "Tiles107",
+      "size": 48,
+      "material": "tile"
+    },
+    {
+      "name": "house/woodfloor",
+      "ambientcg": "WoodFloor051",
+      "size": 96,
+      "material": "wood"
+    },
+    {
+      "name": "house/planks_old",
+      "ambientcg": "WoodFloor043",
+      "size": 96,
+      "material": "wood"
+    },
+    {
+      "name": "house/panel_wood",
+      "ambientcg": "WoodFloor039",
+      "size": 96,
+      "material": "wood"
+    },
+    {
+      "name": "ind/concrete_wall",
+      "ambientcg": "Concrete008",
+      "size": 128,
+      "material": "concrete"
+    },
+    {
+      "name": "ind/concrete_forms",
+      "ambientcg": "Concrete031",
+      "size": 128,
+      "material": "concrete"
+    },
+    {
+      "name": "ind/concrete_floor",
+      "ambientcg": "Concrete033",
+      "size": 128,
+      "material": "concrete"
+    },
+    {
+      "name": "ind/cinderblock",
+      "ambientcg": "Bricks066",
+      "size": 48,
+      "material": "concrete"
+    },
+    {
+      "name": "ind/brick_painted",
+      "ambientcg": "Bricks060",
+      "size": 48,
+      "material": "concrete"
+    },
+    {
+      "name": "ind/brick_red",
+      "ambientcg": "Bricks059",
+      "size": 56,
+      "material": "concrete"
+    },
+    {
+      "name": "ind/paint_green",
+      "ambientcg": "PaintedPlaster012",
+      "size": 96,
+      "material": "plaster"
+    },
+    {
+      "name": "ind/paint_worn",
+      "ambientcg": "PaintedPlaster011",
+      "size": 96,
+      "material": "plaster"
+    },
+    {
+      "name": "ind/metal_corrugated",
+      "ambientcg": "CorrugatedSteel009",
+      "size": 64,
+      "material": "metal"
+    },
+    {
+      "name": "ind/diamondplate",
+      "ambientcg": "DiamondPlate008C",
+      "size": 48,
+      "material": "metal"
+    },
+    {
+      "name": "ind/metal_rust",
+      "ambientcg": "Metal053C",
+      "size": 64,
+      "material": "metal"
+    }
+  ]
+}

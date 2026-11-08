@@ -69,19 +69,53 @@ export const SETTINGS = {
     defs: {
       internalHeight: num('Internal resolution (lines)', 480, 0, 2160, 1, 'The game renders this many lines tall and upscales. 0 = native.', 'px'),
       upscale: select('Upscale filter', 'linear', ['nearest', 'linear'] as const, 'nearest = crunchy pixels, linear = soft CRT-ish.'),
-      faceShade: num('Face shading', 0.6, 0, 1, 0.01, 'Fake directional shading per face direction (fullbright Hammer look). 0 = flat, 1 = strong.'),
+      faceShade: num('Fullbright face shading', 0.6, 0, 1, 0.01, 'Fake per-face shading used only when baked lighting is off. 0 = flat, 1 = strong.'),
       brightness: num('Brightness', 1, 0, 3, 0.01),
       textureFilter: select('Texture filter', 'nearest', ['nearest', 'linear'] as const, 'nearest = crisp texels (retro), linear = smooth.'),
       clearColor: color('Void colour', '#0b0c0e'),
+    },
+  },
+  light: {
+    label: 'Lighting',
+    help: 'Baked lightmaps, Source-style. Fluorescent panels emit light by themselves (like lights.rad). Changes re-bake in the background.',
+    defs: {
+      enabled: bool('Baked lighting', true, 'Off = fullbright with fake face shading (Hammer-style), handy while building.'),
+      luxelSize: num('Luxel size', 16, 2, 64, 1, 'World units per lightmap pixel. Source default is 16. Lower = sharper shadows, slower bake.', 'u'),
+      filter: select('Lightmap filter', 'linear', ['linear', 'nearest'] as const, 'linear = smooth (Source), nearest = blocky (Quake software renderer).'),
+      ambient: color('Ambient', '#1e2024', 'Flat light added everywhere. Keeps unlit corners from going pure black.'),
+      surfaceColor: color('Fluorescent colour', '#f4f1e2', 'Colour of the light the ceiling panels give off.'),
+      surfaceIntensity: num('Fluorescent intensity', 0.6, 0, 4, 0.01),
+      surfaceFifty: num('Fluorescent falloff (50%)', 144, 8, 1024, 4, 'Distance at which panel light is at half strength (Source _fifty_percent_distance).', 'u'),
+      surfaceGlow: num('Panel glow', 0.9, 0, 3, 0.05, 'How bright the panels themselves look.'),
+      lightScale: num('All lights ×', 1, 0, 4, 0.01),
+      bounces: num('Bounces', 1, 0, 2, 1, 'Passes of indirect light. The soft fill and dark corners of Source maps come from this.'),
+      bounceScale: num('Bounce strength', 1.6, 0, 4, 0.05),
+      bounceSamples: num('Bounce rays', 16, 4, 64, 1, 'Rays per luxel per bounce. More = smoother, slower.'),
+      exposure: num('Exposure', 1, 0.1, 4, 0.01, 'Overall lightmap brightness in the shader. No re-bake.'),
+    },
+  },
+  textures: {
+    label: 'Textures',
+    help: 'The texture crusher: clean CC0 photos in, 1998–2004 out. Doom ≈ density 1, 256 shared colours. HL2 ≈ density 3–4, no palette.',
+    defs: {
+      density: num('Texel density', 2, 0.25, 8, 0.25, 'Texels per world unit (inch). Doom 1, HL2 ~4.', 'px/u'),
+      maxSize: num('Max texture size', 512, 16, 2048, 16, undefined, 'px'),
+      colors: num('Colours per texture', 64, 0, 256, 1, '0 = no reduction. Low values give banding/posterised look.'),
+      sharedPalette: bool('Shared palette', false, 'All textures use one palette (Doom PLAYPAL-style), which ties everything together.'),
+      dither: num('Dither', 0, 0, 1, 0.05, 'Ordered dithering when reducing colours (PS1-ish).'),
+      contrast: num('Contrast', 1.1, 0.3, 2.5, 0.01),
+      saturation: num('Saturation', 0.85, 0, 2, 0.01),
+      brightness: num('Brightness', 1, 0.3, 2, 0.01),
+      sharpen: num('Sharpen', 0.35, 0, 2, 0.05, 'Old textures were sharpened after shrinking so they read at a distance.'),
     },
   },
   fog: {
     label: 'Fog',
     defs: {
       enabled: bool('Fog', true),
-      color: color('Fog colour', '#16181c'),
-      near: num('Fog start', 400, 0, 20000, 10, undefined, 'u'),
-      far: num('Fog end', 5000, 1, 40000, 10, undefined, 'u'),
+      color: color('Fog colour', '#121315'),
+      near: num('Fog start', 600, 0, 20000, 10, undefined, 'u'),
+      far: num('Fog end', 6000, 1, 40000, 10, undefined, 'u'),
     },
   },
   hud: {
@@ -135,20 +169,40 @@ export function diffSettings(s: Settings, base: Settings = DEFAULT_SETTINGS): Se
 }
 
 /**
- * Movement presets: a starting point, then tune from there.
- * Applying one only touches the movement values listed.
+ * Presets: a starting point, then tune from there.
+ * Applying one only touches the values it lists.
  */
-export const MOVE_PRESETS: Record<string, SettingsPatch> = {
-  'Source (HL2-ish)': {
+export const PRESETS: Record<string, SettingsPatch> = {
+  'Look: GMod / Source 2004': {
+    textures: { density: 3, colors: 0, sharedPalette: false, dither: 0, contrast: 1.05, saturation: 0.9, sharpen: 0.25, maxSize: 512 },
+    render: { internalHeight: 720, upscale: 'linear', textureFilter: 'linear' },
+    light: { luxelSize: 16, filter: 'linear', bounces: 1 },
+  },
+  'Look: Late-90s (default)': {
+    textures: { density: 2, colors: 64, sharedPalette: false, dither: 0, contrast: 1.1, saturation: 0.85, sharpen: 0.35, maxSize: 512 },
+    render: { internalHeight: 480, upscale: 'linear', textureFilter: 'nearest' },
+    light: { luxelSize: 16, filter: 'linear', bounces: 1 },
+  },
+  'Look: Doom / myhouse': {
+    textures: { density: 1, colors: 256, sharedPalette: true, dither: 0, contrast: 1.2, saturation: 1, sharpen: 0.2, maxSize: 256 },
+    render: { internalHeight: 400, upscale: 'nearest', textureFilter: 'nearest' },
+    light: { luxelSize: 16, filter: 'nearest', bounces: 1 },
+  },
+  'Look: PS1': {
+    textures: { density: 1, colors: 24, sharedPalette: false, dither: 0.6, contrast: 1.15, saturation: 1.1, sharpen: 0, maxSize: 128 },
+    render: { internalHeight: 240, upscale: 'nearest', textureFilter: 'nearest' },
+    light: { luxelSize: 32, filter: 'linear', bounces: 1 },
+  },
+  'Movement: Source (HL2-ish)': {
     move: { runSpeed: 190, walkSpeed: 110, sprintSpeed: 320, accelerate: 10, airAccelerate: 10, friction: 4, stopSpeed: 100, autoHop: false, landingFriction: false, jumpSpeedCap: 0, airWishCap: 30 },
   },
-  'CS:S': {
+  'Movement: CS:S': {
     move: { runSpeed: 250, walkSpeed: 130, sprintSpeed: 250, accelerate: 5, airAccelerate: 10, friction: 4, stopSpeed: 75, autoHop: false, landingFriction: false, jumpSpeedCap: 0, airWishCap: 30 },
   },
-  'Bhop server': {
+  'Movement: Bhop server': {
     move: { runSpeed: 260, walkSpeed: 130, sprintSpeed: 260, accelerate: 5, airAccelerate: 100, friction: 4, stopSpeed: 75, autoHop: true, landingFriction: false, jumpSpeedCap: 0, airWishCap: 30 },
   },
-  'Liminal stroll': {
+  'Movement: Liminal stroll': {
     move: { runSpeed: 140, walkSpeed: 80, sprintSpeed: 220, accelerate: 6, airAccelerate: 6, friction: 5, stopSpeed: 100, autoHop: false, landingFriction: true, jumpSpeedCap: 1, airWishCap: 30 },
   },
 };

@@ -10,7 +10,9 @@
     "test": "vitest run",
     "preview": "vite preview",
     "gen:testmap": "vite-node tools/gen-test-map.ts",
-    "build:page": "vite build --mode page && node tools/make-page.mjs"
+    "build:page": "vite build --mode page && node tools/make-page.mjs",
+    "bench:bake": "vite-node tools/bench/bake-bench.ts",
+    "fetch:textures": "python3 tools/fetch_textures.py"
   },
   "dependencies": {
     "three": "^0.187.0"

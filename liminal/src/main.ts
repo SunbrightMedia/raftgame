@@ -15,6 +15,7 @@ async function boot(): Promise<void> {
 
   const canvas = document.getElementById('view') as HTMLCanvasElement;
   const game = new Game(canvas, storage, config);
+  await game.init();
 
   const params = new URLSearchParams(location.search);
   const mapPath = params.get('map') ? `maps/${params.get('map')}.json` : DEFAULT_MAP;

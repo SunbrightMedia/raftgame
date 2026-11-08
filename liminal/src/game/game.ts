@@ -10,6 +10,7 @@ import { angleVectors } from '../engine/vec3';
 import { Input } from './input';
 import { Level } from './level';
 import { Player } from './player';
+import { Lighting } from './lighting';
 
 /**
  * Owns the play loop: fixed-rate physics ticks, per-frame mouse look,
@@ -21,10 +22,12 @@ export class Game {
   readonly textures = new TextureRegistry();
   readonly input: Input;
   readonly scene = new THREE.Scene();
+  readonly lighting = new Lighting();
   level!: Level;
   player!: Player;
   mapPath = '';
-  mapStatus = 'no map';
+  private mapLabel = 'no map';
+  get mapStatus(): string { return `${this.mapLabel} · ${this.lighting.status}`; }
   private acc = 0;
   private last = performance.now();
   onFrame: ((dt: number) => void) | null = null;
@@ -32,8 +35,29 @@ export class Game {
   constructor(canvas: HTMLCanvasElement, private storage: Storage, readonly config: ConfigStore) {
     this.renderer = new LowResRenderer(canvas);
     this.input = new Input(canvas);
-    this.applySettings(config.values);
-    config.onChange((s) => this.applySettings(s));
+    this.lighting.onBaked = (layout, tex) => {
+      if (!this.level) return;
+      this.level.setLightmap(layout, tex);
+      worldUniforms.lightmap.value = tex;
+      this.updateLightUniforms(this.settings);
+    };
+  }
+
+  /** Load textures and start reacting to settings. Call once before loading a map. */
+  async init(): Promise<void> {
+    await this.textures.init();
+    this.applySettings(this.config.values);
+    this.config.onChange((s) => this.applySettings(s));
+  }
+
+  private updateLightUniforms(s: Settings): void {
+    const lm = this.level?.lightmap;
+    worldUniforms.lightmapOn.value = s.light.enabled && lm ? 1 : 0;
+    worldUniforms.exposure.value = s.light.exposure;
+    if (lm) {
+      const f = s.light.filter === 'nearest' ? THREE.NearestFilter : THREE.LinearFilter;
+      if (lm.magFilter !== f) { lm.magFilter = lm.minFilter = f; lm.needsUpdate = true; }
+    }
   }
 
   get settings(): Settings { return this.config.values; }
@@ -43,7 +67,10 @@ export class Game {
     this.renderer.upscale = s.render.upscale as 'nearest' | 'linear';
     this.renderer.setSourceFov(s.view.fov);
     this.renderer.setClearColor(s.fog.enabled ? s.fog.color : s.render.clearColor);
-    this.textures.setFilter(s.render.textureFilter as 'nearest' | 'linear');
+    const recrushed = this.textures.setCrush(s.textures, s.render.textureFilter as 'nearest' | 'linear');
+    if (recrushed && this.level) this.level.rebuild();
+    if (this.level) this.lighting.request(this.level, s, this.textures);
+    this.updateLightUniforms(s);
     worldUniforms.faceShade.value = s.render.faceShade;
     worldUniforms.brightness.value = s.render.brightness;
     worldUniforms.fogOn.value = s.fog.enabled ? 1 : 0;
@@ -63,14 +90,16 @@ export class Game {
   setMap(map: MapFile, label: string): void {
     const level = new Level(map, this.textures);
     if (this.level) {
-      this.scene.remove(this.level.meshes);
+      this.scene.remove(this.level.root);
       this.level.dispose();
     }
     this.level = level;
-    this.scene.add(level.meshes);
+    this.scene.add(level.root);
+    worldUniforms.lightmapOn.value = 0;
+    this.lighting.request(level, this.settings, this.textures, true);
     if (this.player) this.player.setLevel(level);
     else this.player = new Player(level, this.settings);
-    this.mapStatus = `${label}: ${map.brushes.length} brushes, ${map.entities.length} entities`;
+    this.mapLabel = `${label}: ${map.brushes.length} brushes, ${map.entities.length} entities`;
   }
 
   start(): void {

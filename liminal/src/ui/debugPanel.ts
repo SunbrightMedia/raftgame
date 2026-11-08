@@ -1,5 +1,5 @@
 import type { Def, Schema } from '../data/schema';
-import { SETTINGS, DEFAULT_SETTINGS, MOVE_PRESETS, diffSettings } from '../data/settings';
+import { SETTINGS, DEFAULT_SETTINGS, PRESETS, diffSettings } from '../data/settings';
 import type { ConfigStore } from '../data/config';
 
 export interface PanelHooks {
@@ -47,11 +47,11 @@ export class DebugPanel {
       this.flash('all settings reset');
     });
     const presets = document.createElement('select');
-    presets.append(new Option('Movement preset…', ''));
-    for (const name of Object.keys(MOVE_PRESETS)) presets.append(new Option(name, name));
+    presets.append(new Option('Preset…', ''));
+    for (const name of Object.keys(PRESETS)) presets.append(new Option(name, name));
     presets.onchange = () => {
       if (!presets.value) return;
-      this.config.replace(MOVE_PRESETS[presets.value]);
+      this.config.replace(PRESETS[presets.value]);
       presets.value = '';
       this.refresh();
     };

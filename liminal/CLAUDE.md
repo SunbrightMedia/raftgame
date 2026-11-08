@@ -26,3 +26,13 @@ it *feels* right; that's the user's call.
   (`SURFACE_CLIP_EPSILON`). Together these are what stop snagging on brush seams.
 - Maps are written with `serializeMap` (one brush per line) so diffs stay readable.
 - `vite.config.ts` file API only reaches `config/`, `maps/`, `textures/`.
+- Lighting is baked (`engine/light/bake.ts`, pure, runs in a worker). The
+  renderer and the baker share one face list (`engine/light/faces.ts`); never
+  build geometry another way or lightmap UVs will disagree.
+- Textures: only CC0 or original. Never Valve/id/other games' assets, even if
+  the user asks for "the real ones"; recreate the look with the crusher.
+  Photo sources are listed in `tools/textures.sources.json` with credits.
+- `npm run build:page` + republishing the artifact gives the user a playable
+  link; do that after each milestone (same scratchpad path keeps the URL only
+  within one session; otherwise publish with the artifact's `url`:
+  https://claude.ai/artifact/8ZcuArU2M8xGFsXWTvYfWh).

@@ -56,7 +56,7 @@ function slabs(x0: number, y0: number, x1: number, y1: number, z0: number, z1: n
 }
 
 const W = 16; // wall thickness
-const WALL = 'office/wall', CARPET = 'office/carpet', CEIL = 'office/ceiling';
+const WALL = 'office/plaster', CARPET = 'office/carpet_blue', CEIL = 'office/ceiling';
 
 // ---------------------------------------------------------------- office floor
 // 1536 x 1024, 112 tall (a little too tall for a drop ceiling: on purpose).
@@ -75,8 +75,8 @@ const WALL = 'office/wall', CARPET = 'office/carpet', CEIL = 'office/ceiling';
   // Low cubicle partitions, 48 tall: you can jump on them (and walk the tops).
   for (let i = 0; i < 3; i++) {
     const x = 480 + i * 256;
-    box([x, 96, 0], [x + 8, 352, 48], 'dev/blue');
-    box([x, 96, 0], [x + 160, 104, 48], 'dev/blue');
+    box([x, 96, 0], [x + 8, 352, 48], 'office/carpet_beige', { faces: { pz: { tex: 'office/trim' } } });
+    box([x, 96, 0], [x + 160, 104, 48], 'office/carpet_beige', { faces: { pz: { tex: 'office/trim' } } });
   }
   // Baseboard trim around the room as a scale cue.
   box([X0, Y0, 0], [X1, Y0 + 2, 4], 'office/trim', { solid: false });
@@ -89,18 +89,25 @@ const WALL = 'office/wall', CARPET = 'office/carpet', CEIL = 'office/ceiling';
 // (Milestone 4 makes it longer than it should be.)
 {
   const X0 = 704, X1 = 800, Y0 = 1040, Y1 = 3088, H = 96;
-  slabs(X0 - W, Y0, X1 + W, Y1, 0, H, CARPET, CEIL);
-  wall('y', Y0, Y1, X0 - W, W, 0, H, WALL);
-  wall('y', Y0, Y1, X1, W, 0, H, WALL);
+  slabs(X0 - W, Y0, X1 + W, Y1, 0, H, 'office/carpet_yellow', 'office/ceiling_vent');
+  wall('y', Y0, Y1, X0 - W, W, 0, H, 'house/wallpaper_motif');
+  wall('y', Y0, Y1, X1, W, 0, H, 'house/wallpaper_motif');
   for (let y = Y0 + 128; y < Y1; y += 256) lightPanel(X0 + 24, y - 24, X1 - 24, y + 24, H);
   // End room.
-  const R0x = 560, R1x = 944, R0y = Y1, R1y = Y1 + 384, RH = 112;
-  slabs(R0x - W, R0y, R1x + W, R1y + W, 0, RH, CARPET, CEIL);
-  wall('x', R0x - W, R1x + W, R0y - W, W, 0, RH, WALL, [[X0, X1, H]]);
-  wall('x', R0x - W, R1x + W, R1y, W, 0, RH, WALL);
-  wall('y', R0y, R1y, R0x - W, W, 0, RH, WALL);
-  wall('y', R0y, R1y, R1x, W, 0, RH, WALL);
-  lightPanel(R0x + 160, R0y + 160, R0x + 224, R0y + 224, RH);
+  // End room: a suburban kitchen, lit by one warm lamp instead of fluorescents.
+  const R0x = 560, R1x = 944, R0y = Y1, R1y = Y1 + 384, RH = 104;
+  const PAPER = 'house/wallpaper_stripe';
+  slabs(R0x - W, R0y, R1x + W, R1y + W, 0, RH, 'house/tile_checker', 'office/plaster');
+  wall('x', R0x - W, R1x + W, R0y - W, W, 0, RH, PAPER, [[X0, X1, H]]);
+  wall('x', R0x - W, R1x + W, R1y, W, 0, RH, PAPER);
+  wall('y', R0y, R1y, R0x - W, W, 0, RH, PAPER);
+  wall('y', R0y, R1y, R1x, W, 0, RH, PAPER);
+  // Counters along the back wall, with a wood-paneled front.
+  box([R0x, R1y - 24, 0], [R1x, R1y, 36], 'house/paneling', { faces: { pz: { tex: 'house/tile_white' } } });
+  // A table in the middle.
+  box([R0x + 152, R0y + 152, 28], [R0x + 232, R0y + 232, 30], 'house/woodfloor');
+  box([R0x + 188, R0y + 188, 0], [R0x + 196, R0y + 196, 28], 'house/woodfloor');
+  entities.push({ id: 2000, class: 'light', origin: [R0x + 192, R0y + 192, RH - 14], props: { color: '#ffcf8f', intensity: 1.6, fifty: 120 } });
 }
 
 // ------------------------------------------------------------- movement test hall
@@ -112,12 +119,15 @@ const WALL = 'office/wall', CARPET = 'office/carpet', CEIL = 'office/ceiling';
 //   the rest: 2000 units of open floor for bhop / strafing
 {
   const X0 = 1552, X1 = 3600, Y0 = 0, Y1 = 1024, H = 384;
-  slabs(X0, Y0 - W, X1 + W, Y1 + W, 0, H, 'dev/floor', 'dev/gray');
-  wall('x', X0, X1 + W, Y0 - W, W, 0, H, 'dev/orange');
-  wall('x', X0, X1 + W, Y1, W, 0, H, 'dev/orange');
-  wall('y', Y0, Y1, X1, W, 0, H, 'dev/orange');
+  slabs(X0, Y0 - W, X1 + W, Y1 + W, 0, H, 'ind/concrete_floor', 'ind/concrete_forms');
+  wall('x', X0, X1 + W, Y0 - W, W, 0, H, 'ind/cinderblock');
+  wall('x', X0, X1 + W, Y1, W, 0, H, 'ind/cinderblock');
+  wall('y', Y0, Y1, X1, W, 0, H, 'ind/cinderblock');
   // The office's east wall is only 112 tall; close the hall above it.
-  box([1536, -16, 112], [1552, 1040, H], 'dev/orange');
+  box([1536, -16, 112], [1552, 1040, H], 'ind/cinderblock');
+  // Cold work lights up in the rafters.
+  let lid = 3000;
+  for (let x = 1800; x < X1; x += 512) for (const y of [256, 768]) entities.push({ id: lid++, class: 'light', origin: [x, y, H - 24], props: { color: '#dde6f0', intensity: 2.6, fifty: 300, emit: 'down' } });
 
   // Step tests.
   const steps = [8, 16, 18, 20, 24];
@@ -134,12 +144,12 @@ const WALL = 'office/wall', CARPET = 'office/carpet', CEIL = 'office/ceiling';
   for (let i = 0; i < 3; i++) box([2784 + i * 24, 384, 0], [2784 + (i + 1) * 24, 640, 64 - (i + 1) * 16], 'dev/white');
 
   // Crawlspace: 256 long, 48 tall. You must crouch to get through.
-  box([3000, 768, 48], [3256, 896, 64], 'dev/orange'); // roof
-  box([3000, 752, 0], [3256, 768, 64], 'dev/orange');
-  box([3000, 896, 0], [3256, 912, 64], 'dev/orange');
+  box([3000, 768, 48], [3256, 896, 64], 'ind/metal_corrugated'); // roof
+  box([3000, 752, 0], [3256, 768, 64], 'ind/metal_corrugated');
+  box([3000, 896, 0], [3256, 912, 64], 'ind/metal_corrugated');
 
   // A low wall to vault and a ledge to slide along.
-  box([3300, 64, 0], [3316, 640, 40], 'dev/gray');
+  box([3300, 64, 0], [3316, 640, 40], 'ind/diamondplate');
 }
 
 entities.push({ id: 1000, class: 'player_start', origin: [160, 512, 0], angles: [0, 0, 0] });
