@@ -152,10 +152,12 @@ export class TextureRegistry {
     const t = new THREE.CanvasTexture(canvas);
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
     t.colorSpace = THREE.NoColorSpace;
-    t.anisotropy = 4;
+    // Anisotropic + trilinear minification: walls seen at a steep angle stay
+    // smooth instead of breaking into shimmering dot grids. Magnification
+    // (up close) still honours the nearest/linear choice, so texels stay crisp.
+    t.anisotropy = 16;
     t.magFilter = this.filter === 'nearest' ? THREE.NearestFilter : THREE.LinearFilter;
-    // Mipmaps stop distant floors shimmering; nearest-within-mip keeps texels crisp up close.
-    t.minFilter = this.filter === 'nearest' ? THREE.NearestMipmapLinearFilter : THREE.LinearMipmapLinearFilter;
+    t.minFilter = THREE.LinearMipmapLinearFilter;
     return { name, texture: t, worldW: src.worldW, worldH: src.worldH, material: src.material, emissive: src.emissive, albedo: averageColor(px) };
   }
 

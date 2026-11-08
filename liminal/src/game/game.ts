@@ -65,6 +65,7 @@ export class Game {
   applySettings(s: Settings): void {
     this.renderer.internalHeight = Math.round(s.render.internalHeight);
     this.renderer.upscale = s.render.upscale as 'nearest' | 'linear';
+    this.renderer.msaa = s.render.msaa;
     this.renderer.setSourceFov(s.view.fov);
     this.renderer.setClearColor(s.fog.enabled ? s.fog.color : s.render.clearColor);
     const recrushed = this.textures.setCrush(s.textures, s.render.textureFilter as 'nearest' | 'linear');

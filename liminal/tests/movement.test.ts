@@ -52,13 +52,14 @@ describe('walls', () => {
   const wall = boxBrush(2, v3(200, -1000, 0), v3(216, 1000, 200));
   it('stops at a wall', () => {
     const { ps } = sim(floorWorld(wall), 200, cmd({ forward: 1 }));
-    expect(ps.origin.x).toBeLessThan(200 - 16);
-    expect(ps.origin.x).toBeGreaterThan(200 - 16 - 1);
+    const half = DEFAULT_MOVE.hullWidth / 2;
+    expect(ps.origin.x).toBeLessThan(200 - half);
+    expect(ps.origin.x).toBeGreaterThan(200 - half - 1);
   });
   it('slides along a wall when moving diagonally into it', () => {
     const { ps } = sim(floorWorld(wall), 200, cmd({ forward: 1, side: -1 })); // yaw 0: forward=+x, left=+y
     expect(ps.origin.y).toBeGreaterThan(300);
-    expect(ps.origin.x).toBeLessThan(200 - 16);
+    expect(ps.origin.x).toBeLessThan(200 - DEFAULT_MOVE.hullWidth / 2);
   });
 });
 

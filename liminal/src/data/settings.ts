@@ -68,6 +68,7 @@ export const SETTINGS = {
     help: 'The full look panel (grading, grain, bloom) arrives in Milestone 3.',
     defs: {
       internalHeight: num('Internal resolution (lines)', 480, 0, 2160, 1, 'The game renders this many lines tall and upscales. 0 = native.', 'px'),
+      msaa: num('Antialiasing (MSAA)', 4, 0, 8, 1, 'Multisample antialiasing on the internal render: smooths jagged geometry edges. 0 = off (crunchier), 4 = smooth.', 'x'),
       upscale: select('Upscale filter', 'linear', ['nearest', 'linear'] as const, 'nearest = crunchy pixels, linear = soft CRT-ish.'),
       faceShade: num('Fullbright face shading', 0.6, 0, 1, 0.01, 'Fake per-face shading used only when baked lighting is off. 0 = flat, 1 = strong.'),
       brightness: num('Brightness', 1, 0, 3, 0.01),
