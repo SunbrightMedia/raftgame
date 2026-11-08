@@ -1,0 +1,24 @@
+{
+  "name": "liminal",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "preview": "vite preview",
+    "gen:testmap": "vite-node tools/gen-test-map.ts"
+  },
+  "dependencies": {
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/three": "^0.187.0",
+    "typescript": "~5.9.3",
+    "vite": "^6.4.5",
+    "vitest": "^3.2.7"
+  }
+}
