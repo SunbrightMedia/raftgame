@@ -36,3 +36,5 @@ it *feels* right; that's the user's call.
   link; do that after each milestone (same scratchpad path keeps the URL only
   within one session; otherwise publish with the artifact's `url`:
   https://claude.ai/artifact/8ZcuArU2M8xGFsXWTvYfWh).
+- **Movement rework is planned: take heavily from GZDoom** (the user's call).
+  Until then the Source-style pmove stays as is; don't tune it piecemeal.

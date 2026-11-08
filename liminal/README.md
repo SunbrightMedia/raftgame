@@ -193,6 +193,7 @@ config/  maps/  textures/   data on disk (the dev server's /api/file only reache
 3. **Look pass** ✅ (pulled forward): baked lightmaps with bounce, surface lights, CC0 photo textures + live crusher, look presets.
    Still to come in the feel pass: post (grading, grain, vignette, bloom), per-map look overrides,
    ambient loops, reverb zones, per-material footsteps.
+- **Movement rework (later):** based heavily on GZDoom's movement rather than Source's.
 4. **Impossible geometry**: seamless teleporters, render-to-texture portals, world state flags/counters, conditional groups.
 5. Wedges/convex brushes, desktop build (Tauri).
 
