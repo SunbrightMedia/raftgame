@@ -6,6 +6,7 @@ in the tweak panel, or change the default back in code).
 
 | date | setting | old → new | why |
 |---|---|---|---|
+| 2026-11-08 | Camera › Lamp glow (new) / Overexposed surfaces keep colour | 8 / 0.85 → 0.6 | Panels had lost their glow; neon carpet may whiten a little |
 | 2026-11-08 | Camera › White balance tint; Overexposed surfaces keep colour | (new) 0; (new) 0.85 | Per-map colour cast; neon carpet went white under light |
 | 2026-11-08 | Lighting › Remaining bounces | (new) 1 | Rooms take on the colour of their own surfaces (user) |
 | 2026-11-08 | pmp_basement map › White balance / tint | 4300 K / 0 → 3300 K / +1.0 | Match the reference photo's pink cast (wall ratio 1 : 0.87 : 0.78 vs photo 1 : 0.89 : 0.80) |

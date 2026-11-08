@@ -54,6 +54,7 @@ export interface CameraParams {
   rolloff: number;
   blackStretch: number;
   surfaceHue: number;
+  lampGlow: number;
   tint: number;
   fisheye: number;
   banding: number;
@@ -107,8 +108,10 @@ export class Digicam {
       }`, { src: { value: null }, cell: { value: new THREE.Vector2(1 / METER_W, 1 / METER_H) } });
     // Jimenez 2014 13-tap downsample: five overlapping 2×2 boxes, weighted.
     this.downPass = pass(/* glsl */ `
-      uniform sampler2D src; uniform vec2 texel; uniform float karis; varying vec2 vUv;
-      vec3 s(vec2 o) { return min(texture2D(src, vUv + o * texel).rgb, vec3(60000.0)); }
+      uniform sampler2D src; uniform vec2 texel; uniform float karis, srcBoost; varying vec2 vUv;
+      // First level: light sources (alpha 1) count srcBoost× more, so lamps and
+      // panels glow without every bright wall glowing too.
+      vec3 s(vec2 o) { vec4 t = texture2D(src, vUv + o * texel); return min(t.rgb * (1.0 + srcBoost * t.a * karis), vec3(60000.0)); }
       float w(vec3 c) { return karis > 0.5 ? 1.0 / (1.0 + dot(c, vec3(0.2126, 0.7152, 0.0722)) * 0.02) : 1.0; }
       vec3 box(vec3 a, vec3 b, vec3 c, vec3 d) {
         // Karis average on the first level: luminance-weighted so a single very
@@ -124,7 +127,7 @@ export class Digicam {
         vec3 r = box(j, k, l, m) * 0.5
                + (box(a, b, d, e) + box(b, c, e, f) + box(d, e, g, h) + box(e, f, h, i)) * 0.125;
         gl_FragColor = vec4(r, 1.0);
-      }`, { src: { value: null }, texel: { value: new THREE.Vector2() }, karis: { value: 0 } });
+      }`, { src: { value: null }, texel: { value: new THREE.Vector2() }, karis: { value: 0 }, srcBoost: { value: 0 } });
     // 3×3 tent upsample of the coarser level, added to this level: the sum of
     // all levels approximates the lens's sharp-core-long-tail spread.
     this.upPass = pass(/* glsl */ `
@@ -365,7 +368,7 @@ export class Digicam {
       let input: THREE.WebGLRenderTarget = src;
       for (let i = 0; i < GLARE_LEVELS; i++) {
         const u = this.downPass.mat.uniforms;
-        u.src.value = input.texture; u.texel.value.set(1 / input.width, 1 / input.height); u.karis.value = i === 0 ? 1 : 0;
+        u.src.value = input.texture; u.texel.value.set(1 / input.width, 1 / input.height); u.karis.value = i === 0 ? 1 : 0; u.srcBoost.value = p.lampGlow;
         gl.setRenderTarget(this.down[i]); gl.render(this.downPass.scene, this.cam);
         input = this.down[i];
       }
