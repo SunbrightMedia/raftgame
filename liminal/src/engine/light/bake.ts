@@ -45,6 +45,14 @@ export interface BakeParams {
   surfaceFifty: number;
   /** Glow drawn on the emitting surface itself (lightmap value). */
   surfaceGlow: number;
+  /**
+   * Ambient occlusion: how much light is lost where surfaces close in
+   * (wall-floor junctions, under furniture, inside corners). Uses the first
+   * bounce pass's rays, so it needs bounces >= 1.
+   */
+  aoStrength?: number;
+  /** Distance within which nearby surfaces count as occluding. */
+  aoRadius?: number;
 }
 
 /** Shadow casters: every solid brush as a convex plane set. */
@@ -82,6 +90,8 @@ interface FaceSamples {
   valid: Uint8Array;
   direct: Float32Array;
   total: Float32Array;
+  /** Ambient occlusion per luxel (3 channels, all equal), 1 = open. */
+  ao: Float32Array;
   emitting: boolean;
 }
 
@@ -131,7 +141,7 @@ export function bake(input: BakeInput): BakeOutput {
       face: f, rect,
       stepS: f.width / (rect.w - 1), stepT: f.height / (rect.h - 1),
       pos: new Float64Array(n * 3), valid: new Uint8Array(n),
-      direct: new Float32Array(n * 3), total: new Float32Array(n * 3),
+      direct: new Float32Array(n * 3), total: new Float32Array(n * 3), ao: new Float32Array(n * 3).fill(1),
       emitting: !!input.emissive[f.tex],
     };
     for (let j = 0; j < rect.h; j++) {
@@ -220,7 +230,8 @@ export function bake(input: BakeInput): BakeOutput {
         const px = fs.pos[k * 3], py = fs.pos[k * 3 + 1], pz = fs.pos[k * 3 + 2];
         const rot = hash(k * 7919 + f.id * 104729) * Math.PI * 2;
         const cr = Math.cos(rot), sr = Math.sin(rot);
-        let r = 0, g = 0, b = 0;
+        let r = 0, g = 0, b = 0, occ = 0;
+        const aoR = p.aoRadius ?? 24;
         for (const [a, c, h] of dirs) {
           const x = a * cr - c * sr, y = a * sr + c * cr; // rotate around the normal
           const dx = f.r[0] * x + f.u[0] * y + f.n[0] * h;
@@ -228,6 +239,8 @@ export function bake(input: BakeInput): BakeOutput {
           const dz = f.r[2] * x + f.u[2] * y + f.n[2] * h;
           const hit = castRay(boxes, px, py, pz, dx * 4096, dy * 4096, dz * 4096);
           if (!hit) continue;
+          const dist = hit.t * 4096;
+          if (pass === 0 && dist < aoR) occ += 1 - dist / aoR;
           const hs = byId.get(hit.faceId);
           if (!hs) continue;
           const v = lookup(hs, px + dx * 4096 * hit.t, py + dy * 4096 * hit.t, pz + dz * 4096 * hit.t);
@@ -237,8 +250,13 @@ export function bake(input: BakeInput): BakeOutput {
         out[k * 3] = (r / dirs.length) * p.bounceScale;
         out[k * 3 + 1] = (g / dirs.length) * p.bounceScale;
         out[k * 3 + 2] = (b / dirs.length) * p.bounceScale;
+        if (pass === 0) {
+          const ao = Math.max(0, 1 - (p.aoStrength ?? 0) * Math.min(1, (occ / dirs.length) * 2.2));
+          fs.ao[k * 3] = fs.ao[k * 3 + 1] = fs.ao[k * 3 + 2] = ao;
+        }
       }
       fillSkipped(out, rw, rh, fs.valid, onGrid);
+      if (pass === 0) fillSkipped(fs.ao, rw, rh, fs.valid, onGrid);
     }
     // Next pass bounces what this one gathered.
     for (const fs of samples) {
@@ -251,14 +269,20 @@ export function bake(input: BakeInput): BakeOutput {
   const pixels = new Uint8ClampedArray(input.width * input.height * 4);
   for (const fs of samples) {
     dilate(fs, fs.total);
+    dilate(fs, fs.direct);
+    dilate(fs, fs.ao);
     const { rect } = fs;
     for (let j = 0; j < rect.h; j++) {
       for (let i = 0; i < rect.w; i++) {
         const k = j * rect.w + i;
         const o = ((rect.y + j) * input.width + rect.x + i) * 4;
-        pixels[o] = ((fs.total[k * 3] + p.ambient[0]) / 2) * 255;
-        pixels[o + 1] = ((fs.total[k * 3 + 1] + p.ambient[1]) / 2) * 255;
-        pixels[o + 2] = ((fs.total[k * 3 + 2] + p.ambient[2]) / 2) * 255;
+        // Occlusion darkens indirect and ambient light fully, direct light a little
+        // (contact shadows in corners and under furniture).
+        const ao = fs.ao[k * 3], aoDirect = 1 - (1 - ao) * 0.35;
+        for (let c = 0; c < 3; c++) {
+          const direct = fs.direct[k * 3 + c], indirect = fs.total[k * 3 + c] - direct;
+          pixels[o + c] = ((direct * aoDirect + (indirect + p.ambient[c]) * ao) / 2) * 255;
+        }
         pixels[o + 3] = 255;
       }
     }

@@ -55,6 +55,13 @@ the user having to say them again.
 - Prefer real 3D models (CC0) for organic or complex things (plants,
   sofas, chairs) once model loading exists.
 
+**Get it right before the camera** (user: very important)
+- Everything *before* post-processing (geometry, materials, lighting,
+  occlusion) must already be as close to the reference photos as possible.
+  The digicam pass only adds the medium on top; it must never be used to
+  hide a wrong material, wrong light or wrong shape. Judge rooms with the
+  camera pass off first.
+
 **Materials that are approved**
 - The plush carpet (soft haze with gentle mottling, recoloured per room)
   is good. Reuse it for any wall-to-wall carpet.
@@ -144,6 +151,30 @@ the user having to say them again.
 - **Chrome bar stools with burgundy vinyl seats.** (claude, confirmed)
 - **Rooms are under-furnished:** few objects, lots of floor. Emptiness is
   part of the feel. (claude, confirmed: "amazing")
+
+## The medium: early-2000s consumer digital cameras
+
+From the user's reference set (Postmodern Palace posts). The feel is
+inseparable from how these photos were taken (2001–2006 point-and-shoots):
+
+- **Low dynamic range.** Lamps, skylights, fluorescent panels and windows
+  clip to flat cream-white, and the clipped area bleeds a soft glow.
+- **Purple/blue fringing** where blown highlights meet dark edges
+  (skylight mullions, window frames).
+- **Wrong auto white balance.** Tungsten rooms go amber-orange; fluorescent
+  rooms take a yellow-green cast over everything.
+- **Noise reduction + JPEG:** fine texture (carpet) smears into blotches,
+  smooth walls band into steps.
+- **In-camera oversharpening** gives thin halos on edges, on an image that's
+  otherwise soft.
+- **Shadows:** chroma noise, lifted milky blacks; mild corner vignetting.
+- Built as the **Camera (digicam look)** settings: everything tunable,
+  never a VHS filter.
+
+Also seen in the set: atria with sloped skylights, long armless modular
+sofas in teal velour, trophy cases, vertical blinds over night city views,
+ceramic table lamps glowing on half-walls, wood paneling with ceiling
+coves, banquet-room patterned carpet.
 
 ## The photograph itself
 

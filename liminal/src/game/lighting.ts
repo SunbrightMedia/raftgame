@@ -85,6 +85,8 @@ export class Lighting {
         surfaceSpacing: 32,
         surfaceFifty: L.surfaceFifty,
         surfaceGlow: L.surfaceGlow,
+        aoStrength: L.aoStrength,
+        aoRadius: L.aoRadius,
       },
     };
     this.status = 'baking…';

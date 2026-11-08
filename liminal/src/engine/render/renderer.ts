@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Digicam, type DigicamParams } from './digicam';
 
 THREE.ColorManagement.enabled = false;
 THREE.Object3D.DEFAULT_UP.set(0, 0, 1);
@@ -18,6 +19,9 @@ export class LowResRenderer {
   internalHeight = 480;
   /** MSAA samples on the internal render (0 = off). Smooths geometry edges. */
   msaa = 4;
+  /** The early-digital-camera pass; null = plain upscale. */
+  camera_: DigicamParams | null = null;
+  private digicam = new Digicam();
   upscale: 'nearest' | 'linear' = 'linear';
   /** Size actually rendered last frame, for the HUD. */
   readonly renderSize = new THREE.Vector2();
@@ -62,13 +66,18 @@ export class LowResRenderer {
     if (!this.target || this.target.width !== iw || this.target.height !== ih || this.target.texture.magFilter !== filter || this.target.samples !== samples) {
       this.target?.dispose();
       this.target = new THREE.WebGLRenderTarget(iw, ih, {
-        depthBuffer: true, colorSpace: THREE.NoColorSpace, magFilter: filter, minFilter: filter, generateMipmaps: false, samples,
+        // Half-float keeps values above white, so the camera pass can bloom and clip them.
+        depthBuffer: true, colorSpace: THREE.NoColorSpace, magFilter: filter, minFilter: filter, generateMipmaps: false, samples, type: THREE.HalfFloatType,
       });
       this.blitMat.map = this.target.texture;
       this.blitMat.needsUpdate = true;
     }
     this.gl.setRenderTarget(this.target);
     this.gl.render(scene, this.camera);
+    if (this.camera_?.enabled) {
+      this.digicam.render(this.gl, this.target, null, this.camera_);
+      return;
+    }
     this.gl.setRenderTarget(null);
     this.gl.render(this.blitScene, this.blitCam);
   }

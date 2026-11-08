@@ -223,28 +223,51 @@ const DEFS: Record<string, Def> = {
       noise(g, w, h, rnd, 5);
     },
   },
-  // Fake laminate marble: printed soft grey veining on off-white. Bar and counter tops.
+  // Fake LAMINATE marble (Formica-style), not stone: a flat printed photo of
+  // marble. Warm off-white, soft low-contrast veining, fine print grain, and
+  // a small repeat you can spot across a long counter. Satin, not polished.
   'house/laminate_marble': {
-    px: [256, 256], world: [48, 48], material: 'tile',
+    px: [256, 256], world: [24, 24], material: 'laminate', raw: true,
     paint: (g, w, h, rnd) => {
-      g.fillStyle = '#e8e6df'; g.fillRect(0, 0, w, h);
-      for (let k = 0; k < 14; k++) {
-        let x = rnd() * w, y = rnd() * h, a = rnd() * Math.PI;
+      const cloud = valueNoise(w, h, 6, rnd), cloud2 = valueNoise(w, h, 18, rnd);
+      const img = g.createImageData(w, h);
+      for (let i = 0; i < w * h; i++) {
+        const v = (cloud[i] - 0.5) * 10 + (cloud2[i] - 0.5) * 6;
+        img.data[i * 4] = 232 + v; img.data[i * 4 + 1] = 225 + v; img.data[i * 4 + 2] = 212 + v * 0.9; img.data[i * 4 + 3] = 255;
+      }
+      g.putImageData(img, 0, 0);
+      // Soft printed veins: faint, blurry, mostly one direction.
+      g.filter = 'blur(1.2px)';
+      for (let k = 0; k < 9; k++) {
+        let x = rnd() * w, y = rnd() * h, a = -0.5 + (rnd() - 0.5) * 0.6;
         const pts: [number, number][] = [[x, y]];
-        for (let i = 0; i < 18; i++) {
-          a += (rnd() - 0.5) * 0.9; x += Math.cos(a) * 14; y += Math.sin(a) * 14;
-          pts.push([x, y]);
-        }
-        g.strokeStyle = `rgba(${120 + rnd() * 40},${120 + rnd() * 40},${125 + rnd() * 40},${0.12 + rnd() * 0.25})`;
-        g.lineWidth = 0.6 + rnd() * 2.2;
-        // Draw the vein at every wrapped offset so the texture tiles.
+        for (let i = 0; i < 16; i++) { a += (rnd() - 0.5) * 0.7; x += Math.cos(a) * 12; y += Math.sin(a) * 12; pts.push([x, y]); }
+        g.strokeStyle = `rgba(150,140,130,${0.10 + rnd() * 0.14})`;
+        g.lineWidth = 0.8 + rnd() * 2.5;
         for (const ox of [-w, 0, w]) for (const oy of [-h, 0, h]) {
           g.beginPath();
           pts.forEach(([px, py], i) => (i ? g.lineTo(px + ox, py + oy) : g.moveTo(px + ox, py + oy)));
           g.stroke();
         }
       }
-      noise(g, w, h, rnd, 6);
+      g.filter = 'none';
+      // Print grain: tiny warm-grey dots, the giveaway that it's a printed sheet.
+      for (let k = 0; k < 2200; k++) {
+        g.fillStyle = `rgba(${120 + rnd() * 50},${110 + rnd() * 40},${100 + rnd() * 30},${0.12 + rnd() * 0.2})`;
+        g.fillRect(Math.floor(rnd() * w), Math.floor(rnd() * h), 1, 1);
+      }
+    },
+  },
+  // The laminate edge strip on a counter's front: same print, slightly darker,
+  // with the thin dark seam line where the edge strip meets the top.
+  // Map it so v=0 is the bottom of the 1.5" edge (offset [0, -z0]).
+  'house/laminate_edge': {
+    px: [256, 16], world: [24, 1.5], material: 'laminate', raw: true,
+    paint: (g, w, h, rnd) => {
+      g.fillStyle = '#ddd5c6'; g.fillRect(0, 0, w, h);
+      noise(g, w, h, rnd, 8);
+      g.fillStyle = '#5a4636'; g.fillRect(0, 0, w, 1);      // seam at the top (canvas row 0 = v 1)
+      g.fillStyle = 'rgba(90,70,54,0.35)'; g.fillRect(0, 1, w, 1);
     },
   },
   // Very orange stained veneer (maple/oak), vertical grain. 24" × 48" repeat.

@@ -61,9 +61,15 @@ function arcBand(cx: number, cy: number, rIn: number, rOut: number, a0: number, 
     const dir = [(o1[0] - o0[0]) / chord, (o1[1] - o0[1]) / chord];
     // Mesh UVs use the world projection onto the face's direction; shift it so u = distance around the curve.
     const off = along - (o0[0] * dir[0] + o0[1] * dir[1]);
-    prism([p(rIn, t0), o0, o1, p(rIn, t1)], z0, z1, tex, { faces: { ...faces, side1: { ...(faces.side ?? {}), ...(faces.side1 ?? {}), offset: [off, 0] } } });
+    prism([p(rIn, t0), o0, o1, p(rIn, t1)], z0, z1, tex, { faces: { ...faces, side1: { ...(faces.side ?? {}), ...(faces.side1 ?? {}), offset: [off, faces.side?.offset?.[1] ?? 0] } } });
     along += chord;
   }
+}
+
+/** A laminate counter top: printed top, edge strip with its seam line on every side. */
+function counterTop(min: V3, max: V3): void {
+  const edge = { tex: 'house/laminate_edge', offset: [0, -min[2]] as [number, number] };
+  box(min, max, 'house/laminate_marble', { faces: { px: edge, nx: edge, py: edge, ny: edge } });
 }
 
 /** Room trim: white baseboards along the inside of a rectangle, skipping gaps (openings). */
@@ -257,15 +263,15 @@ function casingY(o0: number, o1: number, height: number, faceX: number, dir: 1 |
   box([120, 404, 0], [156, 420, 84], WOOD, { faces: { ny: { tex: 'house/cabinet_glass', offset: [-120, 0] } } });
   // Kitchenette run in the back-right corner.
   box([200, 396, 0], [300, 420, 35], WOOD);
-  box([200, 394, 35], [300, 420, 36.5], MARBLE);
+  counterTop([200, 394, 35], [300, 420, 36.5]);
   box([200, 408, 54], [300, 420, 86], WOOD);
 
   // Curved L-shaped bar, its curve facing the openings, stools on that side.
   const bx = 214, by = 336;
   arcBand(bx, by, 40, 64, 180, 360, 10, 0, 40, 'pmp/bar_front');
-  arcBand(bx, by, 38, 67, 180, 360, 10, 40, 41.5, MARBLE);
+  arcBand(bx, by, 38, 67, 180, 360, 10, 40, 41.5, MARBLE, { side: { tex: 'house/laminate_edge', offset: [0, -40] } });
   box([254, by, 0], [278, 380, 40], 'pmp/bar_front');
-  box([252, by, 40], [281, 383, 41.5], MARBLE);
+  counterTop([252, by, 40], [281, 383, 41.5]);
   for (const a of [210, 245, 280, 315]) {
     const sx = bx + 84 * Math.cos(deg(a)), sy = by + 84 * Math.sin(deg(a));
     prism(circle(sx, sy, 8, 12), 0, 1, 'fixture/chrome');
@@ -280,7 +286,9 @@ writeFileSync(new URL('../maps/pmp_basement.json', import.meta.url), serializeMa
   format: MAP_FORMAT, version: MAP_VERSION, name: 'pmp_basement', brushes, entities,
   // This room's mood (STYLE.md: residential = moody and warm, never sterile).
   settings: {
-    light: { ambient: '#0e0b09', bounceScale: 1.35, exposure: 1.0 },
+    light: { ambient: '#0e0b09', bounceScale: 1.35, exposure: 1.0, luxelSize: 8 },
+    // A tungsten-lit basement: the camera's auto white balance leaves it amber.
+    camera: { whiteBalance: '#ffe6c4' },
     fog: { enabled: true, color: '#140e0a', near: 120, far: 2600 },
   },
 }));
