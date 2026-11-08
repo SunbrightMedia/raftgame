@@ -36,3 +36,19 @@ export function boxBrush(id: number, min: Vec3, max: Vec3, material = 'default')
     ],
   };
 }
+
+/**
+ * Any convex brush from its planes. Axis-aligned "bevel" planes at the bounds
+ * are added (they don't change the shape) so sweeping a box past a slanted
+ * side doesn't catch on corners, the trick Quake 3 uses.
+ */
+export function convexBrush(id: number, planes: Plane[], min: Vec3, max: Vec3, material = 'default'): CollisionBrush {
+  const bevels: Plane[] = [
+    { n: v3(1, 0, 0), d: max.x }, { n: v3(-1, 0, 0), d: -min.x },
+    { n: v3(0, 1, 0), d: max.y }, { n: v3(0, -1, 0), d: -min.y },
+    { n: v3(0, 0, 1), d: max.z }, { n: v3(0, 0, -1), d: -min.z },
+  ];
+  const isAxial = (p: Plane) => Math.abs(p.n.x) + Math.abs(p.n.y) + Math.abs(p.n.z) > 0.9999 && [p.n.x, p.n.y, p.n.z].filter((c) => Math.abs(c) > 1e-9).length === 1;
+  const extra = bevels.filter((b) => !planes.some((p) => isAxial(p) && p.n.x === b.n.x && p.n.y === b.n.y && p.n.z === b.n.z));
+  return { id, material, min: { ...min }, max: { ...max }, planes: [...planes, ...extra] };
+}

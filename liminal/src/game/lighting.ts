@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import BakeWorker from '../engine/light/bake.worker?worker&inline';
 import type { BakeInput, BakeLight, BakeOutput, RGB } from '../engine/light/bake';
-import { layoutLightmap, type LightmapLayout } from '../engine/light/faces';
+import { layoutLightmap, solidPlanes, type LightmapLayout } from '../engine/light/faces';
 import type { TextureRegistry } from '../engine/render/textures';
 import type { Settings } from '../data/settings';
 import type { Level } from './level';
@@ -62,7 +62,8 @@ export class Lighting {
       const intensity = typeof p.intensity === 'number' ? p.intensity : 1;
       const fifty = typeof p.fifty === 'number' ? p.fifty : 128;
       // "emit": "down" makes a Lambertian downlight (work lights, recessed cans) instead of a bare bulb.
-      const dir = p.emit === 'down' ? ([0, 0, -1] as [number, number, number]) : undefined;
+      // "emit": "up" for cove lights hidden on a soffit, washing the ceiling.
+      const dir = p.emit === 'down' ? ([0, 0, -1] as [number, number, number]) : p.emit === 'up' ? ([0, 0, 1] as [number, number, number]) : undefined;
       return { pos: e.origin, color: [c[0] * intensity, c[1] * intensity, c[2] * intensity], fifty, range: typeof p.range === 'number' ? p.range : fifty * 6, dir };
     });
 
@@ -71,7 +72,7 @@ export class Lighting {
       width: layout.width,
       height: layout.height,
       rects: [...layout.rects],
-      boxes: level.map.brushes.filter((b) => b.solid !== false).map((b) => ({ brushId: b.id, min: b.min, max: b.max })),
+      boxes: level.map.brushes.filter((b) => b.solid !== false).map(solidPlanes),
       lights,
       emissive,
       albedo,

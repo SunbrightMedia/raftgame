@@ -12,7 +12,8 @@
     "gen:testmap": "vite-node tools/gen-test-map.ts",
     "build:page": "vite build --mode page && node tools/make-page.mjs",
     "bench:bake": "vite-node tools/bench/bake-bench.ts",
-    "fetch:textures": "python3 tools/fetch_textures.py"
+    "fetch:textures": "python3 tools/fetch_textures.py",
+    "gen:pmp": "vite-node tools/gen-pmp-basement.ts"
   },
   "dependencies": {
     "three": "^0.187.0"

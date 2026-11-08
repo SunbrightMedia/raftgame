@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import type { MapFile } from '../data/map';
 import { CollisionWorld } from '../engine/collision/trace';
-import { boxBrush } from '../engine/collision/brush';
+import { convexBrush } from '../engine/collision/brush';
 import { buildFaceMeshes, disposeGroup } from '../engine/render/brushMesh';
 import type { TextureRegistry } from '../engine/render/textures';
-import { buildFaces, type Face, type LightmapLayout } from '../engine/light/faces';
+import { buildFaces, solidPlanes, type Face, type LightmapLayout } from '../engine/light/faces';
 import { type Vec3, v3 } from '../engine/vec3';
 
 /** A map turned into things the engine uses: collision, faces, render meshes, spawn. */
@@ -21,7 +21,10 @@ export class Level {
     this.collision = new CollisionWorld(
       map.brushes
         .filter((b) => b.solid !== false)
-        .map((b) => boxBrush(b.id, v3(...b.min), v3(...b.max), b.material ?? 'default')),
+        .map((b) => {
+          const sp = solidPlanes(b);
+          return convexBrush(b.id, sp.planes.map((p) => ({ n: v3(...p.n), d: p.d })), v3(...b.min), v3(...b.max), b.material ?? 'default');
+        }),
     );
     this.faces = buildFaces(map.brushes);
     const start = map.entities.find((e) => e.class === 'player_start');

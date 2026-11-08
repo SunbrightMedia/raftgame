@@ -31,6 +31,8 @@ interface Source {
   credit?: string;
 }
 
+interface Variant { name: string; from: string; color: string; contrast?: number }
+
 interface ManifestEntry { name: string; file: string; size: [number, number]; material?: string; credit?: string; pixelart?: boolean }
 
 /**
@@ -44,6 +46,7 @@ interface ManifestEntry { name: string; file: string; size: [number, number]; ma
  */
 export class TextureRegistry {
   private sources = new Map<string, Source>();
+  private variants = new Map<string, Variant>();
   private entries = new Map<string, TexEntry>();
   private filter: 'nearest' | 'linear' = 'nearest';
   private params: CrushParams | null = null;
@@ -55,6 +58,8 @@ export class TextureRegistry {
     const urls = import.meta.glob('../../../textures/**/*.{png,jpg,jpeg}', { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
     const manifests = import.meta.glob('../../../textures/index.json', { eager: true, import: 'default' }) as Record<string, { textures: ManifestEntry[] }>;
     const manifest = Object.values(manifests)[0]?.textures ?? [];
+    const variantFiles = import.meta.glob('../../../textures/variants.json', { eager: true, import: 'default' }) as Record<string, { variants: Variant[] }>;
+    for (const v of Object.values(variantFiles)[0]?.variants ?? []) this.variants.set(v.name, v);
     const byFile = new Map(manifest.map((m) => [m.file, m]));
 
     for (const n of devTextureNames()) {
@@ -79,7 +84,9 @@ export class TextureRegistry {
 
   /** Decode the images for these textures (call before building meshes that use them). */
   async prepare(names: Iterable<string>): Promise<void> {
-    await Promise.all([...new Set(names)].map(async (n) => {
+    const all = new Set<string>();
+    for (const n of names) { all.add(n); const v = this.variants.get(n); if (v) all.add(v.from); }
+    await Promise.all([...all].map(async (n) => {
       const src = this.sources.get(n);
       if (!src || src.image || !src.url) return;
       try {
@@ -100,11 +107,15 @@ export class TextureRegistry {
   }
 
   names(): string[] {
-    return [...this.sources.keys()].filter((n) => n !== 'missing').sort();
+    return [...this.sources.keys(), ...this.variants.keys()].filter((n) => n !== 'missing').sort();
   }
 
   get(name: string): TexEntry {
     let e = this.entries.get(name);
+    if (!e && this.variants.has(name)) {
+      e = this.buildVariant(this.variants.get(name)!);
+      this.entries.set(name, e);
+    }
     if (!e) {
       const src = this.sources.get(name);
       e = this.build(src?.image ? src : this.sources.get('missing')!, name);
@@ -128,6 +139,37 @@ export class TextureRegistry {
   }
 
   private sharedPalette: Palette | null = null;
+
+  /** Recolour a texture: keep its detail (luminance), move its average colour to `color`. */
+  private buildVariant(v: Variant): TexEntry {
+    const base = this.get(v.from);
+    const src = base.texture.image as HTMLCanvasElement;
+    const canvas = document.createElement('canvas');
+    canvas.width = src.width; canvas.height = src.height;
+    const g = canvas.getContext('2d', { willReadFrequently: true })!;
+    g.drawImage(src, 0, 0);
+    const img = g.getImageData(0, 0, canvas.width, canvas.height);
+    const d = img.data;
+    let mean = 0;
+    for (let i = 0; i < d.length; i += 4) mean += 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+    mean = Math.max(1, mean / (d.length / 4));
+    const n = parseInt(v.color.slice(1), 16);
+    const tr = (n >> 16) & 255, tg = (n >> 8) & 255, tb = n & 255;
+    const k = v.contrast ?? 1;
+    for (let i = 0; i < d.length; i += 4) {
+      const l = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+      const f = 1 + (l / mean - 1) * k;
+      d[i] = tr * f; d[i + 1] = tg * f; d[i + 2] = tb * f;
+    }
+    g.putImageData(img, 0, 0);
+    const t = new THREE.CanvasTexture(canvas);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.colorSpace = THREE.NoColorSpace;
+    t.anisotropy = 16;
+    t.magFilter = base.texture.magFilter;
+    t.minFilter = THREE.LinearMipmapLinearFilter;
+    return { ...base, name: v.name, texture: t, albedo: averageColor(d) };
+  }
 
   private build(src: Source, name: string): TexEntry {
     const p = this.params;

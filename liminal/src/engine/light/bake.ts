@@ -1,4 +1,4 @@
-import { type Axis, type Face, type LightmapRect, facePoint } from './faces';
+import { type Axis, type Face, type LightmapRect, type SolidPlanes, facePoint, insideSolid } from './faces';
 
 /**
  * Lightmap baker, in the spirit of Source's VRAD:
@@ -47,7 +47,8 @@ export interface BakeParams {
   surfaceGlow: number;
 }
 
-export interface BakeBox { brushId: number; min: Axis; max: Axis }
+/** Shadow casters: every solid brush as a convex plane set. */
+export type BakeBox = SolidPlanes;
 
 export interface BakeInput {
   faces: Face[];
@@ -96,7 +97,8 @@ export function bake(input: BakeInput): BakeOutput {
   // Light-emitting surfaces become a grid of small Lambertian lights.
   for (const f of input.faces) {
     const em = input.emissive[f.tex];
-    if (!em) continue;
+    // intensity 0 = glows but casts no light (e.g. a pot light's lens; the light itself is an entity).
+    if (!em || em.intensity <= 0) continue;
     const ns = Math.max(1, Math.round(f.width / p.surfaceSpacing));
     const nt = Math.max(1, Math.round(f.height / p.surfaceSpacing));
     const cell = (f.width / ns) * (f.height / nt);
@@ -168,7 +170,7 @@ export function bake(input: BakeInput): BakeOutput {
       const l = lights[li];
       const side = (l.pos[0] - f.origin[0]) * f.n[0] + (l.pos[1] - f.origin[1]) * f.n[1] + (l.pos[2] - f.origin[2]) * f.n[2];
       if (side <= 0) continue;
-      if (sphereBox(l.pos, l.range, { brushId: -1, min: fmin, max: fmax })) cand.push(li);
+      if (sphereBox(l.pos, l.range, { min: fmin, max: fmax })) cand.push(li);
     }
     for (let k = 0; k < fs.valid.length; k++) {
       if (!fs.valid[k]) continue;
@@ -358,7 +360,7 @@ function hash(n: number): number {
 const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v);
 const scale3 = (c: RGB, s: number): RGB => [c[0] * s, c[1] * s, c[2] * s];
 
-function sphereBox(c: Axis, r: number, b: BakeBox): boolean {
+function sphereBox(c: Axis, r: number, b: { min: Axis; max: Axis }): boolean {
   let d = 0;
   for (let i = 0; i < 3; i++) {
     const v = c[i] < b.min[i] ? b.min[i] - c[i] : c[i] > b.max[i] ? c[i] - b.max[i] : 0;
@@ -368,39 +370,35 @@ function sphereBox(c: Axis, r: number, b: BakeBox): boolean {
 }
 
 function insideAny(boxes: BakeBox[], p: Axis): boolean {
-  for (const b of boxes) {
-    if (p[0] > b.min[0] + EPS && p[0] < b.max[0] - EPS && p[1] > b.min[1] + EPS && p[1] < b.max[1] - EPS && p[2] > b.min[2] + EPS && p[2] < b.max[2] - EPS) return true;
-  }
+  for (const b of boxes) if (insideSolid(b, p, EPS)) return true;
   return false;
 }
 
-/** Does the segment (a → b) pass through any box? */
+/** Does the segment (a → b) pass through any solid? */
 function occluded(boxes: BakeBox[], ax: number, ay: number, az: number, bx: number, by: number, bz: number): boolean {
   const dx = bx - ax, dy = by - ay, dz = bz - az;
   for (const b of boxes) {
-    const t = slab(b, ax, ay, az, dx, dy, dz);
+    const t = clipRay(b, ax, ay, az, dx, dy, dz);
     if (t !== null && t.t0 < 1 - EPS && t.t1 > EPS) return true;
   }
   return false;
 }
 
-/** Nearest box hit along o + d·t, t in (0, 1], and which face of it was entered. */
+/** Nearest solid hit along o + d·t, t in (0, 1], and which face of it was entered. */
 function castRay(boxes: BakeBox[], ox: number, oy: number, oz: number, dx: number, dy: number, dz: number): { t: number; faceId: number } | null {
   let best: { t: number; faceId: number } | null = null;
   for (const b of boxes) {
-    const t = slab(b, ox, oy, oz, dx, dy, dz);
+    const t = clipRay(b, ox, oy, oz, dx, dy, dz);
     if (!t || t.t0 <= EPS || t.t0 > 1) continue;
-    if (!best || t.t0 < best.t) {
-      // Entered through the min side when moving in +axis, i.e. the face pointing -axis.
-      const sign = [dx, dy, dz][t.axis] > 0 ? 1 : 0; // face index: px=0 nx=1 py=2 ny=3 pz=4 nz=5
-      best = { t: t.t0, faceId: b.brushId * 6 + t.axis * 2 + sign };
-    }
+    if (!best || t.t0 < best.t) best = { t: t.t0, faceId: b.brushId * 64 + t.face };
   }
   return best;
 }
 
-function slab(b: BakeBox, ox: number, oy: number, oz: number, dx: number, dy: number, dz: number): { t0: number; t1: number; axis: number } | null {
-  let t0 = -Infinity, t1 = Infinity, axis = 0;
+/** Clip a ray against a convex plane set: entry/exit parameters and the entry face. */
+function clipRay(b: BakeBox, ox: number, oy: number, oz: number, dx: number, dy: number, dz: number): { t0: number; t1: number; face: number } | null {
+  // Cheap bounding-box rejection first.
+  let t0 = -Infinity, t1 = Infinity;
   const o = [ox, oy, oz], d = [dx, dy, dz];
   for (let i = 0; i < 3; i++) {
     if (Math.abs(d[i]) < 1e-12) {
@@ -409,9 +407,23 @@ function slab(b: BakeBox, ox: number, oy: number, oz: number, dx: number, dy: nu
     }
     let a = (b.min[i] - o[i]) / d[i], c = (b.max[i] - o[i]) / d[i];
     if (a > c) { const tmp = a; a = c; c = tmp; }
-    if (a > t0) { t0 = a; axis = i; }
+    if (a > t0) t0 = a;
     if (c < t1) t1 = c;
     if (t0 > t1) return null;
   }
-  return { t0, t1, axis };
+  t0 = -Infinity; t1 = Infinity;
+  let face = -1;
+  for (const pl of b.planes) {
+    const denom = pl.n[0] * dx + pl.n[1] * dy + pl.n[2] * dz;
+    const dist = pl.n[0] * ox + pl.n[1] * oy + pl.n[2] * oz - pl.d;
+    if (Math.abs(denom) < 1e-12) {
+      if (dist >= 0) return null;
+      continue;
+    }
+    const t = -dist / denom;
+    if (denom < 0) { if (t > t0) { t0 = t; face = pl.face; } }
+    else if (t < t1) t1 = t;
+    if (t0 > t1) return null;
+  }
+  return { t0, t1, face };
 }

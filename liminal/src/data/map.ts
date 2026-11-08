@@ -42,7 +42,30 @@ export interface BoxBrushDef {
   /** Rendered and walkable? Non-solid brushes are for visuals only. */
   solid?: boolean;
 }
-export type BrushDef = BoxBrushDef;
+/**
+ * A vertical prism: a convex polygon in plan (x, y, counter-clockwise seen
+ * from above) extruded from z0 to z1. Curved things in 80s/90s interiors
+ * (carpet arcs, bar counters, round ottomans, columns) are nearly always
+ * vertical extrusions, so curves are built from several of these.
+ *
+ * Face keys: "pz" (top), "nz" (bottom), "side" (every side), "side3" (one side).
+ * `min`/`max` are derived bounds, filled in by parseMap and never saved.
+ */
+export interface PrismBrushDef {
+  id: number;
+  type: 'prism';
+  points: [number, number][];
+  z0: number;
+  z1: number;
+  tex?: string;
+  faces?: Record<string, FaceTex>;
+  group?: string;
+  material?: string;
+  solid?: boolean;
+  min: V3;
+  max: V3;
+}
+export type BrushDef = BoxBrushDef | PrismBrushDef;
 
 export interface EntityDef {
   id: number;
@@ -78,6 +101,10 @@ export function parseMap(json: unknown): MapFile {
   const brushes: BrushDef[] = [];
   for (const [i, b] of (Array.isArray(m.brushes) ? m.brushes : []).entries()) {
     const r = b as Record<string, unknown>;
+    if (r.type === 'prism') {
+      brushes.push(parsePrism(r, i));
+      continue;
+    }
     if (r.type !== 'box') throw new MapError(`brush #${i}: unknown type ${String(r.type)}`);
     if (!isV3(r.min) || !isV3(r.max)) throw new MapError(`brush #${i}: min/max must be [x,y,z]`);
     const min: V3 = [Math.min(r.min[0], r.max[0]), Math.min(r.min[1], r.max[1]), Math.min(r.min[2], r.max[2])];
@@ -118,8 +145,45 @@ export function parseMap(json: unknown): MapFile {
   };
 }
 
-export function faceTex(b: BrushDef, face: FaceKey): Required<FaceTex> {
-  const f = b.faces?.[face] ?? {};
+function parsePrism(r: Record<string, unknown>, i: number): PrismBrushDef {
+  const pts = r.points;
+  if (!Array.isArray(pts) || pts.length < 3 || !pts.every((p) => Array.isArray(p) && p.length === 2 && p.every((n) => typeof n === 'number' && Number.isFinite(n)))) {
+    throw new MapError(`brush #${i}: prism needs points [[x,y],...] (3 or more)`);
+  }
+  if (typeof r.z0 !== 'number' || typeof r.z1 !== 'number' || r.z1 <= r.z0) throw new MapError(`brush #${i}: prism needs z0 < z1`);
+  let points = pts as [number, number][];
+  // Normalise winding to counter-clockwise.
+  let area = 0;
+  for (let k = 0; k < points.length; k++) {
+    const [x0, y0] = points[k], [x1, y1] = points[(k + 1) % points.length];
+    area += x0 * y1 - x1 * y0;
+  }
+  if (area < 0) points = [...points].reverse();
+  // Must be convex: every turn goes the same way.
+  for (let k = 0; k < points.length; k++) {
+    const [ax, ay] = points[k], [bx, by] = points[(k + 1) % points.length], [cx, cy] = points[(k + 2) % points.length];
+    if ((bx - ax) * (cy - by) - (by - ay) * (cx - bx) < -1e-6) throw new MapError(`brush #${i}: prism outline must be convex`);
+  }
+  const xs = points.map((p) => p[0]), ys = points.map((p) => p[1]);
+  return {
+    id: typeof r.id === 'number' ? r.id : i + 1,
+    type: 'prism',
+    points,
+    z0: r.z0, z1: r.z1,
+    tex: typeof r.tex === 'string' ? r.tex : undefined,
+    faces: (r.faces && typeof r.faces === 'object' ? r.faces : undefined) as PrismBrushDef['faces'],
+    group: typeof r.group === 'string' ? r.group : undefined,
+    material: typeof r.material === 'string' ? r.material : undefined,
+    solid: r.solid === false ? false : undefined,
+    min: [Math.min(...xs), Math.min(...ys), r.z0],
+    max: [Math.max(...xs), Math.max(...ys), r.z1],
+  };
+}
+
+/** Texture settings for one face. Prism sides fall back from "sideN" to "side". */
+export function faceTex(b: BrushDef, face: string): Required<FaceTex> {
+  const faces = (b.faces ?? {}) as Record<string, FaceTex | undefined>;
+  const f = faces[face] ?? (face.startsWith('side') ? faces.side : undefined) ?? {};
   return {
     tex: f.tex ?? b.tex ?? 'dev/gray',
     scale: f.scale ?? [1, 1],
@@ -133,7 +197,7 @@ export function faceTex(b: BrushDef, face: FaceKey): Required<FaceTex> {
  * git show exactly which brushes changed.
  */
 export function serializeMap(m: MapFile): string {
-  const line = (o: unknown) => '    ' + JSON.stringify(o);
+  const line = (o: unknown) => '    ' + JSON.stringify(o, (k, v) => ((k === 'min' || k === 'max') && (o as BrushDef).type === 'prism' ? undefined : v));
   const head: Record<string, unknown> = { format: m.format, version: m.version, name: m.name };
   const parts = [
     '{',

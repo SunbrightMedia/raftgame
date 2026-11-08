@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildFaces, layoutLightmap } from '../src/engine/light/faces';
+import { buildFaces, layoutLightmap, solidPlanes } from '../src/engine/light/faces';
 import { bake, falloff, type BakeInput } from '../src/engine/light/bake';
 import { medianCut, applyPalette } from '../src/engine/render/crusher';
 import type { BrushDef } from '../src/data/map';
@@ -20,7 +20,7 @@ function bakeRoom(brushes: BrushDef[], lightPos: [number, number, number], bounc
   const lay = layoutLightmap(faces, 16);
   const input: BakeInput = {
     faces, width: lay.width, height: lay.height, rects: [...lay.rects],
-    boxes: brushes.map((b) => ({ brushId: b.id, min: b.min, max: b.max })),
+    boxes: brushes.map(solidPlanes),
     lights: [{ pos: lightPos, color: [1, 1, 1], fifty: 128, range: 1024 }],
     emissive: {}, albedo: { wall: [0.5, 0.5, 0.5] },
     params: { ambient: [0, 0, 0], lightScale: 1, bounces, bounceScale: 1, bounceSamples: 16, surfaceSpacing: 32, surfaceFifty: 128, surfaceGlow: 1 },
@@ -79,11 +79,11 @@ describe('texture crusher', () => {
   });
 });
 
-describe('test map', () => {
-  it('has no overlapping coplanar faces (they z-fight and flicker)', async () => {
+describe.each(['test_room', 'pmp_basement'])('map %s', (name) => {
+  it('has no overlapping coplanar box faces (they z-fight and flicker)', async () => {
     const { readFileSync } = await import('node:fs');
-    const map = JSON.parse(readFileSync(new URL('../maps/test_room.json', import.meta.url), 'utf8'));
-    const solids = map.brushes.filter((b: BrushDef) => b.solid !== false) as BrushDef[];
+    const map = JSON.parse(readFileSync(new URL(`../maps/${name}.json`, import.meta.url), 'utf8'));
+    const solids = map.brushes.filter((b: BrushDef) => b.solid !== false && b.type === 'box') as BrushDef[];
     const bad: string[] = [];
     for (let i = 0; i < solids.length; i++) for (let j = i + 1; j < solids.length; j++) {
       const a = solids[i], b = solids[j];
@@ -94,5 +94,27 @@ describe('test map', () => {
       }
     }
     expect(bad).toEqual([]);
+  });
+});
+
+describe('prism brushes', () => {
+  it('block the player, render polygon tops, and cast shadows', async () => {
+    const { parseMap } = await import('../src/data/map');
+    const { CollisionWorld } = await import('../src/engine/collision/trace');
+    const { convexBrush } = await import('../src/engine/collision/brush');
+    const { v3 } = await import('../src/engine/vec3');
+    const oct = Array.from({ length: 8 }, (_, i) => [200 + 32 * Math.cos((i / 8) * Math.PI * 2), 32 * Math.sin((i / 8) * Math.PI * 2)]);
+    const map = parseMap({ format: 'liminal-map', version: 1, name: 't', entities: [], brushes: [
+      { id: 1, type: 'box', min: [-512, -512, -16], max: [512, 512, 0], tex: 'wall' },
+      { id: 2, type: 'prism', points: oct, z0: 0, z1: 64, tex: 'wall' },
+    ] });
+    const faces = buildFaces(map.brushes);
+    expect(faces.filter((f) => f.brushId === 2 && f.poly).length).toBe(1); // top (bottom is buried in the floor)
+    expect(faces.filter((f) => f.brushId === 2 && f.key.startsWith('side')).length).toBe(8);
+    const world = new CollisionWorld(map.brushes.map((b) => { const sp = solidPlanes(b); return convexBrush(b.id, sp.planes.map((p) => ({ n: v3(...p.n), d: p.d })), v3(...b.min), v3(...b.max)); }));
+    const tr = world.trace(v3(0, 0, 1), v3(300, 0, 1), v3(-12, -12, 0), v3(12, 12, 54));
+    expect(tr.fraction).toBeLessThan(1);
+    expect(tr.endpos.x).toBeGreaterThan(200 - 32 - 13);
+    expect(tr.endpos.x).toBeLessThan(200 - 32 - 11);
   });
 });

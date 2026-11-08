@@ -6,7 +6,7 @@ import { Game } from './game/game';
 import { DebugPanel } from './ui/debugPanel';
 import { Hud } from './ui/hud';
 
-const DEFAULT_MAP = 'maps/test_room.json';
+const DEFAULT_MAP = 'maps/pmp_basement.json';
 
 async function boot(): Promise<void> {
   const storage = await openStorage();
@@ -30,6 +30,9 @@ async function boot(): Promise<void> {
   const panel = new DebugPanel(config, {
     onOpenChange: (open) => { if (open) game.input.unlock(); },
     reloadMap: () => void game.loadMapPath(game.mapPath).catch((e) => showError((e as Error).message)),
+    listMaps: () => storage.list('maps'),
+    loadMap: (path) => void game.loadMapPath(path).catch((e) => showError((e as Error).message)),
+    currentMap: () => game.mapPath,
     loadMapFile: (f) => void loadDropped(f),
     mapStatus: () => game.mapStatus,
   });

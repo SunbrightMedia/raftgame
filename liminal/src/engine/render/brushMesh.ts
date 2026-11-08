@@ -21,9 +21,10 @@ export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout
     const rot = (f.rot * Math.PI) / 180;
     const cr = Math.cos(rot), sr = Math.sin(rot);
     const sx = f.scale[0] || 1, sy = f.scale[1] || 1;
-    // Corners counter-clockwise seen from outside.
-    for (const [s, t] of [[0, 0], [1, 0], [1, 1], [0, 1]]) {
-      const p = facePoint(f, s * f.width, t * f.height);
+    // Outline counter-clockwise seen from outside: the polygon, or the rectangle.
+    const outline: [number, number][] = f.poly ?? [[0, 0], [f.width, 0], [f.width, f.height], [0, f.height]];
+    for (const [s, t] of outline) {
+      const p = facePoint(f, s, t);
       bt.pos.push(p[0], p[1], p[2]);
       // World-aligned texture projection.
       const wu = p[0] * f.r[0] + p[1] * f.r[1] + p[2] * f.r[2];
@@ -31,11 +32,13 @@ export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout
       const ru = wu * cr - wv * sr, rv = wu * sr + wv * cr;
       bt.uv.push((ru / sx + f.offset[0]) / tex.worldW, (rv / sy + f.offset[1]) / tex.worldH);
       if (rect && layout) {
-        bt.lm.push((rect.x + 0.5 + s * (rect.w - 1)) / layout.width, (rect.y + 0.5 + t * (rect.h - 1)) / layout.height);
+        const fs = f.width > 0 ? s / f.width : 0, ft = f.height > 0 ? t / f.height : 0;
+        bt.lm.push((rect.x + 0.5 + fs * (rect.w - 1)) / layout.width, (rect.y + 0.5 + ft * (rect.h - 1)) / layout.height);
       } else bt.lm.push(0, 0);
       bt.shade.push(f.shade);
     }
-    bt.idx.push(base, base + 1, base + 2, base, base + 2, base + 3);
+    // Convex: a triangle fan.
+    for (let k = 1; k < outline.length - 1; k++) bt.idx.push(base, base + k, base + k + 1);
   }
 
   const group = new THREE.Group();

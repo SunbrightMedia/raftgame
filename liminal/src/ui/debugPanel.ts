@@ -5,6 +5,9 @@ import type { ConfigStore } from '../data/config';
 export interface PanelHooks {
   onOpenChange(open: boolean): void;
   reloadMap(): void;
+  listMaps(): Promise<string[]>;
+  loadMap(path: string): void;
+  currentMap(): string;
   loadMapFile(file: File): void;
   mapStatus(): string;
 }
@@ -79,7 +82,16 @@ export class DebugPanel {
     this.root.append(bar);
 
     const mapBar = el('div', 'dbg-bar');
+    const maps = document.createElement('select');
+    maps.id = 'dbg-maps';
+    maps.title = 'Switch map';
+    void this.hooks.listMaps().then((names) => {
+      for (const n of names.filter((x) => x.endsWith('.json')).sort()) maps.append(new Option(n.replace(/\.json$/, ''), `maps/${n}`));
+      maps.value = this.hooks.currentMap();
+    });
+    maps.onchange = () => this.hooks.loadMap(maps.value);
     mapBar.append(
+      maps,
       button('Reload map', 'Re-read the map JSON from disk (R respawns without reloading)', () => this.hooks.reloadMap()),
       button('Open map…', 'Load a map .json (you can also drop one onto the window)', () => pickFile('.json', (f) => this.hooks.loadMapFile(f))),
     );

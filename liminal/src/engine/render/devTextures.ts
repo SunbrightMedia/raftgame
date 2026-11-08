@@ -182,6 +182,153 @@ const DEFS: Record<string, Def> = {
       noise(g, w, h, rnd, 14);
     },
   },
+
+  // ---- 90s house details (Postmodern Palace reference; see STYLE.md) ----
+
+  // Six-panel colonial door, painted white. One door: 36" × 80".
+  'house/door_6panel': {
+    px: [144, 320], world: [36, 80], material: 'wood',
+    paint: (g, w, h, rnd) => {
+      g.fillStyle = '#ecebe5'; g.fillRect(0, 0, w, h);
+      // Panels: top pair small, middle pair tall, bottom pair medium (inches → px at 4px/in).
+      const P = 4;
+      const panels = [[5, 5, 11, 17], [20, 5, 11, 17], [5, 26, 11, 30], [20, 26, 11, 30], [5, 60, 11, 15], [20, 60, 11, 15]];
+      for (const [x, y, pw, ph] of panels) {
+        const X = x * P, Y = y * P, W = pw * P, H = ph * P;
+        g.fillStyle = '#c9c8c1'; g.fillRect(X - 3, Y - 3, W + 6, H + 6);   // shadowed bevel
+        g.fillStyle = '#f6f5f0'; g.fillRect(X - 3, Y - 3, W + 6, 2); g.fillRect(X - 3, Y - 3, 2, H + 6); // lit edges
+        g.fillStyle = '#e4e3dc'; g.fillRect(X, Y, W, H);                   // raised field
+      }
+      noise(g, w, h, rnd, 5);
+    },
+  },
+  // Fake laminate marble: printed soft grey veining on off-white. Bar and counter tops.
+  'house/laminate_marble': {
+    px: [256, 256], world: [48, 48], material: 'tile',
+    paint: (g, w, h, rnd) => {
+      g.fillStyle = '#e8e6df'; g.fillRect(0, 0, w, h);
+      for (let k = 0; k < 14; k++) {
+        let x = rnd() * w, y = rnd() * h, a = rnd() * Math.PI;
+        const pts: [number, number][] = [[x, y]];
+        for (let i = 0; i < 18; i++) {
+          a += (rnd() - 0.5) * 0.9; x += Math.cos(a) * 14; y += Math.sin(a) * 14;
+          pts.push([x, y]);
+        }
+        g.strokeStyle = `rgba(${120 + rnd() * 40},${120 + rnd() * 40},${125 + rnd() * 40},${0.12 + rnd() * 0.25})`;
+        g.lineWidth = 0.6 + rnd() * 2.2;
+        // Draw the vein at every wrapped offset so the texture tiles.
+        for (const ox of [-w, 0, w]) for (const oy of [-h, 0, h]) {
+          g.beginPath();
+          pts.forEach(([px, py], i) => (i ? g.lineTo(px + ox, py + oy) : g.moveTo(px + ox, py + oy)));
+          g.stroke();
+        }
+      }
+      noise(g, w, h, rnd, 6);
+    },
+  },
+  // Very orange stained veneer (maple/oak), vertical grain. 24" × 48" repeat.
+  'house/wood_orange': {
+    px: [128, 256], world: [24, 48], material: 'wood',
+    paint: (g, w, h, rnd) => {
+      for (let x = 0; x < w; x++) {
+        const v = Math.sin(x * 0.21 + Math.sin(x * 0.05) * 3) * 10 + Math.sin(x * 1.3) * 4 + (rnd() - 0.5) * 6;
+        g.fillStyle = `rgb(${200 + v},${112 + v * 0.8},${48 + v * 0.5})`;
+        g.fillRect(x, 0, 1, h);
+      }
+      for (let k = 0; k < 40; k++) {
+        g.fillStyle = `rgba(120,55,20,${0.08 + rnd() * 0.12})`;
+        g.fillRect(rnd() * w, rnd() * h, 1, 6 + rnd() * 30);
+      }
+      noise(g, w, h, rnd, 7);
+    },
+  },
+  // Tall display cabinet front: orange wood frame, frosted glass, thin gold lines. One unit: 36" × 84".
+  'house/cabinet_glass': {
+    px: [144, 336], world: [36, 84], material: 'wood',
+    paint: (g, w, h, rnd) => {
+      const P = 4;
+      g.fillStyle = '#c8722f'; g.fillRect(0, 0, w, h);
+      for (const x0 of [3, 19]) {
+        const X = x0 * P, Y = 4 * P, W = 14 * P, H = 74 * P;
+        const grad = g.createLinearGradient(X, Y, X + W, Y + H);
+        grad.addColorStop(0, '#9fab a0'.replace(' ', '')); grad.addColorStop(0.5, '#7f8b83'); grad.addColorStop(1, '#6c776f');
+        g.fillStyle = grad; g.fillRect(X, Y, W, H);
+        // faint shelves and objects behind frosted glass
+        g.fillStyle = 'rgba(40,45,40,0.45)';
+        for (const sy of [22, 40, 58]) g.fillRect(X, sy * P, W, 3);
+        for (let k = 0; k < 6; k++) g.fillRect(X + 6 + rnd() * (W - 16), (18 + Math.floor(rnd() * 3) * 18) * P - 12, 6, 12);
+        // thin gold trim lines inset in the glass
+        g.strokeStyle = '#c9a54a'; g.lineWidth = 2;
+        g.strokeRect(X + 6, Y + 6, W - 12, H - 12);
+      }
+      noise(g, w, h, rnd, 6);
+    },
+  },
+  // Burgundy vinyl upholstery (bar stools).
+  'house/vinyl_burgundy': {
+    px: [64, 64], world: [16, 16], material: 'fabric',
+    paint: (g, w, h, rnd) => {
+      g.fillStyle = '#6e1c26'; g.fillRect(0, 0, w, h);
+      noise(g, w, h, rnd, 10);
+    },
+  },
+  // Patterned band around a round ottoman: small diamonds and dots on dark.
+  'house/ottoman_band': {
+    px: [64, 32], world: [16, 8], material: 'fabric',
+    paint: (g, w, h, rnd) => {
+      g.fillStyle = '#3d3a2a'; g.fillRect(0, 0, w, h);
+      for (let x = 4; x < w; x += 16) {
+        g.fillStyle = '#c98f74'; g.beginPath(); g.moveTo(x, h / 2 - 6); g.lineTo(x + 5, h / 2); g.lineTo(x, h / 2 + 6); g.lineTo(x - 5, h / 2); g.fill();
+        g.fillStyle = '#7fa59a'; g.fillRect(x + 8, h / 2 - 2, 3, 3);
+      }
+      g.fillStyle = '#b8a77a'; g.fillRect(0, 2, w, 2); g.fillRect(0, h - 4, w, 2);
+      noise(g, w, h, rnd, 8);
+    },
+  },
+  // Polished chrome: banded reflections.
+  'fixture/chrome': {
+    px: [32, 64], world: [8, 16], material: 'metal',
+    paint: (g, w, h) => {
+      const grad = g.createLinearGradient(0, 0, w, 0);
+      [['#5a5d62', 0], ['#e9ecef', 0.3], ['#8b9096', 0.5], ['#f7f8f9', 0.7], ['#666a70', 1]].forEach(([c, t]) => grad.addColorStop(t as number, c as string));
+      g.fillStyle = grad; g.fillRect(0, 0, w, h);
+    },
+  },
+  // Recessed pot light lens. Glows, but casts no light itself: the light is a separate entity.
+  'fixture/potlight': {
+    px: [32, 32], world: [6, 6], material: 'glass',
+    emissive: { color: [1, 0.93, 0.8], intensity: 0 },
+    paint: (g, w, h) => {
+      g.fillStyle = '#d9d6cf'; g.fillRect(0, 0, w, h);
+      g.fillStyle = '#fff6e4'; g.beginPath(); g.arc(w / 2, h / 2, w * 0.36, 0, Math.PI * 2); g.fill();
+    },
+  },
+  // Semi-gloss white trim (baseboards, casing).
+  'house/trim_white': {
+    px: [32, 32], world: [16, 16], material: 'wood',
+    paint: (g, w, h, rnd) => {
+      g.fillStyle = '#efede6'; g.fillRect(0, 0, w, h);
+      noise(g, w, h, rnd, 4);
+    },
+  },
+  // Almond rocker light switch plate, 3" × 4.5".
+  'house/switchplate': {
+    px: [24, 36], world: [3, 4.5], material: 'plastic',
+    paint: (g, w, h) => {
+      g.fillStyle = '#e3d9c3'; g.fillRect(0, 0, w, h);
+      g.fillStyle = '#d4c8ae'; g.fillRect(8, 10, 8, 16);
+      g.fillStyle = '#efe7d4'; g.fillRect(8, 10, 8, 7);
+    },
+  },
+  // Dark rubber cove base for commercial spaces (STYLE.md: "VERY important").
+  'commercial/cove_base_plum': {
+    px: [64, 16], world: [32, 4], material: 'rubber',
+    paint: (g, w, h, rnd) => {
+      g.fillStyle = '#3e1d2c'; g.fillRect(0, 0, w, h);
+      g.fillStyle = '#4c2536'; g.fillRect(0, 0, w, 2);
+      noise(g, w, h, rnd, 6);
+    },
+  },
   missing: {
     px: [32, 32], world: [32, 32], raw: true,
     paint: (g, w, h) => {

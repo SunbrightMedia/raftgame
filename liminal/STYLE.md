@@ -110,6 +110,35 @@ noise, chromatic-aberration smears or fake timestamps: those look terrible
 and carry no nostalgia. The target is a *film photo scan*, subtle enough
 that you notice the mood before the effect.
 
+## Commercial interiors (reference 2: the interior window)
+
+All confirmed by the user.
+
+- **Windows between interior rooms.** A large window from one windowless
+  room into another, with no use and no way through: look, but you can't get in.
+- **Curtains where no window can be.** Floor-length pinch-pleat drapes on
+  an interior wall, hung from a soffit or curtain pocket.
+- **Purposeless half walls:** a knee wall with a flat cap at sill height.
+- **You stand in the dark and look into the light.** The viewer's room is
+  dim with no visible source; the room beyond glows warm from a hidden
+  source. (user) This can be illogical too: there may be no light in that
+  space at all.
+- **Hidden sources** in soffits and curtain pockets.
+- **Vinyl wallcovering** in roughly 4' panels with visible vertical seams:
+  mottled grey-mauve, the commercial counterpart of house paint.
+- **Rubber cove base, not wood baseboard, in commercial spaces.** (user:
+  "VERY important") A dark plum/burgundy vinyl strip that curves into the
+  carpet. Trim follows the building type: white wood in houses, dark rubber
+  cove base in offices, clinics, hotels and churches.
+- **Plum/purple low-pile commercial carpet**: late-80s mauve.
+- **Thick rounded window frames painted mauve-pink,** with deep sills, no
+  hardware and near-invisible glass.
+- **Completely empty rooms** whose purpose you can't name.
+- **Cool mauve/purple-grey on this side, warm amber beyond.**
+- **Colour coordination with one outlier.** (user) The window lining
+  matches the carpet; the curtains are the outlier. Rooms are colour-matched
+  sets with one thing that doesn't belong, and the outlier is part of the feel.
+
 ---
 
 ## Palettes (draft)

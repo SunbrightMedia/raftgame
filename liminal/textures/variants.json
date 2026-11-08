@@ -1,0 +1,65 @@
+{
+  "_comment": "Recoloured textures: take an existing texture's detail, give it a new colour. The average colour becomes `color`; `contrast` scales the detail (1 = as is). This is how palettes get exact colours (STYLE.md).",
+  "variants": [
+    {
+      "name": "pmp/carpet_royal",
+      "from": "office/carpet_blue",
+      "color": "#2a4291",
+      "contrast": 0.35
+    },
+    {
+      "name": "pmp/carpet_salmon",
+      "from": "office/carpet_blue",
+      "color": "#d08680",
+      "contrast": 0.35
+    },
+    {
+      "name": "pmp/paint_mint",
+      "from": "office/plaster",
+      "color": "#b3c9bb",
+      "contrast": 0.7
+    },
+    {
+      "name": "pmp/paint_warmwhite",
+      "from": "office/plaster",
+      "color": "#eadfce",
+      "contrast": 0.7
+    },
+    {
+      "name": "pmp/ceiling_white",
+      "from": "office/plaster",
+      "color": "#ebe9e2",
+      "contrast": 0.5
+    },
+    {
+      "name": "pmp/fabric_green",
+      "from": "office/carpet_blue",
+      "color": "#6b7a45",
+      "contrast": 0.6
+    },
+    {
+      "name": "pmp/bar_front",
+      "from": "house/wood_orange",
+      "color": "#8a3527",
+      "contrast": 1.1
+    },
+    {
+      "name": "pmp/vinyl_wall_mauve",
+      "from": "office/plaster_worn",
+      "color": "#b7a9ab",
+      "contrast": 0.8
+    },
+    {
+      "name": "pmp/carpet_plum",
+      "from": "office/carpet_blue",
+      "color": "#5b3550",
+      "contrast": 1.2
+    },
+    {
+      "name": "pmp/brass",
+      "from": "fixture/chrome",
+      "color": "#b8913f",
+      "contrast": 0.8
+    }
+  ]
+}
