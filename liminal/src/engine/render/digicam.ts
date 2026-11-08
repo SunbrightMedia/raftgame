@@ -346,7 +346,7 @@ export class Digicam {
       }
       const avgL = Math.exp(sum / wsum);
       const key = 0.18 * Math.pow(2, p.evComp);
-      const lo = 1 / (1.2 * Math.pow(2, 14)), hi = 1 / (1.2 * Math.pow(2, 1));
+      const lo = 1 / (1.2 * Math.pow(2, 17)), hi = 1 / (1.2 * Math.pow(2, 1));
       this.target = Math.min(hi, Math.max(lo, key / Math.max(1e-4, avgL)));
     }
     const k = 1 - Math.exp(-dt * p.adaptSpeed);

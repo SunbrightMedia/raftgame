@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import BakeWorker from '../engine/light/bake.worker?worker&inline';
 import type { BakeInput, BakeLight, BakeOutput } from '../engine/light/bake';
-import { BR30_65W, cosNPeak, kelvinToLinear, emitterColor } from '../engine/light/units';
+import { BR30_65W, cosNPeak, kelvinToLinear, emitterColor, INCH, srgbToLinear } from '../engine/light/units';
 import { layoutLightmap, solidPlanes, type LightmapLayout } from '../engine/light/faces';
 import type { TextureRegistry } from '../engine/render/textures';
 import type { Settings } from '../data/settings';
@@ -230,6 +230,7 @@ export class Lighting {
         aoDirect: L.aoDirect,
         aoCurve: L.aoCurve,
         extraBounces: L.extraBounces,
+        ...(L.skyLuminance > 0 ? { sky: { luminance: L.skyLuminance, zenith: hexToLinearNorm(L.skyZenith), horizon: hexToLinearNorm(L.skyHorizon) } } : {}),
       },
     };
   }
@@ -257,6 +258,14 @@ export function lightFromEntity(origin: [number, number, number], p: Props): Bak
     const lm = num('lumens', BR30_65W.lumens);
     return { pos: origin, color, I0: cosNPeak(lm, BR30_65W.n) * BR30_65W.efficiency, dir: [0, 0, -1], n: BR30_65W.n, cutoffDeg: num('cutoff', BR30_65W.cutoffDeg), softDeg: BR30_65W.softDeg, spill: BR30_65W.spill };
   }
+  if (type === 'sun') {
+    // Directional: a very distant point whose intensity gives `lux` at the scene.
+    // pitch/yaw as in Source's light_environment (pitch -60 = 60° above the horizon, shining down).
+    const pr = (num('pitch', -60) * Math.PI) / 180, yr = (num('yaw', 0) * Math.PI) / 180;
+    const dir: [number, number, number] = [Math.cos(pr) * Math.cos(yr), Math.cos(pr) * Math.sin(yr), Math.sin(pr)];
+    const D = 4e6; // inches (~100 km)
+    return { pos: [origin[0] - dir[0] * D, origin[1] - dir[1] * D, origin[2] - dir[2] * D], color, I0: num('lux', 90000) * (D * INCH) ** 2 };
+  }
   if (type === 'dome') {
     const n = 0.6, lm = num('lumens', 800) * 0.8; // ~80% gets out through the glass
     return { pos: origin, color, I0: cosNPeak(lm, n), dir: [0, 0, -1], n, cutoffDeg: 88, softDeg: 2, spill: 0 };
@@ -283,4 +292,12 @@ export function mapLights(level: Level): BakeLight[] {
     if ((t === 'can' || t === 'bulb' || t === 'dome') && dyn < MAX_DYNAMIC) { l.dynamic = true; dyn++; }
     return l;
   });
+}
+
+/** sRGB hex → linear colour normalised to luminance 1. */
+export function hexToLinearNorm(hex: string): [number, number, number] {
+  const n = parseInt(hex.replace('#', ''), 16);
+  const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => srgbToLinear(v / 255));
+  const l = Math.max(1e-6, 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]);
+  return [c[0] / l, c[1] / l, c[2] / l];
 }

@@ -14,7 +14,8 @@
     "bench:bake": "vite-node tools/bench/bake-bench.ts",
     "fetch:textures": "python3 tools/fetch_textures.py",
     "gen:pmp": "vite-node tools/gen-pmp-basement.ts",
-    "gen:mall": "vite-node tools/gen-mall.ts"
+    "gen:mall": "vite-node tools/gen-mall.ts",
+    "gen:flatgrass": "vite-node tools/gen-flatgrass.ts"
   },
   "dependencies": {
     "three": "^0.187.0"

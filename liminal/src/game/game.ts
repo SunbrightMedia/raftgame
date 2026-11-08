@@ -11,7 +11,8 @@ import { angleVectors } from '../engine/vec3';
 import { Input } from './input';
 import { Level } from './level';
 import { Player } from './player';
-import { Lighting, mapLights, MAX_DYNAMIC } from './lighting';
+import { Lighting, mapLights, MAX_DYNAMIC, hexToLinearNorm } from './lighting';
+import { Sky } from '../engine/render/sky';
 
 /**
  * Owns the play loop: fixed-rate physics ticks, per-frame mouse look,
@@ -35,9 +36,11 @@ export class Game {
   private last = performance.now();
   onFrame: ((dt: number) => void) | null = null;
   private holdUntil = 0;
+  readonly sky = new Sky();
   private precompiled = false;
 
   constructor(canvas: HTMLCanvasElement, private storage: Storage, readonly config: ConfigStore) {
+    this.scene.add(this.sky.mesh);
     this.renderer = new LowResRenderer(canvas);
     this.lighting = new Lighting(storage);
     this.input = new Input(canvas);
@@ -107,6 +110,18 @@ export class Game {
     tex.needsUpdate = true;
   }
 
+  /** Sky dome and sun disc from the light settings and the map's sun entity. */
+  private updateSky(s: Settings): void {
+    const sunEnt = this.level?.map.entities.find((e) => e.class === 'light' && e.props?.type === 'sun');
+    let sun: { dir: [number, number, number]; color: [number, number, number] } | null = null;
+    if (sunEnt) {
+      const p = sunEnt.props as Record<string, number>;
+      const pr = ((p.pitch ?? -60) * Math.PI) / 180, yr = ((p.yaw ?? 0) * Math.PI) / 180;
+      sun = { dir: [-Math.cos(pr) * Math.cos(yr), -Math.cos(pr) * Math.sin(yr), -Math.sin(pr)], color: kelvinToLinear(p.kelvin ?? 5600) };
+    }
+    this.sky.set(s.light.skyLuminance, hexToLinearNorm(s.light.skyZenith), hexToLinearNorm(s.light.skyHorizon), sun);
+  }
+
   private updateLightUniforms(s: Settings): void {
     worldUniforms.lightScale.value = s.light.lightScale;
     const lm = this.level?.lightmap;
@@ -154,6 +169,7 @@ export class Game {
     worldUniforms.fogFar.value = s.fog.far;
     worldUniforms.fogLuminance.value = s.fog.luminance;
     worldUniforms.specScale.value = s.surface.reflections;
+    this.updateSky(s);
     worldUniforms.roughnessAdd.value = s.surface.roughness;
     worldUniforms.bumpScale.value = s.surface.bump;
     this.input.rawInput = s.view.rawInput;
@@ -232,6 +248,7 @@ export class Game {
     const { forward } = angleVectors(this.player.pitch, this.player.yaw);
     cam.up.set(0, 0, 1);
     cam.lookAt(eye.x + forward.x, eye.y + forward.y, eye.z + forward.z);
+    this.sky.follow(cam);
     cam.rotateZ((this.player.roll(s) * Math.PI) / 180);
     const C = s.camera;
     worldUniforms.flashOn.value = C.flash ? 1 : 0;

@@ -23,6 +23,7 @@ Procedural textures (`dev/*`, `house/wallpaper_*`, `house/paneling`, `office/vin
 | [CorrugatedSteel009 from ambientCG.com](https://ambientcg.com/a/CorrugatedSteel009) | CC0 1.0 | `ind/metal_corrugated` |
 | [DiamondPlate008C from ambientCG.com](https://ambientcg.com/a/DiamondPlate008C) | CC0 1.0 | `ind/diamondplate` |
 | [Dirty yellow tiles by GrEmlin](https://opengameart.org/content/dirty-yellow-tiles) | CC0 1.0 | `liminal/dirty_yellow_tiles` |
+| [Grass004 from ambientCG.com](https://ambientcg.com/a/Grass004) | CC0 1.0 | `outdoor/grass` |
 | [Interior textures by PucciGames](https://opengameart.org/content/interior-textures) | CC0 1.0 | `house/paneling_red`, `house/parquet`, `house/parquet_red`, `house/rug_orange`, `house/wall_beige`, `house/wall_beige2`, `house/wall_orange` |
 | [Metal053C from ambientCG.com](https://ambientcg.com/a/Metal053C) | CC0 1.0 | `ind/metal_rust` |
 | [OfficeCeiling001 from ambientCG.com](https://ambientcg.com/a/OfficeCeiling001) | CC0 1.0 | `office/ceiling` |

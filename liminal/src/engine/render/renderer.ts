@@ -30,7 +30,7 @@ export class LowResRenderer {
     this.gl = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
     this.gl.outputColorSpace = THREE.LinearSRGBColorSpace;
     this.gl.setPixelRatio(1);
-    this.camera = new THREE.PerspectiveCamera(74, 16 / 9, 2, 32768);
+    this.camera = new THREE.PerspectiveCamera(74, 16 / 9, 2, 65536);
     this.blitMat = new THREE.MeshBasicMaterial({ depthTest: false, depthWrite: false });
     this.blitScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.blitMat));
   }

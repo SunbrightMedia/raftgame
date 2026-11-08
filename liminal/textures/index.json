@@ -291,6 +291,18 @@
    "license": "CC0 1.0"
   },
   {
+   "name": "outdoor/grass",
+   "file": "src/outdoor__grass.jpg",
+   "size": [
+    96,
+    96
+   ],
+   "material": "grass",
+   "credit": "Grass004 from ambientCG.com",
+   "url": "https://ambientcg.com/a/Grass004",
+   "license": "CC0 1.0"
+  },
+  {
    "name": "freedoom/AASTINKY",
    "file": "freedoom/walls/AASTINKY.png",
    "size": [

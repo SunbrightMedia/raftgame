@@ -14,6 +14,7 @@
     "metal":    { "roughness": 0.35, "f0": 0.6,   "metal": 1, "bump": 0.03 },
     "glass":    { "roughness": 0.05, "f0": 0.04,  "metal": 0, "bump": 0 },
     "plastic":  { "roughness": 0.4,  "f0": 0.045, "metal": 0, "bump": 0.01 },
+    "grass":    { "roughness": 0.95, "f0": 0.03,  "metal": 0, "bump": 0.15 },
     "rubber":   { "roughness": 0.6,  "f0": 0.035, "metal": 0, "bump": 0.01 }
   },
   "textures": {}

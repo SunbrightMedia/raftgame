@@ -66,6 +66,18 @@
       "from": "house/trim_white",
       "color": "#ece3cf",
       "contrast": 0.5
+    },
+    {
+      "name": "flatgrass/concrete",
+      "from": "ind/concrete_floor",
+      "color": "#a9a8a2",
+      "contrast": 0.8
+    },
+    {
+      "name": "flatgrass/brick",
+      "from": "ind/brick_painted",
+      "color": "#8c8b87",
+      "contrast": 1.0
     }
   ]
 }

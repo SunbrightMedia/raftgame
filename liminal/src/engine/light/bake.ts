@@ -79,6 +79,11 @@ export interface BakeParams {
    * made local). Rooms take on the colour of their own surfaces. 0 = off.
    */
   extraBounces?: number;
+  /**
+   * Open sky (outdoor maps): rays that escape see sky luminance (cd/m²),
+   * coloured from horizon to zenith (linear, luminance 1 each). Absent = indoors.
+   */
+  sky?: { luminance: number; zenith: RGB; horizon: RGB };
   /** Falloff curve: AO is raised to this power, so open wall stays untouched
    *  while creases (wall bases, corners) get much darker. 1 = linear. */
   aoCurve?: number;
@@ -295,7 +300,16 @@ export function bake(input: BakeInput): BakeOutput {
           const dy = f.r[1] * x + f.u[1] * y + f.n[1] * h;
           const dz = f.r[2] * x + f.u[2] * y + f.n[2] * h;
           const hit = castRay(boxes, px, py, pz, dx * 4096, dy * 4096, dz * 4096);
-          if (!hit) continue;
+          if (!hit) {
+            // Escaped: open sky above the horizon adds its radiance (π·L as exitance).
+            if (p.sky && dz > 0) {
+              const t = Math.sqrt(dz), L = p.sky.luminance * Math.PI;
+              r += L * (p.sky.horizon[0] + (p.sky.zenith[0] - p.sky.horizon[0]) * t);
+              g += L * (p.sky.horizon[1] + (p.sky.zenith[1] - p.sky.horizon[1]) * t);
+              b += L * (p.sky.horizon[2] + (p.sky.zenith[2] - p.sky.horizon[2]) * t);
+            }
+            continue;
+          }
           const dist = hit.t * 4096;
           if (pass === 0 && dist < aoR) occ += 1 - dist / aoR;
           const hs = byId.get(hit.faceId);
