@@ -19,6 +19,8 @@ export const worldUniforms = {
   fogNear: { value: 400 },
   fogFar: { value: 5000 },
   fogOn: { value: 1 },
+  fogHaze: { value: 0 },
+  tileBreakup: { value: 0 },
   lightmap: { value: null as THREE.Texture | null },
   lightmapOn: { value: 0 },
   // On-camera light riding just above the lens (candela, linear colour).
@@ -115,6 +117,8 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
       uniform float fogNear;
       uniform float fogFar;
       uniform float fogOn;
+      uniform float fogHaze;
+      uniform float tileBreakup;
       uniform float flashOn;
       uniform vec3 flashPos;
       uniform vec3 flashColor;
@@ -143,6 +147,12 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
       varying vec2 vLm;
       varying float vShade;
       varying float vDepth;
+      float vnoise(vec2 p) {
+        vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+        float a = fract(sin(dot(i, vec2(127.1, 311.7))) * 43758.5453), b = fract(sin(dot(i + vec2(1.0, 0.0), vec2(127.1, 311.7))) * 43758.5453);
+        float c = fract(sin(dot(i + vec2(0.0, 1.0), vec2(127.1, 311.7))) * 43758.5453), d = fract(sin(dot(i + vec2(1.0, 1.0), vec2(127.1, 311.7))) * 43758.5453);
+        return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+      }
       vec3 toLinear(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }
       float height(vec2 uv) { return dot(texture2D(map, uv).rgb, vec3(0.299, 0.587, 0.114)); }
 
@@ -199,6 +209,12 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
 
       void main() {
         vec3 rho = toLinear(texture2D(map, vUv).rgb);
+        // Large-scale variation in world space, so a texture's repeats don't line up into a visible grid.
+        if (tileBreakup > 0.0) {
+          vec2 wp = vWorld.xy + vWorld.z * 0.7;
+          float v = vnoise(wp / 900.0) * 0.6 + vnoise(wp / 3100.0 + 17.0) * 0.4;
+          rho *= 1.0 + tileBreakup * (v - 0.5) * 2.0;
+        }
         vec3 L;
         if (isSource > 0.5) {
           // Keep below the half-float frame buffer's max (65504): a 2700 K lens's
@@ -289,7 +305,9 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
           }
           L = (Lbaked + Edyn / PI * diffuseColor * (1.0 - env) + spec * specScale) * brightness;
         }
-        float f = fogOn * clamp((vDepth - fogNear) / max(1.0, fogFar - fogNear), 0.0, 1.0);
+        // Linear fog, or haze: exponential like real aerial perspective (95% by fogFar).
+        float fd = max(0.0, vDepth - fogNear) / max(1.0, fogFar - fogNear);
+        float f = fogOn * (fogHaze > 0.5 ? 1.0 - exp(-3.0 * fd) : clamp(fd, 0.0, 1.0));
         // Alpha marks light sources (lamp lenses, panels) for the camera pass:
         // only they get the lamp-edge line and fringe, not overexposed surfaces.
         gl_FragColor = vec4(mix(L, toLinear(fogColor) * fogLuminance, f), isSource);

@@ -151,6 +151,7 @@ function parsePrism(r: Record<string, unknown>, i: number): PrismBrushDef {
     throw new MapError(`brush #${i}: prism needs points [[x,y],...] (3 or more)`);
   }
   if (typeof r.z0 !== 'number' || typeof r.z1 !== 'number' || r.z1 <= r.z0) throw new MapError(`brush #${i}: prism needs z0 < z1`);
+  if (pts.length > 126) throw new MapError(`brush #${i}: prism has more than 126 sides`);
   let points = pts as [number, number][];
   // Normalise winding to counter-clockwise.
   let area = 0;

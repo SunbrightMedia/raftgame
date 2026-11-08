@@ -54,6 +54,8 @@ export interface CameraParams {
   rolloff: number;
   blackStretch: number;
   surfaceHue: number;
+  grain: number;
+  grainSize: number;
   lampGlow: number;
   tint: number;
   fisheye: number;
@@ -256,7 +258,7 @@ export class Digicam {
     // bandwidth, so colour bleeds sideways past edges.
     this.encodePass = pass(/* glsl */ `
       uniform sampler2D src; uniform vec2 texel;
-      uniform float artifacts, softness, softH, sharpen, sharpenLimit, chroma, warmSat, shadowTint, banding, noise, blackLift, seed;
+      uniform float artifacts, softness, softH, sharpen, sharpenLimit, chroma, warmSat, shadowTint, banding, noise, grain, grainSize, blackLift, seed;
       varying vec2 vUv;
       float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233)) + seed) * 43758.5453); }
       float Y(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
@@ -302,13 +304,20 @@ export class Digicam {
           vec3 n = vec3(hash(px), hash(px + 17.0), hash(px + 41.0)) - 0.5;
           float yl = Y(c);
           c += (n - dot(n, vec3(0.333))) * noise * (1.0 - yl) * 0.25 + (hash(px + 7.0) - 0.5) * noise * 0.03;
+          // Film grain: clumpy, a little colour, the same strength at every brightness.
+          if (grain > 0.0) {
+            vec2 gp = floor(vUv / texel / grainSize);
+            vec3 gn = vec3(hash(gp + 3.1), hash(gp + 9.7), hash(gp + 23.3)) - 0.5;
+            float gl = hash(gp + 51.9) - 0.5;
+            c += (gl * 0.8 + (gn - dot(gn, vec3(0.333))) * 0.5) * grain * 0.35;
+          }
           if (banding > 1.0) c = floor(c * banding + 0.5) / banding;
         }
         gl_FragColor = vec4(clamp(c, 0.0, 1.0), 1.0);
       }`, {
       src: { value: null }, texel: { value: new THREE.Vector2() },
       artifacts: { value: 1 }, softness: { value: 0 }, softH: { value: 0 }, sharpen: { value: 0 }, sharpenLimit: { value: 0 },
-      chroma: { value: 0 }, warmSat: { value: 0 }, shadowTint: { value: 0 }, banding: { value: 0 }, noise: { value: 0 }, blackLift: { value: 0 }, seed: { value: 0 },
+      chroma: { value: 0 }, warmSat: { value: 0 }, shadowTint: { value: 0 }, banding: { value: 0 }, noise: { value: 0 }, grain: { value: 0 }, grainSize: { value: 1.6 }, blackLift: { value: 0 }, seed: { value: 0 },
     });
   }
 
@@ -408,7 +417,7 @@ export class Digicam {
     e.softness.value = p.softness; e.softH.value = p.softnessH;
     e.sharpen.value = 0; e.sharpenLimit.value = 0;
     e.chroma.value = p.chromaBlur; e.warmSat.value = p.warmSaturation; e.shadowTint.value = p.shadowTint;
-    e.banding.value = p.banding; e.noise.value = p.noise; e.blackLift.value = p.blackLift;
+    e.banding.value = p.banding; e.noise.value = p.noise; e.grain.value = p.grain; e.grainSize.value = p.grainSize; e.blackLift.value = p.blackLift;
     e.seed.value = (this.frame++ % 997) * 0.731;
     gl.setRenderTarget(out);
     gl.render(this.encodePass.scene, this.cam);

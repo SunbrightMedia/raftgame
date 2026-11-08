@@ -18,8 +18,8 @@ export const FACE_FRAMES: Record<FaceKey, { n: Axis; r: Axis; u: Axis; shade: nu
 };
 const BOX_INDEX: Record<FaceKey, number> = { px: 0, nx: 1, py: 2, ny: 3, pz: 4, nz: 5 };
 
-/** Faces per brush in the id scheme (prisms may have up to 62 sides). */
-export const FACES_PER_BRUSH = 64;
+/** Faces per brush in the id scheme (prisms may have up to 126 sides: curves need many). */
+export const FACES_PER_BRUSH = 128;
 export const faceId = (brushId: number, index: number) => brushId * FACES_PER_BRUSH + index;
 
 /**

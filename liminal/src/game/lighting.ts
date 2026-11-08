@@ -10,7 +10,7 @@ import type { Storage } from '../data/storage';
 
 
 /** Bump when the baker's output changes meaning, so old caches are ignored. */
-const BAKE_VERSION = 5;
+const BAKE_VERSION = 6;
 
 /**
  * Cached lightmap: RGBE (Ward's shared-exponent format, as in Radiance .hdr)

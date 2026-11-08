@@ -168,6 +168,8 @@ export class Game {
     worldUniforms.fogNear.value = s.fog.near;
     worldUniforms.fogFar.value = s.fog.far;
     worldUniforms.fogLuminance.value = s.fog.luminance;
+    worldUniforms.fogHaze.value = s.fog.haze ? 1 : 0;
+    worldUniforms.tileBreakup.value = s.render.tileBreakup;
     worldUniforms.specScale.value = s.surface.reflections;
     this.updateSky(s);
     worldUniforms.roughnessAdd.value = s.surface.roughness;

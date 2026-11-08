@@ -1,4 +1,4 @@
-import { type Axis, type Face, type LightmapRect, type SolidPlanes, facePoint, insideSolid } from './faces';
+import { type Axis, type Face, type LightmapRect, type SolidPlanes, facePoint, insideSolid, FACES_PER_BRUSH } from './faces';
 import { INCH } from './units';
 
 /**
@@ -528,7 +528,7 @@ function castRay(boxes: BakeBox[], ox: number, oy: number, oz: number, dx: numbe
   for (const b of boxes) {
     const t = clipRay(b, ox, oy, oz, dx, dy, dz);
     if (!t || t.t0 <= EPS || t.t0 > 1) continue;
-    if (!best || t.t0 < best.t) best = { t: t.t0, faceId: b.brushId * 64 + t.face };
+    if (!best || t.t0 < best.t) best = { t: t.t0, faceId: b.brushId * FACES_PER_BRUSH + t.face };
   }
   return best;
 }

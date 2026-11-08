@@ -45,8 +45,13 @@ writeFileSync(new URL('../maps/flatgrass.json', import.meta.url), serializeMap({
     // Huge faces: coarse luxels keep the bake quick; the platform's faces get finer ones automatically.
     light: { luxelSize: 128, skyLuminance: 7000, skyZenith: '#3a5cb2', skyHorizon: '#e4e8ec' },
     // Fog = the horizon colour at the sky's brightness there (7000 / 0.25), so far grass melts into the sky.
-    fog: { enabled: true, color: '#e4e8ec', luminance: 28000, near: 3000, far: 90000 },
-    camera: { flash: false, whiteBalanceK: 5600 },
+    // Aerial haze: the photo's structure is low-contrast blue-grey, half dissolved
+    // into the sky. The haze is dimmer than the horizon sky (a bright haze washed
+    // the whole field white) and starts past arm's length.
+    fog: { enabled: true, haze: true, color: '#c9d2dc', luminance: 9000, near: 1500, far: 120000 },
+    render: { tileBreakup: 0.35 },
+    // Grain over everything, sky included, as in the photo.
+    camera: { flash: false, whiteBalanceK: 5600, grain: 0.35 },
   },
 }));
 console.log(`wrote maps/flatgrass.json: ${brushes.length} brushes`);

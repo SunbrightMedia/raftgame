@@ -6,6 +6,7 @@ in the tweak panel, or change the default back in code).
 
 | date | setting | old → new | why |
 |---|---|---|---|
+| 2026-11-08 | Fog › Haze (new), Fog end max 40000 → 200000; Render › Texture repeat breakup (new, 0); Camera › Film grain / size (new, 0 / 1.6) | — | flatgrass vibe: haze, grain, no tiling grid (map sets haze, breakup 0.35, grain 0.35) |
 | 2026-11-08 | Lighting › Sky colours / Horizon haze height (new) | #2f66c9 / #bcd4ea (brightness-normalised) → #3a5cb2 / #e4e8ec (relative brightness), 2.5° | Match the flatgrass reference photo's white-to-blue sky |
 | 2026-11-08 | Lighting › Sky brightness / colours (new); Luxel size max 64 → 256 | 0 (indoors) / #2f66c9 / #bcd4ea | Outdoor maps (flatgrass) |
 | 2026-11-08 | Camera › Lamp glow (new) / Overexposed surfaces keep colour | 8 / 0.85 → 0.6 | Panels had lost their glow; neon carpet may whiten a little |

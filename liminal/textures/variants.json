@@ -68,16 +68,16 @@
       "contrast": 0.5
     },
     {
-      "name": "flatgrass/concrete",
-      "from": "ind/concrete_floor",
-      "color": "#a9a8a2",
-      "contrast": 0.8
+      "name": "flatgrass/concrete_smooth",
+      "from": "ind/concrete_wall",
+      "color": "#9c9b96",
+      "contrast": 0.45
     },
     {
-      "name": "flatgrass/brick",
-      "from": "ind/brick_painted",
-      "color": "#8c8b87",
-      "contrast": 1.0
+      "name": "flatgrass/concrete_dark",
+      "from": "ind/concrete_wall",
+      "color": "#7a7973",
+      "contrast": 0.45
     }
   ]
 }
