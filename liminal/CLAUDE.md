@@ -38,3 +38,6 @@ it *feels* right; that's the user's call.
   https://claude.ai/artifact/8ZcuArU2M8xGFsXWTvYfWh).
 - **Movement rework is planned: take heavily from GZDoom** (the user's call).
   Until then the Source-style pmove stays as is; don't tune it piecemeal.
+- **Before building or changing any room, read STYLE.md, especially
+  "Standing preferences".** They are the user's accumulated feedback and must
+  hold for every room without being repeated. Add new feedback there.

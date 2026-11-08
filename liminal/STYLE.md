@@ -13,6 +13,54 @@ waiting for the user to confirm or reject.
 
 ---
 
+## Standing preferences (apply to EVERY room)
+
+These come from the user's feedback on built rooms. They are not
+suggestions: every room, prop and generator rule must follow them without
+the user having to say them again.
+
+**Overall target**
+- **Source-engine liminal, not Minecraft retro.** Textures smooth and fairly
+  high resolution (HL2/GMod-era), no colour-palette crushing by default, no
+  chunky pixels. "Retro" means the era of the *places*, not low-fi graphics.
+
+**Lighting mood is per room**
+- **Residential rooms: moody and warm.** Dim overall, warm (2700K-ish) pot
+  lights making soft pools, darker corners, nothing blown out. The feel the
+  user calls "Gen X soft club": soft, glowy, a bit dreamy, late night.
+- **Sterile lighting is for specific places only** (offices, clinics,
+  institutional halls): flat, bright, cool fluorescent. Never default to it.
+- Light colour stays near neutral-warm; a room's tint comes from its
+  materials (core principle 2).
+
+**Proportions**
+- **Openings must match their reference.** A cased opening into a side room
+  is about door-and-a-half wide (~48–56"), not a wall-wide gap; only the
+  main "open-concept" opening is wide. When unsure, err narrower.
+- Check every layout against the reference photo's *walls*, not just its
+  contents: which wall each opening is on, and where every door leads.
+  Baseboards meeting walls are the clue for how spaces connect.
+
+**Hardware and small details are real objects, not flat stickers**
+- **Doors:** the knob sits on the stile (the solid edge), about 2.4" from
+  the edge at 36" high, never on a panel. Hinges on the other side.
+- **Light switches:** a plate *and* a toggle/rocker tab that sticks out.
+- Anything you'd touch in real life (knobs, switches, outlets, handles) has
+  depth.
+
+**Furniture must not be blocky**
+- Soft, rounded forms: rounded corners in plan, separate cushions with
+  small gaps, crowned (slightly domed) cushion tops, arms lower and softer
+  than the back. Box-stacks are not acceptable for upholstered furniture.
+- Prefer real 3D models (CC0) for organic or complex things (plants,
+  sofas, chairs) once model loading exists.
+
+**Materials that are approved**
+- The plush carpet (soft haze with gentle mottling, recoloured per room)
+  is good. Reuse it for any wall-to-wall carpet.
+
+---
+
 ## Core principles
 
 1. **Layouts are slightly illogical.** (user) Spaces should not quite make

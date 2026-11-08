@@ -60,6 +60,12 @@
       "from": "fixture/chrome",
       "color": "#b8913f",
       "contrast": 0.8
+    },
+    {
+      "name": "pmp/switch_toggle",
+      "from": "house/trim_white",
+      "color": "#ece3cf",
+      "contrast": 0.5
     }
   ]
 }

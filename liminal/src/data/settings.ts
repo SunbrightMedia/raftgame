@@ -67,12 +67,12 @@ export const SETTINGS = {
     label: 'Render',
     help: 'The full look panel (grading, grain, bloom) arrives in Milestone 3.',
     defs: {
-      internalHeight: num('Internal resolution (lines)', 480, 0, 2160, 1, 'The game renders this many lines tall and upscales. 0 = native.', 'px'),
+      internalHeight: num('Internal resolution (lines)', 720, 0, 2160, 1, 'The game renders this many lines tall and upscales. 0 = native.', 'px'),
       msaa: num('Antialiasing (MSAA)', 4, 0, 8, 1, 'Multisample antialiasing on the internal render: smooths jagged geometry edges. 0 = off (crunchier), 4 = smooth.', 'x'),
       upscale: select('Upscale filter', 'linear', ['nearest', 'linear'] as const, 'nearest = crunchy pixels, linear = soft CRT-ish.'),
       faceShade: num('Fullbright face shading', 0.6, 0, 1, 0.01, 'Fake per-face shading used only when baked lighting is off. 0 = flat, 1 = strong.'),
       brightness: num('Brightness', 1, 0, 3, 0.01),
-      textureFilter: select('Texture filter', 'nearest', ['nearest', 'linear'] as const, 'nearest = crisp texels (retro), linear = smooth.'),
+      textureFilter: select('Texture filter', 'linear', ['nearest', 'linear'] as const, 'nearest = crisp texels (retro), linear = smooth.'),
       clearColor: color('Void colour', '#0b0c0e'),
     },
   },
@@ -99,15 +99,15 @@ export const SETTINGS = {
     label: 'Textures',
     help: 'The texture crusher: clean CC0 photos in, 1998–2004 out. Doom ≈ density 1, 256 shared colours. HL2 ≈ density 3–4, no palette.',
     defs: {
-      density: num('Texel density', 2, 0.25, 8, 0.25, 'Texels per world unit (inch). Doom 1, HL2 ~4.', 'px/u'),
+      density: num('Texel density', 4, 0.25, 8, 0.25, 'Texels per world unit (inch). Doom 1, HL2 ~4.', 'px/u'),
       maxSize: num('Max texture size', 512, 16, 2048, 16, undefined, 'px'),
-      colors: num('Colours per texture', 64, 0, 256, 1, '0 = no reduction. Low values give banding/posterised look.'),
+      colors: num('Colours per texture', 0, 0, 256, 1, '0 = no reduction. Low values give banding/posterised look.'),
       sharedPalette: bool('Shared palette', false, 'All textures use one palette (Doom PLAYPAL-style), which ties everything together.'),
       dither: num('Dither', 0, 0, 1, 0.05, 'Ordered dithering when reducing colours (PS1-ish).'),
-      contrast: num('Contrast', 1.1, 0.3, 2.5, 0.01),
-      saturation: num('Saturation', 0.85, 0, 2, 0.01),
+      contrast: num('Contrast', 1.05, 0.3, 2.5, 0.01),
+      saturation: num('Saturation', 0.95, 0, 2, 0.01),
       brightness: num('Brightness', 1, 0.3, 2, 0.01),
-      sharpen: num('Sharpen', 0.35, 0, 2, 0.05, 'Old textures were sharpened after shrinking so they read at a distance.'),
+      sharpen: num('Sharpen', 0.2, 0, 2, 0.05, 'Old textures were sharpened after shrinking so they read at a distance.'),
     },
   },
   fog: {
@@ -174,12 +174,12 @@ export function diffSettings(s: Settings, base: Settings = DEFAULT_SETTINGS): Se
  * Applying one only touches the values it lists.
  */
 export const PRESETS: Record<string, SettingsPatch> = {
-  'Look: GMod / Source 2004': {
-    textures: { density: 3, colors: 0, sharedPalette: false, dither: 0, contrast: 1.05, saturation: 0.9, sharpen: 0.25, maxSize: 512 },
+  'Look: Source / GMod (default)': {
+    textures: { density: 4, colors: 0, sharedPalette: false, dither: 0, contrast: 1.05, saturation: 0.95, sharpen: 0.2, maxSize: 512 },
     render: { internalHeight: 720, upscale: 'linear', textureFilter: 'linear' },
     light: { luxelSize: 16, filter: 'linear', bounces: 1 },
   },
-  'Look: Late-90s (default)': {
+  'Look: Late-90s crunchy': {
     textures: { density: 2, colors: 64, sharedPalette: false, dither: 0, contrast: 1.1, saturation: 0.85, sharpen: 0.35, maxSize: 512 },
     render: { internalHeight: 480, upscale: 'linear', textureFilter: 'nearest' },
     light: { luxelSize: 16, filter: 'linear', bounces: 1 },

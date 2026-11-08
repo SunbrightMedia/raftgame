@@ -36,6 +36,16 @@ function prism(points: [number, number][], z0: number, z1: number, tex: string, 
 const circle = (cx: number, cy: number, r: number, n: number): [number, number][] =>
   Array.from({ length: n }, (_, i) => [cx + r * Math.cos((i / n) * Math.PI * 2), cy + r * Math.sin((i / n) * Math.PI * 2)]);
 const deg = (d: number) => (d * Math.PI) / 180;
+/** A rectangle with rounded corners, as a convex outline (for soft furniture). */
+function roundRect(x0: number, y0: number, x1: number, y1: number, r: number, seg = 3): [number, number][] {
+  const pts: [number, number][] = [];
+  const corners: [number, number, number][] = [[x1 - r, y0 + r, -90], [x1 - r, y1 - r, 0], [x0 + r, y1 - r, 90], [x0 + r, y0 + r, 180]];
+  for (const [cx, cy, a0] of corners) for (let i = 0; i <= seg; i++) {
+    const a = deg(a0 + (90 * i) / seg);
+    pts.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]);
+  }
+  return pts;
+}
 
 /**
  * A curved band (part of a ring) as convex quads, with the outer face's
@@ -83,9 +93,10 @@ function casingX(o0: number, o1: number, height: number, faceY: number, dir: 1 |
   box([o0 - w, ya, height], [o1 + w, yb, height + w], tex);
 }
 
-function potLight(x: number, y: number, ceiling: number, intensity = 2.1): void {
+function potLight(x: number, y: number, ceiling: number, intensity = 1.35): void {
   prism(circle(x, y, 3, 8), ceiling - 0.5, ceiling, 'fixture/potlight', { solid: false });
-  entities.push({ id: 5000 + entities.length, class: 'light', origin: [x, y, ceiling - 2], props: { color: '#ffe2bd', intensity, fifty: 80, emit: 'down' } });
+  // Warm (~2700K) and fairly tight, so each makes a soft pool and corners stay dim.
+  entities.push({ id: 5000 + entities.length, class: 'light', origin: [x, y, ceiling - 2], props: { color: '#ffcc94', intensity, fifty: 62, emit: 'down' } });
 }
 
 const MINT = 'pmp/paint_mint', WARM = 'pmp/paint_warmwhite', CEIL = 'pmp/ceiling_white';
@@ -130,10 +141,10 @@ function casingY(o0: number, o1: number, height: number, faceX: number, dir: 1 |
 
   box([-6, -6, 0], [246, 0, 96], MINT);   // front (behind the camera)
   box([240, 0, 0], [246, 222, 96], MINT); // right
-  // Left wall, with the den opening y 132..206 (h 84) near the back corner.
-  box([-6, 0, 0], [0, 132, 96], MINT, { faces: { py: jamb } });
-  box([-6, 132, 84], [0, 206, 96], MINT, { faces: { nz: jamb } });
-  box([-6, 206, 0], [0, 242, 96], MINT, { faces: { ny: jamb } });
+  // Left wall, with the den opening y 150..200 (50" wide, h 84) near the back corner.
+  box([-6, 0, 0], [0, 150, 96], MINT, { faces: { py: jamb } });
+  box([-6, 150, 84], [0, 200, 96], MINT, { faces: { nz: jamb } });
+  box([-6, 200, 0], [0, 242, 96], MINT, { faces: { ny: jamb } });
   // Back wall: door x 24..56 (h 80) and the wide opening x 92..188 (h 88), both into the pink room.
   box([0, 216, 0], [24, 222, 96], MINT, { faces: { px: jamb } });
   box([24, 216, 80], [56, 222, 96], MINT, { faces: { nz: jamb } });
@@ -144,19 +155,26 @@ function casingY(o0: number, o1: number, height: number, faceX: number, dir: 1 |
   box([0, 0, 88], [14, 216, 96], MINT, { faces: { nz: { tex: CEIL } } });
 
   // The door, closed, white six-panel, brass knob on both sides.
-  box([24, 218, 0], [56, 219.75, 80], 'house/door_6panel', { faces: { ny: { offset: [-24, 0] }, py: { offset: [-56, 0] } } });
-  box([50, 216.2, 35], [52, 218, 37.5], 'pmp/brass');
-  box([50, 219.75, 35], [52, 221.8, 37.5], 'pmp/brass');
+  // The door texture is drawn for a 36" door; squeeze it onto this 32" one.
+  const dS = 32 / 36;
+  box([24, 218, 0], [56, 219.75, 80], 'house/door_6panel', { faces: { ny: { scale: [dS, 1], offset: [-24 / dS, 0] }, py: { scale: [dS, 1], offset: [56 / dS, 0] } } });
+  // Knob on the latch stile, ~2.4" from the edge at 36" high, with a round-ish rosette; both sides.
+  for (const [face, dir] of [[218, -1], [219.75, 1]] as const) {
+    box([52.4, Math.min(face, face + dir * 0.3), 34.8], [54.8, Math.max(face, face + dir * 0.3), 37.2], 'pmp/brass');
+    box([52.9, Math.min(face + dir * 0.3, face + dir * 2.2), 35.3], [54.3, Math.max(face + dir * 0.3, face + dir * 2.2), 36.7], 'pmp/brass');
+  }
 
-  casingY(132, 206, 84, 0, 1);         // den opening, blue side
+  casingY(150, 200, 84, 0, 1);         // den opening, blue side
   casingX(24, 56, 80, 216, -1);         // door, blue side
   casingX(92, 188, 88, 216, -1);        // wide opening, blue side
   // Almond rocker switch plates at 48".
   box([0, 116, 46], [0.2, 119, 50.5], 'house/switchplate', { faces: { px: { offset: [-116, -46] } } });
+  box([0.2, 117.1, 47.6], [0.65, 117.9, 49], 'pmp/switch_toggle'); // the toggle sticks out
   box([64, 215.8, 46], [67, 216, 50.5], 'house/switchplate', { faces: { ny: { offset: [-64, -46] } } });
+  box([65.1, 215.35, 47.6], [65.9, 215.8, 49], 'pmp/switch_toggle');
 
   baseboards(0, 0, 240, 216, [
-    { side: 'w', from: 129, to: 209 }, { side: 'n', from: 21, to: 59 }, { side: 'n', from: 89, to: 191 },
+    { side: 'w', from: 147, to: 203 }, { side: 'n', from: 21, to: 59 }, { side: 'n', from: 89, to: 191 },
   ]);
   for (const [x, y] of [[70, 60], [180, 60], [70, 156], [180, 156]]) potLight(x, y, 96);
 
@@ -180,22 +198,28 @@ function casingY(o0: number, o1: number, height: number, faceX: number, dir: 1 |
   box([-150, 94, 0], [-6, 100, 92], MINT);
   box([-150, 236, 0], [-6, 242, 92], MINT);
   // The blue room's left wall is this room's right wall (x -6..0); add the den-side casing.
-  casingY(132, 206, 84, -6, -1);
-  baseboards(-150, 100, -6, 236, [{ side: 'e', from: 129, to: 209 }, { side: 'w', from: 113, to: 223 }]);
+  casingY(150, 200, 84, -6, -1);
+  baseboards(-150, 100, -6, 236, [{ side: 'e', from: 147, to: 203 }, { side: 'w', from: 113, to: 223 }]);
 
-  // Sectional sofa along the far (left) wall: base, seat cushions with gaps, back cushions, arms.
-  box([-150, 120, 0], [-120, 216, 9], FABRIC);
-  for (const [y0, y1] of [[120.5, 151.5], [152.5, 183.5], [184.5, 215.5]]) {
-    box([-141, y0, 9], [-120, y1, 17], FABRIC);
-    box([-150, y0, 9], [-141, y1, 32], FABRIC);
+  // Sofa along the far (left) wall, built soft: rounded corners in plan,
+  // separate cushions with gaps and crowned tops, arms lower than the back.
+  prism(roundRect(-150, 113, -120, 223, 2), 0, 9, FABRIC);
+  for (const [y0, y1] of [[113, 121], [215, 223]]) {
+    prism(roundRect(-150, y0, -119, y1, 3.5), 9, 21, FABRIC);
+    prism(roundRect(-149, y0 + 1, -120, y1 - 1, 2.5), 21, 23, FABRIC);
   }
-  box([-150, 113, 0], [-118, 120, 24], FABRIC);
-  box([-150, 216, 0], [-118, 223, 24], FABRIC);
+  for (let i = 0; i < 3; i++) {
+    const y0 = 121.5 + i * 31.2, y1 = y0 + 30.2;
+    prism(roundRect(-142, y0, -121, y1, 3), 9, 15, FABRIC);         // seat cushion
+    prism(roundRect(-141, y0 + 1.2, -122, y1 - 1.2, 2.5), 15, 16.5, FABRIC); // its crown
+    prism(roundRect(-150, y0, -142.5, y1, 2.5), 9, 29, FABRIC);     // back cushion
+    prism(roundRect(-149.5, y0 + 1.2, -143.5, y1 - 1.2, 2), 29, 31, FABRIC);
+  }
   // Round ottoman: striped band below a green cushion.
   prism(circle(-90, 168, 17, 24), 0, 11, 'house/ottoman_band', { faces: { pz: { tex: FABRIC } } });
   prism(circle(-90, 168, 17.5, 24), 11, 16, FABRIC);
-  potLight(-80, 140, 92, 1.8);
-  potLight(-80, 200, 92, 1.5);
+  potLight(-80, 140, 92, 1.2);
+  potLight(-80, 200, 92, 1.0);
 }
 
 // ------------------------------------------------------------------ pink bar room
@@ -224,10 +248,10 @@ function casingY(o0: number, o1: number, height: number, faceX: number, dir: 1 |
   box([6, 396, SZ0], [300, 420, SZ1], WARM);
   box([6, 246, SZ0], [30, 396, SZ1], WARM);
   box([276, 246, SZ0], [300, 396, SZ1], WARM);
-  const cove = (x: number, y: number) => entities.push({ id: 5000 + entities.length, class: 'light', origin: [x, y, SZ1 + 2], props: { color: '#ffd9a8', intensity: 0.9, fifty: 30, emit: 'up' } });
+  const cove = (x: number, y: number) => entities.push({ id: 5000 + entities.length, class: 'light', origin: [x, y, SZ1 + 2], props: { color: '#ffc68a', intensity: 0.8, fifty: 30, emit: 'up' } });
   for (let x = 40; x <= 268; x += 38) { cove(x, 243); cove(x, 399); }
   for (let y = 270; y <= 372; y += 34) { cove(33, y); cove(273, y); }
-  for (const [x, y] of [[70, 290], [150, 290], [230, 290], [70, 350], [150, 350], [230, 350]]) potLight(x, y, 104, 1.4);
+  for (const [x, y] of [[70, 290], [150, 290], [230, 290], [70, 350], [150, 350], [230, 350]]) potLight(x, y, 104, 1.1);
 
   // Tall display cabinet on the back wall: orange wood, frosted glass, gold lines.
   box([120, 404, 0], [156, 420, 84], WOOD, { faces: { ny: { tex: 'house/cabinet_glass', offset: [-120, 0] } } });
@@ -252,5 +276,12 @@ function casingY(o0: number, o1: number, height: number, faceX: number, dir: 1 |
 
 entities.push({ id: 1, class: 'player_start', origin: [205, 25, 0], angles: [0, 122, 0] });
 
-writeFileSync(new URL('../maps/pmp_basement.json', import.meta.url), serializeMap({ format: MAP_FORMAT, version: MAP_VERSION, name: 'pmp_basement', brushes, entities }));
+writeFileSync(new URL('../maps/pmp_basement.json', import.meta.url), serializeMap({
+  format: MAP_FORMAT, version: MAP_VERSION, name: 'pmp_basement', brushes, entities,
+  // This room's mood (STYLE.md: residential = moody and warm, never sterile).
+  settings: {
+    light: { ambient: '#0e0b09', bounceScale: 1.35, exposure: 1.0 },
+    fog: { enabled: true, color: '#140e0a', near: 120, far: 2600 },
+  },
+}));
 console.log(`wrote maps/pmp_basement.json: ${brushes.length} brushes, ${entities.length} entities`);

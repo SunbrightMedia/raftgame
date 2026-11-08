@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import type { Storage } from '../data/storage';
 import type { ConfigStore } from '../data/config';
-import type { Settings } from '../data/settings';
+import { type Settings, DEFAULT_SETTINGS, cloneSettings, applyPatch, diffSettings } from '../data/settings';
 import { parseMap, type MapFile } from '../data/map';
 import { LowResRenderer } from '../engine/render/renderer';
 import { TextureRegistry } from '../engine/render/textures';
@@ -46,8 +46,8 @@ export class Game {
   /** Load textures and start reacting to settings. Call once before loading a map. */
   async init(): Promise<void> {
     await this.textures.init();
-    this.applySettings(this.config.values);
-    this.config.onChange((s) => this.applySettings(s));
+    this.applySettings();
+    this.config.onChange(() => this.applySettings());
   }
 
   private updateLightUniforms(s: Settings): void {
@@ -60,9 +60,24 @@ export class Game {
     }
   }
 
-  get settings(): Settings { return this.config.values; }
+  /**
+   * The settings actually in effect: code defaults, then the current map's
+   * own settings (its lighting mood, look...), then anything the user has
+   * changed in the panel, which always wins.
+   */
+  private effective: Settings = cloneSettings(DEFAULT_SETTINGS);
+  get settings(): Settings { return this.effective; }
 
-  applySettings(s: Settings): void {
+  private computeEffective(): void {
+    const e = cloneSettings(DEFAULT_SETTINGS);
+    if (this.level?.map.settings) applyPatch(e, this.level.map.settings);
+    applyPatch(e, diffSettings(this.config.values));
+    this.effective = e;
+  }
+
+  applySettings(): void {
+    this.computeEffective();
+    const s = this.effective;
     this.renderer.internalHeight = Math.round(s.render.internalHeight);
     this.renderer.upscale = s.render.upscale as 'nearest' | 'linear';
     this.renderer.msaa = s.render.msaa;
@@ -98,10 +113,12 @@ export class Game {
     this.level = level;
     this.scene.add(level.root);
     worldUniforms.lightmapOn.value = 0;
+    this.applySettings();
     this.lighting.request(level, this.settings, this.textures, true);
     if (this.player) this.player.setLevel(level);
     else this.player = new Player(level, this.settings);
-    this.mapLabel = `${label}: ${map.brushes.length} brushes, ${map.entities.length} entities`;
+    const own = map.settings ? Object.values(map.settings).reduce<number>((n, c) => n + Object.keys(c as object).length, 0) : 0;
+    this.mapLabel = `${label}: ${map.brushes.length} brushes, ${map.entities.length} entities${own ? `, ${own} map settings` : ''}`;
   }
 
   start(): void {
