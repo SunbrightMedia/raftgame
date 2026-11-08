@@ -290,7 +290,9 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
           L = (Lbaked + Edyn / PI * diffuseColor * (1.0 - env) + spec * specScale) * brightness;
         }
         float f = fogOn * clamp((vDepth - fogNear) / max(1.0, fogFar - fogNear), 0.0, 1.0);
-        gl_FragColor = vec4(mix(L, toLinear(fogColor) * fogLuminance, f), 1.0);
+        // Alpha marks light sources (lamp lenses, panels) for the camera pass:
+        // only they get the lamp-edge line and fringe, not overexposed surfaces.
+        gl_FragColor = vec4(mix(L, toLinear(fogColor) * fogLuminance, f), isSource);
       }`,
   });
 }

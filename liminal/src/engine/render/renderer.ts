@@ -43,7 +43,7 @@ export class LowResRenderer {
   }
 
   setClearColor(hex: string): void {
-    this.gl.setClearColor(new THREE.Color(hex), 1);
+    this.gl.setClearColor(new THREE.Color(hex), 0); // alpha 0: not a light source (see digicam)
   }
 
   render(scene: THREE.Scene): void {

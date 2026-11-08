@@ -151,6 +151,8 @@ export class Digicam {
       }
       float lumAt(vec2 uv) { return dot(texture2D(src, uv).rgb * gain * wb, vec3(0.2126, 0.7152, 0.0722)); }
       float blown(vec2 uv) { return smoothstep(clip, clip * 1.6, lumAt(uv)); }
+      // Brightness of light sources only (the world shader writes alpha = 1 on them).
+      float srcLumAt(vec2 uv) { vec4 t = texture2D(src, uv); return dot(t.rgb * gain * wb, vec3(0.2126, 0.7152, 0.0722)) * t.a; }
       // Video "knee": above knee×clip, highlights are compressed logarithmically
       // so that \`rolloff\` more stops still fit below clip. A bright room seen
       // from a dim one stays readable instead of flashing white; only lamps,
@@ -201,8 +203,8 @@ export class Digicam {
           float near = 0.0, nb = 0.0;
           for (int i = 0; i < 8; i++) {
             vec2 dir = vec2(cos(float(i) * 0.785398), sin(float(i) * 0.785398)) * texel;
-            near = max(near, smoothstep(clip, clip * 1.6, lumAt(uv + dir * 1.1)));
-            nb = max(nb, smoothstep(clip, clip * 1.6, lumAt(uv + dir * 2.4)));
+            near = max(near, smoothstep(clip, clip * 1.6, srcLumAt(uv + dir * 1.1)));
+            nb = max(nb, smoothstep(clip, clip * 1.6, srcLumAt(uv + dir * 2.4)));
           }
           float ring = edgeDark * near * (1.0 - self);
           c *= 1.0 - ring;
