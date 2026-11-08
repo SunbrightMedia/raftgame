@@ -83,7 +83,7 @@ export interface BakeParams {
    * Open sky (outdoor maps): rays that escape see sky luminance (cd/m²),
    * coloured from horizon to zenith (linear, luminance 1 each). Absent = indoors.
    */
-  sky?: { luminance: number; zenith: RGB; horizon: RGB };
+  sky?: { luminance: number; zenith: RGB; horizon: RGB; band: number };
   /** Falloff curve: AO is raised to this power, so open wall stays untouched
    *  while creases (wall bases, corners) get much darker. 1 = linear. */
   aoCurve?: number;
@@ -242,6 +242,13 @@ export function bake(input: BakeInput): BakeOutput {
     for (let k = 0; k < fs.valid.length; k++) {
       if (!fs.valid[k]) continue;
       const px = fs.pos[k * 3], py = fs.pos[k * 3 + 1], pz = fs.pos[k * 3 + 2];
+      // Shading normal: smoothed across rounded corners (Face.nS), else the face's.
+      let nx = f.n[0], ny = f.n[1], nz = f.n[2];
+      if (f.nS) {
+        const t = Math.min(1, Math.max(0, ((k % fs.rect.w) * fs.stepS) / f.width));
+        nx = f.nS[0][0] + (f.nS[1][0] - f.nS[0][0]) * t; ny = f.nS[0][1] + (f.nS[1][1] - f.nS[0][1]) * t; nz = f.nS[0][2] + (f.nS[1][2] - f.nS[0][2]) * t;
+        const l = Math.hypot(nx, ny, nz) || 1; nx /= l; ny /= l; nz /= l;
+      }
       let r = 0, g = 0, b = 0, dr = 0, dg = 0, db = 0, unshadowed = 0, lit = 0;
       for (const li of cand) {
         const l = lights[li];
@@ -249,7 +256,7 @@ export function bake(input: BakeInput): BakeOutput {
         const d2 = dx * dx + dy * dy + dz * dz;
         if (d2 > ranges[li] * ranges[li]) continue;
         const d = Math.sqrt(d2) || 1e-6;
-        const ndotl = (dx * f.n[0] + dy * f.n[1] + dz * f.n[2]) / d;
+        const ndotl = (dx * nx + dy * ny + dz * nz) / d;
         if (ndotl <= 0) continue;
         const I = intensityToward(l, -dx / d, -dy / d, -dz / d);
         if (I <= 0) continue;
@@ -303,7 +310,7 @@ export function bake(input: BakeInput): BakeOutput {
           if (!hit) {
             // Escaped: open sky above the horizon adds its radiance (π·L as exitance).
             if (p.sky && dz > 0) {
-              const t = Math.sqrt(dz), L = p.sky.luminance * Math.PI;
+              const t = 1 - Math.exp(-dz / p.sky.band), L = p.sky.luminance * Math.PI;
               r += L * (p.sky.horizon[0] + (p.sky.zenith[0] - p.sky.horizon[0]) * t);
               g += L * (p.sky.horizon[1] + (p.sky.zenith[1] - p.sky.horizon[1]) * t);
               b += L * (p.sky.horizon[2] + (p.sky.zenith[2] - p.sky.horizon[2]) * t);

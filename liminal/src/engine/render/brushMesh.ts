@@ -32,7 +32,10 @@ export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout
     for (const [s, t] of outline) {
       const p = facePoint(f, s, t);
       bt.pos.push(p[0], p[1], p[2]);
-      bt.nrm.push(f.n[0], f.n[1], f.n[2]);
+      if (f.nS && !f.poly) {
+        const nn = f.nS[s > f.width / 2 ? 1 : 0];
+        bt.nrm.push(nn[0], nn[1], nn[2]);
+      } else bt.nrm.push(f.n[0], f.n[1], f.n[2]);
       // World-aligned texture projection.
       const wu = p[0] * f.r[0] + p[1] * f.r[1] + p[2] * f.r[2];
       const wv = p[0] * f.u[0] + p[1] * f.u[1] + p[2] * f.u[2];

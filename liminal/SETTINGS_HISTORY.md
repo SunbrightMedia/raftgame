@@ -6,6 +6,7 @@ in the tweak panel, or change the default back in code).
 
 | date | setting | old → new | why |
 |---|---|---|---|
+| 2026-11-08 | Lighting › Sky colours / Horizon haze height (new) | #2f66c9 / #bcd4ea (brightness-normalised) → #3a5cb2 / #e4e8ec (relative brightness), 2.5° | Match the flatgrass reference photo's white-to-blue sky |
 | 2026-11-08 | Lighting › Sky brightness / colours (new); Luxel size max 64 → 256 | 0 (indoors) / #2f66c9 / #bcd4ea | Outdoor maps (flatgrass) |
 | 2026-11-08 | Camera › Lamp glow (new) / Overexposed surfaces keep colour | 8 / 0.85 → 0.6 | Panels had lost their glow; neon carpet may whiten a little |
 | 2026-11-08 | Camera › White balance tint; Overexposed surfaces keep colour | (new) 0; (new) 0.85 | Per-map colour cast; neon carpet went white under light |

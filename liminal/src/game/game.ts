@@ -11,7 +11,7 @@ import { angleVectors } from '../engine/vec3';
 import { Input } from './input';
 import { Level } from './level';
 import { Player } from './player';
-import { Lighting, mapLights, MAX_DYNAMIC, hexToLinearNorm } from './lighting';
+import { Lighting, mapLights, MAX_DYNAMIC, skyColour } from './lighting';
 import { Sky } from '../engine/render/sky';
 
 /**
@@ -119,7 +119,7 @@ export class Game {
       const pr = ((p.pitch ?? -60) * Math.PI) / 180, yr = ((p.yaw ?? 0) * Math.PI) / 180;
       sun = { dir: [-Math.cos(pr) * Math.cos(yr), -Math.cos(pr) * Math.sin(yr), -Math.sin(pr)], color: kelvinToLinear(p.kelvin ?? 5600) };
     }
-    this.sky.set(s.light.skyLuminance, hexToLinearNorm(s.light.skyZenith), hexToLinearNorm(s.light.skyHorizon), sun);
+    this.sky.set(s.light.skyLuminance, skyColour(s.light.skyZenith), skyColour(s.light.skyHorizon), sun, s.light.skyBand);
   }
 
   private updateLightUniforms(s: Settings): void {

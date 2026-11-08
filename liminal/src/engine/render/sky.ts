@@ -19,6 +19,7 @@ export class Sky {
         sunDir: { value: new THREE.Vector3(0, 0, 1) },
         sunOn: { value: 0 },
         sunColor: { value: new THREE.Vector3(1, 1, 1) },
+        band: { value: 0.04 },
       },
       vertexShader: /* glsl */ `
         varying vec3 vDir;
@@ -28,11 +29,11 @@ export class Sky {
         }`,
       fragmentShader: /* glsl */ `
         uniform vec3 zenith, horizon, sunDir, sunColor;
-        uniform float sunOn;
+        uniform float sunOn, band;
         varying vec3 vDir;
         void main() {
           vec3 d = normalize(vDir);
-          float t = sqrt(max(d.z, 0.0));
+          float t = 1.0 - exp(-max(d.z, 0.0) / band);
           vec3 L = mix(horizon, zenith, t);
           if (d.z < 0.0) L = horizon * mix(1.0, 0.55, smoothstep(0.0, 0.2, -d.z)); // below the horizon: haze
           float sun = sunOn * smoothstep(0.99996, 0.99999, dot(d, sunDir)); // ~0.5° disc
@@ -50,9 +51,10 @@ export class Sky {
   }
 
   /** luminance in cd/m²; colours linear, luminance-normalised; sun = direction TO the sun (or null). */
-  set(luminance: number, zenith: [number, number, number], horizon: [number, number, number], sun: { dir: [number, number, number]; color: [number, number, number] } | null): void {
+  set(luminance: number, zenith: [number, number, number], horizon: [number, number, number], sun: { dir: [number, number, number]; color: [number, number, number] } | null, bandDeg = 2.5): void {
     this.mesh.visible = luminance > 0;
     const u = this.mat.uniforms;
+    u.band.value = Math.sin((Math.max(0.1, bandDeg) * Math.PI) / 180);
     u.zenith.value.set(...zenith).multiplyScalar(luminance);
     u.horizon.value.set(...horizon).multiplyScalar(luminance);
     u.sunOn.value = sun ? 1 : 0;

@@ -48,7 +48,17 @@ export interface Face {
   poly?: [number, number][];
   shade: number;
   solid: boolean;
+  /**
+   * Smoothing (Source's smoothing groups): the shading normal at s = 0 and
+   * s = width, for prism sides that meet a neighbouring side at a shallow
+   * angle (rounded corners). Lighting interpolates between them so a curve
+   * built from flat segments shades round. Absent = flat.
+   */
+  nS?: [Axis, Axis];
 }
+
+/** Sides meeting at less than this angle are shaded as one smooth surface. */
+const SMOOTH_DEG = 40;
 
 /** A brush as a convex set of planes n·p ≤ d, with which face each plane is. */
 export interface SolidPlanes { brushId: number; planes: { n: Axis; d: number; face: number }[]; min: Axis; max: Axis }
@@ -135,17 +145,31 @@ function prismFaces(b: PrismBrushDef): Face[] {
   const pts = b.points;
   const h = b.z1 - b.z0;
   const solid = b.solid !== false;
+  const sideN = (k: number): Axis => {
+    const [a0, b0] = pts[(k + pts.length) % pts.length], [a1, b1] = pts[(k + 1) % pts.length];
+    const l = Math.hypot(a1 - a0, b1 - b0) || 1;
+    return [(b1 - b0) / l, -(a1 - a0) / l, 0];
+  };
+  const cosSmooth = Math.cos((SMOOTH_DEG * Math.PI) / 180);
+  const edgeN = (a: Axis, b: Axis): Axis => {
+    if (a[0] * b[0] + a[1] * b[1] < cosSmooth) return a;
+    const x = a[0] + b[0], y = a[1] + b[1], l = Math.hypot(x, y) || 1;
+    return [x / l, y / l, 0];
+  };
   pts.forEach(([x0, y0], k) => {
     const [x1, y1] = pts[(k + 1) % pts.length];
     const len = Math.hypot(x1 - x0, y1 - y0);
     if (len < 1e-6) return;
     const r: Axis = [(x1 - x0) / len, (y1 - y0) / len, 0];
     const n: Axis = [r[1], -r[0], 0];
+    const nA = edgeN(n, sideN(k - 1)), nB = edgeN(n, sideN(k + 1));
+    const smooth = nA !== n || nB !== n;
     const ft = faceTex(b, `side${k}`);
     out.push({
       id: faceId(b.id, k), brushId: b.id, key: `side${k}`, tex: ft.tex, scale: ft.scale, offset: ft.offset, rot: ft.rot,
       n, r, u: [0, 0, 1], origin: [x0, y0, b.z0], width: len, height: h,
       shade: 0.7 + 0.2 * Math.abs(n[1]) + 0.1 * Math.max(0, n[0]), solid,
+      ...(smooth ? { nS: [nA, nB] as [Axis, Axis] } : {}),
     });
   });
   // Top and bottom: polygon faces in the same frames as box tops/bottoms.

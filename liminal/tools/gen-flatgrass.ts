@@ -30,7 +30,11 @@ for (const b of geo.brushes) {
 
 const entities: EntityDef[] = [
   // The map's first spawn point (-512, 576, -12287) → z + 12800.
-  { id: 1, class: 'player_start', origin: [-512, 576, 513], angles: [0, 0, 0] },
+  // Where the reference photo was taken: out in the field facing the platform's
+  // opening, ~11,600 units away (from the platform's apparent size in the photo:
+  // 512 tall over ~123 px, 2048 wide over ~405 px → a ~21° lens; at FOV 90 it
+  // looks smaller than in the photo).
+  { id: 1, class: 'player_start', origin: [600, 11600, 0], angles: [0, -90, 0] },
   // Clear midday sun, 60° up: ~90,000 lx on a surface facing it. 5600 K ≈ the map's 248 244 237.
   { id: 2, class: 'light', origin: [0, 0, 0], props: { type: 'sun', pitch: -60, yaw: 242, lux: 90000, kelvin: 5600 } },
 ];
@@ -39,8 +43,9 @@ writeFileSync(new URL('../maps/flatgrass.json', import.meta.url), serializeMap({
   format: MAP_FORMAT, version: MAP_VERSION, name: 'flatgrass', brushes, entities,
   settings: {
     // Huge faces: coarse luxels keep the bake quick; the platform's faces get finer ones automatically.
-    light: { luxelSize: 128, skyLuminance: 7000, skyZenith: '#2f66c9', skyHorizon: '#bcd4ea' },
-    fog: { enabled: true, color: '#bcd4ea', luminance: 7000, near: 3000, far: 90000 },
+    light: { luxelSize: 128, skyLuminance: 7000, skyZenith: '#3a5cb2', skyHorizon: '#e4e8ec' },
+    // Fog = the horizon colour at the sky's brightness there (7000 / 0.25), so far grass melts into the sky.
+    fog: { enabled: true, color: '#e4e8ec', luminance: 28000, near: 3000, far: 90000 },
     camera: { flash: false, whiteBalanceK: 5600 },
   },
 }));

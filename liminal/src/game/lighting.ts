@@ -10,7 +10,7 @@ import type { Storage } from '../data/storage';
 
 
 /** Bump when the baker's output changes meaning, so old caches are ignored. */
-const BAKE_VERSION = 4;
+const BAKE_VERSION = 5;
 
 /**
  * Cached lightmap: RGBE (Ward's shared-exponent format, as in Radiance .hdr)
@@ -112,6 +112,11 @@ export class Lighting {
   private keyFor(level: Level, s: Settings): string {
     const { filter: _f, ...bakeSettings } = s.light; // filtering doesn't need a re-bake
     void _f;
+    // Indoors (no sky), the sky's colours don't affect the bake.
+    if (!(bakeSettings.skyLuminance > 0)) {
+      const b = bakeSettings as Record<string, unknown>;
+      delete b.skyZenith; delete b.skyHorizon; delete b.skyBand;
+    }
     return hash(JSON.stringify([BAKE_VERSION, bakeSettings, s.textures, level.map.brushes, level.map.entities]));
   }
 
@@ -230,7 +235,7 @@ export class Lighting {
         aoDirect: L.aoDirect,
         aoCurve: L.aoCurve,
         extraBounces: L.extraBounces,
-        ...(L.skyLuminance > 0 ? { sky: { luminance: L.skyLuminance, zenith: hexToLinearNorm(L.skyZenith), horizon: hexToLinearNorm(L.skyHorizon) } } : {}),
+        ...(L.skyLuminance > 0 ? { sky: { luminance: L.skyLuminance, zenith: skyColour(L.skyZenith), horizon: skyColour(L.skyHorizon), band: Math.sin((Math.max(0.1, L.skyBand) * Math.PI) / 180) } } : {}),
       },
     };
   }
@@ -300,4 +305,15 @@ export function hexToLinearNorm(hex: string): [number, number, number] {
   const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => srgbToLinear(v / 255));
   const l = Math.max(1e-6, 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]);
   return [c[0] / l, c[1] / l, c[2] / l];
+}
+
+/**
+ * Sky colour as relative radiance: linear, and NOT brightness-normalised, so
+ * a pale horizon really is brighter than a deep-blue zenith (a clear sky is
+ * several times brighter near the horizon). A colour of luminance 0.25 gives
+ * exactly the Sky brightness setting.
+ */
+export function skyColour(hex: string): [number, number, number] {
+  const n = parseInt(hex.replace('#', ''), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => srgbToLinear(v / 255) / 0.25) as [number, number, number];
 }
