@@ -144,6 +144,12 @@
       "ambientcg": "Metal053C",
       "size": 64,
       "material": "metal"
+    },
+    {
+      "name": "outdoor/grass",
+      "ambientcg": "Grass004",
+      "size": 96,
+      "material": "grass"
     }
   ]
 }
