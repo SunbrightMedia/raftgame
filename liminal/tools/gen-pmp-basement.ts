@@ -293,6 +293,9 @@ writeFileSync(new URL('../maps/pmp_basement.json', import.meta.url), serializeMa
   // This room's mood (STYLE.md: residential = moody and warm, never sterile).
   settings: {
     light: { luxelSize: 8 },
+    // The reference is underexposed: moody comes from the camera, not weaker bulbs
+    // (auto exposure would just compensate for dimmer lamps).
+    camera: { evComp: -0.8 },
     fog: { enabled: true, color: '#3a2a20', luminance: 0.6, near: 120, far: 2600 },
   },
 }));

@@ -56,7 +56,9 @@ describe('lightmap bake (physical units)', () => {
     const tall = room().map((b) => (b.id === 2 ? { ...b, min: [-16, -16, 128], max: [528, 528, 144] } as BrushDef : b));
     const { at } = bakeRoom(tall, [can(24, 256, 96)]);
     const above = at(3, 'px', 0, 256, 90), below = at(3, 'px', 0, 256, 50);
-    expect(above).toBeLessThan(below * 0.1);
+    // A clear edge, but not black above it: ~6% reflector spill lights the wall faintly.
+    expect(above).toBeLessThan(below * 0.3);
+    expect(above).toBeGreaterThan(0);
     expect(below).toBeGreaterThan(5);
   });
   it('casts shadows', () => {

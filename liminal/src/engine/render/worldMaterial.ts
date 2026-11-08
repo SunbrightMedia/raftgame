@@ -117,7 +117,8 @@ export function makeWorldMaterial(map: THREE.Texture, source?: { luminance: numb
               if (bm.x < -0.5) {
                 float c = u.z; // cosine between the downward beam and the direction to this point
                 if (c <= 0.0) continue;
-                I = pow(c, bm.y) * smoothstep(bm.w, bm.z, c);
+                float spill = -bm.x - 1.0;
+                I = pow(c, bm.y) * (spill + (1.0 - spill) * smoothstep(bm.w, bm.z, c));
               }
               float dm = d * 0.0254;
               dyn += dynColor[i] * I * ndl / max(dm * dm, 0.0025);

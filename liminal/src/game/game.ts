@@ -62,7 +62,8 @@ export class Game {
       u.dynColor.value[i].set(l.color[0] * l.I0, l.color[1] * l.I0, l.color[2] * l.I0);
       const c = l.cutoffDeg ?? 180, sd = l.softDeg ?? 2;
       const cos = (deg: number) => Math.cos((Math.min(180, Math.max(0, deg)) * Math.PI) / 180);
-      u.dynBeam.value[i].set(l.dir ? -1 : 0, l.n ?? 1, cos(c - sd), cos(c + sd));
+      // x: -(1 + spill) for a downward beam, 0 for a bare bulb.
+      u.dynBeam.value[i].set(l.dir ? -(1 + (l.spill ?? 0)) : 0, l.n ?? 1, cos(c - sd), cos(c + sd));
     });
   }
 

@@ -111,7 +111,7 @@ export function lightFromEntity(origin: [number, number, number], p: Props): Bak
   const type = typeof p.type === 'string' ? p.type : 'bulb';
   if (type === 'can') {
     const lm = num('lumens', BR30_65W.lumens);
-    return { pos: origin, color, I0: cosNPeak(lm, BR30_65W.n) * BR30_65W.efficiency, dir: [0, 0, -1], n: BR30_65W.n, cutoffDeg: num('cutoff', BR30_65W.cutoffDeg), softDeg: BR30_65W.softDeg };
+    return { pos: origin, color, I0: cosNPeak(lm, BR30_65W.n) * BR30_65W.efficiency, dir: [0, 0, -1], n: BR30_65W.n, cutoffDeg: num('cutoff', BR30_65W.cutoffDeg), softDeg: BR30_65W.softDeg, spill: BR30_65W.spill };
   }
   if (type === 'down' || type === 'up') {
     return { pos: origin, color, I0: num('lumens', 400) / Math.PI, dir: [0, 0, type === 'down' ? -1 : 1], n: 1 };

@@ -32,8 +32,10 @@ export interface BakeLight {
   n?: number;
   /** Light beyond this angle from `dir` is blocked (a can's housing). */
   cutoffDeg?: number;
-  /** Softness of the cutoff edge. */
+  /** Softness of the cutoff edge (penumbra from the lamp's size). */
   softDeg?: number;
+  /** Fraction of the beam that spills past the cutoff (reflector, trim). */
+  spill?: number;
   /**
    * Direct light from this light is drawn per pixel by the shader (exact beam
    * edges, e.g. a can's scallop), so the lightmap stores only its bounce and
@@ -107,7 +109,8 @@ export function intensityToward(l: BakeLight, ux: number, uy: number, uz: number
     const ang = (Math.acos(Math.min(1, c)) * 180) / Math.PI;
     const soft = Math.max(0.01, l.softDeg ?? 2);
     const t = Math.min(1, Math.max(0, (l.cutoffDeg + soft - ang) / (2 * soft)));
-    I *= t * t * (3 - 2 * t);
+    const sp = l.spill ?? 0;
+    I *= sp + (1 - sp) * t * t * (3 - 2 * t);
   }
   return I;
 }

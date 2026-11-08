@@ -38,8 +38,11 @@ export const srgbToLinear = (v: number) => (v <= 0.04045 ? v / 12.92 : Math.pow(
  * 2π·I0/(n+1) → I0 ≈ 650·2.4/2π ≈ 248 cd.
  * In a 6" recessed can the housing cuts the beam off at ~50° from straight
  * down (that edge is the scallop on nearby walls) and absorbs ~15%.
+ * The lamp is not a point: a 3.75" BR30 sitting in a 6" can is cut off by the
+ * rim gradually, giving the scallop's top edge a penumbra of roughly ±12°.
+ * The can's reflector also spills a little light past the cutoff (~6%).
  */
-export const BR30_65W = { lumens: 650, n: 1.4, cutoffDeg: 50, softDeg: 4, efficiency: 0.85 };
+export const BR30_65W = { lumens: 650, n: 1.4, cutoffDeg: 50, softDeg: 12, spill: 0.06, efficiency: 0.85 };
 
 /** Peak candela of a cos^n emitter (lower hemisphere) given its total lumens. */
 export const cosNPeak = (lumens: number, n: number) => (lumens * (n + 1)) / (2 * Math.PI);
