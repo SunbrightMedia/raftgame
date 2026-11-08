@@ -6,6 +6,7 @@ in the tweak panel, or change the default back in code).
 
 | date | setting | old → new | why |
 |---|---|---|---|
+| 2026-11-08 | Lighting › Corner darkening falloff | (new) 2.5 | Deepen wall-base/corner darkness; effect limited by lightmap resolution (not yet published) |
 | 2026-11-08 | Camera › fringe, sharpening, highlight curve | → restored to the pre-green-fix look: fringe code as before (0.6), sharpening on the HDR image again (now hue-safe), highlight knee 0.72 / roll-off 1 (the original shoulder) | User: fringe used to look sharp and purple |
 | 2026-11-08 | Camera › Purple fringe | 1.0 + outer ring → 0.8, scaled by blown-area size (threshold 2.5) | User: distant lamps became purple blobs |
 | 2026-11-08 | Surfaces › Reflections × | 1 → 0 | User: global sheen turned dark carpets grey; looks better off |

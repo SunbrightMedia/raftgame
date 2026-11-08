@@ -72,6 +72,9 @@ export interface BakeParams {
   aoRadius?: number;
   /** How much of the occlusion also darkens baked direct light (0..1). */
   aoDirect?: number;
+  /** Falloff curve: AO is raised to this power, so open wall stays untouched
+   *  while creases (wall bases, corners) get much darker. 1 = linear. */
+  aoCurve?: number;
 }
 
 /** Shadow casters: every solid brush as a convex plane set. */
@@ -295,7 +298,7 @@ export function bake(input: BakeInput): BakeOutput {
         out[k * 3 + 1] = (g / dirs.length) * p.bounceScale;
         out[k * 3 + 2] = (b / dirs.length) * p.bounceScale;
         if (pass === 0) {
-          const ao = Math.max(0, 1 - (p.aoStrength ?? 0) * Math.min(1, (occ / dirs.length) * 2.2));
+          const ao = Math.pow(Math.max(0, 1 - (p.aoStrength ?? 0) * Math.min(1, (occ / dirs.length) * 2.2)), p.aoCurve ?? 1);
           fs.ao[k * 3] = fs.ao[k * 3 + 1] = fs.ao[k * 3 + 2] = ao;
         }
       }

@@ -228,6 +228,7 @@ export class Lighting {
         aoStrength: L.aoStrength,
         aoRadius: L.aoRadius,
         aoDirect: L.aoDirect,
+        aoCurve: L.aoCurve,
       },
     };
   }

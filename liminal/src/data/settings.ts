@@ -95,6 +95,7 @@ export const SETTINGS = {
       aoStrength: num('Corner darkening (AO)', 0.9, 0, 1, 0.01, 'Darkening where surfaces close in: the band along the bottom of walls and into corners. Computed from the room\'s geometry in the bake.'),
       aoRadius: num('AO radius', 48, 2, 128, 1, 'How far from a corner or wall base the darkening reaches.', 'u'),
       aoDirect: num('AO on direct light', 1, 0, 1, 0.01, 'How much the corner darkening also applies to light straight from lamps (not just bounce light). Camcorder footage shows it strongly.'),
+      aoCurve: num('Corner darkening falloff', 2.5, 1, 6, 0.1, 'Deepens the darkness right at wall bases and in corners while leaving open wall alone. 1 = gentle (old).'),
     },
   },
   surface: {
