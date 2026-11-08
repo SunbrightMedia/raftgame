@@ -6,6 +6,7 @@ in the tweak panel, or change the default back in code).
 
 | date | setting | old → new | why |
 |---|---|---|---|
+| 2026-11-08 | Camera › Colour bleed / Extra horizontal softness | 0 / 0 → 2 / 0.4 | User's values |
 | 2026-11-08 | Movement › Ground friction; Camera › Brightness / Contrast | 4 (Source) / 0 / 1.25 → 6 / -0.18 / 0.95 | User's values |
 | 2026-11-08 | Camera › Brightness / Contrast / Black crush | (new) 0 / 1.25 / 0.03 (before: no contrast curve, i.e. 1 / 0) | User: proper digicam contrast and a brightness that auto exposure can't undo |
 | 2026-11-08 | Camera › Purple fringe / Lamp edge darkness | 0.6 / (new) → 0.45 / 0.7 | User: sharp dark edge around lamps, visible up close |
