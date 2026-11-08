@@ -154,6 +154,8 @@ export const SETTINGS = {
       flashBeam: num('Camera light beam', 90, 5, 90, 1, 'Half-angle where the camera light falls to half strength. 90 = even in every direction (a flash). A camcorder video light is ~25–35°: bright centre, dark frame edges.', '°'),
       artifacts: bool('Sensor & JPEG artifacts', true, 'The medium on top: glow and fringing around blown highlights, softness with sharpening halos, banding, shadow noise, vignette. Off = a clean exposure.'),
       glare: num('Glare amount', 0.018, 0, 0.3, 0.001, 'Lens glare: every bright point spreads into a soft halo in proportion to its energy (sharp core, long faint tail). Distant lamps get small faint halos, close ones big strong ones. 0 = off.'),
+      bloom: num('Bloom', 0, 0, 2, 0.01, 'Glow from anything bright on screen (overexposed walls, sky, windows), spilling past the edges of bright areas. Lamp glow is lamps only; this is everything.'),
+      bloomThreshold: num('Bloom threshold', 0.8, 0.2, 3, 0.05, 'How bright (× the highlight clip) something must be to bloom. Lower = more of the picture glows.'),
       lampGlow: num('Lamp glow', 8, 0, 40, 0.5, 'Extra glow from light sources only (lamps, light panels), on top of the lens glare. Panels are only ~30× brighter than a lit office, so without this they barely glow.'),
       glareSpread: num('Glare spread', 0.5, 0.2, 0.95, 0.01, 'How far the halo tail reaches. Low = tight halo hugging the light, high = wide veil.'),
       fringe: num('Purple fringe', 0.45, 0, 3, 0.01, 'Purple halo just outside the dark edge of blown lamps.'),

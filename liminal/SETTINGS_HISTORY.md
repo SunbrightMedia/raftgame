@@ -6,6 +6,7 @@ in the tweak panel, or change the default back in code).
 
 | date | setting | old → new | why |
 |---|---|---|---|
+| 2026-11-08 | Camera › Bloom / Bloom threshold (new) | 0 / 0.8 × clip | User asked for a bloom slider (bright areas spilling past edges) |
 | 2026-11-08 | Camera › Film grain / Grain size / Grain motion | 0 (flatgrass map 0.35) / 1.6 / 12 Hz → 0.2 / 1 / 60 Hz, for every map | User's values |
 | 2026-11-08 | Camera › Grain motion | 0 → 12 Hz | User: frozen grain was more distracting than per-frame grain |
 | 2026-11-08 | Camera › Grain motion (new) | 0 (holds still; before: new pattern every frame) | User: grain moved around too much |
