@@ -5,8 +5,8 @@ import { type Settings, DEFAULT_SETTINGS, cloneSettings, applyPatch, diffSetting
 import { parseMap, type MapFile } from '../data/map';
 import { LowResRenderer } from '../engine/render/renderer';
 import { TextureRegistry } from '../engine/render/textures';
-import { worldUniforms } from '../engine/render/worldMaterial';
-import { kelvinToLinear } from '../engine/light/units';
+import { worldUniforms, MAX_RECTS } from '../engine/render/worldMaterial';
+import { kelvinToLinear, emitterColor } from '../engine/light/units';
 import { angleVectors } from '../engine/vec3';
 import { Input } from './input';
 import { Level } from './level';
@@ -72,6 +72,41 @@ export class Game {
     });
   }
 
+  /** Light-emitting rectangles (troffers) in the current map, for reflections. */
+  private rects: { c: number[]; hw: number[]; hh: number[]; lum: number[] }[] = [];
+  private rectFrame = 0;
+
+  private collectRects(): void {
+    this.rects = [];
+    for (const f of this.level.faces) {
+      const t = this.textures.get(f.tex);
+      if (!t.emissive?.castsLight) continue;
+      const col = emitterColor(t.emissive);
+      const c = [0, 1, 2].map((a) => f.origin[a] + (f.r[a] * f.width + f.u[a] * f.height) / 2);
+      const hw = [0, 1, 2].map((a) => (f.r[a] * f.width) / 2);
+      let hh = [0, 1, 2].map((a) => (f.u[a] * f.height) / 2);
+      // The LTC code expects corners wound so that cross(hw, hh) points away from the lit side.
+      const cx = [hw[1] * hh[2] - hw[2] * hh[1], hw[2] * hh[0] - hw[0] * hh[2], hw[0] * hh[1] - hw[1] * hh[0]];
+      if (cx[0] * f.n[0] + cx[1] * f.n[1] + cx[2] * f.n[2] > 0) hh = hh.map((x) => -x);
+      this.rects.push({ c, hw, hh, lum: col.map((x) => x * t.emissive!.luminance) });
+    }
+    this.rectFrame = 0;
+  }
+
+  /** Upload the light rectangles nearest the eye (all of them, in most rooms). */
+  private uploadRects(eye: { x: number; y: number; z: number }): void {
+    if (this.rectFrame++ % 6 !== 0) return;
+    const d2 = (r: { c: number[] }) => (r.c[0] - eye.x) ** 2 + (r.c[1] - eye.y) ** 2 + (r.c[2] - eye.z) ** 2;
+    const list = this.rects.length > MAX_RECTS ? [...this.rects].sort((a, b) => d2(a) - d2(b)).slice(0, MAX_RECTS) : this.rects;
+    const tex = worldUniforms.rectTex.value;
+    const data = tex.image.data as Float32Array;
+    list.forEach((r, i) => {
+      data.set([...r.c, 0, ...r.hw, 0, ...r.hh, 0, ...r.lum, 0], i * 16);
+    });
+    worldUniforms.rectCount.value = list.length;
+    tex.needsUpdate = true;
+  }
+
   private updateLightUniforms(s: Settings): void {
     worldUniforms.lightScale.value = s.light.lightScale;
     const lm = this.level?.lightmap;
@@ -118,6 +153,9 @@ export class Game {
     worldUniforms.fogNear.value = s.fog.near;
     worldUniforms.fogFar.value = s.fog.far;
     worldUniforms.fogLuminance.value = s.fog.luminance;
+    worldUniforms.specScale.value = s.surface.reflections;
+    worldUniforms.roughnessAdd.value = s.surface.roughness;
+    worldUniforms.bumpScale.value = s.surface.bump;
     this.input.rawInput = s.view.rawInput;
   }
 
@@ -143,6 +181,7 @@ export class Game {
     worldUniforms.lightmapOn.value = 0;
     this.applySettings();
     this.uploadDynamicLights();
+    this.collectRects();
     this.lighting.request(level, this.settings, this.textures, true);
     this.holdUntil = performance.now() + this.settings.render.lightHoldMs;
     if (this.player) this.player.setLevel(level);
@@ -189,13 +228,19 @@ export class Game {
     const eye = this.player.eye(alpha, s);
     const cam = this.renderer.camera;
     cam.position.set(eye.x, eye.y, eye.z);
+    this.uploadRects(eye);
     const { forward } = angleVectors(this.player.pitch, this.player.yaw);
     cam.up.set(0, 0, 1);
     cam.lookAt(eye.x + forward.x, eye.y + forward.y, eye.z + forward.z);
+    cam.rotateZ((this.player.roll(s) * Math.PI) / 180);
     const C = s.camera;
     worldUniforms.flashOn.value = C.flash ? 1 : 0;
     worldUniforms.flashPos.value.set(eye.x, eye.y, eye.z + C.flashHeight);
     worldUniforms.flashCandela.value = C.flashCandela;
+    worldUniforms.flashDir.value.set(forward.x, forward.y, forward.z);
+    // Half-intensity half-angle θ → cos^n beam with cos(θ)^n = 0.5.
+    const half = (Math.min(89, Math.max(1, C.flashBeam)) * Math.PI) / 180;
+    worldUniforms.flashBeamN.value = C.flashBeam >= 90 ? 0 : Math.log(0.5) / Math.log(Math.cos(half));
     worldUniforms.flashColor.value.set(...kelvinToLinear(C.flashKelvin));
 
     this.renderer.render(this.scene);

@@ -1,0 +1,20 @@
+{
+  "_about": "How each material reflects light. roughness: 0 = mirror, 1 = fully matte (GGX, Disney remap). f0: reflectance straight on; ~0.04 for paint, plastic, varnish, glass (index 1.5); 0.02-0.03 for fibres. metal: 1 = metal (reflection tinted by the texture). bump: relief height in inches, taken from the texture's own light/dark pattern. 'textures' overrides a single texture by name.",
+  "materials": {
+    "default":  { "roughness": 0.7,  "f0": 0.04,  "metal": 0, "bump": 0.03 },
+    "carpet":   { "roughness": 0.78, "f0": 0.03,  "metal": 0, "bump": 0.12 },
+    "fabric":   { "roughness": 0.9,  "f0": 0.025, "metal": 0, "bump": 0.06 },
+    "plaster":  { "roughness": 0.55, "f0": 0.04,  "metal": 0, "bump": 0.02 },
+    "wallpaper":{ "roughness": 0.42, "f0": 0.04,  "metal": 0, "bump": 0.012 },
+    "ceiling":  { "roughness": 0.92, "f0": 0.025, "metal": 0, "bump": 0.08 },
+    "tile":     { "roughness": 0.3,  "f0": 0.04,  "metal": 0, "bump": 0.03 },
+    "laminate": { "roughness": 0.28, "f0": 0.045, "metal": 0, "bump": 0.005 },
+    "wood":     { "roughness": 0.38, "f0": 0.04,  "metal": 0, "bump": 0.03 },
+    "concrete": { "roughness": 0.85, "f0": 0.035, "metal": 0, "bump": 0.06 },
+    "metal":    { "roughness": 0.35, "f0": 0.6,   "metal": 1, "bump": 0.03 },
+    "glass":    { "roughness": 0.05, "f0": 0.04,  "metal": 0, "bump": 0 },
+    "plastic":  { "roughness": 0.4,  "f0": 0.045, "metal": 0, "bump": 0.01 },
+    "rubber":   { "roughness": 0.6,  "f0": 0.035, "metal": 0, "bump": 0.01 }
+  },
+  "textures": {}
+}

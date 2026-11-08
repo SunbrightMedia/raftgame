@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import BakeWorker from '../engine/light/bake.worker?worker&inline';
 import type { BakeInput, BakeLight, BakeOutput } from '../engine/light/bake';
-import { BR30_65W, cosNPeak, kelvinToLinear } from '../engine/light/units';
+import { BR30_65W, cosNPeak, kelvinToLinear, emitterColor } from '../engine/light/units';
 import { layoutLightmap, solidPlanes, type LightmapLayout } from '../engine/light/faces';
 import type { TextureRegistry } from '../engine/render/textures';
 import type { Settings } from '../data/settings';
@@ -10,7 +10,7 @@ import type { Storage } from '../data/storage';
 
 
 /** Bump when the baker's output changes meaning, so old caches are ignored. */
-const BAKE_VERSION = 3;
+const BAKE_VERSION = 4;
 
 /**
  * Cached lightmap: RGBE (Ward's shared-exponent format, as in Radiance .hdr)
@@ -207,7 +207,7 @@ export class Lighting {
     for (const f of level.faces) {
       const t = textures.get(f.tex);
       albedo[f.tex] = t.albedo;
-      if (t.emissive && t.emissive.castsLight) emissive[f.tex] = { color: kelvinToLinear(t.emissive.kelvin), luminance: t.emissive.luminance };
+      if (t.emissive && t.emissive.castsLight) emissive[f.tex] = { color: emitterColor(t.emissive), luminance: t.emissive.luminance };
     }
     return {
       faces: level.faces,

@@ -26,6 +26,15 @@ export function kelvinToLinear(kelvin: number): [number, number, number] {
   return [lin[0] / lum, lin[1] / lum, lin[2] / lum];
 }
 
+/** Linear colour (luminance 1) of an emitter: an explicit sRGB colour (signs, LEDs) or a colour temperature. */
+export function emitterColor(e: { kelvin: number; color?: string }): [number, number, number] {
+  if (!e.color) return kelvinToLinear(e.kelvin);
+  const n = parseInt(e.color.replace('#', ''), 16);
+  const lin = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => srgbToLinear(v / 255));
+  const lum = Math.max(1e-6, 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2]);
+  return [lin[0] / lum, lin[1] / lum, lin[2] / lum];
+}
+
 export const srgbToLinear = (v: number) => (v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
 
 /**

@@ -2,9 +2,10 @@ import * as THREE from 'three';
 import { type Face, type LightmapLayout, facePoint } from '../light/faces';
 import type { TextureRegistry } from './textures';
 import { makeWorldMaterial } from './worldMaterial';
-import { kelvinToLinear } from '../light/units';
+import { emitterColor } from '../light/units';
+import { surfaceFor } from './surfaces';
 
-interface Batch { pos: number[]; nrm: number[]; uv: number[]; lm: number[]; shade: number[]; idx: number[] }
+interface Batch { pos: number[]; nrm: number[]; uv: number[]; lm: number[]; shade: number[]; gu: number[]; gv: number[]; idx: number[] }
 
 /**
  * Build render meshes for all faces, batched into one mesh per texture.
@@ -15,13 +16,17 @@ export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout
   const batches = new Map<string, Batch>();
   for (const f of faces) {
     let bt = batches.get(f.tex);
-    if (!bt) { bt = { pos: [], nrm: [], uv: [], lm: [], shade: [], idx: [] }; batches.set(f.tex, bt); }
+    if (!bt) { bt = { pos: [], nrm: [], uv: [], lm: [], shade: [], gu: [], gv: [], idx: [] }; batches.set(f.tex, bt); }
     const tex = textures.get(f.tex);
     const rect = layout?.rects.get(f.id);
     const base = bt.pos.length / 3;
     const rot = (f.rot * Math.PI) / 180;
     const cr = Math.cos(rot), sr = Math.sin(rot);
     const sx = f.scale[0] || 1, sy = f.scale[1] || 1;
+    // How texture u and v change per inch moved across the face (for bump mapping).
+    const ku = 1 / (sx * tex.worldW), kv = 1 / (sy * tex.worldH);
+    const gu = [0, 1, 2].map((a) => (cr * f.r[a] - sr * f.u[a]) * ku);
+    const gv = [0, 1, 2].map((a) => (sr * f.r[a] + cr * f.u[a]) * kv);
     // Outline counter-clockwise seen from outside: the polygon, or the rectangle.
     const outline: [number, number][] = f.poly ?? [[0, 0], [f.width, 0], [f.width, f.height], [0, f.height]];
     for (const [s, t] of outline) {
@@ -38,6 +43,8 @@ export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout
         bt.lm.push((rect.x + 0.5 + fs * (rect.w - 1)) / layout.width, (rect.y + 0.5 + ft * (rect.h - 1)) / layout.height);
       } else bt.lm.push(0, 0);
       bt.shade.push(f.shade);
+      bt.gu.push(gu[0], gu[1], gu[2]);
+      bt.gv.push(gv[0], gv[1], gv[2]);
     }
     // Convex: a triangle fan.
     for (let k = 1; k < outline.length - 1; k++) bt.idx.push(base, base + k, base + k + 1);
@@ -53,10 +60,12 @@ export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout
     geo.setAttribute('uv', new THREE.Float32BufferAttribute(bt.uv, 2));
     geo.setAttribute('lmuv', new THREE.Float32BufferAttribute(bt.lm, 2));
     geo.setAttribute('shade', new THREE.Float32BufferAttribute(bt.shade, 1));
+    geo.setAttribute('gu', new THREE.Float32BufferAttribute(bt.gu, 3));
+    geo.setAttribute('gv', new THREE.Float32BufferAttribute(bt.gv, 3));
     geo.setIndex(bt.idx);
     geo.computeBoundingSphere();
     const entry = textures.get(tex);
-    const mat = makeWorldMaterial(entry.texture, entry.emissive ? { luminance: entry.emissive.luminance, color: kelvinToLinear(entry.emissive.kelvin) } : undefined);
+    const mat = makeWorldMaterial(entry.texture, surfaceFor(tex, entry.material), entry.emissive ? { luminance: entry.emissive.luminance, color: emitterColor(entry.emissive) } : undefined);
     // Overlapping coplanar faces (common with hand-drawn brushes) would
     // z-fight and flicker. A small, distinct depth bias per texture batch
     // makes one surface win consistently instead.

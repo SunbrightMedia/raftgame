@@ -42,6 +42,12 @@ export interface BakeLight {
    * how shadowed each spot is (alpha channel), not its direct light.
    */
   dynamic?: boolean;
+  /**
+   * Reflected per pixel by the shader (light-emitting rectangles): counts
+   * toward the alpha channel's shadow fraction, which hides reflections of
+   * lights the spot can't see.
+   */
+  reflected?: boolean;
 }
 
 /** A light-emitting surface: its luminance in cd/m² (e.g. a fluorescent troffer ≈ 2000). */
@@ -85,8 +91,8 @@ export interface BakeInput {
 export interface BakeOutput {
   /**
    * RGBA float. RGB: irradiance in lux from baked lights' direct light plus
-   * all indirect light. A: fraction of the dynamic lights' direct light that
-   * reaches this spot (1 = unshadowed).
+   * all indirect light. A: fraction of the per-pixel lights' (dynamic lights
+   * and light-emitting surfaces) direct light that reaches this spot (1 = unshadowed).
    */
   pixels: Float32Array;
   width: number;
@@ -158,7 +164,7 @@ export function bake(input: BakeInput): BakeOutput {
       for (let j = 0; j < nt; j++) {
         lights.push({
           pos: facePoint(f, ((i + 0.5) * f.width) / ns, ((j + 0.5) * f.height) / nt, 0.5),
-          color: em.color, I0: em.luminance * cellM2 * p.lightScale, dir: f.n, n: 1,
+          color: em.color, I0: em.luminance * cellM2 * p.lightScale, dir: f.n, n: 1, reflected: true,
         });
       }
     }
@@ -231,10 +237,12 @@ export function bake(input: BakeInput): BakeOutput {
         // E = I·cosθ / d²  (lux, with d in metres)
         const dm = d * INCH;
         const w = (I * ndotl) / (dm * dm);
-        if (l.dynamic) unshadowed += w;
+        const perPixel = l.dynamic || l.reflected;
+        if (perPixel) unshadowed += w;
         if (occluded(lightBoxes[li], px, py, pz, l.pos[0], l.pos[1], l.pos[2])) continue;
         r += l.color[0] * w; g += l.color[1] * w; b += l.color[2] * w;
-        if (l.dynamic) { lit += w; dr += l.color[0] * w; dg += l.color[1] * w; db += l.color[2] * w; }
+        if (perPixel) lit += w;
+        if (l.dynamic) { dr += l.color[0] * w; dg += l.color[1] * w; db += l.color[2] * w; }
       }
       fs.direct[k * 3] = r; fs.direct[k * 3 + 1] = g; fs.direct[k * 3 + 2] = b;
       fs.dynDirect[k * 3] = dr; fs.dynDirect[k * 3 + 1] = dg; fs.dynDirect[k * 3 + 2] = db;

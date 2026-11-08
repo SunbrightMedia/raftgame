@@ -119,7 +119,20 @@ export class Player {
   eye(alpha: number, s: Settings): Vec3 {
     const o = s.sim.interpolate ? lerp(this.prevOrigin, this.state.origin, alpha) : copy(this.state.origin);
     const speedFrac = Math.min(1, len2d(this.state.velocity) / Math.max(1, this.params.runSpeed));
-    const bob = this.state.onGround ? Math.sin(this.bobPhase * Math.PI) * s.view.viewBob * speedFrac : 0;
-    return v3(o.x, o.y, o.z + this.eyeOffset + bob + this.dip);
+    const g = this.state.onGround && !this.state.noclip ? speedFrac : 0;
+    const ph = this.bobPhase * Math.PI;
+    // Handheld: the view dips at each footfall (bobPhase is whole at a step)...
+    const bob = (0.5 - Math.abs(Math.cos(ph))) * 2 * s.view.viewBob * g;
+    // ...and sways left/right once every two steps.
+    const sway = Math.sin(ph) * s.view.viewSway * g;
+    const yaw = (this.yaw * Math.PI) / 180;
+    return v3(o.x + Math.sin(yaw) * sway, o.y - Math.cos(yaw) * sway, o.z + this.eyeOffset + bob + this.dip);
+  }
+
+  /** Camera roll in degrees from the handheld sway. */
+  roll(s: Settings): number {
+    const speedFrac = Math.min(1, len2d(this.state.velocity) / Math.max(1, this.params.runSpeed));
+    const g = this.state.onGround && !this.state.noclip ? speedFrac : 0;
+    return Math.sin(this.bobPhase * Math.PI) * s.view.viewRoll * g;
   }
 }

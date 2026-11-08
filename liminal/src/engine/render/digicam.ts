@@ -18,11 +18,13 @@ import { kelvinToLinear } from '../light/units';
  *    No threshold and no clamp: a distant lamp covering a few pixels makes a
  *    small faint halo, a close one a large strong one.
  * 3. White balance in kelvin.
- * 4. Sensor response: linear, then a short shoulder into flat clipped white.
+ * 4. Sensor response: linear, then a short shoulder into clipped near-white.
  * 5. sRGB encoding.
- * 6. Optional artifacts of the medium, only where the real camera makes
- *    them: purple fringe at blown edges, softness + sharpening halos,
- *    compression banding, shadow chroma noise, milky blacks, vignetting.
+ * 6. Recording (second pass): stored as luma + chroma like video and JPEG:
+ *    softer horizontally, edge enhancement, chroma at lower bandwidth, warm
+ *    colours pushed, magenta-lifted blacks, banding, noise.
+ * Artifacts appear only where the real camera makes them (fringing only at
+ * blown edges, etc.). Barrel distortion and fisheye are optional.
  */
 export interface CameraParams {
   autoExposure: boolean;
@@ -36,10 +38,17 @@ export interface CameraParams {
   glare: number;
   glareSpread: number;
   fringe: number;
+  fringeWidth: number;
   aberration: number;
   softness: number;
+  softnessH: number;
   sharpen: number;
   sharpenLimit: number;
+  chromaBlur: number;
+  warmSaturation: number;
+  shadowTint: number;
+  blownTint: number;
+  fisheye: number;
   banding: number;
   noise: number;
   blackLift: number;
@@ -68,7 +77,9 @@ export class Digicam {
   private meterPass;
   private downPass;
   private upPass;
-  private finalPass;
+  private developPass;
+  private encodePass;
+  private developed: THREE.WebGLRenderTarget | null = null;
   private frame = 0;
   private last = performance.now();
   private target = 0.05;
@@ -119,82 +130,154 @@ export class Digicam {
            + texture2D(coarse, vUv + vec2(texel.x, -texel.y)).rgb + texture2D(coarse, vUv + vec2(-texel.x, texel.y)).rgb;
         gl_FragColor = vec4(texture2D(fine, vUv).rgb + t / 16.0 * spread, 1.0);
       }`, { coarse: { value: null }, fine: { value: null }, texel: { value: new THREE.Vector2() }, spread: { value: 0.65 } });
-    this.finalPass = pass(/* glsl */ `
-      uniform sampler2D src; uniform sampler2D glare; uniform vec2 texel; uniform vec3 wb;
-      uniform float gain, clip, saturation, artifacts, glareAmt, glareNorm, fringe, aberration, softness, sharpen, sharpenLimit, banding, noise, blackLift, vignette, seed;
+    // Sensor: lens geometry, exposure, glare, white balance, fringing, the
+    // highlight response, sRGB.
+    this.developPass = pass(/* glsl */ `
+      uniform sampler2D src; uniform sampler2D glare; uniform vec2 texel; uniform vec3 wb; uniform float aspect;
+      uniform float gain, clip, saturation, artifacts, glareAmt, glareNorm, fringe, fringeWidth, refPx, aberration, vignette, fisheye, blownTint;
       varying vec2 vUv;
-      float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233)) + seed) * 43758.5453); }
       vec3 tap(vec2 uv) {
         vec2 d = (uv - 0.5) * aberration * 0.006;
         return vec3(texture2D(src, uv + d).r, texture2D(src, uv).g, texture2D(src, uv - d).b);
       }
-      vec3 soft(vec2 uv, float r) {
-        vec2 o = texel * r;
-        return (tap(uv) * 4.0 + tap(uv + vec2(o.x, 0.0)) + tap(uv - vec2(o.x, 0.0)) + tap(uv + vec2(0.0, o.y)) + tap(uv - vec2(0.0, o.y))) / 8.0;
-      }
       float lumAt(vec2 uv) { return dot(texture2D(src, uv).rgb * gain * wb, vec3(0.2126, 0.7152, 0.0722)); }
+      float blown(vec2 uv) { return smoothstep(clip, clip * 1.6, lumAt(uv)); }
       float shoulder(float m) {
         float knee = 0.72 * clip;
         return m <= knee ? m : knee + (clip - knee) * (1.0 - exp(-(m - knee) / max(0.001, clip - knee)));
       }
-      // Display-referred luma of a linear colour: what the sharpener sees.
-      float lumaOut(vec3 lin) {
-        float y = shoulder(dot(lin * gain * wb, vec3(0.2126, 0.7152, 0.0722))) / clip;
-        return pow(clamp(y, 0.0, 1.0), 1.0 / 2.2);
-      }
       vec3 toSRGB(vec3 c) { return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c)); }
+      // Barrel distortion (Brown's radial model, r' = r(1 + k r²)), normalised so
+      // the frame's corners stay put: edges squeeze in, the centre swells.
+      vec2 lens(vec2 uv) {
+        if (fisheye <= 0.0) return uv;
+        vec2 p = (uv - 0.5) * vec2(aspect, 1.0);
+        float rmax2 = 0.25 * (aspect * aspect + 1.0);
+        p *= (1.0 + fisheye * dot(p, p) / rmax2) / (1.0 + fisheye);
+        return p / vec2(aspect, 1.0) + 0.5;
+      }
       void main() {
-        vec3 c;
-        float detail = 0.0;
-        if (artifacts > 0.5) {
-          // In-camera sharpening works on luma after the tone curve (as a camera's
-          // JPEG engine does), not per channel on linear light: per channel, the
-          // undershoot beside a blown amber bulb strips red faster than green and
-          // leaves a green ring.
-          c = soft(vUv, softness);
-          detail = clamp((lumaOut(c) - lumaOut(soft(vUv, softness + 1.5))) * sharpen, -sharpenLimit, sharpenLimit);
-        } else {
-          c = texture2D(src, vUv).rgb;
-        }
+        vec2 uv = lens(vUv);
+        vec3 c = artifacts > 0.5 ? tap(uv) : texture2D(src, uv).rgb;
         // Lens glare: energy-conserving mix with the spread image (linear radiance).
-        c = mix(c, texture2D(glare, vUv).rgb * glareNorm, glareAmt);
+        c = mix(c, texture2D(glare, uv).rgb * glareNorm, glareAmt);
         c *= gain * wb;
         if (artifacts > 0.5) {
           vec2 v0 = vUv - 0.5;
           c *= 1.0 - vignette * dot(v0, v0) * 1.6;
-          float self = smoothstep(clip * 0.7, clip, lumAt(vUv));
-          float nb = 0.0;
-          for (int i = 0; i < 8; i++) {
-            float a = float(i) * 0.785398;
-            nb = max(nb, smoothstep(clip, clip * 1.6, lumAt(vUv + vec2(cos(a), sin(a)) * texel * 1.6)));
+          // Fringing around blown highlights, profile measured on camcorder footage
+          // of fluorescent troffers (742-line frames): knife-edge core, a dark line
+          // ~2 px wide, a blue rim to ~5 px, then a lavender halo (blue ≈ red >
+          // green) fading out by ~15 px. Distances below are in those reference
+          // pixels, scaled to this frame; fringeWidth sets the halo's reach.
+          float self = smoothstep(clip * 0.7, clip, lumAt(uv));
+          if (self < 1.0 && fringe > 0.0) {
+            float px = refPx;
+            float d = 0.0, prevR = 0.0;
+            float radii[8];
+            radii[0] = 1.0; radii[1] = 2.0; radii[2] = 3.0; radii[3] = 4.5; radii[4] = 6.5; radii[5] = 9.0; radii[6] = 12.5; radii[7] = 17.0;
+            float hit = 0.0;
+            // Per-pixel rotation of the sample directions: no octagon steps.
+            float jit = fract(sin(dot(floor(vUv / texel), vec2(12.9898, 78.233))) * 43758.5453) * 0.785398;
+            for (int k = 0; k < 8; k++) {
+              float r = radii[k];
+              float b = 0.0;
+              for (int i = 0; i < 8; i++) {
+                float a = float(i) * 0.785398 + float(k) * 0.4 + jit;
+                b = max(b, blown(uv + vec2(cos(a), sin(a)) * texel * r * px));
+              }
+              hit = max(hit, b);
+              d += (r - prevR) * (1.0 - hit); // distance to the nearest blown pixel, softly
+              prevR = r;
+            }
+            if (hit > 0.0) {
+              float reach = fringeWidth; // reference px
+              float ringAmt = 1.0 - smoothstep(1.0, 2.5, d);
+              float rimAmt = smoothstep(1.5, 2.5, d) * (1.0 - smoothstep(4.0, 6.0, d));
+              float haloAmt = smoothstep(2.5, 4.0, d) * exp(-max(0.0, d - 4.0) / max(1.0, reach / 3.0)) * (1.0 - smoothstep(reach * 0.7, 17.0, d));
+              float o = (1.0 - self) * fringe;
+              // The dark line is greyed and purple, not just a darker background.
+              float rl = 0.45 * ringAmt * min(1.0, o);
+              float yl = dot(c, vec3(0.2126, 0.7152, 0.0722));
+              c = mix(c, yl * vec3(1.0, 0.75, 1.05), rl) * (1.0 - rl);
+              c += (vec3(0.18, 0.36, 1.0) * 0.5 * rimAmt + vec3(0.7, 0.55, 1.0) * 0.33 * haloAmt) * o * hit;
+            }
           }
-          c += vec3(0.55, 0.25, 1.0) * fringe * nb * (1.0 - self);
         }
         // Sensor response, hue-preserving: compress by the brightest channel so an
-        // overexposed tungsten glow stays amber instead of sliding through yellow
-        // (per-channel clipping), then let only the truly blown core go white.
+        // overexposed glow keeps its hue instead of sliding through yellow
+        // (per-channel clipping). Far past clip it goes nearly white, keeping a
+        // trace of its colour (blownTint): footage of warm troffers clips cream.
         float m = max(c.r, max(c.g, c.b));
         c *= shoulder(m) / max(m, 1e-6);
-        c = mix(c, vec3(clip), smoothstep(clip * 1.2, clip * 4.0, m));
+        c = mix(c, vec3(clip), smoothstep(clip * 1.2, clip * 4.0, m) * (1.0 - blownTint));
         c = min(c / clip, vec3(1.0));
         float lum = dot(c, vec3(0.2126, 0.7152, 0.0722));
         c = max(vec3(0.0), mix(vec3(lum), c, saturation));
-        c = toSRGB(c);
-        c = max(vec3(0.0), c + detail);
+        gl_FragColor = vec4(toSRGB(c), 1.0);
+      }`, {
+      src: { value: null }, glare: { value: null }, texel: { value: new THREE.Vector2() }, wb: { value: new THREE.Vector3(1, 1, 1) }, aspect: { value: 1 },
+      gain: { value: 1 }, clip: { value: 1 }, saturation: { value: 1 }, artifacts: { value: 1 }, glareAmt: { value: 0 }, glareNorm: { value: 1 },
+      fringe: { value: 0 }, fringeWidth: { value: 15 }, refPx: { value: 1 }, aberration: { value: 0 }, vignette: { value: 0 }, fisheye: { value: 0 }, blownTint: { value: 0 },
+    });
+    // Recording: the picture as a video/JPEG encoder stores it, as luma + chroma.
+    // (ntsc-rs's signal model as reference, not its tape damage.) Luma gets lens
+    // softness (more horizontally), then edge enhancement with capped halos. Chroma has a fraction of luma's horizontal
+    // bandwidth, so colour bleeds sideways past edges.
+    this.encodePass = pass(/* glsl */ `
+      uniform sampler2D src; uniform vec2 texel;
+      uniform float artifacts, softness, softH, sharpen, sharpenLimit, chroma, warmSat, shadowTint, banding, noise, blackLift, seed;
+      varying vec2 vUv;
+      float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233)) + seed) * 43758.5453); }
+      float Y(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
+      // Gaussian luma blur, sigma ≈ half the given radius (matching the old
+      // 5-tap lens softness): 7 taps across, 3 down.
+      float lumaBlur(vec2 uv, float sx, float sy) {
+        float t = 0.0, w = 0.0;
+        for (int i = -3; i <= 3; i++) for (int j = -1; j <= 1; j++) {
+          vec2 o = vec2(float(i) * sx / 3.0, float(j) * sy * 0.5);
+          float k = exp(-0.5 * (float(i * i) / 2.25 + float(j * j)));
+          t += Y(texture2D(src, uv + o * texel).rgb) * k; w += k;
+        }
+        return t / w;
+      }
+      void main() {
+        vec4 a = texture2D(src, vUv);
+        vec3 c = a.rgb;
         if (artifacts > 0.5) {
-          c = blackLift + c * (1.0 - blackLift);
+          float y = lumaBlur(vUv, softness + softH, softness);
+          float wide = lumaBlur(vUv, softness + softH + 1.6, softness + 0.6);
+          float detail = clamp((y - wide) * sharpen, -sharpenLimit, sharpenLimit);
+          // Chroma: horizontal low-pass.
+          vec2 cc = vec2(0.0); float w = 0.0;
+          for (int i = -4; i <= 4; i++) {
+            float k = exp(-0.5 * float(i * i) / 4.0);
+            vec3 s = texture2D(src, vUv + vec2(float(i) * chroma * 0.5, 0.0) * texel).rgb;
+            float sy = Y(s);
+            cc += vec2(s.b - sy, s.r - sy) * k; w += k;
+          }
+          cc /= w;
+          y += detail;
+          c = vec3(y + cc.y, y - (0.299 * cc.y + 0.114 * cc.x) / 0.587, y + cc.x);
+          // Colour response: reds, oranges and yellows pushed harder than the rest.
+          float yy = Y(c);
+          float mx = max(c.r, max(c.g, c.b)), mn = min(c.r, min(c.g, c.b));
+          float warm = smoothstep(0.0, 0.25, mx - mn) * clamp((c.r - c.b) / max(mx - mn, 1e-4), 0.0, 1.0);
+          c = max(vec3(0.0), mix(vec3(yy), c, 1.0 + warmSat * warm));
+          // Lifted blacks, tinted magenta.
+          vec3 lift = blackLift * mix(vec3(1.0), vec3(1.25, 0.55, 1.2), shadowTint);
+          c = lift + c * (1.0 - lift);
           vec2 px = floor(vUv / texel);
           vec3 n = vec3(hash(px), hash(px + 17.0), hash(px + 41.0)) - 0.5;
-          float y = dot(c, vec3(0.2126, 0.7152, 0.0722));
-          c += (n - dot(n, vec3(0.333))) * noise * (1.0 - y) * 0.25 + (hash(px + 7.0) - 0.5) * noise * 0.03;
+          float yl = Y(c);
+          c += (n - dot(n, vec3(0.333))) * noise * (1.0 - yl) * 0.25 + (hash(px + 7.0) - 0.5) * noise * 0.03;
           if (banding > 1.0) c = floor(c * banding + 0.5) / banding;
         }
         gl_FragColor = vec4(clamp(c, 0.0, 1.0), 1.0);
       }`, {
-      src: { value: null }, glare: { value: null }, texel: { value: new THREE.Vector2() }, wb: { value: new THREE.Vector3(1, 1, 1) },
-      gain: { value: 1 }, clip: { value: 1 }, saturation: { value: 1 }, artifacts: { value: 1 }, glareAmt: { value: 0 }, glareNorm: { value: 1 },
-      fringe: { value: 0 }, aberration: { value: 0 }, softness: { value: 0 }, sharpen: { value: 0 }, sharpenLimit: { value: 0 }, banding: { value: 0 }, noise: { value: 0 },
-      blackLift: { value: 0 }, vignette: { value: 0 }, seed: { value: 0 },
+      src: { value: null }, texel: { value: new THREE.Vector2() },
+      artifacts: { value: 1 }, softness: { value: 0 }, softH: { value: 0 }, sharpen: { value: 0 }, sharpenLimit: { value: 0 },
+      chroma: { value: 0 }, warmSat: { value: 0 }, shadowTint: { value: 0 }, banding: { value: 0 }, noise: { value: 0 }, blackLift: { value: 0 }, seed: { value: 0 },
     });
   }
 
@@ -245,7 +328,7 @@ export class Digicam {
     const wb = new THREE.Vector3(1 / w[0], 1 / w[1], 1 / w[2]);
     wb.multiplyScalar(1 / (0.2126 * wb.x + 0.7152 * wb.y + 0.0722 * wb.z));
 
-    const f = this.finalPass.mat.uniforms;
+    const f = this.developPass.mat.uniforms;
     if (p.glare > 0) {
       this.ensure(src.width, src.height);
       // Downsample chain.
@@ -271,15 +354,32 @@ export class Digicam {
       for (let i = 0; i < GLARE_LEVELS; i++) norm += Math.pow(p.glareSpread, i);
       f.glareNorm.value = 1 / norm;
     }
+    if (!this.developed || this.developed.width !== src.width || this.developed.height !== src.height) {
+      this.developed?.dispose();
+      this.developed = new THREE.WebGLRenderTarget(src.width, src.height, { depthBuffer: false, colorSpace: THREE.NoColorSpace, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
+    }
+    // The fringe profile is in pixels of the 742-line reference footage, scaled to this frame.
+    const refPx = src.height / 742;
     f.src.value = src.texture;
     f.texel.value.set(1 / src.width, 1 / src.height);
+    f.aspect.value = src.width / src.height;
     f.wb.value.copy(wb);
     f.gain.value = this.exposure; f.clip.value = p.clip; f.saturation.value = p.saturation; f.artifacts.value = p.artifacts ? 1 : 0;
-    f.glareAmt.value = Math.max(0, p.glare); f.fringe.value = p.fringe; f.aberration.value = p.aberration; f.softness.value = p.softness;
-    f.sharpen.value = p.sharpen; f.sharpenLimit.value = p.sharpenLimit; f.banding.value = p.banding; f.noise.value = p.noise;
-    f.blackLift.value = p.blackLift; f.vignette.value = p.vignette;
-    f.seed.value = (this.frame++ % 997) * 0.731;
+    f.glareAmt.value = Math.max(0, p.glare); f.fringe.value = p.fringe; f.fringeWidth.value = (p.fringeWidth / 100) * 742; f.refPx.value = refPx; f.aberration.value = p.aberration;
+    f.vignette.value = p.vignette; f.fisheye.value = p.fisheye; f.blownTint.value = p.blownTint;
+    gl.setRenderTarget(this.developed);
+    gl.render(this.developPass.scene, this.cam);
+
+    const e = this.encodePass.mat.uniforms;
+    e.src.value = this.developed.texture;
+    e.texel.value.set(1 / src.width, 1 / src.height);
+    e.artifacts.value = p.artifacts ? 1 : 0;
+    e.softness.value = p.softness; e.softH.value = p.softnessH;
+    e.sharpen.value = p.sharpen; e.sharpenLimit.value = p.sharpenLimit;
+    e.chroma.value = p.chromaBlur; e.warmSat.value = p.warmSaturation; e.shadowTint.value = p.shadowTint;
+    e.banding.value = p.banding; e.noise.value = p.noise; e.blackLift.value = p.blackLift;
+    e.seed.value = (this.frame++ % 997) * 0.731;
     gl.setRenderTarget(out);
-    gl.render(this.finalPass.scene, this.cam);
+    gl.render(this.encodePass.scene, this.cam);
   }
 }

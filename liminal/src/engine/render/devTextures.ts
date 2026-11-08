@@ -23,7 +23,7 @@ export interface TexImage {
    * light the room from this surface in the bake (lights.rad-style), or only
    * glow (a pot-light lens, whose light is a separate entity).
    */
-  emissive?: { kelvin: number; luminance: number; castsLight: boolean };
+  emissive?: { kelvin: number; luminance: number; castsLight: boolean; color?: string };
   /** Skip the crusher (dev grids stay crisp and exact). */
   raw?: boolean;
   material: string;
@@ -412,6 +412,75 @@ const DEFS: Record<string, Def> = {
       g.fillStyle = '#3e1d2c'; g.fillRect(0, 0, w, h);
       g.fillStyle = '#4c2536'; g.fillRect(0, 0, w, 2);
       noise(g, w, h, rnd, 6);
+    },
+  },
+  // ---- Mall / commercial (Backrooms "Mall Run" lighting reference; original designs) ----
+  // Gold vinyl wallpaper: pinstripe pairs every 12" with a column of stacked
+  // scallops between them. Paper-flat, a little satin. 24" repeat.
+  'mall/wallpaper_gold': {
+    px: [192, 192], world: [24, 24], material: 'wallpaper',
+    paint: (g, w, h, rnd) => {
+      g.fillStyle = '#e4cd7a'; g.fillRect(0, 0, w, h);
+      const col = w / 2;
+      for (let c = 0; c < 2; c++) {
+        const x0 = c * col;
+        g.fillStyle = '#c4a046'; g.fillRect(x0 + 2, 0, 3, h); g.fillRect(x0 + 8, 0, 1, h);
+        // Scallop column, offset half a step on alternate columns.
+        const cx = x0 + col / 2 + 3, step = h / 6, off = c ? step / 2 : 0;
+        for (let k = -1; k < 7; k++) {
+          const cy = k * step + off;
+          g.strokeStyle = '#c9a74e'; g.lineWidth = 4;
+          g.beginPath(); g.arc(cx, cy + step * 0.55, step * 0.62, Math.PI * 1.12, Math.PI * 1.88); g.stroke();
+          g.strokeStyle = '#d6b960'; g.lineWidth = 2;
+          g.beginPath(); g.arc(cx, cy + step * 0.55, step * 0.36, Math.PI * 1.15, Math.PI * 1.85); g.stroke();
+          g.fillStyle = '#c29d44'; g.fillRect(cx - 1.5, cy + step * 0.05, 3, 3);
+        }
+      }
+      noise(g, w, h, rnd, 7); wear(g, w, h, rnd, 0.05);
+    },
+  },
+  // Commercial loop carpet, maroon, full of coloured flecks (light, dark,
+  // blue-violet, cream) like real solution-dyed carpet. Bypasses the crusher.
+  'mall/carpet_maroon': {
+    px: [256, 256], world: [36, 36], material: 'carpet', raw: true,
+    paint: (g, w, h, rnd) => {
+      const mottle = valueNoise(w, h, 5, rnd), mid = valueNoise(w, h, 24, rnd);
+      const img = g.createImageData(w, h);
+      for (let i = 0; i < w * h; i++) {
+        const m = (mottle[i] - 0.5) * 16 + (mid[i] - 0.5) * 12 + (rnd() - 0.5) * 18;
+        let r = 122 + m, gg = 48 + m * 0.5, b = 66 + m * 0.6;
+        const f = rnd();
+        if (f < 0.07) { r = 196; gg = 112; b = 132; }
+        else if (f < 0.13) { r = 58; gg = 20; b = 32; }
+        else if (f < 0.155) { r = 92; gg = 74; b = 140; }
+        else if (f < 0.17) { r = 214; gg = 192; b = 170; }
+        img.data[i * 4] = r; img.data[i * 4 + 1] = gg; img.data[i * 4 + 2] = b; img.data[i * 4 + 3] = 255;
+      }
+      g.putImageData(img, 0, 0);
+    },
+  },
+  // 2×4 troffer with a flat diffuser, cool-white tubes (4100 K) in a thin dark frame.
+  'mall/troffer': {
+    px: [64, 128], world: [24, 48], material: 'glass',
+    // Same fixture as office/lightpanel: three T8 tubes ≈ 5500 lm over 0.74 m² → ≈2200 cd/m².
+    emissive: { kelvin: 4100, luminance: 2200, castsLight: true },
+    paint: (g, w, h) => {
+      g.fillStyle = '#fbfaf4'; g.fillRect(0, 0, w, h);
+      g.fillStyle = '#efeee6';
+      for (let i = 0; i < w; i += 4) for (let j = (i / 4) % 2 ? 2 : 0; j < h; j += 4) g.fillRect(i, j, 2, 2);
+      g.fillStyle = '#5c5a55';
+      g.fillRect(0, 0, w, 2); g.fillRect(0, h - 2, w, 2); g.fillRect(0, 0, 2, h); g.fillRect(w - 2, 0, 2, h);
+    },
+  },
+  // Exit sign face: red LED letters on a dark lens. Glows red; too small to light the room.
+  'mall/exit_sign': {
+    px: [64, 32], world: [12, 6], material: 'plastic',
+    emissive: { kelvin: 2000, color: '#ff2a14', luminance: 400, castsLight: false },
+    paint: (g, w, h) => {
+      g.fillStyle = '#1c0705'; g.fillRect(0, 0, w, h);
+      g.fillStyle = '#ff4030';
+      g.font = 'bold 20px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText('EXIT', w / 2, h / 2 + 1);
     },
   },
   missing: {

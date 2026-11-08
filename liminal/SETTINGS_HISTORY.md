@@ -6,6 +6,13 @@ in the tweak panel, or change the default back in code).
 
 | date | setting | old → new | why |
 |---|---|---|---|
+| 2026-11-08 | Camera › Purple fringe | 0.5 → 1.0, rebuilt (blue rim + lavender halo + dark line, profile measured from Mall Run frames); new Fringe width 2 % | User: strengthen the fringe / hard edge |
+| 2026-11-08 | Camera › Glare amount | 0.018 → 0.008 | Warm glare was washing out the fringe structure |
+| 2026-11-08 | Camera › Sharpening halo limit's blown-edge variant | (removed) | The dark line is now part of the fringe profile |
+| 2026-11-08 | Camera › Blown highlights keep colour / Extra horizontal softness / Colour bleed / Warm colour boost / Shadow tint / Fisheye / Camera light beam | (new) 0.12 / 0.5 px / 1.5 px / 0.25 / 0.5 / 0 / 90° | Mall Run study (D1–D3, C3, C5, B5) |
+| 2026-11-08 | Lighting › Bounces | 1 → 2 | Ceiling coloured by bounce light (B2) |
+| 2026-11-08 | View › View bob / sway / roll | 0 / – / – → 0.8 / 0.6 / 0.4° | Handheld camera bob while moving (user) |
+| 2026-11-08 | Surfaces & reflections | (new) ×1, roughness +0, relief ×1 | Reflections + bump (B3); per-material values in textures/surfaces.json |
 | 2026-11-08 | Camera › Sharpening halo limit | (new) 0.08 | Glow was yellow-green: per-channel sharpening of HDR light stripped red beside amber bulbs. Sharpening now acts on luma after the tone curve, capped by this |
 | 2026-11-08 | Render › Wait for lighting | (new) 4000 ms | Don't show the flat unlit world while the lightmap loads |
 | 2026-11-08 | Camera › Glow (bloom, threshold, radius) | 0.5 / 1.5 / 1.0 → replaced by Glare amount 0.018 and Glare spread 0.5 (first try 0.035 / 0.65 hid the hard edge and fringe) | Glow looked unpolished, especially at distance: rebuilt as an energy-based lens glare (Spencer 1995; Jimenez 2014) |
