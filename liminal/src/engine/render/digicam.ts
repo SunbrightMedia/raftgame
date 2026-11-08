@@ -39,6 +39,9 @@ export interface CameraParams {
   glareSpread: number;
   fringe: number;
   edgeDark: number;
+  brightness: number;
+  contrast: number;
+  blackCrush: number;
   aberration: number;
   softness: number;
   softnessH: number;
@@ -136,7 +139,7 @@ export class Digicam {
     // highlight response, sRGB.
     this.developPass = pass(/* glsl */ `
       uniform sampler2D src; uniform sampler2D glare; uniform vec2 texel; uniform vec3 wb; uniform float aspect;
-      uniform float gain, clip, saturation, artifacts, glareAmt, glareNorm, fringe, fringeWidth, aberration, vignette, fisheye, blownTint, knee, rolloff, blackStretch, softness, sharpen, edgeDark;
+      uniform float gain, clip, saturation, artifacts, glareAmt, glareNorm, fringe, fringeWidth, aberration, vignette, fisheye, blownTint, knee, rolloff, blackStretch, softness, sharpen, edgeDark, brightnessOut, contrast, blackCrush;
       varying vec2 vUv;
       vec3 tap(vec2 uv) {
         vec2 d = (uv - 0.5) * aberration * 0.006;
@@ -219,11 +222,23 @@ export class Digicam {
         c = min(c / clip, vec3(1.0));
         float lum = dot(c, vec3(0.2126, 0.7152, 0.0722));
         c = max(vec3(0.0), mix(vec3(lum), c, saturation));
-        gl_FragColor = vec4(toSRGB(c), 1.0);
+        // The camera's picture style, on the encoded image (so auto exposure
+        // can't undo it): brightness as a midtone gamma, contrast as an S-curve
+        // per channel around mid-grey (as camera "contrast" settings do, which
+        // also adds a little saturation), then the black point.
+        vec3 o = toSRGB(c);
+        o = pow(max(o, vec3(0.0)), vec3(exp2(-brightnessOut)));
+        if (contrast != 1.0) {
+          vec3 lo = 0.5 * pow(2.0 * o, vec3(contrast));
+          vec3 hi = 1.0 - 0.5 * pow(2.0 * (1.0 - o), vec3(contrast));
+          o = mix(lo, hi, step(0.5, o));
+        }
+        o = max(vec3(0.0), (o - blackCrush) / max(0.01, 1.0 - blackCrush));
+        gl_FragColor = vec4(o, 1.0);
       }`, {
       src: { value: null }, glare: { value: null }, texel: { value: new THREE.Vector2() }, wb: { value: new THREE.Vector3(1, 1, 1) }, aspect: { value: 1 },
       gain: { value: 1 }, clip: { value: 1 }, saturation: { value: 1 }, artifacts: { value: 1 }, glareAmt: { value: 0 }, glareNorm: { value: 1 },
-      fringe: { value: 0 }, fringeWidth: { value: 2 }, aberration: { value: 0 }, vignette: { value: 0 }, fisheye: { value: 0 }, blownTint: { value: 0 }, softness: { value: 0 }, sharpen: { value: 0 }, edgeDark: { value: 0 }, knee: { value: 0.55 }, rolloff: { value: 2.5 }, blackStretch: { value: 0 },
+      fringe: { value: 0 }, fringeWidth: { value: 2 }, aberration: { value: 0 }, vignette: { value: 0 }, fisheye: { value: 0 }, blownTint: { value: 0 }, softness: { value: 0 }, sharpen: { value: 0 }, edgeDark: { value: 0 }, brightnessOut: { value: 0 }, contrast: { value: 1 }, blackCrush: { value: 0 }, knee: { value: 0.55 }, rolloff: { value: 2.5 }, blackStretch: { value: 0 },
     });
     // Recording: the picture as a video/JPEG encoder stores it, as luma + chroma.
     // (ntsc-rs's signal model as reference, not its tape damage.) Luma gets lens
@@ -369,7 +384,7 @@ export class Digicam {
     f.aspect.value = src.width / src.height;
     f.wb.value.copy(wb);
     f.gain.value = this.exposure; f.clip.value = p.clip; f.saturation.value = p.saturation; f.artifacts.value = p.artifacts ? 1 : 0;
-    f.glareAmt.value = Math.max(0, p.glare); f.fringe.value = p.fringe; f.softness.value = p.softness; f.sharpen.value = p.sharpen; f.edgeDark.value = p.edgeDark; f.aberration.value = p.aberration;
+    f.glareAmt.value = Math.max(0, p.glare); f.fringe.value = p.fringe; f.softness.value = p.softness; f.sharpen.value = p.sharpen; f.edgeDark.value = p.edgeDark; f.brightnessOut.value = p.brightness; f.contrast.value = p.contrast; f.blackCrush.value = p.blackCrush; f.aberration.value = p.aberration;
     f.vignette.value = p.vignette; f.fisheye.value = p.fisheye; f.blownTint.value = p.blownTint; f.knee.value = p.knee; f.rolloff.value = p.rolloff; f.blackStretch.value = p.blackStretch;
     gl.setRenderTarget(this.developed);
     gl.render(this.developPass.scene, this.cam);

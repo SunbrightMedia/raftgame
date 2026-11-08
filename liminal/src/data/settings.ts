@@ -74,7 +74,7 @@ export const SETTINGS = {
       msaa: num('Antialiasing (MSAA)', 4, 0, 8, 1, 'Multisample antialiasing on the internal render: smooths jagged geometry edges. 0 = off (crunchier), 4 = smooth.', 'x'),
       upscale: select('Upscale filter', 'linear', ['nearest', 'linear'] as const, 'nearest = crunchy pixels, linear = soft CRT-ish.'),
       faceShade: num('Fullbright face shading', 0.6, 0, 1, 0.01, 'Fake per-face shading used only when baked lighting is off. 0 = flat, 1 = strong.'),
-      brightness: num('Brightness', 1, 0, 3, 0.01),
+      brightness: num('Scene light × (auto exposure undoes this)', 1, 0, 3, 0.01, 'Multiplies the light in the scene itself. With auto exposure on, the camera re-meters and cancels it. For picture brightness use Camera › Brightness.'),
       textureFilter: select('Texture filter', 'linear', ['nearest', 'linear'] as const, 'nearest = crisp texels (retro), linear = smooth.'),
       lightHoldMs: num('Wait for lighting', 4000, 0, 30000, 100, 'On map load, draw nothing until the lightmap is ready (at most this long), instead of flashing the flat unlit world.', 'ms'),
       clearColor: color('Void colour', '#0b0c0e'),
@@ -127,6 +127,9 @@ export const SETTINGS = {
     help: 'A 2001–2006 consumer digicam: meters the scene and sets exposure itself, has its own white balance and a short dynamic range. The look comes from this, not from filters (STYLE.md, "The medium").',
     defs: {
       autoExposure: bool('Auto exposure', true, 'Meter the scene like a point-and-shoot (centre-weighted average) and expose for it. Why lamps blow out while the room stays readable.'),
+      brightness: num('Brightness', 0, -1.5, 1.5, 0.01, 'Picture brightness (midtones), applied after auto exposure so it stays put. 0 = neutral.'),
+      contrast: num('Contrast', 1.25, 0.5, 3, 0.01, 'Camera contrast: an S-curve around mid-grey. 1 = flat (as before); consumer digicams pushed this hard.'),
+      blackCrush: num('Black crush', 0.03, 0, 0.3, 0.005, 'Where the picture goes fully black. Deep shadows, as in the photos.'),
       evComp: num('Exposure compensation', 0, -4, 4, 0.1, 'Like the +/- button on the camera.', 'EV'),
       manualEV: num('Manual exposure', 5, -2, 14, 0.1, 'Used when auto exposure is off. Dim interiors ≈ 4–6, offices ≈ 7–8.', 'EV100'),
       adaptSpeed: num('Exposure adapt speed', 2, 0.1, 20, 0.1, 'How fast auto exposure follows the scene.'),
