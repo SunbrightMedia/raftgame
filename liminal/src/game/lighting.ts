@@ -227,6 +227,7 @@ export class Lighting {
         surfaceSpacing: 16,
         aoStrength: L.aoStrength,
         aoRadius: L.aoRadius,
+        aoDirect: L.aoDirect,
       },
     };
   }
@@ -241,6 +242,9 @@ type Props = Record<string, unknown>;
  *   type:   "can"  — BR30 flood in a 6" recessed can: cos^1.4 beam, 50° cutoff, 85% efficiency
  *           "bulb" — bare bulb, equal in every direction: I = lm / 4π
  *           "down" / "up" — flat Lambertian emitter facing down/up: I0 = lm / π
+ *           "dome" — flush-mount frosted dome on the ceiling: wide downward
+ *                    cos^0.6 lobe, nothing upward, so the ceiling above it
+ *                    doesn't get the hot spot a bare bulb throws
  * Units and sources: see engine/light/units.ts.
  */
 export function lightFromEntity(origin: [number, number, number], p: Props): BakeLight {
@@ -250,6 +254,10 @@ export function lightFromEntity(origin: [number, number, number], p: Props): Bak
   if (type === 'can') {
     const lm = num('lumens', BR30_65W.lumens);
     return { pos: origin, color, I0: cosNPeak(lm, BR30_65W.n) * BR30_65W.efficiency, dir: [0, 0, -1], n: BR30_65W.n, cutoffDeg: num('cutoff', BR30_65W.cutoffDeg), softDeg: BR30_65W.softDeg, spill: BR30_65W.spill };
+  }
+  if (type === 'dome') {
+    const n = 0.6, lm = num('lumens', 800) * 0.8; // ~80% gets out through the glass
+    return { pos: origin, color, I0: cosNPeak(lm, n), dir: [0, 0, -1], n, cutoffDeg: 88, softDeg: 2, spill: 0 };
   }
   if (type === 'down' || type === 'up') {
     return { pos: origin, color, I0: num('lumens', 400) / Math.PI, dir: [0, 0, type === 'down' ? -1 : 1], n: 1 };
@@ -270,7 +278,7 @@ export function mapLights(level: Level): BakeLight[] {
   return level.map.entities.filter((e) => e.class === 'light').map((e) => {
     const l = lightFromEntity(e.origin, e.props ?? {});
     const t = (e.props ?? {}).type ?? 'bulb';
-    if ((t === 'can' || t === 'bulb') && dyn < MAX_DYNAMIC) { l.dynamic = true; dyn++; }
+    if ((t === 'can' || t === 'bulb' || t === 'dome') && dyn < MAX_DYNAMIC) { l.dynamic = true; dyn++; }
     return l;
   });
 }

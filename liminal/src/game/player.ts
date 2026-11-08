@@ -107,7 +107,9 @@ export class Player {
     const diff = target - this.eyeOffset;
     this.eyeOffset += Math.sign(diff) * Math.min(Math.abs(diff), rate * dt);
 
-    if (st.onGround && !st.noclip) this.bobPhase += (len2d(st.velocity) * dt) / 32;
+    // One step per whole bobPhase: a cadence in Hz, scaled by speed (√, so walking is
+    // only a little slower than running, as with real footsteps).
+    if (st.onGround && !st.noclip) this.bobPhase += s.view.bobRate * Math.sqrt(Math.min(1, len2d(st.velocity) / Math.max(1, this.params.runSpeed))) * dt;
 
     // Landing dip: critically damped spring back to zero.
     const k = 180, c = 2 * Math.sqrt(k);

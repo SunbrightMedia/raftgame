@@ -110,7 +110,7 @@ const WALL = 'office/plaster', CARPET = 'office/carpet_blue', CEIL = 'office/cei
   // A table in the middle.
   box([R0x + 152, R0y + 152, 28], [R0x + 232, R0y + 232, 30], 'house/woodfloor');
   box([R0x + 188, R0y + 188, 0], [R0x + 196, R0y + 196, 28], 'house/woodfloor');
-  entities.push({ id: 2000, class: 'light', origin: [R0x + 192, R0y + 192, RH - 14], props: { type: 'bulb', lumens: 800, kelvin: 2700 } });
+  entities.push({ id: 2000, class: 'light', origin: [R0x + 192, R0y + 192, RH - 4], props: { type: 'dome', lumens: 800, kelvin: 2700 } });
 }
 
 // ---------------------------------------------------------------- the arcade

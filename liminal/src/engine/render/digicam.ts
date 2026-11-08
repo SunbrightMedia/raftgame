@@ -48,6 +48,9 @@ export interface CameraParams {
   warmSaturation: number;
   shadowTint: number;
   blownTint: number;
+  knee: number;
+  rolloff: number;
+  blackStretch: number;
   fisheye: number;
   banding: number;
   noise: number;
@@ -134,7 +137,7 @@ export class Digicam {
     // highlight response, sRGB.
     this.developPass = pass(/* glsl */ `
       uniform sampler2D src; uniform sampler2D glare; uniform vec2 texel; uniform vec3 wb; uniform float aspect;
-      uniform float gain, clip, saturation, artifacts, glareAmt, glareNorm, fringe, fringeWidth, refPx, aberration, vignette, fisheye, blownTint;
+      uniform float gain, clip, saturation, artifacts, glareAmt, glareNorm, fringe, fringeWidth, aberration, vignette, fisheye, blownTint, knee, rolloff, blackStretch;
       varying vec2 vUv;
       vec3 tap(vec2 uv) {
         vec2 d = (uv - 0.5) * aberration * 0.006;
@@ -142,9 +145,14 @@ export class Digicam {
       }
       float lumAt(vec2 uv) { return dot(texture2D(src, uv).rgb * gain * wb, vec3(0.2126, 0.7152, 0.0722)); }
       float blown(vec2 uv) { return smoothstep(clip, clip * 1.6, lumAt(uv)); }
+      // Video "knee": above knee×clip, highlights are compressed logarithmically
+      // so that \`rolloff\` more stops still fit below clip. A bright room seen
+      // from a dim one stays readable instead of flashing white; only lamps,
+      // far brighter, actually clip.
       float shoulder(float m) {
-        float knee = 0.72 * clip;
-        return m <= knee ? m : knee + (clip - knee) * (1.0 - exp(-(m - knee) / max(0.001, clip - knee)));
+        float k = knee * clip;
+        if (m <= k) return m;
+        return min(clip, k + (clip - k) * log2(1.0 + (m - k) / k) / max(0.1, rolloff));
       }
       vec3 toSRGB(vec3 c) { return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c)); }
       // Barrel distortion (Brown's radial model, r' = r(1 + k r²)), normalised so
@@ -165,50 +173,27 @@ export class Digicam {
         if (artifacts > 0.5) {
           vec2 v0 = vUv - 0.5;
           c *= 1.0 - vignette * dot(v0, v0) * 1.6;
-          // Fringing around blown highlights, profile measured on camcorder footage
-          // of fluorescent troffers (742-line frames): knife-edge core, a dark line
-          // ~2 px wide, a blue rim to ~5 px, then a lavender halo (blue ≈ red >
-          // green) fading out by ~15 px. Distances below are in those reference
-          // pixels, scaled to this frame; fringeWidth sets the halo's reach.
+          // Purple fringe where blown highlights meet darker surroundings: the
+          // hard-edged look from before the Mall Run study (the user's pick),
+          // with a fainter second ring for strength.
           float self = smoothstep(clip * 0.7, clip, lumAt(uv));
-          if (self < 1.0 && fringe > 0.0) {
-            float px = refPx;
-            float d = 0.0, prevR = 0.0;
-            float radii[8];
-            radii[0] = 1.0; radii[1] = 2.0; radii[2] = 3.0; radii[3] = 4.5; radii[4] = 6.5; radii[5] = 9.0; radii[6] = 12.5; radii[7] = 17.0;
-            float hit = 0.0;
-            // Per-pixel rotation of the sample directions: no octagon steps.
-            float jit = fract(sin(dot(floor(vUv / texel), vec2(12.9898, 78.233))) * 43758.5453) * 0.785398;
-            for (int k = 0; k < 8; k++) {
-              float r = radii[k];
-              float b = 0.0;
-              for (int i = 0; i < 8; i++) {
-                float a = float(i) * 0.785398 + float(k) * 0.4 + jit;
-                b = max(b, blown(uv + vec2(cos(a), sin(a)) * texel * r * px));
-              }
-              hit = max(hit, b);
-              d += (r - prevR) * (1.0 - hit); // distance to the nearest blown pixel, softly
-              prevR = r;
-            }
-            if (hit > 0.0) {
-              float reach = fringeWidth; // reference px
-              float ringAmt = 1.0 - smoothstep(1.0, 2.5, d);
-              float rimAmt = smoothstep(1.5, 2.5, d) * (1.0 - smoothstep(4.0, 6.0, d));
-              float haloAmt = smoothstep(2.5, 4.0, d) * exp(-max(0.0, d - 4.0) / max(1.0, reach / 3.0)) * (1.0 - smoothstep(reach * 0.7, 17.0, d));
-              float o = (1.0 - self) * fringe;
-              // The dark line is greyed and purple, not just a darker background.
-              float rl = 0.45 * ringAmt * min(1.0, o);
-              float yl = dot(c, vec3(0.2126, 0.7152, 0.0722));
-              c = mix(c, yl * vec3(1.0, 0.75, 1.05), rl) * (1.0 - rl);
-              c += (vec3(0.18, 0.36, 1.0) * 0.5 * rimAmt + vec3(0.7, 0.55, 1.0) * 0.33 * haloAmt) * o * hit;
-            }
+          float nb = 0.0, nb2 = 0.0;
+          for (int i = 0; i < 8; i++) {
+            vec2 dir = vec2(cos(float(i) * 0.785398), sin(float(i) * 0.785398)) * texel;
+            nb = max(nb, smoothstep(clip, clip * 1.6, lumAt(uv + dir * 1.6)));
+            nb2 = max(nb2, smoothstep(clip, clip * 1.6, lumAt(uv + dir * 1.6 * fringeWidth)));
           }
+          c += vec3(0.55, 0.25, 1.0) * fringe * max(nb, nb2 * 0.4) * (1.0 - self);
         }
         // Sensor response, hue-preserving: compress by the brightest channel so an
         // overexposed glow keeps its hue instead of sliding through yellow
         // (per-channel clipping). Far past clip it goes nearly white, keeping a
         // trace of its colour (blownTint): footage of warm troffers clips cream.
         float m = max(c.r, max(c.g, c.b));
+        // Black stretch: video cameras lift the darkest tones so a dim room next
+        // door isn't a black hole (hue-preserving gain, fading out by ~quarter clip).
+        c *= 1.0 + blackStretch * (1.0 - smoothstep(0.0, 0.25 * clip, m));
+        m = max(c.r, max(c.g, c.b));
         c *= shoulder(m) / max(m, 1e-6);
         c = mix(c, vec3(clip), smoothstep(clip * 1.2, clip * 4.0, m) * (1.0 - blownTint));
         c = min(c / clip, vec3(1.0));
@@ -218,7 +203,7 @@ export class Digicam {
       }`, {
       src: { value: null }, glare: { value: null }, texel: { value: new THREE.Vector2() }, wb: { value: new THREE.Vector3(1, 1, 1) }, aspect: { value: 1 },
       gain: { value: 1 }, clip: { value: 1 }, saturation: { value: 1 }, artifacts: { value: 1 }, glareAmt: { value: 0 }, glareNorm: { value: 1 },
-      fringe: { value: 0 }, fringeWidth: { value: 15 }, refPx: { value: 1 }, aberration: { value: 0 }, vignette: { value: 0 }, fisheye: { value: 0 }, blownTint: { value: 0 },
+      fringe: { value: 0 }, fringeWidth: { value: 2 }, aberration: { value: 0 }, vignette: { value: 0 }, fisheye: { value: 0 }, blownTint: { value: 0 }, knee: { value: 0.55 }, rolloff: { value: 2.5 }, blackStretch: { value: 0 },
     });
     // Recording: the picture as a video/JPEG encoder stores it, as luma + chroma.
     // (ntsc-rs's signal model as reference, not its tape damage.) Luma gets lens
@@ -358,15 +343,13 @@ export class Digicam {
       this.developed?.dispose();
       this.developed = new THREE.WebGLRenderTarget(src.width, src.height, { depthBuffer: false, colorSpace: THREE.NoColorSpace, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
     }
-    // The fringe profile is in pixels of the 742-line reference footage, scaled to this frame.
-    const refPx = src.height / 742;
     f.src.value = src.texture;
     f.texel.value.set(1 / src.width, 1 / src.height);
     f.aspect.value = src.width / src.height;
     f.wb.value.copy(wb);
     f.gain.value = this.exposure; f.clip.value = p.clip; f.saturation.value = p.saturation; f.artifacts.value = p.artifacts ? 1 : 0;
-    f.glareAmt.value = Math.max(0, p.glare); f.fringe.value = p.fringe; f.fringeWidth.value = (p.fringeWidth / 100) * 742; f.refPx.value = refPx; f.aberration.value = p.aberration;
-    f.vignette.value = p.vignette; f.fisheye.value = p.fisheye; f.blownTint.value = p.blownTint;
+    f.glareAmt.value = Math.max(0, p.glare); f.fringe.value = p.fringe; f.fringeWidth.value = p.fringeWidth; f.aberration.value = p.aberration;
+    f.vignette.value = p.vignette; f.fisheye.value = p.fisheye; f.blownTint.value = p.blownTint; f.knee.value = p.knee; f.rolloff.value = p.rolloff; f.blackStretch.value = p.blackStretch;
     gl.setRenderTarget(this.developed);
     gl.render(this.developPass.scene, this.cam);
 

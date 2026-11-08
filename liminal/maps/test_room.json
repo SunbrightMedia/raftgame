@@ -116,7 +116,7 @@
     {"id":111,"type":"box","min":[3300,64,0],"max":[3316,640,40],"tex":"ind/diamondplate"}
   ],
   "entities": [
-    {"id":2000,"class":"light","origin":[752,3280,90],"props":{"type":"bulb","lumens":800,"kelvin":2700}},
+    {"id":2000,"class":"light","origin":[752,3280,100],"props":{"type":"dome","lumens":800,"kelvin":2700}},
     {"id":3000,"class":"light","origin":[1800,256,360],"props":{"type":"down","lumens":3000,"kelvin":4100}},
     {"id":3001,"class":"light","origin":[1800,768,360],"props":{"type":"down","lumens":3000,"kelvin":4100}},
     {"id":3002,"class":"light","origin":[2312,256,360],"props":{"type":"down","lumens":3000,"kelvin":4100}},

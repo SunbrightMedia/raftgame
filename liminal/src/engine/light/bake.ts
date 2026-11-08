@@ -70,6 +70,8 @@ export interface BakeParams {
   aoStrength?: number;
   /** Distance within which nearby surfaces count as occluding. */
   aoRadius?: number;
+  /** How much of the occlusion also darkens baked direct light (0..1). */
+  aoDirect?: number;
 }
 
 /** Shadow casters: every solid brush as a convex plane set. */
@@ -322,9 +324,10 @@ export function bake(input: BakeInput): BakeOutput {
       for (let i = 0; i < rect.w; i++) {
         const k = j * rect.w + i;
         const o = ((rect.y + j) * input.width + rect.x + i) * 4;
-        // Occlusion darkens indirect and ambient light fully, direct light a little
-        // (contact shadows in corners and under furniture).
-        const ao = fs.ao[k * 3], aoDirect = 1 - (1 - ao) * 0.35;
+        // Occlusion darkens indirect and ambient light fully, direct light by
+        // aoDirect: the dark band along the bottom of walls and into corners
+        // that camcorder footage of real rooms shows (the Mall Run study).
+        const ao = fs.ao[k * 3], aoDirect = 1 - (1 - ao) * (p.aoDirect ?? 0.35);
         for (let c = 0; c < 3; c++) {
           const direct = fs.direct[k * 3 + c], indirect = fs.total[k * 3 + c] - direct;
           const bakedDirect = direct - fs.dynDirect[k * 3 + c]; // dynamic lights are drawn per pixel

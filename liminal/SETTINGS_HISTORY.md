@@ -6,6 +6,12 @@ in the tweak panel, or change the default back in code).
 
 | date | setting | old → new | why |
 |---|---|---|---|
+| 2026-11-08 | Surfaces › Reflections × | 1 → 0 | User: global sheen turned dark carpets grey; looks better off |
+| 2026-11-08 | Camera › Glare / Blown keep colour / Horizontal softness / Colour bleed / Warm boost / Shadow tint | 0.008 / 0.12 / 0.5 / 1.5 / 0.25 / 0.5 → 0.018 / 0 / 0 / 0 / 0 / 0 | User: revert to the pre-Mall-Run look, keep only the approved fixes (sliders remain) |
+| 2026-11-08 | Lighting › AO strength / radius / on direct light | 0.4 / 24 / 0.35 (fixed) → 0.9 / 48 / 1.0 | Dark band along wall bases and into corners (user: main takeaway of the Mall Run footage) |
+| 2026-11-08 | Camera › Highlight knee / roll-off / black stretch | hard shoulder at 0.72 → 0.55 / 2.5 EV / 0.25 | Neighbouring rooms looked far too bright or too dark |
+| 2026-11-08 | Camera › Purple fringe | Mall Run profile rebuild → back to the earlier hard-edge fringe at 1.0, with a fainter outer ring | User: the rebuild looked horrid |
+| 2026-11-08 | View › bob / sway / roll | 0.8 / 0.6 / 0.4° (distance-based, ~6 steps/s) → 0.3 / 0.25 / 0.15°, 1.8 steps/s | User: bob comically fast |
 | 2026-11-08 | Camera › Purple fringe | 0.5 → 1.0, rebuilt (blue rim + lavender halo + dark line, profile measured from Mall Run frames); new Fringe width 2 % | User: strengthen the fringe / hard edge |
 | 2026-11-08 | Camera › Glare amount | 0.018 → 0.008 | Warm glare was washing out the fringe structure |
 | 2026-11-08 | Camera › Sharpening halo limit's blown-edge variant | (removed) | The dark line is now part of the fringe profile |
