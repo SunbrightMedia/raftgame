@@ -1,57 +1,58 @@
 import { type Axis, type Face, type LightmapRect, type SolidPlanes, facePoint, insideSolid } from './faces';
+import { INCH } from './units';
 
 /**
- * Lightmap baker, in the spirit of Source's VRAD:
+ * Lightmap baker, in physical units (see units.ts):
  *  - direct light from point lights and from light-emitting surfaces
- *    (Source's lights.rad: fluorescent panels light the room by themselves),
- *    with hard shadow rays against brushes,
- *  - inverse-square falloff controlled by a "fifty percent distance", like
- *    Source lights' _fifty_percent_distance,
- *  - optional bounce passes (gathered indirect light), which give the soft
- *    fill and corner darkening that make old Source maps look the way they do,
- *  - plus a flat ambient term.
+ *    (Source's lights.rad idea: a fluorescent panel lights the room by
+ *    itself), with hard shadow rays against brushes,
+ *  - pure inverse-square falloff (Source's default attenuation) with real
+ *    beam shapes: cos^n intensity and an optional hard-ish cutoff angle,
+ *    which is what throws the scallop a recessed can leaves on a wall,
+ *  - bounce passes using LINEAR albedo, so a surface reflects the fraction
+ *    of light it really does,
+ *  - ambient occlusion.
+ * Output is irradiance in lux, linear, as floats. No clamping, no fudge factors.
  *
- * Pure data in, pixels out: no DOM or three.js, so it runs in a worker and in tests.
+ * Pure data in, numbers out: no DOM or three.js, so it runs in a worker and in tests.
  */
 
 export type RGB = [number, number, number];
 
 export interface BakeLight {
+  /** Position in world units (inches). */
   pos: Axis;
-  /** Colour × intensity. 1 = full white at very close range. */
+  /** Linear colour, normalised to luminance 1 (see kelvinToLinear). */
   color: RGB;
-  /** Distance at which the light is at half strength. */
-  fifty: number;
-  /** Beyond this the light contributes nothing (smoothly). */
-  range: number;
-  /** If set, the light faces this way (surface lights, downlights). */
+  /** Peak intensity in candela. */
+  I0: number;
+  /** Facing direction; without it the light is a bare bulb (same intensity every way). */
   dir?: Axis;
-  /** Beam tightness: emission ∝ cos(angle)^cone. 1 = Lambertian, 3+ = a pot light's beam. */
-  cone?: number;
+  /** Beam shape: intensity ∝ cos^n of the angle from `dir`. 1 = Lambertian. */
+  n?: number;
+  /** Light beyond this angle from `dir` is blocked (a can's housing). */
+  cutoffDeg?: number;
+  /** Softness of the cutoff edge. */
+  softDeg?: number;
 }
 
-export interface SurfaceEmitter { color: RGB; intensity: number }
+/** A light-emitting surface: its luminance in cd/m² (e.g. a fluorescent troffer ≈ 2000). */
+export interface SurfaceEmitter { color: RGB; luminance: number }
 
 export interface BakeParams {
+  /** Flat extra irradiance, lux. Physically 0; a fill for taste. */
   ambient: RGB;
-  /** Multiplies every light. */
+  /** Multiplies every light (an artist control; 1 = physical). */
   lightScale: number;
   /** 0..2 bounce passes. */
   bounces: number;
-  /** Strength multiplier for bounced light. */
+  /** 1 = physically correct bounce. */
   bounceScale: number;
   /** Rays per luxel per bounce. */
   bounceSamples: number;
-  /** Spacing of the point samples a light-emitting surface is split into. */
+  /** Spacing of the point samples a light-emitting surface is split into (world units). */
   surfaceSpacing: number;
-  surfaceFifty: number;
-  /** Glow drawn on the emitting surface itself (lightmap value). */
-  surfaceGlow: number;
-  /**
-   * Ambient occlusion: how much light is lost where surfaces close in
-   * (wall-floor junctions, under furniture, inside corners). Uses the first
-   * bounce pass's rays, so it needs bounces >= 1.
-   */
+  /** Ambient occlusion strength (needs bounces >= 1). */
   aoStrength?: number;
   /** Distance within which nearby surfaces count as occluding. */
   aoRadius?: number;
@@ -68,19 +69,41 @@ export interface BakeInput {
   boxes: BakeBox[];
   lights: BakeLight[];
   emissive: Record<string, SurfaceEmitter>;
+  /** LINEAR average albedo per texture (0..1 reflectance). */
   albedo: Record<string, RGB>;
   params: BakeParams;
 }
 
 export interface BakeOutput {
-  /** RGBA8, lightmap value / 2 (shader multiplies by 2 for overbright). */
-  pixels: Uint8ClampedArray;
+  /** RGBA float, irradiance in lux (alpha unused). */
+  pixels: Float32Array;
   width: number;
   height: number;
   ms: number;
   luxels: number;
   lights: number;
 }
+
+/** Below this irradiance (lux) a light is considered out of range. */
+const MIN_LUX = 0.02;
+
+/** Candela of light `l` towards direction (dx,dy,dz)/d, from the light outward. */
+export function intensityToward(l: BakeLight, ux: number, uy: number, uz: number): number {
+  if (!l.dir) return l.I0;
+  const c = ux * l.dir[0] + uy * l.dir[1] + uz * l.dir[2];
+  if (c <= 0) return 0;
+  let I = l.I0 * Math.pow(c, l.n ?? 1);
+  if (l.cutoffDeg !== undefined) {
+    const ang = (Math.acos(Math.min(1, c)) * 180) / Math.PI;
+    const soft = Math.max(0.01, l.softDeg ?? 2);
+    const t = Math.min(1, Math.max(0, (l.cutoffDeg + soft - ang) / (2 * soft)));
+    I *= t * t * (3 - 2 * t);
+  }
+  return I;
+}
+
+/** Distance (world units) beyond which a light gives less than MIN_LUX. */
+const rangeOf = (l: BakeLight) => Math.sqrt((l.I0 * Math.max(...l.color)) / MIN_LUX) / INCH;
 
 interface FaceSamples {
   face: Face;
@@ -105,31 +128,28 @@ export function bake(input: BakeInput): BakeOutput {
   const rects = new Map(input.rects);
   const boxes = input.boxes;
 
-  const lights: BakeLight[] = input.lights.map((l) => ({ ...l, color: scale3(l.color, p.lightScale) }));
-  // Light-emitting surfaces become a grid of small Lambertian lights.
+  const lights: BakeLight[] = input.lights.map((l) => ({ ...l, I0: l.I0 * p.lightScale }));
+  // Light-emitting surfaces become a grid of small Lambertian emitters with
+  // I0 = luminance × area (cd), facing out of the surface.
   for (const f of input.faces) {
     const em = input.emissive[f.tex];
-    // intensity 0 = glows but casts no light (e.g. a pot light's lens; the light itself is an entity).
-    if (!em || em.intensity <= 0) continue;
+    if (!em || em.luminance <= 0) continue;
     const ns = Math.max(1, Math.round(f.width / p.surfaceSpacing));
     const nt = Math.max(1, Math.round(f.height / p.surfaceSpacing));
-    const cell = (f.width / ns) * (f.height / nt);
-    const k = (em.intensity * p.lightScale * cell) / (32 * 32);
+    const cellM2 = ((f.width / ns) * (f.height / nt)) * INCH * INCH;
     for (let i = 0; i < ns; i++) {
       for (let j = 0; j < nt; j++) {
         lights.push({
-          pos: facePoint(f, ((i + 0.5) * f.width) / ns, ((j + 0.5) * f.height) / nt, 2),
-          color: scale3(em.color, k),
-          fifty: p.surfaceFifty,
-          range: p.surfaceFifty * 5,
-          dir: f.n,
+          pos: facePoint(f, ((i + 0.5) * f.width) / ns, ((j + 0.5) * f.height) / nt, 0.5),
+          color: em.color, I0: em.luminance * cellM2 * p.lightScale, dir: f.n, n: 1,
         });
       }
     }
   }
+  const ranges = lights.map(rangeOf);
 
   // Which brushes can shadow each light (only those inside its range).
-  const lightBoxes = lights.map((l) => boxes.filter((b) => sphereBox(l.pos, l.range, b)));
+  const lightBoxes = lights.map((l, i) => boxes.filter((b) => sphereBox(l.pos, ranges[i], b)));
 
   const samples: FaceSamples[] = [];
   const byId = new Map<number, FaceSamples>();
@@ -163,16 +183,8 @@ export function bake(input: BakeInput): BakeOutput {
   // ---- direct light
   for (const fs of samples) {
     const f = fs.face;
-    if (fs.emitting) {
-      const em = input.emissive[f.tex];
-      fs.direct.fill(0);
-      for (let k = 0; k < fs.valid.length; k++) {
-        fs.direct[k * 3] = em.color[0] * p.surfaceGlow;
-        fs.direct[k * 3 + 1] = em.color[1] * p.surfaceGlow;
-        fs.direct[k * 3 + 2] = em.color[2] * p.surfaceGlow;
-      }
-      continue;
-    }
+    // Light sources are self-lit in the shader; their lightmap stays dark.
+    if (fs.emitting) continue;
     // Lights that can reach this face at all: in front of it and in range of its bounds.
     const lo = facePoint(f, 0, 0), hi = facePoint(f, f.width, f.height);
     const fmin: Axis = [Math.min(lo[0], hi[0]), Math.min(lo[1], hi[1]), Math.min(lo[2], hi[2])];
@@ -182,7 +194,7 @@ export function bake(input: BakeInput): BakeOutput {
       const l = lights[li];
       const side = (l.pos[0] - f.origin[0]) * f.n[0] + (l.pos[1] - f.origin[1]) * f.n[1] + (l.pos[2] - f.origin[2]) * f.n[2];
       if (side <= 0) continue;
-      if (sphereBox(l.pos, l.range, { min: fmin, max: fmax })) cand.push(li);
+      if (sphereBox(l.pos, ranges[li], { min: fmin, max: fmax })) cand.push(li);
     }
     for (let k = 0; k < fs.valid.length; k++) {
       if (!fs.valid[k]) continue;
@@ -192,20 +204,16 @@ export function bake(input: BakeInput): BakeOutput {
         const l = lights[li];
         const dx = l.pos[0] - px, dy = l.pos[1] - py, dz = l.pos[2] - pz;
         const d2 = dx * dx + dy * dy + dz * dz;
-        if (d2 > l.range * l.range) continue;
+        if (d2 > ranges[li] * ranges[li]) continue;
         const d = Math.sqrt(d2) || 1e-6;
         const ndotl = (dx * f.n[0] + dy * f.n[1] + dz * f.n[2]) / d;
         if (ndotl <= 0) continue;
-        let emit = 1;
-        if (l.dir) {
-          emit = -(dx * l.dir[0] + dy * l.dir[1] + dz * l.dir[2]) / d;
-          if (emit <= 0) continue;
-          if (l.cone && l.cone !== 1) emit = Math.pow(emit, l.cone);
-        }
-        const att = falloff(d, l.fifty, l.range);
-        if (att <= 0) continue;
+        const I = intensityToward(l, -dx / d, -dy / d, -dz / d);
+        if (I <= 0) continue;
         if (occluded(lightBoxes[li], px, py, pz, l.pos[0], l.pos[1], l.pos[2])) continue;
-        const w = att * ndotl * emit;
+        // E = I·cosθ / d²  (lux, with d in metres)
+        const dm = d * INCH;
+        const w = (I * ndotl) / (dm * dm);
         r += l.color[0] * w; g += l.color[1] * w; b += l.color[2] * w;
       }
       fs.direct[k * 3] = r; fs.direct[k * 3 + 1] = g; fs.direct[k * 3 + 2] = b;
@@ -271,7 +279,7 @@ export function bake(input: BakeInput): BakeOutput {
   }
 
   // ---- write the atlas
-  const pixels = new Uint8ClampedArray(input.width * input.height * 4);
+  const pixels = new Float32Array(input.width * input.height * 4);
   for (const fs of samples) {
     dilate(fs, fs.total);
     dilate(fs, fs.direct);
@@ -286,21 +294,15 @@ export function bake(input: BakeInput): BakeOutput {
         const ao = fs.ao[k * 3], aoDirect = 1 - (1 - ao) * 0.35;
         for (let c = 0; c < 3; c++) {
           const direct = fs.direct[k * 3 + c], indirect = fs.total[k * 3 + c] - direct;
-          pixels[o + c] = ((direct * aoDirect + (indirect + p.ambient[c]) * ao) / 2) * 255;
+          pixels[o + c] = direct * aoDirect + (indirect + p.ambient[c]) * ao;
         }
-        pixels[o + 3] = 255;
+        pixels[o + 3] = 1;
       }
     }
   }
   return { pixels, width: input.width, height: input.height, ms: Date.now() - t0, luxels, lights: lights.length };
 }
 
-/** Source-like inverse square with a "fifty percent" distance, faded to zero at `range`. */
-export function falloff(d: number, fifty: number, range: number): number {
-  const q = (x: number) => 1 / (1 + (x / Math.max(1, fifty)) ** 2);
-  const end = q(range);
-  return Math.max(0, (q(d) - end) / (1 - end));
-}
 
 /** 3×3 box blur over a face's valid luxels, `passes` times. */
 function smooth(buf: Float32Array, w: number, h: number, valid: Uint8Array, passes: number): void {
@@ -406,7 +408,6 @@ function hash(n: number): number {
 }
 
 const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v);
-const scale3 = (c: RGB, s: number): RGB => [c[0] * s, c[1] * s, c[2] * s];
 
 function sphereBox(c: Axis, r: number, b: { min: Axis; max: Axis }): boolean {
   let d = 0;

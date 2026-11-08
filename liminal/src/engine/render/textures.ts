@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { makeDevTexture, devTextureNames, type TexImage } from './devTextures';
-import { type CrushParams, grade, sharpen, medianCut, applyPalette, averageColor, type Palette } from './crusher';
+import { type CrushParams, grade, sharpen, medianCut, applyPalette, averageLinear, type Palette } from './crusher';
 
 export interface TexEntry {
   name: string;
@@ -9,8 +9,8 @@ export interface TexEntry {
   worldW: number;
   worldH: number;
   material: string;
-  emissive?: { color: [number, number, number]; intensity: number };
-  /** Average colour after crushing, 0..1: used for bounce light. */
+  emissive?: TexImage['emissive'];
+  /** Average LINEAR reflectance after crushing, 0..1: used for bounce light. */
   albedo: [number, number, number];
 }
 
@@ -168,7 +168,7 @@ export class TextureRegistry {
     t.anisotropy = 16;
     t.magFilter = base.texture.magFilter;
     t.minFilter = THREE.LinearMipmapLinearFilter;
-    return { ...base, name: v.name, texture: t, albedo: averageColor(d) };
+    return { ...base, name: v.name, texture: t, albedo: averageLinear(d) };
   }
 
   private build(src: Source, name: string): TexEntry {
@@ -200,7 +200,7 @@ export class TextureRegistry {
     t.anisotropy = 16;
     t.magFilter = this.filter === 'nearest' ? THREE.NearestFilter : THREE.LinearFilter;
     t.minFilter = THREE.LinearMipmapLinearFilter;
-    return { name, texture: t, worldW: src.worldW, worldH: src.worldH, material: src.material, emissive: src.emissive, albedo: averageColor(px) };
+    return { name, texture: t, worldW: src.worldW, worldH: src.worldH, material: src.material, emissive: src.emissive, albedo: averageLinear(px) };
   }
 
   private crush(src: Source, p: CrushParams): HTMLCanvasElement {

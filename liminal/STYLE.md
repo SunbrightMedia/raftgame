@@ -170,6 +170,9 @@ inseparable from how these photos were taken (2001–2006 point-and-shoots):
 - **Shadows:** chroma noise, lifted milky blacks; mild corner vignetting.
 - Built as the **Camera (digicam look)** settings: everything tunable,
   never a VHS filter.
+- **Light sources: hard-edged blowout with a purple fringe.** (user: "great
+  for the style") Lamps, cans and panels clip to a flat white shape with a
+  crisp edge, a soft glow, and a thin purple/blue fringe around them.
 - **No filter clichés.** (user) No global chromatic aberration, scan lines,
   tracking noise or "analog" overlays. Effects appear only where the real
   camera would produce them (fringing only at blown highlight edges).

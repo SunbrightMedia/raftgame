@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Digicam, type DigicamParams } from './digicam';
+import { Digicam, type CameraParams } from './digicam';
 
 THREE.ColorManagement.enabled = false;
 THREE.Object3D.DEFAULT_UP.set(0, 0, 1);
@@ -19,8 +19,8 @@ export class LowResRenderer {
   internalHeight = 480;
   /** MSAA samples on the internal render (0 = off). Smooths geometry edges. */
   msaa = 4;
-  /** The early-digital-camera pass; null = plain upscale. */
-  camera_: DigicamParams | null = null;
+  /** The camera: exposure, white balance, response, sRGB, the medium's artifacts. */
+  camera_: CameraParams | null = null;
   private digicam = new Digicam();
   upscale: 'nearest' | 'linear' = 'linear';
   /** Size actually rendered last frame, for the HUD. */
@@ -74,7 +74,7 @@ export class LowResRenderer {
     }
     this.gl.setRenderTarget(this.target);
     this.gl.render(scene, this.camera);
-    if (this.camera_?.enabled) {
+    if (this.camera_) {
       this.digicam.render(this.gl, this.target, null, this.camera_);
       return;
     }

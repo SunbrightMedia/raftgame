@@ -99,12 +99,12 @@ function casingX(o0: number, o1: number, height: number, faceY: number, dir: 1 |
   box([o0 - w, ya, height], [o1 + w, yb, height + w], tex);
 }
 
-function potLight(x: number, y: number, ceiling: number, intensity = 3.2): void {
+function potLight(x: number, y: number, ceiling: number, lumens = 650): void {
   // A white trim ring with a round lens: the lens is a light source (self-lit, blows out).
   prism(circle(x, y, 3.9, 20), ceiling - 0.4, ceiling, TRIM, { solid: false });
   prism(circle(x, y, 2.8, 20), ceiling - 0.55, ceiling - 0.4, 'fixture/potlight', { solid: false });
-  // Warm (~2700K) beam: bright pools and scallops on nearby walls, dark between.
-  entities.push({ id: 5000 + entities.length, class: 'light', origin: [x, y, ceiling - 3], props: { color: '#ffcc94', intensity, fifty: 70, emit: 'down', cone: 2.5 } });
+  // 65 W BR30 incandescent flood (≈650 lm, 2700 K) in a 6" recessed can: see engine/light/units.ts.
+  entities.push({ id: 5000 + entities.length, class: 'light', origin: [x, y, ceiling - 3], props: { type: 'can', lumens, kelvin: 2700 } });
 }
 
 const MINT = 'pmp/paint_mint', WARM = 'pmp/paint_warmwhite', CEIL = 'pmp/ceiling_white';
@@ -185,7 +185,7 @@ function casingY(o0: number, o1: number, height: number, faceX: number, dir: 1 |
     { side: 'w', from: 147, to: 203 }, { side: 'n', from: 21, to: 59 }, { side: 'n', from: 89, to: 191 },
   ]);
   // Cans around the perimeter, ~30" off the walls, so each throws a scallop up the wall.
-  for (const [x, y] of [[30, 40], [30, 110], [210, 40], [210, 110], [210, 180], [120, 186], [120, 40]]) potLight(x, y, 96, 1.5);
+  for (const [x, y] of [[30, 40], [30, 110], [210, 40], [210, 110], [210, 180], [120, 186], [120, 40]]) potLight(x, y, 96);
 
   // The pink carpet spills out of the wide opening in a big curve that
   // sweeps right, to the right-hand wall: the part of a circle (through the
@@ -227,8 +227,8 @@ function casingY(o0: number, o1: number, height: number, faceX: number, dir: 1 |
   // Round ottoman: striped band below a green cushion.
   prism(circle(-90, 168, 17, 24), 0, 11, 'house/ottoman_band', { faces: { pz: { tex: FABRIC } } });
   prism(circle(-90, 168, 17.5, 24), 11, 16, FABRIC);
-  potLight(-80, 140, 92, 1.7);
-  potLight(-80, 200, 92, 1.4);
+  potLight(-80, 140, 92, 475); // 50 W BR30
+  potLight(-80, 200, 92, 475);
 }
 
 // ------------------------------------------------------------------ pink bar room
@@ -257,12 +257,13 @@ function casingY(o0: number, o1: number, height: number, faceX: number, dir: 1 |
   box([6, 396, SZ0], [300, 420, SZ1], WARM);
   box([6, 246, SZ0], [30, 396, SZ1], WARM);
   box([276, 246, SZ0], [300, 396, SZ1], WARM);
-  // Cove: a near-continuous strip of small up-lights hidden on the soffit,
-  // 14" below the tray ceiling, so it washes the ceiling instead of spotting it.
-  const cove = (x: number, y: number) => entities.push({ id: 5000 + entities.length, class: 'light', origin: [x, y, SZ1 + 1], props: { color: '#ffc68a', intensity: 0.055, fifty: 46, emit: 'up' } });
+  // Cove: a warm-white strip hidden on the soffit, 14" below the tray ceiling,
+  // modelled as one up-facing emitter per foot at ~150 lm/ft (3000 K): an
+  // assumption, typical of a 90s fluorescent/incandescent cove.
+  const cove = (x: number, y: number) => entities.push({ id: 5000 + entities.length, class: 'light', origin: [x, y, SZ1 + 1], props: { type: 'up', lumens: 150, kelvin: 3000 } });
   for (let x = 36; x <= 270; x += 12) { cove(x, 243); cove(x, 399); }
   for (let y = 258; y <= 384; y += 12) { cove(33, y); cove(273, y); }
-  for (const [x, y] of [[70, 290], [150, 290], [230, 290], [70, 350], [150, 350], [230, 350]]) potLight(x, y, 112, 1.5);
+  for (const [x, y] of [[70, 290], [150, 290], [230, 290], [70, 350], [150, 350], [230, 350]]) potLight(x, y, 112);
 
   // Tall display cabinet on the back wall: orange wood, frosted glass, gold lines.
   box([120, 404, 0], [156, 420, 84], WOOD, { faces: { ny: { tex: 'house/cabinet_glass', offset: [-120, 0] } } });
@@ -291,10 +292,8 @@ writeFileSync(new URL('../maps/pmp_basement.json', import.meta.url), serializeMa
   format: MAP_FORMAT, version: MAP_VERSION, name: 'pmp_basement', brushes, entities,
   // This room's mood (STYLE.md: residential = moody and warm, never sterile).
   settings: {
-    light: { ambient: '#0e0b09', bounceScale: 1.35, exposure: 1.0, luxelSize: 8 },
-    // A tungsten-lit basement: the camera's auto white balance leaves it amber.
-    camera: { whiteBalance: '#ffe6c4' },
-    fog: { enabled: true, color: '#140e0a', near: 120, far: 2600 },
+    light: { luxelSize: 8 },
+    fog: { enabled: true, color: '#3a2a20', luminance: 0.6, near: 120, far: 2600 },
   },
 }));
 console.log(`wrote maps/pmp_basement.json: ${brushes.length} brushes, ${entities.length} entities`);

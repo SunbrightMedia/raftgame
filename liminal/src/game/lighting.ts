@@ -1,15 +1,12 @@
 import * as THREE from 'three';
 import BakeWorker from '../engine/light/bake.worker?worker&inline';
-import type { BakeInput, BakeLight, BakeOutput, RGB } from '../engine/light/bake';
+import type { BakeInput, BakeLight, BakeOutput } from '../engine/light/bake';
+import { BR30_65W, cosNPeak, kelvinToLinear } from '../engine/light/units';
 import { layoutLightmap, solidPlanes, type LightmapLayout } from '../engine/light/faces';
 import type { TextureRegistry } from '../engine/render/textures';
 import type { Settings } from '../data/settings';
 import type { Level } from './level';
 
-export const hexToRgb = (hex: string): RGB => {
-  const n = parseInt(hex.slice(1), 16);
-  return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
-};
 
 /**
  * Keeps the level's lightmap in step with the map and the light settings.
@@ -28,8 +25,8 @@ export class Lighting {
   request(level: Level, s: Settings, textures: TextureRegistry, force = false): void {
     if (!s.light.enabled) return;
     // Exposure and filtering are applied without re-baking.
-    const { exposure: _e, filter: _f, ...bakeSettings } = s.light;
-    void _e; void _f;
+    const { filter: _f, ...bakeSettings } = s.light;
+    void _f;
     const key = JSON.stringify([bakeSettings, s.textures, level.map.name, level.faces.length]);
     if (!force && key === this.lastKey) return;
     this.lastKey = key;
@@ -50,22 +47,10 @@ export class Lighting {
     for (const f of level.faces) {
       const t = textures.get(f.tex);
       albedo[f.tex] = t.albedo;
-      if (t.emissive) {
-        const c = hexToRgb(L.surfaceColor);
-        emissive[f.tex] = { color: [c[0] * t.emissive.color[0], c[1] * t.emissive.color[1], c[2] * t.emissive.color[2]], intensity: t.emissive.intensity * L.surfaceIntensity };
-      }
+      if (t.emissive && t.emissive.castsLight) emissive[f.tex] = { color: kelvinToLinear(t.emissive.kelvin), luminance: t.emissive.luminance };
     }
 
-    const lights: BakeLight[] = level.map.entities.filter((e) => e.class === 'light').map((e) => {
-      const p = e.props ?? {};
-      const c = hexToRgb(typeof p.color === 'string' ? p.color : '#ffffff');
-      const intensity = typeof p.intensity === 'number' ? p.intensity : 1;
-      const fifty = typeof p.fifty === 'number' ? p.fifty : 128;
-      // "emit": "down" makes a Lambertian downlight (work lights, recessed cans) instead of a bare bulb.
-      // "emit": "up" for cove lights hidden on a soffit, washing the ceiling.
-      const dir = p.emit === 'down' ? ([0, 0, -1] as [number, number, number]) : p.emit === 'up' ? ([0, 0, 1] as [number, number, number]) : undefined;
-      return { pos: e.origin, color: [c[0] * intensity, c[1] * intensity, c[2] * intensity], fifty, range: typeof p.range === 'number' ? p.range : fifty * 6, dir, cone: typeof p.cone === 'number' ? p.cone : undefined };
-    });
+    const lights: BakeLight[] = level.map.entities.filter((e) => e.class === 'light').map((e) => lightFromEntity(e.origin, e.props ?? {}));
 
     const input: BakeInput = {
       faces: level.faces,
@@ -77,14 +62,12 @@ export class Lighting {
       emissive,
       albedo,
       params: {
-        ambient: hexToRgb(L.ambient),
+        ambient: [L.ambientLux, L.ambientLux, L.ambientLux],
         lightScale: L.lightScale,
         bounces: L.bounces,
         bounceScale: L.bounceScale,
         bounceSamples: L.bounceSamples,
-        surfaceSpacing: 32,
-        surfaceFifty: L.surfaceFifty,
-        surfaceGlow: L.surfaceGlow,
+        surfaceSpacing: 16,
         aoStrength: L.aoStrength,
         aoRadius: L.aoRadius,
       },
@@ -93,7 +76,10 @@ export class Lighting {
     this.worker.onmessage = (e: MessageEvent<{ id: number; out: BakeOutput }>) => {
       if (e.data.id !== this.seq) return;
       const out = e.data.out;
-      const tex = new THREE.DataTexture(out.pixels, out.width, out.height, THREE.RGBAFormat);
+      // Irradiance in lux, linear: half-float keeps the range and filters on every WebGL2 GPU.
+      const half = new Uint16Array(out.pixels.length);
+      for (let i = 0; i < half.length; i++) half[i] = THREE.DataUtils.toHalfFloat(Math.min(65000, out.pixels[i]));
+      const tex = new THREE.DataTexture(half, out.width, out.height, THREE.RGBAFormat, THREE.HalfFloatType);
       tex.colorSpace = THREE.NoColorSpace;
       tex.magFilter = tex.minFilter = L.filter === 'nearest' ? THREE.NearestFilter : THREE.LinearFilter;
       tex.generateMipmaps = false;
@@ -106,4 +92,29 @@ export class Lighting {
     this.worker.onerror = (e) => { this.status = `bake failed: ${e.message}`; };
     this.worker.postMessage({ id, input });
   }
+}
+
+type Props = Record<string, unknown>;
+
+/**
+ * A map "light" entity → a physical light.
+ *   lumens: total luminous flux (a 60 W incandescent A19 ≈ 800 lm)
+ *   kelvin: colour temperature (incandescent 2700, warm-white fluorescent 3000–3500, cool-white 4100)
+ *   type:   "can"  — BR30 flood in a 6" recessed can: cos^1.4 beam, 50° cutoff, 85% efficiency
+ *           "bulb" — bare bulb, equal in every direction: I = lm / 4π
+ *           "down" / "up" — flat Lambertian emitter facing down/up: I0 = lm / π
+ * Units and sources: see engine/light/units.ts.
+ */
+export function lightFromEntity(origin: [number, number, number], p: Props): BakeLight {
+  const num = (k: string, d: number) => (typeof p[k] === 'number' ? (p[k] as number) : d);
+  const color = kelvinToLinear(num('kelvin', 2700));
+  const type = typeof p.type === 'string' ? p.type : 'bulb';
+  if (type === 'can') {
+    const lm = num('lumens', BR30_65W.lumens);
+    return { pos: origin, color, I0: cosNPeak(lm, BR30_65W.n) * BR30_65W.efficiency, dir: [0, 0, -1], n: BR30_65W.n, cutoffDeg: num('cutoff', BR30_65W.cutoffDeg), softDeg: BR30_65W.softDeg };
+  }
+  if (type === 'down' || type === 'up') {
+    return { pos: origin, color, I0: num('lumens', 400) / Math.PI, dir: [0, 0, type === 'down' ? -1 : 1], n: 1 };
+  }
+  return { pos: origin, color, I0: num('lumens', 800) / (4 * Math.PI) };
 }

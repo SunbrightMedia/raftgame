@@ -17,7 +17,13 @@ export interface TexImage {
   /** World units one repeat covers. */
   worldW: number;
   worldH: number;
-  emissive?: { color: [number, number, number]; intensity: number };
+  /**
+   * A light source. luminance in cd/m² (a 1990s fluorescent troffer ≈ 2000,
+   * a BR30 lens ≈ 48000); kelvin = colour temperature; castsLight = also
+   * light the room from this surface in the bake (lights.rad-style), or only
+   * glow (a pot-light lens, whose light is a separate entity).
+   */
+  emissive?: { kelvin: number; luminance: number; castsLight: boolean };
   /** Skip the crusher (dev grids stay crisp and exact). */
   raw?: boolean;
   material: string;
@@ -185,7 +191,9 @@ const DEFS: Record<string, Def> = {
   // Fluorescent troffer with a prismatic diffuser. Emits light.
   'office/lightpanel': {
     px: [96, 96], world: [48, 48], material: 'glass',
-    emissive: { color: [1, 0.98, 0.92], intensity: 1 },
+    // 2×4 troffer, three F32T8 tubes (~2800 lm each, ~65% fixture efficiency → ~5500 lm)
+    // over ~0.74 m²: L = Φ/(π·A) ≈ 2300 cd/m². Warm-white 3500 K tubes.
+    emissive: { kelvin: 3500, luminance: 2200, castsLight: true },
     paint: (g, w, h) => {
       g.fillStyle = '#f7f5ea'; g.fillRect(0, 0, w, h);
       g.fillStyle = '#e6e3d4';
@@ -373,7 +381,8 @@ const DEFS: Record<string, Def> = {
   // Recessed pot light lens. Glows, but casts no light itself: the light is a separate entity.
   'fixture/potlight': {
     px: [32, 32], world: [6, 6], material: 'glass',
-    emissive: { color: [1, 0.93, 0.8], intensity: 0 },
+    // BR30 face: ~248 cd over a ~3.2" lens (≈0.0052 m²) → ≈48000 cd/m². The can's light is an entity.
+    emissive: { kelvin: 2700, luminance: 48000, castsLight: false },
     paint: (g, w, h) => {
       g.fillStyle = '#d9d6cf'; g.fillRect(0, 0, w, h);
       g.fillStyle = '#fff6e4'; g.beginPath(); g.arc(w / 2, h / 2, w * 0.36, 0, Math.PI * 2); g.fill();

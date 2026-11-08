@@ -124,3 +124,13 @@ export function averageColor(px: Uint8ClampedArray): [number, number, number] {
   for (let i = 0; i < px.length; i += 4) { r += px[i]; g += px[i + 1]; b += px[i + 2]; }
   return [r / n / 255, g / n / 255, b / n / 255];
 }
+
+/** Average LINEAR reflectance of display-space (sRGB) pixels: what a surface really reflects. */
+export function averageLinear(px: Uint8ClampedArray): [number, number, number] {
+  const lut = new Float32Array(256);
+  for (let i = 0; i < 256; i++) { const v = i / 255; lut[i] = v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }
+  let r = 0, g = 0, b = 0;
+  const n = px.length / 4;
+  for (let i = 0; i < px.length; i += 4) { r += lut[px[i]]; g += lut[px[i + 1]]; b += lut[px[i + 2]]; }
+  return [r / n, g / n, b / n];
+}

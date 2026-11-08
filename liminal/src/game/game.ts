@@ -6,6 +6,7 @@ import { parseMap, type MapFile } from '../data/map';
 import { LowResRenderer } from '../engine/render/renderer';
 import { TextureRegistry } from '../engine/render/textures';
 import { worldUniforms } from '../engine/render/worldMaterial';
+import { kelvinToLinear } from '../engine/light/units';
 import { angleVectors } from '../engine/vec3';
 import { Input } from './input';
 import { Level } from './level';
@@ -53,8 +54,7 @@ export class Game {
   private updateLightUniforms(s: Settings): void {
     const lm = this.level?.lightmap;
     worldUniforms.lightmapOn.value = s.light.enabled && lm ? 1 : 0;
-    worldUniforms.exposure.value = s.light.exposure;
-    worldUniforms.sourceBrightness.value = s.light.sourceBrightness;
+
     if (lm) {
       const f = s.light.filter === 'nearest' ? THREE.NearestFilter : THREE.LinearFilter;
       if (lm.magFilter !== f) { lm.magFilter = lm.minFilter = f; lm.needsUpdate = true; }
@@ -95,6 +95,7 @@ export class Game {
     worldUniforms.fogColor.value.set(s.fog.color);
     worldUniforms.fogNear.value = s.fog.near;
     worldUniforms.fogFar.value = s.fog.far;
+    worldUniforms.fogLuminance.value = s.fog.luminance;
     this.input.rawInput = s.view.rawInput;
   }
 
@@ -160,9 +161,8 @@ export class Game {
     const C = s.camera;
     worldUniforms.flashOn.value = C.flash ? 1 : 0;
     worldUniforms.flashPos.value.set(eye.x, eye.y, eye.z + C.flashHeight);
-    worldUniforms.flashIntensity.value = C.flashIntensity;
-    worldUniforms.flashFifty.value = C.flashFifty;
-    worldUniforms.flashColor.value.set(C.flashColor);
+    worldUniforms.flashCandela.value = C.flashCandela;
+    worldUniforms.flashColor.value.set(...kelvinToLinear(C.flashKelvin));
 
     this.renderer.render(this.scene);
     this.onFrame?.(dt);

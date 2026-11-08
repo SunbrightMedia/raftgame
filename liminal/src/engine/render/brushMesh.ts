@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { type Face, type LightmapLayout, facePoint } from '../light/faces';
 import type { TextureRegistry } from './textures';
 import { makeWorldMaterial } from './worldMaterial';
+import { kelvinToLinear } from '../light/units';
 
 interface Batch { pos: number[]; nrm: number[]; uv: number[]; lm: number[]; shade: number[]; idx: number[] }
 
@@ -55,7 +56,7 @@ export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout
     geo.setIndex(bt.idx);
     geo.computeBoundingSphere();
     const entry = textures.get(tex);
-    const mat = makeWorldMaterial(entry.texture, !!entry.emissive);
+    const mat = makeWorldMaterial(entry.texture, entry.emissive ? { luminance: entry.emissive.luminance, color: kelvinToLinear(entry.emissive.kelvin) } : undefined);
     // Overlapping coplanar faces (common with hand-drawn brushes) would
     // z-fight and flicker. A small, distinct depth bias per texture batch
     // makes one surface win consistently instead.
