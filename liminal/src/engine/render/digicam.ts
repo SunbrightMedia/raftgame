@@ -7,16 +7,22 @@ import { kelvinToLinear } from '../light/units';
  *
  * 1. Exposure. Auto: meter the frame (centre-weighted log average) and expose
  *    so the average lands on mid-grey, adapting over time; or a manual EV100.
- *    This is why lamps blow out while the room stays readable.
- * 2. White balance in kelvin: light at the camera's white point comes out
- *    neutral; warmer light comes out amber.
- * 3. Sensor response: linear, then a short shoulder into flat clipped white
- *    (low dynamic range).
- * 4. sRGB encoding.
- * 5. Optional artifacts of the medium, applied only where the real camera
- *    produces them: glow and purple fringe around blown highlights, lens
- *    softness with sharpening halos, compression banding, shadow chroma noise,
- *    milky blacks, vignette. Never global "analog" filters.
+ * 2. Lens glare: every bright point is spread by the lens's point-spread
+ *    function, a sharp core with a long faint tail, in proportion to its
+ *    energy (Spencer et al., "Physically-Based Glare Effects for Digital
+ *    Images", SIGGRAPH 1995). Computed with the progressive downsample /
+ *    upsample chain from Jimenez, "Next Generation Post Processing in Call of
+ *    Duty: Advanced Warfare" (SIGGRAPH 2014): 13-tap downsample with a
+ *    luminance-weighted ("Karis") average on the first level so tiny bright
+ *    pixels don't flicker, tent-filter upsample, energy-conserving mix.
+ *    No threshold and no clamp: a distant lamp covering a few pixels makes a
+ *    small faint halo, a close one a large strong one.
+ * 3. White balance in kelvin.
+ * 4. Sensor response: linear, then a short shoulder into flat clipped white.
+ * 5. sRGB encoding.
+ * 6. Optional artifacts of the medium, only where the real camera makes
+ *    them: purple fringe at blown edges, softness + sharpening halos,
+ *    compression banding, shadow chroma noise, milky blacks, vignetting.
  */
 export interface CameraParams {
   autoExposure: boolean;
@@ -27,9 +33,8 @@ export interface CameraParams {
   clip: number;
   saturation: number;
   artifacts: boolean;
-  bloom: number;
-  bloomThreshold: number;
-  bloomRadius: number;
+  glare: number;
+  glareSpread: number;
   fringe: number;
   aberration: number;
   softness: number;
@@ -51,20 +56,21 @@ function pass(fragmentShader: string, uniforms: Record<string, THREE.IUniform>):
 }
 
 const METER_W = 24, METER_H = 16;
+const GLARE_LEVELS = 6;
 
 export class Digicam {
   private cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-  private bright: THREE.WebGLRenderTarget | null = null;
-  private blurA: THREE.WebGLRenderTarget | null = null;
-  private blurB: THREE.WebGLRenderTarget | null = null;
+  private down: THREE.WebGLRenderTarget[] = [];
+  private up: THREE.WebGLRenderTarget[] = [];
   private meter = new THREE.WebGLRenderTarget(METER_W, METER_H, { depthBuffer: false, type: THREE.FloatType, colorSpace: THREE.NoColorSpace });
   private meterBuf = new Float32Array(METER_W * METER_H * 4);
   private meterPass;
-  private brightPass;
-  private blurPass;
+  private downPass;
+  private upPass;
   private finalPass;
   private frame = 0;
   private last = performance.now();
+  private target = 0.05;
   /** Current exposure multiplier (radiance → 0..1 scene-referred). */
   exposure = 0.05;
 
@@ -72,7 +78,6 @@ export class Digicam {
     this.meterPass = pass(/* glsl */ `
       uniform sampler2D src; uniform vec2 cell; varying vec2 vUv;
       void main() {
-        // log-luminance of a 4×4 spread of samples in this cell
         float s = 0.0;
         for (int i = 0; i < 4; i++) for (int j = 0; j < 4; j++) {
           vec2 o = (vec2(float(i), float(j)) + 0.5) / 4.0 - 0.5;
@@ -81,31 +86,41 @@ export class Digicam {
         }
         gl_FragColor = vec4(s / 16.0, 0.0, 0.0, 1.0);
       }`, { src: { value: null }, cell: { value: new THREE.Vector2(1 / METER_W, 1 / METER_H) } });
-    this.brightPass = pass(/* glsl */ `
-      uniform sampler2D src; uniform vec2 srcTexel; uniform float threshold; uniform float gain; uniform vec3 wb; varying vec2 vUv;
-      vec3 bright(vec2 uv) {
-        // Only the energy beyond the threshold glows: a lamp lens (far past white)
-        // glows, a merely bright ceiling barely does.
-        vec3 c = texture2D(src, uv).rgb * gain * wb;
-        return min(max(c - threshold, 0.0), vec3(4.0));
+    // Jimenez 2014 13-tap downsample: five overlapping 2×2 boxes, weighted.
+    this.downPass = pass(/* glsl */ `
+      uniform sampler2D src; uniform vec2 texel; uniform float karis; varying vec2 vUv;
+      vec3 s(vec2 o) { return min(texture2D(src, vUv + o * texel).rgb, vec3(60000.0)); }
+      float w(vec3 c) { return karis > 0.5 ? 1.0 / (1.0 + dot(c, vec3(0.2126, 0.7152, 0.0722)) * 0.02) : 1.0; }
+      vec3 box(vec3 a, vec3 b, vec3 c, vec3 d) {
+        // Karis average on the first level: luminance-weighted so a single very
+        // bright pixel can't flicker in and out as the camera moves.
+        float wa = w(a), wb = w(b), wc = w(c), wd = w(d);
+        return (a * wa + b * wb + c * wc + d * wd) / (wa + wb + wc + wd);
       }
       void main() {
-        // Average the whole 4×4 block this texel covers (four bilinear taps), so
-        // small bright things like lamp lenses don't flicker in and out.
-        vec2 o = srcTexel;
-        gl_FragColor = vec4((bright(vUv + vec2(-o.x, -o.y)) + bright(vUv + vec2(o.x, -o.y)) + bright(vUv + vec2(-o.x, o.y)) + bright(vUv + vec2(o.x, o.y))) * 0.25, 1.0);
-      }`, { src: { value: null }, srcTexel: { value: new THREE.Vector2() }, threshold: { value: 0.9 }, gain: { value: 1 }, wb: { value: new THREE.Vector3(1, 1, 1) } });
-    this.blurPass = pass(/* glsl */ `
-      uniform sampler2D src; uniform vec2 dir; varying vec2 vUv;
+        vec3 a = s(vec2(-2.0, 2.0)), b = s(vec2(0.0, 2.0)), c = s(vec2(2.0, 2.0));
+        vec3 d = s(vec2(-2.0, 0.0)), e = s(vec2(0.0, 0.0)), f = s(vec2(2.0, 0.0));
+        vec3 g = s(vec2(-2.0, -2.0)), h = s(vec2(0.0, -2.0)), i = s(vec2(2.0, -2.0));
+        vec3 j = s(vec2(-1.0, 1.0)), k = s(vec2(1.0, 1.0)), l = s(vec2(-1.0, -1.0)), m = s(vec2(1.0, -1.0));
+        vec3 r = box(j, k, l, m) * 0.5
+               + (box(a, b, d, e) + box(b, c, e, f) + box(d, e, g, h) + box(e, f, h, i)) * 0.125;
+        gl_FragColor = vec4(r, 1.0);
+      }`, { src: { value: null }, texel: { value: new THREE.Vector2() }, karis: { value: 0 } });
+    // 3×3 tent upsample of the coarser level, added to this level: the sum of
+    // all levels approximates the lens's sharp-core-long-tail spread.
+    this.upPass = pass(/* glsl */ `
+      uniform sampler2D coarse; uniform sampler2D fine; uniform vec2 texel; uniform float spread; varying vec2 vUv;
       void main() {
-        vec3 s = texture2D(src, vUv).rgb * 0.227;
-        s += (texture2D(src, vUv + dir * 1.385).rgb + texture2D(src, vUv - dir * 1.385).rgb) * 0.316;
-        s += (texture2D(src, vUv + dir * 3.231).rgb + texture2D(src, vUv - dir * 3.231).rgb) * 0.070;
-        gl_FragColor = vec4(s, 1.0);
-      }`, { src: { value: null }, dir: { value: new THREE.Vector2() } });
+        vec3 t = texture2D(coarse, vUv).rgb * 4.0;
+        t += (texture2D(coarse, vUv + vec2(texel.x, 0.0)).rgb + texture2D(coarse, vUv - vec2(texel.x, 0.0)).rgb
+            + texture2D(coarse, vUv + vec2(0.0, texel.y)).rgb + texture2D(coarse, vUv - vec2(0.0, texel.y)).rgb) * 2.0;
+        t += texture2D(coarse, vUv + texel).rgb + texture2D(coarse, vUv - texel).rgb
+           + texture2D(coarse, vUv + vec2(texel.x, -texel.y)).rgb + texture2D(coarse, vUv + vec2(-texel.x, texel.y)).rgb;
+        gl_FragColor = vec4(texture2D(fine, vUv).rgb + t / 16.0 * spread, 1.0);
+      }`, { coarse: { value: null }, fine: { value: null }, texel: { value: new THREE.Vector2() }, spread: { value: 0.65 } });
     this.finalPass = pass(/* glsl */ `
-      uniform sampler2D src; uniform sampler2D glow; uniform vec2 texel; uniform vec3 wb;
-      uniform float gain, clip, saturation, artifacts, bloom, fringe, aberration, softness, sharpen, banding, noise, blackLift, vignette, seed;
+      uniform sampler2D src; uniform sampler2D glare; uniform vec2 texel; uniform vec3 wb;
+      uniform float gain, clip, saturation, artifacts, glareAmt, glareNorm, fringe, aberration, softness, sharpen, banding, noise, blackLift, vignette, seed;
       varying vec2 vUv;
       float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233)) + seed) * 43758.5453); }
       vec3 tap(vec2 uv) {
@@ -121,21 +136,17 @@ export class Digicam {
       void main() {
         vec3 c;
         if (artifacts > 0.5) {
-          // Lens softness, then the camera's unsharp mask on top: soft image, crisp halos.
           vec3 base = soft(vUv, softness), wide = soft(vUv, softness + 1.5);
           c = max(vec3(0.0), base + (base - wide) * sharpen);
         } else {
           c = texture2D(src, vUv).rgb;
         }
-        // Exposure and white balance (linear, scene-referred). Vignetting is lens
-        // light falloff, so it happens here, before the sensor clips: a blown lamp
-        // in the corner stays white.
+        // Lens glare: energy-conserving mix with the spread image (linear radiance).
+        c = mix(c, texture2D(glare, vUv).rgb * glareNorm, glareAmt);
         c *= gain * wb;
-        if (artifacts > 0.5) { vec2 v0 = vUv - 0.5; c *= 1.0 - vignette * dot(v0, v0) * 1.6; }
         if (artifacts > 0.5) {
-          c += texture2D(glow, vUv).rgb * bloom;
-          // Purple fringe: a thin line just outside blown highlights (sensor
-          // blooming/lens fringing), checked at full resolution, not a haze.
+          vec2 v0 = vUv - 0.5;
+          c *= 1.0 - vignette * dot(v0, v0) * 1.6;
           float self = smoothstep(clip * 0.7, clip, lumAt(vUv));
           float nb = 0.0;
           for (int i = 0; i < 8; i++) {
@@ -144,7 +155,6 @@ export class Digicam {
           }
           c += vec3(0.55, 0.25, 1.0) * fringe * nb * (1.0 - self);
         }
-        // Sensor response: linear to the knee, a short shoulder, flat clipped white.
         float knee = 0.72 * clip;
         vec3 over = max(c - knee, 0.0);
         c = min(c, vec3(knee)) + (clip - knee) * (1.0 - exp(-over / max(0.001, clip - knee)));
@@ -162,22 +172,25 @@ export class Digicam {
         }
         gl_FragColor = vec4(clamp(c, 0.0, 1.0), 1.0);
       }`, {
-      src: { value: null }, glow: { value: null }, texel: { value: new THREE.Vector2() }, wb: { value: new THREE.Vector3(1, 1, 1) },
-      gain: { value: 1 }, clip: { value: 1 }, saturation: { value: 1 }, artifacts: { value: 1 }, bloom: { value: 0 }, fringe: { value: 0 },
-      aberration: { value: 0 }, softness: { value: 0 }, sharpen: { value: 0 }, banding: { value: 0 }, noise: { value: 0 },
+      src: { value: null }, glare: { value: null }, texel: { value: new THREE.Vector2() }, wb: { value: new THREE.Vector3(1, 1, 1) },
+      gain: { value: 1 }, clip: { value: 1 }, saturation: { value: 1 }, artifacts: { value: 1 }, glareAmt: { value: 0 }, glareNorm: { value: 1 },
+      fringe: { value: 0 }, aberration: { value: 0 }, softness: { value: 0 }, sharpen: { value: 0 }, banding: { value: 0 }, noise: { value: 0 },
       blackLift: { value: 0 }, vignette: { value: 0 }, seed: { value: 0 },
     });
   }
 
   private ensure(w: number, h: number): void {
-    const bw = Math.max(1, Math.round(w / 4)), bh = Math.max(1, Math.round(h / 4));
-    if (this.bright && this.bright.width === bw && this.bright.height === bh) return;
-    for (const t of [this.bright, this.blurA, this.blurB]) t?.dispose();
-    const mk = () => new THREE.WebGLRenderTarget(bw, bh, { depthBuffer: false, colorSpace: THREE.NoColorSpace, type: THREE.HalfFloatType });
-    this.bright = mk(); this.blurA = mk(); this.blurB = mk();
+    const w0 = Math.max(1, w >> 1), h0 = Math.max(1, h >> 1);
+    if (this.down[0] && this.down[0].width === w0 && this.down[0].height === h0) return;
+    for (const t of [...this.down, ...this.up]) t.dispose();
+    this.down = []; this.up = [];
+    for (let i = 0; i < GLARE_LEVELS; i++) {
+      const mk = () => new THREE.WebGLRenderTarget(Math.max(1, w >> (i + 1)), Math.max(1, h >> (i + 1)),
+        { depthBuffer: false, colorSpace: THREE.NoColorSpace, type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
+      this.down.push(mk()); this.up.push(mk());
+    }
   }
 
-  /** Meter the frame (every few frames) and move exposure toward the target. */
   private autoExpose(gl: THREE.WebGLRenderer, src: THREE.WebGLRenderTarget, p: CameraParams): void {
     const now = performance.now();
     const dt = Math.min(0.25, (now - this.last) / 1000);
@@ -192,7 +205,6 @@ export class Digicam {
       gl.setRenderTarget(this.meter);
       gl.render(this.meterPass.scene, this.cam);
       gl.readRenderTargetPixels(this.meter, 0, 0, METER_W, METER_H, this.meterBuf);
-      // Centre-weighted average, like a point-and-shoot's default metering.
       let sum = 0, wsum = 0;
       for (let y = 0; y < METER_H; y++) for (let x = 0; x < METER_W; x++) {
         const dx = (x + 0.5) / METER_W - 0.5, dy = (y + 0.5) / METER_H - 0.5;
@@ -200,51 +212,51 @@ export class Digicam {
         sum += this.meterBuf[(y * METER_W + x) * 4] * w; wsum += w;
       }
       const avgL = Math.exp(sum / wsum);
-      // Expose the average to mid-grey (0.18), within a consumer camera's range (EV100 1..14).
       const key = 0.18 * Math.pow(2, p.evComp);
       const lo = 1 / (1.2 * Math.pow(2, 14)), hi = 1 / (1.2 * Math.pow(2, 1));
       this.target = Math.min(hi, Math.max(lo, key / Math.max(1e-4, avgL)));
     }
-    // Adapt in log space.
     const k = 1 - Math.exp(-dt * p.adaptSpeed);
     this.exposure = Math.exp(Math.log(this.exposure) + (Math.log(this.target) - Math.log(this.exposure)) * k);
   }
-  private target = 0.05;
 
   render(gl: THREE.WebGLRenderer, src: THREE.WebGLRenderTarget, out: THREE.WebGLRenderTarget | null, p: CameraParams): void {
     this.autoExpose(gl, src, p);
-    // White balance: light at the camera's white point comes out neutral.
     const w = kelvinToLinear(p.whiteBalanceK);
     const wb = new THREE.Vector3(1 / w[0], 1 / w[1], 1 / w[2]);
-    const wl = 0.2126 * wb.x + 0.7152 * wb.y + 0.0722 * wb.z;
-    wb.multiplyScalar(1 / wl);
-    const gain = this.exposure;
+    wb.multiplyScalar(1 / (0.2126 * wb.x + 0.7152 * wb.y + 0.0722 * wb.z));
 
-    if (p.artifacts) {
-      this.ensure(src.width, src.height);
-      const bright = this.bright!, a = this.blurA!, b = this.blurB!;
-      const bu = this.brightPass.mat.uniforms;
-      bu.src.value = src.texture; bu.threshold.value = p.bloomThreshold * p.clip; bu.gain.value = gain; bu.wb.value.copy(wb);
-      bu.srcTexel.value.set(1 / src.width, 1 / src.height);
-      gl.setRenderTarget(bright); gl.render(this.brightPass.scene, this.cam);
-      let input: THREE.WebGLRenderTarget = bright;
-      const r = Math.max(0.25, p.bloomRadius);
-      for (let i = 0; i < 2; i++) {
-        const u = this.blurPass.mat.uniforms;
-        u.src.value = input.texture; u.dir.value.set(r / bright.width, 0);
-        gl.setRenderTarget(a); gl.render(this.blurPass.scene, this.cam);
-        u.src.value = a.texture; u.dir.value.set(0, r / bright.height);
-        gl.setRenderTarget(b); gl.render(this.blurPass.scene, this.cam);
-        input = b;
-      }
-      this.finalPass.mat.uniforms.glow.value = b.texture;
-    }
     const f = this.finalPass.mat.uniforms;
+    if (p.glare > 0) {
+      this.ensure(src.width, src.height);
+      // Downsample chain.
+      let input: THREE.WebGLRenderTarget = src;
+      for (let i = 0; i < GLARE_LEVELS; i++) {
+        const u = this.downPass.mat.uniforms;
+        u.src.value = input.texture; u.texel.value.set(1 / input.width, 1 / input.height); u.karis.value = i === 0 ? 1 : 0;
+        gl.setRenderTarget(this.down[i]); gl.render(this.downPass.scene, this.cam);
+        input = this.down[i];
+      }
+      // Upsample and accumulate, coarsest to finest.
+      let coarse: THREE.WebGLRenderTarget = this.down[GLARE_LEVELS - 1];
+      for (let i = GLARE_LEVELS - 2; i >= 0; i--) {
+        const u = this.upPass.mat.uniforms;
+        u.coarse.value = coarse.texture; u.fine.value = this.down[i].texture;
+        u.texel.value.set(1 / coarse.width, 1 / coarse.height); u.spread.value = p.glareSpread;
+        gl.setRenderTarget(this.up[i]); gl.render(this.upPass.scene, this.cam);
+        coarse = this.up[i];
+      }
+      f.glare.value = this.up[0].texture;
+      // Normalise the summed levels so the glare image carries the frame's energy.
+      let norm = 0;
+      for (let i = 0; i < GLARE_LEVELS; i++) norm += Math.pow(p.glareSpread, i);
+      f.glareNorm.value = 1 / norm;
+    }
     f.src.value = src.texture;
     f.texel.value.set(1 / src.width, 1 / src.height);
     f.wb.value.copy(wb);
-    f.gain.value = gain; f.clip.value = p.clip; f.saturation.value = p.saturation; f.artifacts.value = p.artifacts ? 1 : 0;
-    f.bloom.value = p.bloom; f.fringe.value = p.fringe; f.aberration.value = p.aberration; f.softness.value = p.softness;
+    f.gain.value = this.exposure; f.clip.value = p.clip; f.saturation.value = p.saturation; f.artifacts.value = p.artifacts ? 1 : 0;
+    f.glareAmt.value = Math.max(0, p.glare); f.fringe.value = p.fringe; f.aberration.value = p.aberration; f.softness.value = p.softness;
     f.sharpen.value = p.sharpen; f.banding.value = p.banding; f.noise.value = p.noise;
     f.blackLift.value = p.blackLift; f.vignette.value = p.vignette;
     f.seed.value = (this.frame++ % 997) * 0.731;
