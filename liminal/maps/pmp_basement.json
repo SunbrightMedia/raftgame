@@ -2,7 +2,7 @@
   "format": "liminal-map",
   "version": 1,
   "name": "pmp_basement",
-  "settings": {"light":{"luxelSize":8},"camera":{"evComp":-0.8},"fog":{"enabled":true,"color":"#3a2a20","luminance":0.6,"near":120,"far":2600}},
+  "settings": {"light":{"luxelSize":8},"camera":{"evComp":0},"fog":{"enabled":true,"color":"#3a2a20","luminance":0.6,"near":120,"far":2600}},
   "brushes": [
     {"id":1,"type":"box","min":[-6,-6,-16],"max":[246,216,0],"tex":"pmp/carpet_royal"},
     {"id":2,"type":"box","min":[-6,216,-16],"max":[24,222,0],"tex":"pmp/carpet_royal"},
