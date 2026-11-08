@@ -170,6 +170,9 @@ inseparable from how these photos were taken (2001–2006 point-and-shoots):
 - **Shadows:** chroma noise, lifted milky blacks; mild corner vignetting.
 - Built as the **Camera (digicam look)** settings: everything tunable,
   never a VHS filter.
+- **No filter clichés.** (user) No global chromatic aberration, scan lines,
+  tracking noise or "analog" overlays. Effects appear only where the real
+  camera would produce them (fringing only at blown highlight edges).
 
 Also seen in the set: atria with sloped skylights, long armless modular
 sofas in teal velour, trophy cases, vertical blinds over night city views,
