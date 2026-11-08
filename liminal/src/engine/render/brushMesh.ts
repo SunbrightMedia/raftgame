@@ -40,6 +40,7 @@ export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout
 
   const group = new THREE.Group();
   group.name = 'world';
+  let batchIndex = 0;
   for (const [tex, bt] of batches) {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.Float32BufferAttribute(bt.pos, 3));
@@ -48,7 +49,15 @@ export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout
     geo.setAttribute('shade', new THREE.Float32BufferAttribute(bt.shade, 1));
     geo.setIndex(bt.idx);
     geo.computeBoundingSphere();
-    const mesh = new THREE.Mesh(geo, makeWorldMaterial(textures.get(tex).texture));
+    const mat = makeWorldMaterial(textures.get(tex).texture);
+    // Overlapping coplanar faces (common with hand-drawn brushes) would
+    // z-fight and flicker. A small, distinct depth bias per texture batch
+    // makes one surface win consistently instead.
+    mat.polygonOffset = true;
+    mat.polygonOffsetFactor = 0;
+    mat.polygonOffsetUnits = -batchIndex;
+    batchIndex++;
+    const mesh = new THREE.Mesh(geo, mat);
     mesh.name = `tex:${tex}`;
     group.add(mesh);
   }

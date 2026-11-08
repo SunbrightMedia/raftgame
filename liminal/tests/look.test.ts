@@ -78,3 +78,21 @@ describe('texture crusher', () => {
     expect(unique.size).toBeLessThanOrEqual(16);
   });
 });
+
+describe('test map', () => {
+  it('has no overlapping coplanar faces (they z-fight and flicker)', async () => {
+    const { readFileSync } = await import('node:fs');
+    const map = JSON.parse(readFileSync(new URL('../maps/test_room.json', import.meta.url), 'utf8'));
+    const solids = map.brushes.filter((b: BrushDef) => b.solid !== false) as BrushDef[];
+    const bad: string[] = [];
+    for (let i = 0; i < solids.length; i++) for (let j = i + 1; j < solids.length; j++) {
+      const a = solids[i], b = solids[j];
+      for (let ax = 0; ax < 3; ax++) for (const side of ['min', 'max'] as const) {
+        if (a[side][ax] !== b[side][ax]) continue;
+        const others = [0, 1, 2].filter((k) => k !== ax);
+        if (others.every((k) => Math.min(a.max[k], b.max[k]) - Math.max(a.min[k], b.min[k]) > 0)) bad.push(`${a.id}/${b.id}`);
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+});

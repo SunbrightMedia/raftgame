@@ -76,7 +76,7 @@ const WALL = 'office/plaster', CARPET = 'office/carpet_blue', CEIL = 'office/cei
   for (let i = 0; i < 3; i++) {
     const x = 480 + i * 256;
     box([x, 96, 0], [x + 8, 352, 48], 'office/carpet_beige', { faces: { pz: { tex: 'office/trim' } } });
-    box([x, 96, 0], [x + 160, 104, 48], 'office/carpet_beige', { faces: { pz: { tex: 'office/trim' } } });
+    box([x + 8, 96, 0], [x + 160, 104, 48], 'office/carpet_beige', { faces: { pz: { tex: 'office/trim' } } });
   }
   // Baseboard trim around the room as a scale cue.
   box([X0, Y0, 0], [X1, Y0 + 2, 4], 'office/trim', { solid: false });
@@ -90,10 +90,12 @@ const WALL = 'office/plaster', CARPET = 'office/carpet_blue', CEIL = 'office/cei
 {
   const X0 = 704, X1 = 800, Y0 = 1040, Y1 = 3088, H = 96;
   // Backrooms Level 0: the CC0 Backrooms pack's wallpaper, carpet and ceiling.
-  slabs(X0 - W, Y0, X1 + W, Y1, 0, H, 'liminal/backrooms_carpet', 'liminal/backrooms_ceiling');
-  wall('y', Y0, Y1, X0 - W, W, 0, H, 'liminal/backrooms_wallpaper');
-  wall('y', Y0, Y1, X1, W, 0, H, 'liminal/backrooms_wallpaper');
-  for (let y = Y0 + 128; y < Y1; y += 256) lightPanel(X0 + 24, y - 24, X1 - 24, y + 24, H);
+  // Stop W short of Y1: the end room's south wall occupies Y1-W..Y1, and overlapping
+  // brushes there made coplanar faces z-fight in the doorway.
+  slabs(X0 - W, Y0, X1 + W, Y1 - W, 0, H, 'liminal/backrooms_carpet', 'liminal/backrooms_ceiling');
+  wall('y', Y0, Y1 - W, X0 - W, W, 0, H, 'liminal/backrooms_wallpaper');
+  wall('y', Y0, Y1 - W, X1, W, 0, H, 'liminal/backrooms_wallpaper');
+  for (let y = Y0 + 128; y < Y1 - W; y += 256) lightPanel(X0 + 24, y - 24, X1 - 24, y + 24, H);
   // End room.
   // End room: a suburban kitchen, lit by one warm lamp instead of fluorescents.
   const R0x = 560, R1x = 944, R0y = Y1, R1y = Y1 + 384, RH = 104;
@@ -138,7 +140,7 @@ const WALL = 'office/plaster', CARPET = 'office/carpet_blue', CEIL = 'office/cei
   wall('x', X0, X1 + W, Y1, W, 0, H, 'ind/cinderblock');
   wall('y', Y0, Y1, X1, W, 0, H, 'freedoom/BROWN1'); // Freedoom techbase panels on the far wall
   // The office's east wall is only 112 tall; close the hall above it.
-  box([1536, -16, 112], [1552, 1040, H], 'ind/cinderblock');
+  box([1536, -16, 128], [1552, 1040, H], 'ind/cinderblock'); // starts above the office ceiling slab (112..128)
   // Cold work lights up in the rafters.
   let lid = 3000;
   for (let x = 1800; x < X1; x += 512) for (const y of [256, 768]) entities.push({ id: lid++, class: 'light', origin: [x, y, H - 24], props: { color: '#dde6f0', intensity: 2.6, fifty: 300, emit: 'down' } });
