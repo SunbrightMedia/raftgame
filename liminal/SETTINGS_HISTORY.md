@@ -6,6 +6,7 @@ in the tweak panel, or change the default back in code).
 
 | date | setting | old → new | why |
 |---|---|---|---|
+| 2026-11-08 | Camera › Purple fringe | 1.0 + outer ring → 0.8, scaled by blown-area size (threshold 2.5) | User: distant lamps became purple blobs |
 | 2026-11-08 | Surfaces › Reflections × | 1 → 0 | User: global sheen turned dark carpets grey; looks better off |
 | 2026-11-08 | Camera › Glare / Blown keep colour / Horizontal softness / Colour bleed / Warm boost / Shadow tint | 0.008 / 0.12 / 0.5 / 1.5 / 0.25 / 0.5 → 0.018 / 0 / 0 / 0 / 0 / 0 | User: revert to the pre-Mall-Run look, keep only the approved fixes (sliders remain) |
 | 2026-11-08 | Lighting › AO strength / radius / on direct light | 0.4 / 24 / 0.35 (fixed) → 0.9 / 48 / 1.0 | Dark band along wall bases and into corners (user: main takeaway of the Mall Run footage) |

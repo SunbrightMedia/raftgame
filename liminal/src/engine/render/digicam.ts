@@ -173,17 +173,20 @@ export class Digicam {
         if (artifacts > 0.5) {
           vec2 v0 = vUv - 0.5;
           c *= 1.0 - vignette * dot(v0, v0) * 1.6;
-          // Purple fringe where blown highlights meet darker surroundings: the
-          // hard-edged look from before the Mall Run study (the user's pick),
-          // with a fainter second ring for strength.
+          // Purple fringe where blown highlights meet darker surroundings (the
+          // hard-edged look the user picked). Scaled by how much of the wider
+          // neighbourhood is blown: the edge of a big blown lamp gets it, a lamp
+          // only a few pixels across gets almost none (otherwise distant lights
+          // turn into purple blobs, the fringe being wider than the lamp).
           float self = smoothstep(clip * 0.7, clip, lumAt(uv));
-          float nb = 0.0, nb2 = 0.0;
+          float nb = 0.0, cover = 0.0;
           for (int i = 0; i < 8; i++) {
             vec2 dir = vec2(cos(float(i) * 0.785398), sin(float(i) * 0.785398)) * texel;
             nb = max(nb, smoothstep(clip, clip * 1.6, lumAt(uv + dir * 1.6)));
-            nb2 = max(nb2, smoothstep(clip, clip * 1.6, lumAt(uv + dir * 1.6 * fringeWidth)));
+            cover += smoothstep(clip, clip * 1.6, lumAt(uv + dir * 1.6 * fringeWidth));
           }
-          c += vec3(0.55, 0.25, 1.0) * fringe * max(nb, nb2 * 0.4) * (1.0 - self);
+          float big = smoothstep(0.5, 2.5, cover);
+          c += vec3(0.55, 0.25, 1.0) * fringe * nb * big * (1.0 - self);
         }
         // Sensor response, hue-preserving: compress by the brightest channel so an
         // overexposed glow keeps its hue instead of sliding through yellow
