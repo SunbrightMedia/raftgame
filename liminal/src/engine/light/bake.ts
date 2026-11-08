@@ -72,6 +72,13 @@ export interface BakeParams {
   aoRadius?: number;
   /** How much of the occlusion also darkens baked direct light (0..1). */
   aoDirect?: number;
+  /**
+   * Bounces beyond the simulated ones, estimated per luxel as a geometric
+   * series: last bounce × ρ/(1−ρ) per colour channel, where ρ is the average
+   * albedo of the surfaces that luxel sees (Cohen et al. 1988's ambient term,
+   * made local). Rooms take on the colour of their own surfaces. 0 = off.
+   */
+  extraBounces?: number;
   /** Falloff curve: AO is raised to this power, so open wall stays untouched
    *  while creases (wall bases, corners) get much darker. 1 = linear. */
   aoCurve?: number;
@@ -145,6 +152,8 @@ interface FaceSamples {
   dynDirect: Float32Array;
   /** Shadowed/unshadowed ratio of dynamic lights' direct light (3 equal channels). */
   shadow: Float32Array;
+  /** Average linear albedo of the surfaces this luxel sees (3 channels). */
+  seen: Float32Array;
   emitting: boolean;
 }
 
@@ -192,7 +201,7 @@ export function bake(input: BakeInput): BakeOutput {
       stepS: f.width / (rect.w - 1), stepT: f.height / (rect.h - 1),
       pos: new Float64Array(n * 3), valid: new Uint8Array(n),
       direct: new Float32Array(n * 3), total: new Float32Array(n * 3), ao: new Float32Array(n * 3).fill(1),
-      dynDirect: new Float32Array(n * 3), shadow: new Float32Array(n * 3).fill(1),
+      dynDirect: new Float32Array(n * 3), shadow: new Float32Array(n * 3).fill(1), seen: new Float32Array(n * 3),
       emitting: !!input.emissive[f.tex],
     };
     for (let j = 0; j < rect.h; j++) {
@@ -259,6 +268,7 @@ export function bake(input: BakeInput): BakeOutput {
   // ---- bounces: each luxel gathers the light reflected by whatever it sees.
   for (const fs of samples) { dilate(fs, fs.direct); fs.total.set(fs.direct); }
   const dirs = hemisphere(Math.max(1, Math.round(p.bounceSamples)));
+  const lastGathered = new Map<FaceSamples, Float32Array>(), lastBounce = new Map<FaceSamples, Float32Array>();
   for (let pass = 0; pass < Math.min(2, Math.round(p.bounces)); pass++) {
     const gathered = new Map<FaceSamples, Float32Array>();
     for (const fs of samples) {
@@ -277,7 +287,7 @@ export function bake(input: BakeInput): BakeOutput {
         const px = fs.pos[k * 3], py = fs.pos[k * 3 + 1], pz = fs.pos[k * 3 + 2];
         const rot = hash(k * 7919 + f.id * 104729) * Math.PI * 2;
         const cr = Math.cos(rot), sr = Math.sin(rot);
-        let r = 0, g = 0, b = 0, occ = 0;
+        let r = 0, g = 0, b = 0, occ = 0, qr = 0, qg = 0, qb = 0;
         const aoR = p.aoRadius ?? 24;
         for (const [a, c, h] of dirs) {
           const x = a * cr - c * sr, y = a * sr + c * cr; // rotate around the normal
@@ -293,11 +303,13 @@ export function bake(input: BakeInput): BakeOutput {
           const v = lookup(hs, px + dx * 4096 * hit.t, py + dy * 4096 * hit.t, pz + dz * 4096 * hit.t);
           const alb = hs.emitting ? [0, 0, 0] : (input.albedo[hs.face.tex] ?? [0.5, 0.5, 0.5]);
           r += v[0] * alb[0]; g += v[1] * alb[1]; b += v[2] * alb[2];
+          qr += alb[0]; qg += alb[1]; qb += alb[2];
         }
         out[k * 3] = (r / dirs.length) * p.bounceScale;
         out[k * 3 + 1] = (g / dirs.length) * p.bounceScale;
         out[k * 3 + 2] = (b / dirs.length) * p.bounceScale;
         if (pass === 0) {
+          fs.seen[k * 3] = qr / dirs.length; fs.seen[k * 3 + 1] = qg / dirs.length; fs.seen[k * 3 + 2] = qb / dirs.length;
           const ao = Math.pow(Math.max(0, 1 - (p.aoStrength ?? 0) * Math.min(1, (occ / dirs.length) * 2.2)), p.aoCurve ?? 1);
           fs.ao[k * 3] = fs.ao[k * 3 + 1] = fs.ao[k * 3 + 2] = ao;
         }
@@ -305,12 +317,28 @@ export function bake(input: BakeInput): BakeOutput {
       fillSkipped(out, rw, rh, fs.valid, onGrid);
       // Indirect light is smooth in reality; blur away sampling noise (blotches).
       smooth(out, rw, rh, fs.valid, 2);
-      if (pass === 0) { fillSkipped(fs.ao, rw, rh, fs.valid, onGrid); smooth(fs.ao, rw, rh, fs.valid, 1); }
+      if (pass === 0) { fillSkipped(fs.ao, rw, rh, fs.valid, onGrid); smooth(fs.ao, rw, rh, fs.valid, 1); fillSkipped(fs.seen, rw, rh, fs.valid, onGrid); smooth(fs.seen, rw, rh, fs.valid, 2); }
     }
     // Next pass bounces what this one gathered.
     for (const fs of samples) {
       const gth = gathered.get(fs)!;
+      const prev = lastGathered.get(fs);
+      // The bounce added by this pass alone (pass 1 gathers bounce 1, pass 2 bounces 1+2).
+      const only = new Float32Array(gth.length);
+      for (let i = 0; i < gth.length; i++) only[i] = prev ? Math.max(0, gth[i] - prev[i]) : gth[i];
+      lastBounce.set(fs, only);
+      lastGathered.set(fs, gth);
       for (let i = 0; i < fs.total.length; i++) fs.total[i] = fs.direct[i] + gth[i];
+    }
+  }
+  // The rest of the bounces, geometric series per channel.
+  const xb = p.extraBounces ?? 0;
+  if (xb > 0) for (const fs of samples) {
+    const lb = lastBounce.get(fs);
+    if (!lb || fs.emitting) continue;
+    for (let i = 0; i < fs.total.length; i++) {
+      const rho = Math.min(0.85, fs.seen[i]);
+      fs.total[i] += xb * lb[i] * (rho / (1 - rho));
     }
   }
 

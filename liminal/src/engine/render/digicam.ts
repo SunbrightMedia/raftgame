@@ -53,6 +53,8 @@ export interface CameraParams {
   knee: number;
   rolloff: number;
   blackStretch: number;
+  surfaceHue: number;
+  tint: number;
   fisheye: number;
   banding: number;
   noise: number;
@@ -139,7 +141,7 @@ export class Digicam {
     // highlight response, sRGB.
     this.developPass = pass(/* glsl */ `
       uniform sampler2D src; uniform sampler2D glare; uniform vec2 texel; uniform vec3 wb; uniform float aspect;
-      uniform float gain, clip, saturation, artifacts, glareAmt, glareNorm, fringe, fringeWidth, aberration, vignette, fisheye, blownTint, knee, rolloff, blackStretch, softness, sharpen, edgeDark, brightnessOut, contrast, blackCrush;
+      uniform float gain, clip, saturation, artifacts, glareAmt, glareNorm, fringe, fringeWidth, aberration, vignette, fisheye, blownTint, knee, rolloff, blackStretch, surfaceHue, softness, sharpen, edgeDark, brightnessOut, contrast, blackCrush;
       varying vec2 vUv;
       vec3 tap(vec2 uv) {
         vec2 d = (uv - 0.5) * aberration * 0.006;
@@ -220,7 +222,10 @@ export class Digicam {
         c *= 1.0 + blackStretch * (1.0 - smoothstep(0.0, 0.25 * clip, m));
         m = max(c.r, max(c.g, c.b));
         c *= shoulder(m) / max(m, 1e-6);
-        c = mix(c, vec3(clip), smoothstep(clip * 1.2, clip * 4.0, m) * (1.0 - blownTint));
+        // Only light sources (alpha 1) go fully white; an overexposed surface
+        // (neon carpet, a lit tabletop) keeps most of its colour (surfaceHue).
+        float isLamp = texture2D(src, uv).a;
+        c = mix(c, vec3(clip), smoothstep(clip * 1.2, clip * 4.0, m) * (1.0 - mix(surfaceHue, blownTint, isLamp)));
         c = min(c / clip, vec3(1.0));
         float lum = dot(c, vec3(0.2126, 0.7152, 0.0722));
         c = max(vec3(0.0), mix(vec3(lum), c, saturation));
@@ -240,7 +245,7 @@ export class Digicam {
       }`, {
       src: { value: null }, glare: { value: null }, texel: { value: new THREE.Vector2() }, wb: { value: new THREE.Vector3(1, 1, 1) }, aspect: { value: 1 },
       gain: { value: 1 }, clip: { value: 1 }, saturation: { value: 1 }, artifacts: { value: 1 }, glareAmt: { value: 0 }, glareNorm: { value: 1 },
-      fringe: { value: 0 }, fringeWidth: { value: 2 }, aberration: { value: 0 }, vignette: { value: 0 }, fisheye: { value: 0 }, blownTint: { value: 0 }, softness: { value: 0 }, sharpen: { value: 0 }, edgeDark: { value: 0 }, brightnessOut: { value: 0 }, contrast: { value: 1 }, blackCrush: { value: 0 }, knee: { value: 0.55 }, rolloff: { value: 2.5 }, blackStretch: { value: 0 },
+      fringe: { value: 0 }, fringeWidth: { value: 2 }, aberration: { value: 0 }, vignette: { value: 0 }, fisheye: { value: 0 }, blownTint: { value: 0 }, softness: { value: 0 }, sharpen: { value: 0 }, edgeDark: { value: 0 }, brightnessOut: { value: 0 }, contrast: { value: 1 }, blackCrush: { value: 0 }, knee: { value: 0.55 }, rolloff: { value: 2.5 }, blackStretch: { value: 0 }, surfaceHue: { value: 0 },
     });
     // Recording: the picture as a video/JPEG encoder stores it, as luma + chroma.
     // (ntsc-rs's signal model as reference, not its tape damage.) Luma gets lens
@@ -349,6 +354,8 @@ export class Digicam {
     this.autoExpose(gl, src, p);
     const w = kelvinToLinear(p.whiteBalanceK);
     const wb = new THREE.Vector3(1 / w[0], 1 / w[1], 1 / w[2]);
+    // Tint: the green–magenta axis of white balance (+ = magenta, − = green).
+    wb.y *= Math.pow(2, -p.tint * 0.5);
     wb.multiplyScalar(1 / (0.2126 * wb.x + 0.7152 * wb.y + 0.0722 * wb.z));
 
     const f = this.developPass.mat.uniforms;
@@ -387,7 +394,7 @@ export class Digicam {
     f.wb.value.copy(wb);
     f.gain.value = this.exposure; f.clip.value = p.clip; f.saturation.value = p.saturation; f.artifacts.value = p.artifacts ? 1 : 0;
     f.glareAmt.value = Math.max(0, p.glare); f.fringe.value = p.fringe; f.softness.value = p.softness; f.sharpen.value = p.sharpen; f.edgeDark.value = p.edgeDark; f.brightnessOut.value = p.brightness; f.contrast.value = p.contrast; f.blackCrush.value = p.blackCrush; f.aberration.value = p.aberration;
-    f.vignette.value = p.vignette; f.fisheye.value = p.fisheye; f.blownTint.value = p.blownTint; f.knee.value = p.knee; f.rolloff.value = p.rolloff; f.blackStretch.value = p.blackStretch;
+    f.vignette.value = p.vignette; f.fisheye.value = p.fisheye; f.blownTint.value = p.blownTint; f.knee.value = p.knee; f.rolloff.value = p.rolloff; f.blackStretch.value = p.blackStretch; f.surfaceHue.value = p.surfaceHue;
     gl.setRenderTarget(this.developed);
     gl.render(this.developPass.scene, this.cam);
 

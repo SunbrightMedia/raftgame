@@ -6,6 +6,9 @@ in the tweak panel, or change the default back in code).
 
 | date | setting | old → new | why |
 |---|---|---|---|
+| 2026-11-08 | Camera › White balance tint; Overexposed surfaces keep colour | (new) 0; (new) 0.85 | Per-map colour cast; neon carpet went white under light |
+| 2026-11-08 | Lighting › Remaining bounces | (new) 1 | Rooms take on the colour of their own surfaces (user) |
+| 2026-11-08 | pmp_basement map › White balance / tint | 4300 K / 0 → 3300 K / +1.0 | Match the reference photo's pink cast (wall ratio 1 : 0.87 : 0.78 vs photo 1 : 0.89 : 0.80) |
 | 2026-11-08 | Camera › Colour bleed / Extra horizontal softness | 0 / 0 → 2 / 0.4 | User's values |
 | 2026-11-08 | Movement › Ground friction; Camera › Brightness / Contrast | 4 (Source) / 0 / 1.25 → 6 / -0.18 / 0.95 | User's values |
 | 2026-11-08 | Camera › Brightness / Contrast / Black crush | (new) 0 / 1.25 / 0.03 (before: no contrast curve, i.e. 1 / 0) | User: proper digicam contrast and a brightness that auto exposure can't undo |

@@ -229,6 +229,7 @@ export class Lighting {
         aoRadius: L.aoRadius,
         aoDirect: L.aoDirect,
         aoCurve: L.aoCurve,
+        extraBounces: L.extraBounces,
       },
     };
   }
