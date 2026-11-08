@@ -64,7 +64,7 @@ export class Lighting {
       // "emit": "down" makes a Lambertian downlight (work lights, recessed cans) instead of a bare bulb.
       // "emit": "up" for cove lights hidden on a soffit, washing the ceiling.
       const dir = p.emit === 'down' ? ([0, 0, -1] as [number, number, number]) : p.emit === 'up' ? ([0, 0, 1] as [number, number, number]) : undefined;
-      return { pos: e.origin, color: [c[0] * intensity, c[1] * intensity, c[2] * intensity], fifty, range: typeof p.range === 'number' ? p.range : fifty * 6, dir };
+      return { pos: e.origin, color: [c[0] * intensity, c[1] * intensity, c[2] * intensity], fifty, range: typeof p.range === 'number' ? p.range : fifty * 6, dir, cone: typeof p.cone === 'number' ? p.cone : undefined };
     });
 
     const input: BakeInput = {

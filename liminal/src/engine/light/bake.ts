@@ -24,8 +24,10 @@ export interface BakeLight {
   fifty: number;
   /** Beyond this the light contributes nothing (smoothly). */
   range: number;
-  /** If set, a Lambertian emitter facing this way (surface lights, downlights). */
+  /** If set, the light faces this way (surface lights, downlights). */
   dir?: Axis;
+  /** Beam tightness: emission ∝ cos(angle)^cone. 1 = Lambertian, 3+ = a pot light's beam. */
+  cone?: number;
 }
 
 export interface SurfaceEmitter { color: RGB; intensity: number }
@@ -198,6 +200,7 @@ export function bake(input: BakeInput): BakeOutput {
         if (l.dir) {
           emit = -(dx * l.dir[0] + dy * l.dir[1] + dz * l.dir[2]) / d;
           if (emit <= 0) continue;
+          if (l.cone && l.cone !== 1) emit = Math.pow(emit, l.cone);
         }
         const att = falloff(d, l.fifty, l.range);
         if (att <= 0) continue;
@@ -256,7 +259,9 @@ export function bake(input: BakeInput): BakeOutput {
         }
       }
       fillSkipped(out, rw, rh, fs.valid, onGrid);
-      if (pass === 0) fillSkipped(fs.ao, rw, rh, fs.valid, onGrid);
+      // Indirect light is smooth in reality; blur away sampling noise (blotches).
+      smooth(out, rw, rh, fs.valid, 2);
+      if (pass === 0) { fillSkipped(fs.ao, rw, rh, fs.valid, onGrid); smooth(fs.ao, rw, rh, fs.valid, 1); }
     }
     // Next pass bounces what this one gathered.
     for (const fs of samples) {
@@ -295,6 +300,25 @@ export function falloff(d: number, fifty: number, range: number): number {
   const q = (x: number) => 1 / (1 + (x / Math.max(1, fifty)) ** 2);
   const end = q(range);
   return Math.max(0, (q(d) - end) / (1 - end));
+}
+
+/** 3×3 box blur over a face's valid luxels, `passes` times. */
+function smooth(buf: Float32Array, w: number, h: number, valid: Uint8Array, passes: number): void {
+  for (let p = 0; p < passes; p++) {
+    const src = buf.slice();
+    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
+      const k = j * w + i;
+      if (!valid[k]) continue;
+      let r = 0, g = 0, b = 0, n = 0;
+      for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
+        const ii = i + di, jj = j + dj;
+        if (ii < 0 || jj < 0 || ii >= w || jj >= h || !valid[jj * w + ii]) continue;
+        const q = (jj * w + ii) * 3;
+        r += src[q]; g += src[q + 1]; b += src[q + 2]; n++;
+      }
+      buf[k * 3] = r / n; buf[k * 3 + 1] = g / n; buf[k * 3 + 2] = b / n;
+    }
+  }
 }
 
 /** Interpolate the luxels the bounce pass skipped from the gathered grid around them. */

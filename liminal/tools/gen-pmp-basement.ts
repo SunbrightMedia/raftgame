@@ -99,10 +99,12 @@ function casingX(o0: number, o1: number, height: number, faceY: number, dir: 1 |
   box([o0 - w, ya, height], [o1 + w, yb, height + w], tex);
 }
 
-function potLight(x: number, y: number, ceiling: number, intensity = 1.35): void {
-  prism(circle(x, y, 3, 8), ceiling - 0.5, ceiling, 'fixture/potlight', { solid: false });
-  // Warm (~2700K) and fairly tight, so each makes a soft pool and corners stay dim.
-  entities.push({ id: 5000 + entities.length, class: 'light', origin: [x, y, ceiling - 2], props: { color: '#ffcc94', intensity, fifty: 62, emit: 'down' } });
+function potLight(x: number, y: number, ceiling: number, intensity = 3.2): void {
+  // A white trim ring with a round lens: the lens is a light source (self-lit, blows out).
+  prism(circle(x, y, 3.9, 20), ceiling - 0.4, ceiling, TRIM, { solid: false });
+  prism(circle(x, y, 2.8, 20), ceiling - 0.55, ceiling - 0.4, 'fixture/potlight', { solid: false });
+  // Warm (~2700K) beam: bright pools and scallops on nearby walls, dark between.
+  entities.push({ id: 5000 + entities.length, class: 'light', origin: [x, y, ceiling - 3], props: { color: '#ffcc94', intensity, fifty: 70, emit: 'down', cone: 2.5 } });
 }
 
 const MINT = 'pmp/paint_mint', WARM = 'pmp/paint_warmwhite', CEIL = 'pmp/ceiling_white';
@@ -182,7 +184,8 @@ function casingY(o0: number, o1: number, height: number, faceX: number, dir: 1 |
   baseboards(0, 0, 240, 216, [
     { side: 'w', from: 147, to: 203 }, { side: 'n', from: 21, to: 59 }, { side: 'n', from: 89, to: 191 },
   ]);
-  for (const [x, y] of [[70, 60], [180, 60], [70, 156], [180, 156]]) potLight(x, y, 96);
+  // Cans around the perimeter, ~30" off the walls, so each throws a scallop up the wall.
+  for (const [x, y] of [[30, 40], [30, 110], [210, 40], [210, 110], [210, 180], [120, 186], [120, 40]]) potLight(x, y, 96, 1.5);
 
   // The pink carpet spills out of the wide opening in a big curve that
   // sweeps right, to the right-hand wall: the part of a circle (through the
@@ -224,23 +227,23 @@ function casingY(o0: number, o1: number, height: number, faceX: number, dir: 1 |
   // Round ottoman: striped band below a green cushion.
   prism(circle(-90, 168, 17, 24), 0, 11, 'house/ottoman_band', { faces: { pz: { tex: FABRIC } } });
   prism(circle(-90, 168, 17.5, 24), 11, 16, FABRIC);
-  potLight(-80, 140, 92, 1.2);
-  potLight(-80, 200, 92, 1.0);
+  potLight(-80, 140, 92, 1.7);
+  potLight(-80, 200, 92, 1.4);
 }
 
 // ------------------------------------------------------------------ pink bar room
 // Behind the back wall, wider than its opening so the door also leads here:
-// inner x 6..300, y 222..420, tray ceiling 104 with a dropped soffit
+// inner x 6..300, y 222..420, tray ceiling 112 with a dropped soffit
 // (z 92..98) around the edge and cove lights hidden on top of it.
 {
   box([6, 222, -16], [300, 420, 0], PINK);
   box([92, 216, -16], [188, 222, 0], PINK);  // wide opening threshold
   box([24, 216, -16], [56, 222, 0], PINK);   // door threshold
-  box([0, 222, 104], [306, 426, 120], CEIL);
-  box([0, 222, 0], [6, 420, 104], WARM);
-  box([300, 216, 0], [306, 426, 104], WARM);
-  box([0, 420, 0], [300, 426, 104], WARM);
-  box([246, 216, 0], [300, 222, 104], WARM);
+  box([0, 222, 112], [306, 426, 128], CEIL);
+  box([0, 222, 0], [6, 420, 112], WARM);
+  box([300, 216, 0], [306, 426, 112], WARM);
+  box([0, 420, 0], [300, 426, 112], WARM);
+  box([246, 216, 0], [300, 222, 112], WARM);
   casingX(24, 56, 80, 222, 1);   // door, pink side
   casingX(92, 188, 88, 222, 1);  // wide opening, pink side
 
@@ -254,10 +257,12 @@ function casingY(o0: number, o1: number, height: number, faceX: number, dir: 1 |
   box([6, 396, SZ0], [300, 420, SZ1], WARM);
   box([6, 246, SZ0], [30, 396, SZ1], WARM);
   box([276, 246, SZ0], [300, 396, SZ1], WARM);
-  const cove = (x: number, y: number) => entities.push({ id: 5000 + entities.length, class: 'light', origin: [x, y, SZ1 + 2], props: { color: '#ffc68a', intensity: 0.8, fifty: 30, emit: 'up' } });
-  for (let x = 40; x <= 268; x += 38) { cove(x, 243); cove(x, 399); }
-  for (let y = 270; y <= 372; y += 34) { cove(33, y); cove(273, y); }
-  for (const [x, y] of [[70, 290], [150, 290], [230, 290], [70, 350], [150, 350], [230, 350]]) potLight(x, y, 104, 1.1);
+  // Cove: a near-continuous strip of small up-lights hidden on the soffit,
+  // 14" below the tray ceiling, so it washes the ceiling instead of spotting it.
+  const cove = (x: number, y: number) => entities.push({ id: 5000 + entities.length, class: 'light', origin: [x, y, SZ1 + 1], props: { color: '#ffc68a', intensity: 0.055, fifty: 46, emit: 'up' } });
+  for (let x = 36; x <= 270; x += 12) { cove(x, 243); cove(x, 399); }
+  for (let y = 258; y <= 384; y += 12) { cove(33, y); cove(273, y); }
+  for (const [x, y] of [[70, 290], [150, 290], [230, 290], [70, 350], [150, 350], [230, 350]]) potLight(x, y, 112, 1.5);
 
   // Tall display cabinet on the back wall: orange wood, frosted glass, gold lines.
   box([120, 404, 0], [156, 420, 84], WOOD, { faces: { ny: { tex: 'house/cabinet_glass', offset: [-120, 0] } } });

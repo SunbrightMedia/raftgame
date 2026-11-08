@@ -3,7 +3,7 @@ import { type Face, type LightmapLayout, facePoint } from '../light/faces';
 import type { TextureRegistry } from './textures';
 import { makeWorldMaterial } from './worldMaterial';
 
-interface Batch { pos: number[]; uv: number[]; lm: number[]; shade: number[]; idx: number[] }
+interface Batch { pos: number[]; nrm: number[]; uv: number[]; lm: number[]; shade: number[]; idx: number[] }
 
 /**
  * Build render meshes for all faces, batched into one mesh per texture.
@@ -14,7 +14,7 @@ export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout
   const batches = new Map<string, Batch>();
   for (const f of faces) {
     let bt = batches.get(f.tex);
-    if (!bt) { bt = { pos: [], uv: [], lm: [], shade: [], idx: [] }; batches.set(f.tex, bt); }
+    if (!bt) { bt = { pos: [], nrm: [], uv: [], lm: [], shade: [], idx: [] }; batches.set(f.tex, bt); }
     const tex = textures.get(f.tex);
     const rect = layout?.rects.get(f.id);
     const base = bt.pos.length / 3;
@@ -26,6 +26,7 @@ export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout
     for (const [s, t] of outline) {
       const p = facePoint(f, s, t);
       bt.pos.push(p[0], p[1], p[2]);
+      bt.nrm.push(f.n[0], f.n[1], f.n[2]);
       // World-aligned texture projection.
       const wu = p[0] * f.r[0] + p[1] * f.r[1] + p[2] * f.r[2];
       const wv = p[0] * f.u[0] + p[1] * f.u[1] + p[2] * f.u[2];
@@ -47,12 +48,14 @@ export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout
   for (const [tex, bt] of batches) {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.Float32BufferAttribute(bt.pos, 3));
+    geo.setAttribute('normal', new THREE.Float32BufferAttribute(bt.nrm, 3));
     geo.setAttribute('uv', new THREE.Float32BufferAttribute(bt.uv, 2));
     geo.setAttribute('lmuv', new THREE.Float32BufferAttribute(bt.lm, 2));
     geo.setAttribute('shade', new THREE.Float32BufferAttribute(bt.shade, 1));
     geo.setIndex(bt.idx);
     geo.computeBoundingSphere();
-    const mat = makeWorldMaterial(textures.get(tex).texture);
+    const entry = textures.get(tex);
+    const mat = makeWorldMaterial(entry.texture, !!entry.emissive);
     // Overlapping coplanar faces (common with hand-drawn brushes) would
     // z-fight and flicker. A small, distinct depth bias per texture batch
     // makes one surface win consistently instead.

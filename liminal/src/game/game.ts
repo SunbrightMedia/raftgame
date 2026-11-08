@@ -54,6 +54,7 @@ export class Game {
     const lm = this.level?.lightmap;
     worldUniforms.lightmapOn.value = s.light.enabled && lm ? 1 : 0;
     worldUniforms.exposure.value = s.light.exposure;
+    worldUniforms.sourceBrightness.value = s.light.sourceBrightness;
     if (lm) {
       const f = s.light.filter === 'nearest' ? THREE.NearestFilter : THREE.LinearFilter;
       if (lm.magFilter !== f) { lm.magFilter = lm.minFilter = f; lm.needsUpdate = true; }
@@ -156,6 +157,12 @@ export class Game {
     const { forward } = angleVectors(this.player.pitch, this.player.yaw);
     cam.up.set(0, 0, 1);
     cam.lookAt(eye.x + forward.x, eye.y + forward.y, eye.z + forward.z);
+    const C = s.camera;
+    worldUniforms.flashOn.value = C.flash ? 1 : 0;
+    worldUniforms.flashPos.value.set(eye.x, eye.y, eye.z + C.flashHeight);
+    worldUniforms.flashIntensity.value = C.flashIntensity;
+    worldUniforms.flashFifty.value = C.flashFifty;
+    worldUniforms.flashColor.value.set(C.flashColor);
 
     this.renderer.render(this.scene);
     this.onFrame?.(dt);
