@@ -21,6 +21,7 @@ export class DebugPanel {
   private rows: Row[] = [];
   private statusEl: HTMLDivElement;
   private search: HTMLInputElement;
+  private textBox: HTMLTextAreaElement;
   open = false;
 
   constructor(private config: ConfigStore, private hooks: PanelHooks) {
@@ -32,6 +33,19 @@ export class DebugPanel {
     this.root.append(head);
 
     const bar = el('div', 'dbg-bar');
+    // Two-click confirm: browser dialogs aren't available everywhere this runs.
+    let armed = 0;
+    const resetAll = button('Reset all', 'Every setting back to its default', () => {
+      if (!armed) {
+        resetAll.textContent = 'Click again to reset';
+        armed = window.setTimeout(() => { armed = 0; resetAll.textContent = 'Reset all'; }, 3000);
+        return;
+      }
+      clearTimeout(armed); armed = 0; resetAll.textContent = 'Reset all';
+      this.config.replace({}, true);
+      this.refresh();
+      this.flash('all settings reset');
+    });
     const presets = document.createElement('select');
     presets.append(new Option('Movement preset…', ''));
     for (const name of Object.keys(MOVE_PRESETS)) presets.append(new Option(name, name));
@@ -43,21 +57,24 @@ export class DebugPanel {
     };
     bar.append(
       presets,
-      button('Copy changes', 'Copy every non-default value as JSON (handy for sharing a tuning)', async () => {
+      button('Copy changes', 'Copy every non-default value as JSON (handy for sharing a tuning)', () => {
         const text = JSON.stringify(diffSettings(this.config.values), null, 2);
-        try { await navigator.clipboard.writeText(text); this.flash('copied'); } catch { prompt('Copy:', text); }
+        // Called inside the click so the clipboard is allowed; fall back to a selectable box.
+        navigator.clipboard.writeText(text).then(() => this.flash('copied'), () => this.showText(text));
       }),
-      button('Export', 'Download config/settings.json', () => download('settings.json', this.config.toJSON())),
+      button('Export', 'Save the settings file (or show it, where downloads are blocked)', () => {
+        if (this.config.storageKind === 'artifact') this.showText(this.config.toJSON());
+        else download('settings.json', this.config.toJSON());
+      }),
       button('Import', 'Load a settings .json', () => pickFile('.json', async (f) => {
         try {
           const j = JSON.parse(await f.text());
           this.config.replace(j.settings ?? j, true);
           this.refresh();
-        } catch (e) { alert(`Bad settings file: ${(e as Error).message}`); }
+          this.flash(`imported ${f.name}`);
+        } catch (e) { this.flash(`${f.name} isn't a settings file: ${(e as Error).message}`); }
       })),
-      button('Reset all', 'Every setting back to its default', () => {
-        if (confirm('Reset every setting to its default?')) { this.config.replace({}, true); this.refresh(); }
-      }),
+      resetAll,
     );
     this.root.append(bar);
 
@@ -70,6 +87,7 @@ export class DebugPanel {
 
     this.search = document.createElement('input');
     this.search.className = 'dbg-search';
+    this.search.id = 'dbg-search';
     this.search.placeholder = 'filter settings…';
     this.search.oninput = () => this.filter();
     this.root.append(this.search);
@@ -77,6 +95,13 @@ export class DebugPanel {
     const body = el('div', 'dbg-body');
     this.root.append(body);
     for (const [cKey, cat] of Object.entries(SETTINGS as Schema)) body.append(this.category(cKey, cat.label, cat.help, cat.defs));
+
+    this.textBox = document.createElement('textarea');
+    this.textBox.className = 'dbg-text';
+    this.textBox.readOnly = true;
+    this.textBox.hidden = true;
+    this.textBox.id = 'dbg-text';
+    this.root.append(this.textBox);
 
     this.statusEl = el('div', 'dbg-status');
     this.root.append(this.statusEl);
@@ -100,6 +125,16 @@ export class DebugPanel {
 
   private updateStatus(): void {
     this.statusEl.textContent = `${this.config.status}  ·  ${this.hooks.mapStatus()}`;
+  }
+
+  /** Show text selected and ready to copy, for when the clipboard or downloads are refused. */
+  private showText(text: string): void {
+    this.textBox.value = text;
+    this.textBox.hidden = false;
+    this.textBox.focus();
+    this.textBox.select();
+    this.flash('select-all + copy the text below (click elsewhere to close)');
+    this.textBox.onblur = () => { this.textBox.hidden = true; };
   }
 
   private flash(msg: string): void {

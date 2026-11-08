@@ -1,4 +1,5 @@
 import { defineConfig, type Plugin } from 'vite';
+import { viteSingleFile } from 'vite-plugin-singlefile';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -69,11 +70,14 @@ function fileApi(): Plugin {
   };
 }
 
-export default defineConfig({
-  plugins: [fileApi()],
+// `--mode page` builds one self-contained HTML file (no server, no install)
+// for publishing as a playable link. See tools/make-page.mjs.
+export default defineConfig(({ mode }) => ({
+  plugins: mode === 'page' ? [fileApi(), viteSingleFile()] : [fileApi()],
+  build: mode === 'page' ? { outDir: 'dist-page', chunkSizeWarningLimit: 4000 } : {},
   server: {
     port: 5173,
     // Saving config/maps from the game must not trigger a page reload.
     watch: { ignored: ['**/config/**', '**/maps/**', '**/textures/**'] },
   },
-});
+}));

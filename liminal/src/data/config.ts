@@ -16,6 +16,8 @@ export class ConfigStore {
 
   constructor(private storage: Storage) {}
 
+  get storageKind(): Storage['kind'] { return this.storage.kind; }
+
   async load(): Promise<void> {
     try {
       const text = await this.storage.read(CONFIG_PATH);
@@ -61,7 +63,8 @@ export class ConfigStore {
   async save(): Promise<void> {
     try {
       await this.storage.write(CONFIG_PATH, this.toJSON());
-      this.status = `saved ${new Date().toLocaleTimeString()} → ${this.storage.kind === 'dev-server' ? CONFIG_PATH : 'browser storage'}`;
+      const where = { 'dev-server': CONFIG_PATH, artifact: 'this page (Claude can read it)', browser: 'browser storage' }[this.storage.kind];
+      this.status = `saved ${new Date().toLocaleTimeString()} → ${where}`;
     } catch (e) {
       this.status = `save failed: ${(e as Error).message}`;
     }

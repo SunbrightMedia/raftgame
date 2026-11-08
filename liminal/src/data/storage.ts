@@ -7,7 +7,7 @@
  * Paths are project-relative: "config/settings.json", "maps/test_room.json".
  */
 export interface Storage {
-  readonly kind: 'dev-server' | 'browser';
+  readonly kind: 'dev-server' | 'browser' | 'artifact';
   read(path: string): Promise<string | null>;
   write(path: string, text: string): Promise<void>;
   list(dir: string): Promise<string[]>;
@@ -63,7 +63,60 @@ class BrowserStorage implements Storage {
   }
 }
 
+/** Minimal slice of the claude.ai artifact `db` API this file uses. */
+interface ArtifactDb {
+  doc(path: string): {
+    get(): Promise<{ exists: boolean; data(): Record<string, unknown> | undefined }>;
+    set(data: Record<string, unknown>): Promise<void>;
+  };
+  collection(path: string): { get(): Promise<{ docs: { id: string }[] }> };
+}
+
+/**
+ * Published as a claude.ai artifact: files live in the artifact's own
+ * database (collection `files`, one document per path), so tuning survives
+ * reloads, follows you between devices, and Claude can read it back.
+ * Anything not saved yet falls back to the files bundled at build time.
+ */
+class ArtifactStorage implements Storage {
+  readonly kind = 'artifact' as const;
+  private fallback = new BrowserStorage();
+  constructor(private db: ArtifactDb) {}
+  // Path segments may not contain '/', so "config/settings.json" -> "config~settings.json".
+  private ref(path: string) { return this.db.doc(`files/${path.replace(/\//g, '~')}`); }
+  async read(path: string): Promise<string | null> {
+    try {
+      const snap = await this.ref(path).get();
+      const text = snap.exists ? snap.data()?.text : undefined;
+      if (typeof text === 'string') return text;
+    } catch (e) { console.warn('artifact db read failed', e); }
+    return this.fallback.read(path);
+  }
+  async write(path: string, text: string): Promise<void> {
+    await this.ref(path).set({ text, savedAt: new Date().toISOString() });
+  }
+  async list(dir: string): Promise<string[]> {
+    const names = new Set(await this.fallback.list(dir));
+    try {
+      const snap = await this.db.collection('files').get();
+      for (const d of snap.docs) {
+        const p = d.id.replace(/~/g, '/');
+        if (p.startsWith(dir + '/')) names.add(p.slice(dir.length + 1));
+      }
+    } catch { /* offline */ }
+    return [...names];
+  }
+}
+
 export async function openStorage(): Promise<Storage> {
+  const host = (window as unknown as { claude?: { use(name: string): Promise<unknown> } }).claude;
+  if (host?.use) {
+    // Inside the claude.ai viewer. use() resolves null if this view can't
+    // run db; cap the wait so a silent host can't stall boot.
+    const db = await Promise.race([host.use('db'), new Promise((r) => setTimeout(() => r(null), 4000))]);
+    if (db) return new ArtifactStorage(db as ArtifactDb);
+    return new BrowserStorage();
+  }
   try {
     const r = await fetch('/api/list/config', { cache: 'no-store' });
     if (r.ok && (r.headers.get('content-type') ?? '').includes('json')) return new DevServerStorage();
