@@ -54,7 +54,7 @@ writeFileSync(new URL('../maps/flatgrass.json', import.meta.url), serializeMap({
     fog: { enabled: true, haze: true, color: '#c9d2dc', luminance: 9000, near: 1500, far: 120000 },
     render: { tileBreakup: 0.35 },
     // Grain over everything, sky included, as in the photo.
-    camera: { flash: false, whiteBalanceK: 5600, grain: 0.35 },
+    camera: { flash: false, whiteBalanceK: 5600 },
   },
 }));
 console.log(`wrote maps/flatgrass.json: ${brushes.length} brushes`);

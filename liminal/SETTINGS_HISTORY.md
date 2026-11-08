@@ -6,6 +6,7 @@ in the tweak panel, or change the default back in code).
 
 | date | setting | old → new | why |
 |---|---|---|---|
+| 2026-11-08 | Camera › Film grain / Grain size / Grain motion | 0 (flatgrass map 0.35) / 1.6 / 12 Hz → 0.2 / 1 / 60 Hz, for every map | User's values |
 | 2026-11-08 | Camera › Grain motion | 0 → 12 Hz | User: frozen grain was more distracting than per-frame grain |
 | 2026-11-08 | Camera › Grain motion (new) | 0 (holds still; before: new pattern every frame) | User: grain moved around too much |
 | 2026-11-08 | Fog › Haze (new), Fog end max 40000 → 200000; Render › Texture repeat breakup (new, 0); Camera › Film grain / size (new, 0 / 1.6) | — | flatgrass vibe: haze, grain, no tiling grid (map sets haze, breakup 0.35, grain 0.35) |
