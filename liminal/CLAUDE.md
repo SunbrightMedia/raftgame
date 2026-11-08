@@ -41,3 +41,8 @@ it *feels* right; that's the user's call.
 - **Before building or changing any room, read STYLE.md, especially
   "Standing preferences".** They are the user's accumulated feedback and must
   hold for every room without being repeated. Add new feedback there.
+- **Lightmap caches** (`maps/<name>.lightmap.json`) are what make lighting
+  appear instantly. They're keyed on the map + light/texture settings, so after
+  changing a map, its lights or those defaults, open each map on the dev
+  server and wait for "baked … · cached" before `build:page`. A stale cache is
+  ignored (the game bakes a quick preview, then the full bake, and saves it).

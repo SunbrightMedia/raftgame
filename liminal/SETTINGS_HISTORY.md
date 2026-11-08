@@ -6,6 +6,8 @@ in the tweak panel, or change the default back in code).
 
 | date | setting | old → new | why |
 |---|---|---|---|
+| 2026-11-08 | Camera › Sharpening halo limit | (new) 0.08 | Glow was yellow-green: per-channel sharpening of HDR light stripped red beside amber bulbs. Sharpening now acts on luma after the tone curve, capped by this |
+| 2026-11-08 | Render › Wait for lighting | (new) 4000 ms | Don't show the flat unlit world while the lightmap loads |
 | 2026-11-08 | Camera › Glow (bloom, threshold, radius) | 0.5 / 1.5 / 1.0 → replaced by Glare amount 0.018 and Glare spread 0.5 (first try 0.035 / 0.65 hid the hard edge and fringe) | Glow looked unpolished, especially at distance: rebuilt as an energy-based lens glare (Spencer 1995; Jimenez 2014) |
 | 2026-11-08 | Camera › In-camera sharpening | 0.5 → 1.0 | User's choice |
 | 2026-11-08 | Camera › Glow threshold | 2.5 → 1.5 | Glow from energy past the threshold only |

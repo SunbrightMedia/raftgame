@@ -93,10 +93,13 @@ export function makeWorldMaterial(map: THREE.Texture, source?: { luminance: numb
         vec3 rho = toLinear(texture2D(map, vUv).rgb);
         vec3 L;
         if (isSource > 0.5) {
-          // Clamp below the half-float frame buffer's max (65504): a 2700 K lens's
+          // Keep below the half-float frame buffer's max (65504): a 2700 K lens's
           // red channel overflowed into Inf/NaN and turned the glow cyan. Still
           // thousands of times past white, so it blows out exactly the same.
-          L = min(rho * sourceLum, vec3(30000.0));
+          // Scale, don't clip per channel: clipping red and green at the same cap
+          // turns an amber bulb yellow, and white balance then pushes it green.
+          L = rho * sourceLum;
+          L *= min(1.0, 30000.0 / max(1e-6, max(L.r, max(L.g, L.b))));
         } else {
           // Irradiance in lux.
           vec4 lm = texture2D(lightmap, vLm);

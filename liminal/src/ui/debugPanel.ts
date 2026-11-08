@@ -86,7 +86,7 @@ export class DebugPanel {
     maps.id = 'dbg-maps';
     maps.title = 'Switch map';
     void this.hooks.listMaps().then((names) => {
-      for (const n of names.filter((x) => x.endsWith('.json')).sort()) maps.append(new Option(n.replace(/\.json$/, ''), `maps/${n}`));
+      for (const n of names.filter((x) => x.endsWith('.json') && !x.endsWith('.lightmap.json')).sort()) maps.append(new Option(n.replace(/\.json$/, ''), `maps/${n}`));
       maps.value = this.hooks.currentMap();
     });
     maps.onchange = () => this.hooks.loadMap(maps.value);

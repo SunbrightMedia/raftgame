@@ -23,7 +23,9 @@ export class Game {
   readonly textures = new TextureRegistry();
   readonly input: Input;
   readonly scene = new THREE.Scene();
-  readonly lighting = new Lighting();
+  readonly lighting: Lighting;
+  /** Where map loading time went (texture prep, level/mesh build). */
+  loadTimes: Record<string, number> = {};
   level!: Level;
   player!: Player;
   mapPath = '';
@@ -32,9 +34,12 @@ export class Game {
   private acc = 0;
   private last = performance.now();
   onFrame: ((dt: number) => void) | null = null;
+  private holdUntil = 0;
+  private precompiled = false;
 
   constructor(canvas: HTMLCanvasElement, private storage: Storage, readonly config: ConfigStore) {
     this.renderer = new LowResRenderer(canvas);
+    this.lighting = new Lighting(storage);
     this.input = new Input(canvas);
     this.lighting.onBaked = (layout, tex) => {
       if (!this.level) return;
@@ -124,8 +129,11 @@ export class Game {
   }
 
   async setMap(map: MapFile, label: string): Promise<void> {
+    const t0 = performance.now();
     await this.textures.prepare(map.brushes.flatMap((b) => [b.tex ?? 'dev/gray', ...Object.values(b.faces ?? {}).map((f) => f?.tex ?? '')]).filter(Boolean));
+    const t1 = performance.now();
     const level = new Level(map, this.textures);
+    this.loadTimes = { texturesMs: Math.round(t1 - t0), levelMs: Math.round(performance.now() - t1) };
     if (this.level) {
       this.scene.remove(this.level.root);
       this.level.dispose();
@@ -136,6 +144,7 @@ export class Game {
     this.applySettings();
     this.uploadDynamicLights();
     this.lighting.request(level, this.settings, this.textures, true);
+    this.holdUntil = performance.now() + this.settings.render.lightHoldMs;
     if (this.player) this.player.setLevel(level);
     else this.player = new Player(level, this.settings);
     const own = map.settings ? Object.values(map.settings).reduce<number>((n, c) => n + Object.keys(c as object).length, 0) : 0;
@@ -154,6 +163,13 @@ export class Game {
 
   private frame(dt: number): void {
     const s = this.settings;
+    // Until the lightmap arrives the world would draw flat and fullbright for a
+    // moment. Hold the frame instead (a dark screen reads as loading), and
+    // compile the shaders meanwhile so the first lit frame doesn't stall.
+    if (s.light.enabled && !this.lighting.shownAt && performance.now() < this.holdUntil) {
+      if (!this.precompiled) { this.renderer.gl.compile(this.scene, this.renderer.camera); this.precompiled = true; }
+      return;
+    }
     const [mx, my] = this.input.consumeMouse();
     this.player.look(mx, my, s);
 

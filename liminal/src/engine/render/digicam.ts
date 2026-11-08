@@ -39,6 +39,7 @@ export interface CameraParams {
   aberration: number;
   softness: number;
   sharpen: number;
+  sharpenLimit: number;
   banding: number;
   noise: number;
   blackLift: number;
@@ -120,7 +121,7 @@ export class Digicam {
       }`, { coarse: { value: null }, fine: { value: null }, texel: { value: new THREE.Vector2() }, spread: { value: 0.65 } });
     this.finalPass = pass(/* glsl */ `
       uniform sampler2D src; uniform sampler2D glare; uniform vec2 texel; uniform vec3 wb;
-      uniform float gain, clip, saturation, artifacts, glareAmt, glareNorm, fringe, aberration, softness, sharpen, banding, noise, blackLift, vignette, seed;
+      uniform float gain, clip, saturation, artifacts, glareAmt, glareNorm, fringe, aberration, softness, sharpen, sharpenLimit, banding, noise, blackLift, vignette, seed;
       varying vec2 vUv;
       float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233)) + seed) * 43758.5453); }
       vec3 tap(vec2 uv) {
@@ -132,12 +133,26 @@ export class Digicam {
         return (tap(uv) * 4.0 + tap(uv + vec2(o.x, 0.0)) + tap(uv - vec2(o.x, 0.0)) + tap(uv + vec2(0.0, o.y)) + tap(uv - vec2(0.0, o.y))) / 8.0;
       }
       float lumAt(vec2 uv) { return dot(texture2D(src, uv).rgb * gain * wb, vec3(0.2126, 0.7152, 0.0722)); }
+      float shoulder(float m) {
+        float knee = 0.72 * clip;
+        return m <= knee ? m : knee + (clip - knee) * (1.0 - exp(-(m - knee) / max(0.001, clip - knee)));
+      }
+      // Display-referred luma of a linear colour: what the sharpener sees.
+      float lumaOut(vec3 lin) {
+        float y = shoulder(dot(lin * gain * wb, vec3(0.2126, 0.7152, 0.0722))) / clip;
+        return pow(clamp(y, 0.0, 1.0), 1.0 / 2.2);
+      }
       vec3 toSRGB(vec3 c) { return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c)); }
       void main() {
         vec3 c;
+        float detail = 0.0;
         if (artifacts > 0.5) {
-          vec3 base = soft(vUv, softness), wide = soft(vUv, softness + 1.5);
-          c = max(vec3(0.0), base + (base - wide) * sharpen);
+          // In-camera sharpening works on luma after the tone curve (as a camera's
+          // JPEG engine does), not per channel on linear light: per channel, the
+          // undershoot beside a blown amber bulb strips red faster than green and
+          // leaves a green ring.
+          c = soft(vUv, softness);
+          detail = clamp((lumaOut(c) - lumaOut(soft(vUv, softness + 1.5))) * sharpen, -sharpenLimit, sharpenLimit);
         } else {
           c = texture2D(src, vUv).rgb;
         }
@@ -155,13 +170,17 @@ export class Digicam {
           }
           c += vec3(0.55, 0.25, 1.0) * fringe * nb * (1.0 - self);
         }
-        float knee = 0.72 * clip;
-        vec3 over = max(c - knee, 0.0);
-        c = min(c, vec3(knee)) + (clip - knee) * (1.0 - exp(-over / max(0.001, clip - knee)));
+        // Sensor response, hue-preserving: compress by the brightest channel so an
+        // overexposed tungsten glow stays amber instead of sliding through yellow
+        // (per-channel clipping), then let only the truly blown core go white.
+        float m = max(c.r, max(c.g, c.b));
+        c *= shoulder(m) / max(m, 1e-6);
+        c = mix(c, vec3(clip), smoothstep(clip * 1.2, clip * 4.0, m));
         c = min(c / clip, vec3(1.0));
         float lum = dot(c, vec3(0.2126, 0.7152, 0.0722));
         c = max(vec3(0.0), mix(vec3(lum), c, saturation));
         c = toSRGB(c);
+        c = max(vec3(0.0), c + detail);
         if (artifacts > 0.5) {
           c = blackLift + c * (1.0 - blackLift);
           vec2 px = floor(vUv / texel);
@@ -174,7 +193,7 @@ export class Digicam {
       }`, {
       src: { value: null }, glare: { value: null }, texel: { value: new THREE.Vector2() }, wb: { value: new THREE.Vector3(1, 1, 1) },
       gain: { value: 1 }, clip: { value: 1 }, saturation: { value: 1 }, artifacts: { value: 1 }, glareAmt: { value: 0 }, glareNorm: { value: 1 },
-      fringe: { value: 0 }, aberration: { value: 0 }, softness: { value: 0 }, sharpen: { value: 0 }, banding: { value: 0 }, noise: { value: 0 },
+      fringe: { value: 0 }, aberration: { value: 0 }, softness: { value: 0 }, sharpen: { value: 0 }, sharpenLimit: { value: 0 }, banding: { value: 0 }, noise: { value: 0 },
       blackLift: { value: 0 }, vignette: { value: 0 }, seed: { value: 0 },
     });
   }
@@ -257,7 +276,7 @@ export class Digicam {
     f.wb.value.copy(wb);
     f.gain.value = this.exposure; f.clip.value = p.clip; f.saturation.value = p.saturation; f.artifacts.value = p.artifacts ? 1 : 0;
     f.glareAmt.value = Math.max(0, p.glare); f.fringe.value = p.fringe; f.aberration.value = p.aberration; f.softness.value = p.softness;
-    f.sharpen.value = p.sharpen; f.banding.value = p.banding; f.noise.value = p.noise;
+    f.sharpen.value = p.sharpen; f.sharpenLimit.value = p.sharpenLimit; f.banding.value = p.banding; f.noise.value = p.noise;
     f.blackLift.value = p.blackLift; f.vignette.value = p.vignette;
     f.seed.value = (this.frame++ % 997) * 0.731;
     gl.setRenderTarget(out);

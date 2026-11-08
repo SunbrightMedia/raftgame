@@ -8,19 +8,29 @@ import { Hud } from './ui/hud';
 
 const DEFAULT_MAP = 'maps/pmp_basement.json';
 
+/** Milliseconds since boot start at each step (window.liminal.bootTimes). */
+const bootTimes: Record<string, number> = {};
+
 async function boot(): Promise<void> {
+  const T = performance.now();
+  const mark = (what: string) => (bootTimes[what] = Math.round(performance.now() - T));
+  bootTimes.pageParsed = Math.round(T);
   const storage = await openStorage();
+  mark('storage');
   const config = new ConfigStore(storage);
   await config.load();
+  mark('config');
 
   const canvas = document.getElementById('view') as HTMLCanvasElement;
   const game = new Game(canvas, storage, config);
   await game.init();
+  mark('textures registered');
 
   const params = new URLSearchParams(location.search);
   const mapPath = params.get('map') ? `maps/${params.get('map')}.json` : DEFAULT_MAP;
   try {
     await game.loadMapPath(mapPath);
+    mark('map loaded');
   } catch (e) {
     showError(`Could not load ${mapPath}: ${(e as Error).message}`);
     return;
@@ -65,9 +75,10 @@ async function boot(): Promise<void> {
 
   game.onFrame = (dt) => hud.update(dt, config.values, game.player, game.input.locked, panel.open, game.renderer.renderSize, config.values.sim.tickRate);
   game.start();
+  requestAnimationFrame(() => requestAnimationFrame(() => mark('first frames drawn')));
 
   // For poking at things from the browser console.
-  (window as unknown as { liminal: unknown }).liminal = { game, config, panel };
+  (window as unknown as { liminal: unknown }).liminal = { game, config, panel, bootTimes };
 }
 
 function showError(msg: string): void {
