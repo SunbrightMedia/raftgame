@@ -25,8 +25,10 @@ export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout
     const sx = f.scale[0] || 1, sy = f.scale[1] || 1;
     // How texture u and v change per inch moved across the face (for bump mapping).
     const ku = 1 / (sx * tex.worldW), kv = 1 / (sy * tex.worldH);
-    const gu = [0, 1, 2].map((a) => (cr * f.r[a] - sr * f.u[a]) * ku);
-    const gv = [0, 1, 2].map((a) => (sr * f.r[a] + cr * f.u[a]) * kv);
+    // Source axes: u = (p·ua/scale + shift)/width; v runs down the image (Source), so it's negated.
+    const ua = f.ua, va = f.va;
+    const gu = ua ? [ua[0] / (sx * tex.worldW), ua[1] / (sx * tex.worldW), ua[2] / (sx * tex.worldW)] : [0, 1, 2].map((a) => (cr * f.r[a] - sr * f.u[a]) * ku);
+    const gv = va ? [-va[0] / (sy * tex.worldH), -va[1] / (sy * tex.worldH), -va[2] / (sy * tex.worldH)] : [0, 1, 2].map((a) => (sr * f.r[a] + cr * f.u[a]) * kv);
     // Outline counter-clockwise seen from outside: the polygon, or the rectangle.
     const outline: [number, number][] = f.poly ?? [[0, 0], [f.width, 0], [f.width, f.height], [0, f.height]];
     for (const [s, t] of outline) {
@@ -36,11 +38,15 @@ export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout
         const nn = f.nS[s > f.width / 2 ? 1 : 0];
         bt.nrm.push(nn[0], nn[1], nn[2]);
       } else bt.nrm.push(f.n[0], f.n[1], f.n[2]);
-      // World-aligned texture projection.
-      const wu = p[0] * f.r[0] + p[1] * f.r[1] + p[2] * f.r[2];
-      const wv = p[0] * f.u[0] + p[1] * f.u[1] + p[2] * f.u[2];
-      const ru = wu * cr - wv * sr, rv = wu * sr + wv * cr;
-      bt.uv.push((ru / sx + f.offset[0]) / tex.worldW, (rv / sy + f.offset[1]) / tex.worldH);
+      if (ua && va) {
+        bt.uv.push(((p[0] * ua[0] + p[1] * ua[1] + p[2] * ua[2]) / sx + ua[3]) / tex.worldW, -((p[0] * va[0] + p[1] * va[1] + p[2] * va[2]) / sy + va[3]) / tex.worldH);
+      } else {
+        // World-aligned texture projection.
+        const wu = p[0] * f.r[0] + p[1] * f.r[1] + p[2] * f.r[2];
+        const wv = p[0] * f.u[0] + p[1] * f.u[1] + p[2] * f.u[2];
+        const ru = wu * cr - wv * sr, rv = wu * sr + wv * cr;
+        bt.uv.push((ru / sx + f.offset[0]) / tex.worldW, (rv / sy + f.offset[1]) / tex.worldH);
+      }
       if (rect && layout) {
         const fs = f.width > 0 ? s / f.width : 0, ft = f.height > 0 ? t / f.height : 0;
         bt.lm.push((rect.x + 0.5 + fs * (rect.w - 1)) / layout.width, (rect.y + 0.5 + ft * (rect.h - 1)) / layout.height);

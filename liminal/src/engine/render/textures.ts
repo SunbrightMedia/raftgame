@@ -10,6 +10,8 @@ export interface TexEntry {
   worldH: number;
   material: string;
   emissive?: TexImage['emissive'];
+  /** Imported Source material facts (blend mode, normal map, reflectivity), if any. */
+  source?: SourceMaterial;
   /** Average LINEAR reflectance after crushing, 0..1: used for bounce light. */
   albedo: [number, number, number];
   /** Height field for relief and parallax (1 = top of the surface), built lazily. */
@@ -85,12 +87,30 @@ interface Source {
   raw: boolean;
   /** Already low-colour pixel art (Freedoom): keep native pixels, only grade it. */
   pixelart: boolean;
+  source?: SourceMaterial;
   credit?: string;
 }
 
 interface Variant { name: string; from: string; color: string; contrast?: number }
 
-interface ManifestEntry { name: string; file: string; size: [number, number]; material?: string; credit?: string; pixelart?: boolean }
+/**
+ * Extra facts about a material imported from Source (tools/source/convert_materials.py):
+ * how it blends, its normal map, the reflectivity VRAD bounces with, lights.rad emission.
+ */
+export interface SourceMaterial {
+  shader: string;
+  normal?: string;
+  translucent?: boolean;
+  alphatest?: boolean;
+  additive?: boolean;
+  selfillum?: boolean;
+  nocull?: boolean;
+  envmap?: boolean;
+  reflectivity?: [number, number, number];
+  rad?: [number, number, number, number];
+}
+
+interface ManifestEntry { name: string; file: string; size: [number, number]; material?: string; credit?: string; pixelart?: boolean; raw?: boolean; source?: SourceMaterial }
 
 /**
  * Name → texture. Sources, highest priority first:
@@ -116,11 +136,14 @@ export class TextureRegistry {
     // the dev server and the normal build have all of it.
     const urls = (import.meta.env.MODE === 'page'
       // (two globs: a negative pattern would also drop the files listed after it)
-      ? { ...import.meta.glob(['../../../textures/**/*.{png,jpg,jpeg}', '!../../../textures/freedoom/**'], { eager: true, query: '?url', import: 'default' }),
+      // Reference material (textures/p2: Valve's, for calibration) is dev-only, never published.
+      ? { ...import.meta.glob(['../../../textures/**/*.{png,jpg,jpeg}', '!../../../textures/freedoom/**', '!../../../textures/p2/**'], { eager: true, query: '?url', import: 'default' }),
         ...import.meta.glob(['../../../textures/freedoom/walls/{BROWN1,COMPSTA1}.png', '../../../textures/freedoom/flats/CEIL5_1.png'], { eager: true, query: '?url', import: 'default' }) }
       : import.meta.glob('../../../textures/**/*.{png,jpg,jpeg}', { eager: true, query: '?url', import: 'default' })) as Record<string, string>;
-    const manifests = import.meta.glob('../../../textures/index.json', { eager: true, import: 'default' }) as Record<string, { textures: ManifestEntry[] }>;
-    const manifest = Object.values(manifests)[0]?.textures ?? [];
+    const manifests = (import.meta.env.MODE === 'page'
+      ? import.meta.glob('../../../textures/index.json', { eager: true, import: 'default' })
+      : import.meta.glob(['../../../textures/index.json', '../../../textures/p2/index.json'], { eager: true, import: 'default' })) as Record<string, { textures: ManifestEntry[] }>;
+    const manifest = Object.values(manifests).flatMap((m) => m.textures ?? []);
     const variantFiles = import.meta.glob('../../../textures/variants.json', { eager: true, import: 'default' }) as Record<string, { variants: Variant[] }>;
     for (const v of Object.values(variantFiles)[0]?.variants ?? []) this.variants.set(v.name, v);
     const byFile = new Map(manifest.map((m) => [m.file, m]));
@@ -140,7 +163,7 @@ export class TextureRegistry {
       this.sources.set(name, {
         name, image: null, url, imgW: 0, imgH: 0,
         worldW: m?.size[0] ?? 0, worldH: m?.size[1] ?? 0,
-        material: m?.material ?? 'default', raw: false, pixelart: !!m?.pixelart, credit: m?.credit,
+        material: m?.material ?? 'default', raw: !!m?.raw, pixelart: !!m?.pixelart, credit: m?.credit, source: m?.source,
       });
     }
   }
@@ -293,7 +316,7 @@ export class TextureRegistry {
     t.anisotropy = 16;
     t.magFilter = this.filter === 'nearest' ? THREE.NearestFilter : THREE.LinearFilter;
     t.minFilter = THREE.LinearMipmapLinearFilter;
-    return { name, texture: t, worldW: src.worldW, worldH: src.worldH, material: src.material, emissive: src.emissive, albedo: averageLinear(px) };
+    return { name, texture: t, worldW: src.worldW, worldH: src.worldH, material: src.material, emissive: src.emissive, source: src.source, albedo: averageLinear(px) };
   }
 
   private crush(src: Source, p: CrushParams): HTMLCanvasElement {

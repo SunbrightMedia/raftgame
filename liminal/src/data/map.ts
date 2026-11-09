@@ -11,6 +11,8 @@
  * Faces are keyed by outward direction: px/nx (+x/-x), py/ny, pz (top), nz (bottom).
  * Any face without an entry uses the brush's `tex`.
  */
+import { type Plane4, convexBounds } from './convex';
+
 export const MAP_FORMAT = 'liminal-map';
 export const MAP_VERSION = 1;
 
@@ -20,6 +22,13 @@ export const FACE_KEYS: readonly FaceKey[] = ['px', 'nx', 'py', 'ny', 'pz', 'nz'
 
 export interface FaceTex {
   tex?: string;
+  /**
+   * Source-style texture axes (Hammer's "uaxis"/"vaxis"): [x, y, z, shift].
+   * Texel u = dot(p, axis) / scale[0] + shift (v likewise, v running down the
+   * image as in Source). Used instead of the face-aligned projection.
+   */
+  uaxis?: [number, number, number, number];
+  vaxis?: [number, number, number, number];
   /** World units per texture pixel multiplier; 1 = the texture's natural size. */
   scale?: [number, number];
   /** In texture pixels. */
@@ -72,7 +81,24 @@ export interface PrismBrushDef {
   min: V3;
   max: V3;
 }
-export type BrushDef = BoxBrushDef | PrismBrushDef;
+/**
+ * Any convex solid, as the planes that bound it (n · p ≤ d inside, n unit),
+ * which is how Hammer and Source store brushes. Faces are keyed by plane
+ * index ("0", "1", ...). `min`/`max` are derived bounds, never saved.
+ */
+export interface ConvexBrushDef {
+  id: number;
+  type: 'convex';
+  planes: Plane4[];
+  tex?: string;
+  faces?: Record<string, FaceTex>;
+  group?: string;
+  material?: string;
+  solid?: boolean;
+  min: V3;
+  max: V3;
+}
+export type BrushDef = BoxBrushDef | PrismBrushDef | ConvexBrushDef;
 
 export interface EntityDef {
   id: number;
@@ -110,6 +136,10 @@ export function parseMap(json: unknown): MapFile {
     const r = b as Record<string, unknown>;
     if (r.type === 'prism') {
       brushes.push(parsePrism(r, i));
+      continue;
+    }
+    if (r.type === 'convex') {
+      brushes.push(parseConvex(r, i));
       continue;
     }
     if (r.type !== 'box') throw new MapError(`brush #${i}: unknown type ${String(r.type)}`);
@@ -193,8 +223,29 @@ function parsePrism(r: Record<string, unknown>, i: number): PrismBrushDef {
   };
 }
 
+function parseConvex(r: Record<string, unknown>, i: number): ConvexBrushDef {
+  const pl = r.planes;
+  if (!Array.isArray(pl) || pl.length < 4 || pl.length > 126 || !pl.every((p) => Array.isArray(p) && p.length === 4 && p.every((n) => typeof n === 'number' && Number.isFinite(n)))) {
+    throw new MapError(`brush #${i}: convex needs 4-126 planes [nx, ny, nz, d]`);
+  }
+  const planes = (pl as Plane4[]).map(([x, y, z, d]) => { const l = Math.hypot(x, y, z) || 1; return [x / l, y / l, z / l, d / l] as Plane4; });
+  const b = convexBounds(planes);
+  if (!b) throw new MapError(`brush #${i}: convex planes enclose nothing`);
+  return {
+    id: typeof r.id === 'number' ? r.id : i + 1,
+    type: 'convex',
+    planes,
+    tex: typeof r.tex === 'string' ? r.tex : undefined,
+    faces: (r.faces && typeof r.faces === 'object' ? r.faces : undefined) as ConvexBrushDef['faces'],
+    group: typeof r.group === 'string' ? r.group : undefined,
+    material: typeof r.material === 'string' ? r.material : undefined,
+    solid: r.solid === false ? false : undefined,
+    min: b.min, max: b.max,
+  };
+}
+
 /** Texture settings for one face. Prism sides fall back from "sideN" to "side". */
-export function faceTex(b: BrushDef, face: string): Required<FaceTex> {
+export function faceTex(b: BrushDef, face: string): Required<Omit<FaceTex, 'uaxis' | 'vaxis'>> & Pick<FaceTex, 'uaxis' | 'vaxis'> {
   const faces = (b.faces ?? {}) as Record<string, FaceTex | undefined>;
   const f = faces[face] ?? (face.startsWith('side') ? faces.side : undefined) ?? {};
   return {
@@ -202,6 +253,7 @@ export function faceTex(b: BrushDef, face: string): Required<FaceTex> {
     scale: f.scale ?? [1, 1],
     offset: f.offset ?? [0, 0],
     rot: f.rot ?? 0,
+    ...(f.uaxis && f.vaxis ? { uaxis: f.uaxis, vaxis: f.vaxis } : {}),
   };
 }
 
@@ -210,7 +262,7 @@ export function faceTex(b: BrushDef, face: string): Required<FaceTex> {
  * git show exactly which brushes changed.
  */
 export function serializeMap(m: MapFile): string {
-  const line = (o: unknown) => '    ' + JSON.stringify(o, (k, v) => ((k === 'min' || k === 'max') && (o as BrushDef).type === 'prism' ? undefined : v));
+  const line = (o: unknown) => '    ' + JSON.stringify(o, (k, v) => ((k === 'min' || k === 'max') && ((o as BrushDef).type === 'prism' || (o as BrushDef).type === 'convex') ? undefined : v));
   const head: Record<string, unknown> = { format: m.format, version: m.version, name: m.name };
   const parts = [
     '{',

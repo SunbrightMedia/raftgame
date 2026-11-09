@@ -1,4 +1,5 @@
-import { type BrushDef, type BoxBrushDef, type PrismBrushDef, type FaceKey, FACE_KEYS, faceTex } from '../../data/map';
+import { type BrushDef, type BoxBrushDef, type PrismBrushDef, type ConvexBrushDef, type FaceKey, FACE_KEYS, faceTex } from '../../data/map';
+import { sidePolygon } from '../../data/convex';
 
 export type Axis = [number, number, number];
 
@@ -36,6 +37,9 @@ export interface Face {
   scale: [number, number];
   offset: [number, number];
   rot: number;
+  /** Source-style texture axes [x, y, z, shift] (FaceTex.uaxis/vaxis); replace scale/offset/rot when set. */
+  ua?: [number, number, number, number];
+  va?: [number, number, number, number];
   n: Axis;
   r: Axis;
   u: Axis;
@@ -88,6 +92,8 @@ export function solidPlanes(b: BrushDef): SolidPlanes {
       { n: [0, 1, 0], d: max[1], face: 2 }, { n: [0, -1, 0], d: -min[1], face: 3 },
       { n: [0, 0, 1], d: max[2], face: 4 }, { n: [0, 0, -1], d: -min[2], face: 5 },
     );
+  } else if (b.type === 'convex') {
+    b.planes.forEach(([x, y, z, d], k) => planes.push({ n: [x, y, z], d, face: k }));
   } else {
     const pts = b.points;
     const W = prismFrame(b);
@@ -127,7 +133,7 @@ export function buildFaces(brushes: BrushDef[]): Face[] {
   for (const x of solids) cells(x.s.min, x.s.max, (k) => { const l = grid.get(k); if (l) l.push(x); else grid.set(k, [x]); });
   const faces: Face[] = [];
   for (const b of brushes) {
-    const own = b.type === 'box' ? boxFaces(b) : prismFaces(b);
+    const own = b.type === 'box' ? boxFaces(b) : b.type === 'convex' ? convexFaces(b) : prismFaces(b);
     for (const f of own) {
       const a = facePoint(f, 0, 0, 0.5), c = facePoint(f, f.width, f.height, 0.5);
       const lo: Axis = [Math.min(a[0], c[0]) - 1, Math.min(a[1], c[1]) - 1, Math.min(a[2], c[2]) - 1];
@@ -160,6 +166,43 @@ function boxFaces(b: BoxBrushDef): Face[] {
       n: fr.n, r: fr.r, u: fr.u, origin, width, height, shade: fr.shade, solid: b.solid !== false,
     });
   }
+  return out;
+}
+
+/**
+ * Faces of a convex brush: each plane's polygon. The face frame (r, u) is
+ * taken from its texture's u axis when it has one (so lightmap luxels line up
+ * with the texture, as in Source), else from the nearest axis-aligned frame.
+ */
+function convexFaces(b: ConvexBrushDef): Face[] {
+  const out: Face[] = [];
+  const solid = b.solid !== false;
+  b.planes.forEach(([nx, ny, nz], k) => {
+    const poly = sidePolygon(b.planes, k);
+    if (poly.length < 3) return;
+    const n: Axis = [nx, ny, nz];
+    const ft = faceTex(b, String(k));
+    const dom = Math.abs(nx) >= Math.abs(ny) && Math.abs(nx) >= Math.abs(nz) ? (nx > 0 ? 'px' : 'nx') : Math.abs(ny) >= Math.abs(nz) ? (ny > 0 ? 'py' : 'ny') : (nz > 0 ? 'pz' : 'nz');
+    let r: Axis = ft.uaxis ? [ft.uaxis[0], ft.uaxis[1], ft.uaxis[2]] : [...FACE_FRAMES[dom as FaceKey].r];
+    const rn = r[0] * n[0] + r[1] * n[1] + r[2] * n[2];
+    r = [r[0] - rn * n[0], r[1] - rn * n[1], r[2] - rn * n[2]];
+    let rl = Math.hypot(r[0], r[1], r[2]);
+    if (rl < 1e-6) { r = [...FACE_FRAMES[dom as FaceKey].r]; rl = 1; }
+    r = [r[0] / rl, r[1] / rl, r[2] / rl];
+    const u: Axis = [n[1] * r[2] - n[2] * r[1], n[2] * r[0] - n[0] * r[2], n[0] * r[1] - n[1] * r[0]]; // r × u = n
+    const S = poly.map((p) => p[0] * r[0] + p[1] * r[1] + p[2] * r[2]);
+    const T = poly.map((p) => p[0] * u[0] + p[1] * u[1] + p[2] * u[2]);
+    const s0 = Math.min(...S), t0 = Math.min(...T);
+    const d = poly[0][0] * n[0] + poly[0][1] * n[1] + poly[0][2] * n[2];
+    const origin: Axis = [0, 1, 2].map((i) => r[i] * s0 + u[i] * t0 + n[i] * d) as Axis;
+    out.push({
+      id: faceId(b.id, k), brushId: b.id, key: String(k), tex: ft.tex, scale: ft.scale, offset: ft.offset, rot: ft.rot,
+      ...(ft.uaxis && ft.vaxis ? { ua: ft.uaxis, va: ft.vaxis } : {}),
+      n, r, u, origin, width: Math.max(...S) - s0, height: Math.max(...T) - t0,
+      poly: S.map((sv, i) => [sv - s0, T[i] - t0] as [number, number]),
+      shade: 0.7 + 0.2 * Math.abs(n[1]) + 0.1 * Math.max(0, n[0]) + 0.1 * n[2], solid,
+    });
+  });
   return out;
 }
 

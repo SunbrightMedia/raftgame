@@ -29,7 +29,7 @@ export function verticalFaces(b: BrushDef): { key: string; samples: number[][]; 
     out.push({ key: 'nx', n: [-1, 0, 0], samples: ys.flatMap((y) => zs.map((z) => [x0, y, z])) });
     out.push({ key: 'py', n: [0, 1, 0], samples: xs.flatMap((x) => zs.map((z) => [x, y1, z])) });
     out.push({ key: 'ny', n: [0, -1, 0], samples: xs.flatMap((x) => zs.map((z) => [x, y0, z])) });
-  } else if (!b.axis || b.axis === 'z') {
+  } else if (b.type === 'prism' && (!b.axis || b.axis === 'z')) {
     const pts = b.points, zs = [0.25, 0.5, 0.75].map((t) => lerp(b.z0, b.z1, t));
     pts.forEach(([ax, ay], k) => {
       const [bx, by] = pts[(k + 1) % pts.length];
