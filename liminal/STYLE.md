@@ -32,6 +32,13 @@ the user having to say them again.
   the reference photo (colours, gradients, framing, camera position) first,
   build to the measurements, then show a side-by-side with the reference from
   the same viewpoint. Don't judge from my own screenshots alone.
+- **Measure geometry with a calibrated camera, not a depth model's guess.**
+  Get the lens and tilt from the photo's vanishing points (straight lines),
+  room axes from the same lines, plan positions from where floor-contact
+  pixels' rays meet the floor, scale from known sizes (doors, counters,
+  handles, railings). A depth model alone got the lens wrong by 50% and
+  skewed every wall. Then read the photo for what's there and what isn't:
+  a dark wedge can be a missing wall, not a shadow; a floor may not exist.
 - **Suggest first when asked to suggest.** If the user asks for a suggestion
   before fixes, reply with the suggestion and wait; change nothing.
 
@@ -245,15 +252,17 @@ All confirmed by the user.
 Measured with Depth Pro and checked by overlay at the photo's camera. Map: `pmp_nook`.
 (The first build guessed "a chest-height niche" and was badly wrong: always measure.)
 
-- **A half-wall window, not a niche:** sill 17", top 69", ~150" wide, in a
-  6" wall. Behind it a low room ~130" deep with a 77" ceiling; its left wall
-  sits ~19" left of the jamb. No baseboard visible in the low room.
+- **A half-wall window onto a stairwell:** sill 17", top 69", ~150" wide,
+  in a 6" wall. Behind it the stairwell, ~130" deep with a 77" ceiling;
+  **no floor in view** (it's a storey down). Its left wall sits ~19" left of
+  the jamb.
 - **One light, in the low room:** a 4"-deep dome ~48" behind the wall, its
   bottom just showing under the header, blown to white. The low room glows
   cream (216, 209, 174); the front room sits in warm brown (wall 134, 111,
   63 near the window), lit dimly from behind the camera.
-- **A hard dark wedge low on the left wall** of the low room: the only hard
-  shadow in the picture (not modelled yet).
+- **The dark wedge low on the left is where the wall isn't:** the left wall
+  stops just above floor level (16" near, 5" far) and the unlit space under
+  it runs off to the left. Not a shadow.
 - **Warm tan "orange-peel" texture paint** everywhere.
 - **Flat white sill** projecting ~1.5" with a small apron moulding under it,
   white baseboard, tan-brown plush carpet (93, 60, 30).
@@ -280,7 +289,15 @@ Measured. Map: `rec_room`.
 
 ## Reference 5: La Quinta Inn, 2004 ("it's supposed to be fun, but everyone is yelling")
 
-Measured. Map: `laquinta`.
+Measured with a vanishing-point camera (lens ~29° across, 5.3° down, eye
+175" above the lobby: the photographer leaned over the far upper railing).
+Map: `laquinta`. Plan in `tools/gen-laquinta.ts`'s header.
+
+- **Two hallways on each floor** under/behind the balcony: one going left
+  (door on its far wall), one going straight back between the balcony and
+  the breakfast alcove (white door on its left wall).
+- **The counter sits in an alcove, against the bar wall**, end to end, under
+  an 86" soffit; the TV is mounted on the soffit face.
 
 - **A two-storey atrium breakfast area**: a balcony corridor wraps the
   upper floor behind a **black wrought-iron railing with wavy balusters**;
@@ -293,7 +310,7 @@ Measured. Map: `laquinta`.
 - **A faux-painted mural** on the upper wall: a potted tree, muddy olive
   and brown (38, 27, 27 in the dark), lit by nothing.
 - **Dark patterned hotel carpet** (46, 29, 28: burgundy with flecks), a
-  **ceramic tile path** by the doors (near white with teal diamond insets),
+  **ceramic tile band** under the balcony (near white with teal diamond insets),
   round café tables with four wooden chairs each, white panel doors.
 - Upper corridor lit by a single **blown wall sconce**. Ceiling dim (91, 82, 75).
 - Camera: from the upper balcony, looking down and across, ~25' up the scene.

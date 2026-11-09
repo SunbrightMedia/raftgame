@@ -3,11 +3,12 @@
  *
  * Built from measurements of the photo (Depth Pro point cloud in the camera's
  * level frame, rotated so the wall is axis-aligned): a half-wall window
- * (sill 17", top 69") in the front room's wall, opening onto a low room 130"
- * deep whose floor is the main floor and whose ceiling is at 77", lit by one
- * dome ~48" behind the wall. Its left wall sits ~19" left of the window's
- * jamb. The front room has one dim light behind the camera. Camera: 109" from the wall, 83" right of
- * the jamb, turned ~26° left of square, ~10° down.
+ * (sill 17", top 69") in the front room's wall, looking into a stairwell:
+ * no floor in view (it's a storey down), a 77" ceiling with one dome ~48"
+ * behind the wall. The stairwell's left wall stops just above floor level;
+ * the dark wedge in the photo is the unlit space under it, not a shadow.
+ * The front room has one dim light behind the camera. Camera: 109" from
+ * the wall, 83" right of the jamb, turned ~26° left of square, ~10° down.
  */
 import { MapBuilder } from './lib/build';
 import { NOOK_ROOMS } from './lib/rooms';
@@ -18,22 +19,39 @@ const H = 96, T = 6, WY = 170;                         // the wall's front face 
 const J0 = 40, J1 = 190, SILL = 17, TOPZ = 69;         // the window
 const LX0 = 21, LX1 = 230, LY1 = 306, LH = 77;         // the low room behind
 
-m.box([-T, -T, -16], [246, WY + T, 0], CARPET);
-m.box([LX0 - T, WY + T, -16], [LX1 + T, LY1 + T, 0], 'nook/floor_pale'); // the low room's floor is pale (photo)
+const DROP = -108;                                     // the stairwell's floor, a storey down
+const SX0 = LX0 - 44;                                  // the dark side space under the left wall
+const EDGE0 = 16, EDGE1 = 5;                           // the left wall stops here (near, far): measured
+
+m.box([-T, -T, -16], [246, WY, 0], CARPET);
 m.box([-T, -T, H], [246, WY + T, H + 16], CEIL);
 m.box([-T, -T, 0], [246, 0, H], PAINT);
 m.box([-T, 0, 0], [0, WY, H], PAINT);
 m.box([240, 0, 0], [246, WY, H], PAINT);
-// The wall with the window.
+// The wall with the window, carried down the stairwell side below the floor.
 m.box([-T, WY, 0], [J0, WY + T, H], PAINT);
 m.box([J1, WY, 0], [246, WY + T, H], PAINT);
 m.box([J0, WY, 0], [J1, WY + T, SILL], PAINT);
 m.box([J0, WY, TOPZ], [J1, WY + T, H], PAINT);
-// The low room behind.
+m.box([SX0 - T, WY, DROP], [LX1 + T, WY + T, 0], PAINT);
+// The stairwell behind: no floor in view, the walls run down a storey.
+m.box([SX0 - T, WY + T, DROP - 16], [LX1 + T, LY1 + T, DROP], 'nook/floor_pale');
 m.box([LX0 - T, WY + T, LH], [LX1 + T, LY1 + T, LH + 16], CEIL);
-m.box([LX0 - T, WY + T, 0], [LX0, LY1, LH], PAINT);
-m.box([LX1, WY + T, 0], [LX1 + T, LY1, LH], PAINT);
-m.box([LX0 - T, LY1, 0], [LX1 + T, LY1 + T, LH], PAINT);
+m.box([LX1, WY + T, DROP], [LX1 + T, LY1, LH], PAINT);
+m.box([SX0 - T, LY1, DROP], [LX1 + T, LY1 + T, LH], PAINT);
+// The left wall ends just above floor level (the "dark wedge" is where it isn't): the space under it
+// runs off to the left, unlit, under a soffit at the same line.
+m.prismX([[WY + T, EDGE0], [LY1, EDGE1], [LY1, LH], [WY + T, LH]], LX0 - T, LX0, PAINT);
+m.prismX([[WY + T, EDGE0 - 1], [LY1, EDGE1 - 1], [LY1, EDGE1], [WY + T, EDGE0]], SX0, LX0, CEIL); // a thin drywall return
+m.box([SX0 - T, WY + T, DROP], [SX0, LY1, EDGE0], PAINT);
+m.box([SX0 - T, WY, 0], [-T, WY + T, EDGE0 + 2], PAINT); // closes the side space above floor level
+// A stair up the right side (out of the photo's view), so the stairwell isn't a pit.
+const steps = 14, rise = -DROP / steps, run = (LY1 - 8 - (WY + T + 12)) / steps;
+for (let i = 0; i < steps - 1; i++) {
+  const y0 = Math.round((WY + T + 12 + i * run) * 100) / 100, y1 = Math.round((WY + T + 12 + (i + 1) * run) * 100) / 100;
+  m.box([LX1 - 36, y0, DROP], [LX1, y1, Math.round(-(i + 1) * rise * 100) / 100], CARPET);
+}
+m.box([LX1 - 36, WY + T, DROP], [LX1, WY + T + 12, 0], CARPET); // top landing, a jump below the sill
 // Flat white sill (photo): a board projecting ~1.5" with a small apron moulding under it.
 m.box([J0 - 3, WY - 1.5, SILL], [J1 + 3, WY, SILL + 1], TRIM);
 m.box([J0, WY, SILL], [J1, WY + T, SILL + 1], TRIM);
@@ -45,7 +63,7 @@ m.box([239.4, 0.6, 0], [240, WY - 0.6, 3.5], TRIM);
 m.box([0, WY - 0.6, 0], [240, WY, 3.5], TRIM);
 // The one light: a flush dome on the low room's ceiling, ~48" behind the wall.
 m.cylinder(72, 218, 7, LH - 4, LH, 'fixture/dome', { solid: false }); // a 4" deep dome, its bottom just shows under the header
-m.light([72, 218, LH - 4.5], { type: 'dome', lumens: 900, kelvin: 3000 });
+m.light([72, 218, LH - 4.5], { type: 'dome', lumens: 1500, kelvin: 3000 });
 // The front wall is lit warm from behind the camera in the photo: one dim ceiling light, out of view.
 m.cylinder(170, 24, 5, H - 1.5, H, 'fixture/dome', { solid: false });
 m.light([170, 24, H - 2], { type: 'dome', lumens: 800, kelvin: 2800 });

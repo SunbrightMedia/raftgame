@@ -495,26 +495,49 @@ const DEFS: Record<string, Def> = {
   },
   // Faux-painted mural: a potted tree on a muddy olive-gold wall, soft and smeared,
   // the kind of thing a 1990s hotel had painted on its atrium wall.
+  // The lobby mural (photo): pale ochre wash, a big dark ficus in a pot, two small
+  // potted plants at its foot.
   'lq/mural_tree': {
     px: [256, 256], world: [160, 100], material: 'plaster', raw: true,
     paint: (g, w, h, rnd) => {
-      const bg = g.createLinearGradient(0, 0, 0, h);
-      bg.addColorStop(0, '#8a7d55'); bg.addColorStop(1, '#6f6444');
+      const Y = (v: number) => h * (1 - v);                                       // v: 0 bottom .. 1 top
+      const bg = g.createLinearGradient(0, 0, w, 0);
+      bg.addColorStop(0, '#b4a679'); bg.addColorStop(0.5, '#c2b388'); bg.addColorStop(1, '#ab9c70');
       g.fillStyle = bg; g.fillRect(0, 0, w, h);
-      for (let k = 0; k < 900; k++) { g.fillStyle = `rgba(${60 + rnd() * 50},${55 + rnd() * 40},${30 + rnd() * 25},0.08)`; g.beginPath(); g.arc(rnd() * w, rnd() * h, 4 + rnd() * 14, 0, Math.PI * 2); g.fill(); }
-      const cx = w * 0.62;
-      g.fillStyle = '#4a3a26'; g.fillRect(cx - 4, h * 0.48, 8, h * 0.36);           // trunk
-      g.fillStyle = '#3d3424'; g.fillRect(cx - 22, h * 0.82, 44, h * 0.13);         // pot
-      for (let k = 0; k < 140; k++) {                                              // canopy
-        const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()) * w * 0.17;
-        g.fillStyle = `rgba(${28 + rnd() * 20},${38 + rnd() * 22},${20 + rnd() * 14},0.55)`;
-        g.beginPath(); g.arc(cx + Math.cos(a) * r, h * 0.3 + Math.sin(a) * r * 0.9, 5 + rnd() * 9, 0, Math.PI * 2); g.fill();
+      for (let k = 0; k < 700; k++) { g.fillStyle = `rgba(${120 + rnd() * 60},${105 + rnd() * 50},${60 + rnd() * 30},0.07)`; g.beginPath(); g.arc(rnd() * w, rnd() * h, 6 + rnd() * 18, 0, Math.PI * 2); g.fill(); }
+      const cx = w * 0.36;
+      g.fillStyle = '#9a8a62'; g.fillRect(cx - 22, Y(0.2), 44, h * 0.16);          // pot
+      g.fillStyle = '#3f3322';
+      for (let k = 0; k < 3; k++) { g.beginPath(); g.moveTo(cx - 3 + k * 2, Y(0.2)); g.quadraticCurveTo(cx - 10 + k * 9, Y(0.45), cx - 6 + k * 6, Y(0.62)); g.lineWidth = 2.5; g.strokeStyle = '#3f3322'; g.stroke(); }
+      for (let k = 0; k < 260; k++) {                                              // canopy
+        const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd());
+        g.fillStyle = `rgba(${24 + rnd() * 18},${32 + rnd() * 20},${18 + rnd() * 12},0.6)`;
+        g.beginPath(); g.arc(cx + Math.cos(a) * r * w * 0.11, Y(0.74) + Math.sin(a) * r * h * 0.22, 2 + rnd() * 5, 0, Math.PI * 2); g.fill();
       }
-      for (let k = 0; k < 40; k++) {                                               // a small plant left
-        const a = rnd() * Math.PI * 2, r = rnd() * w * 0.05;
-        g.fillStyle = `rgba(30,40,22,0.6)`; g.beginPath(); g.arc(w * 0.28 + Math.cos(a) * r, h * 0.72 + Math.sin(a) * r, 3 + rnd() * 5, 0, Math.PI * 2); g.fill();
+      for (const [px, s] of [[0.2, 0.09], [0.47, 0.07]] as const) {               // small potted plants
+        g.fillStyle = '#5b4a33'; g.fillRect(w * px - 9, Y(0.12), 18, h * 0.1);
+        for (let k = 0; k < 50; k++) {
+          const a = -Math.PI * rnd(), r = rnd() * w * s;
+          g.fillStyle = 'rgba(28,38,22,0.7)'; g.beginPath(); g.ellipse(w * px + Math.cos(a) * r, Y(0.13) + Math.sin(a) * r, 5, 2, a, 0, Math.PI * 2); g.fill();
+        }
       }
       noise(g, w, h, rnd, 10);
+    },
+  },
+  // Lobby floor tile (photo): big cream squares, thin grout, a small dark-teal
+  // diamond set into every third corner.
+  'lq/tile': {
+    px: [256, 256], world: [54, 54], material: 'tile', raw: true,
+    paint: (g, w, h, rnd) => {
+      g.fillStyle = '#ddd3bf'; g.fillRect(0, 0, w, h);
+      for (let k = 0; k < 500; k++) { g.fillStyle = `rgba(${170 + rnd() * 60},${160 + rnd() * 55},${140 + rnd() * 45},0.08)`; g.beginPath(); g.arc(rnd() * w, rnd() * h, 2 + rnd() * 9, 0, Math.PI * 2); g.fill(); }
+      g.fillStyle = '#a89c86';
+      for (let i = 0; i < 3; i++) { g.fillRect((i * w) / 3, 0, 1.5, h); g.fillRect(0, (i * h) / 3, w, 1.5); }
+      g.fillStyle = '#2f4f50';
+      const d = w / 9;
+      g.beginPath(); g.moveTo(0, -d); g.lineTo(d, 0); g.lineTo(0, d); g.lineTo(-d, 0); g.closePath(); g.fill();
+      for (const [x, y] of [[w, 0], [0, h], [w, h]]) { g.beginPath(); g.moveTo(x, y - d); g.lineTo(x + d, y); g.lineTo(x, y + d); g.lineTo(x - d, y); g.closePath(); g.fill(); }
+      noise(g, w, h, rnd, 6);
     },
   },
   // CRT screen tuned to nothing: animated snow (the world shader draws the
