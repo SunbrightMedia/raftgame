@@ -145,10 +145,10 @@ compiling and passing checks in seconds.
 
 ---
 
-## Decisions needed
+## Decisions
 
-1. Digicam look: keep as an optional layer, default off for Source-style maps?
-2. Props vertex-lit like Source (recommended) rather than lightmapped?
-3. Hugging Face access to SAM 3 / DINOv3 (gated by Meta), or stay on
-   SAM 2.1 / DINOv2?
-4. Existing maps: keep as regression tests (recommended) or archive?
+1. Digicam look: an optional layer, off for Source-style maps. (decided)
+2. Props vertex-lit like Source, world geometry lightmapped. (open)
+3. Use the latest models (SAM 3, DINOv3): needs the user's Hugging Face
+   access to Meta's gated repos. (decided; waiting on access)
+4. Old maps: moved to `junk/`, kept but not used. (done)
