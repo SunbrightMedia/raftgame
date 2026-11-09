@@ -1,0 +1,858 @@
+[
+{
+"file": "materials/detail/metal_detail_01.vtf",
+"arch": 8,
+"src_off": 36429400,
+"len": 175008,
+"part": 1,
+"off": 0
+},
+{
+"file": "materials/dev/flat_normal.vtf",
+"arch": 0,
+"src_off": 115940968,
+"len": 1255,
+"part": 1,
+"off": 175008
+},
+{
+"file": "materials/glass/refract_light_color.vtf",
+"arch": 0,
+"src_off": 188576176,
+"len": 87576,
+"part": 1,
+"off": 176263
+},
+{
+"file": "materials/glass/refract_light_normal.vtf",
+"arch": 0,
+"src_off": 188532320,
+"len": 43856,
+"part": 1,
+"off": 263839
+},
+{
+"file": "materials/models/anim_wp/framework/squarebeams_main.vtf",
+"arch": 0,
+"src_off": 115341234,
+"len": 349784,
+"part": 1,
+"off": 307695
+},
+{
+"file": "materials/models/anim_wp/framework/squarebeams_skin3.vtf",
+"arch": 0,
+"src_off": 115691018,
+"len": 175008,
+"part": 1,
+"off": 657479
+},
+{
+"file": "materials/models/props/de_train/ladderaluminium.vtf",
+"arch": 5,
+"src_off": 201230042,
+"len": 87568,
+"part": 1,
+"off": 832487
+},
+{
+"file": "materials/models/props/de_train/ladderaluminium_ref.vtf",
+"arch": 5,
+"src_off": 201208010,
+"len": 22032,
+"part": 1,
+"off": 920055
+},
+{
+"file": "materials/models/props/food_can/food_can.vtf",
+"arch": 5,
+"src_off": 192110213,
+"len": 87640,
+"part": 1,
+"off": 942087
+},
+{
+"file": "materials/models/props/food_can/food_can_n.vtf",
+"arch": 5,
+"src_off": 192088109,
+"len": 22104,
+"part": 1,
+"off": 1029727
+},
+{
+"file": "materials/models/props/lab_desk02/lab_desk02.vtf",
+"arch": 5,
+"src_off": 180602789,
+"len": 175008,
+"part": 1,
+"off": 1051831
+},
+{
+"file": "materials/models/props/lab_desk05/lab_desk05.vtf",
+"arch": 0,
+"src_off": 193758440,
+"len": 175008,
+"part": 1,
+"off": 1226839
+},
+{
+"file": "materials/models/props/terror/hamradio01.vtf",
+"arch": 5,
+"src_off": 155590739,
+"len": 175008,
+"part": 1,
+"off": 1401847
+},
+{
+"file": "materials/models/props/terror/hamradio01_ref.vtf",
+"arch": 5,
+"src_off": 155415731,
+"len": 175008,
+"part": 1,
+"off": 1576855
+},
+{
+"file": "materials/models/props/water_bottle/water_bottle.vtf",
+"arch": 5,
+"src_off": 146414894,
+"len": 43936,
+"part": 1,
+"off": 1751863
+},
+{
+"file": "materials/models/props/water_bottle/water_bottle_exp.vtf",
+"arch": 5,
+"src_off": 146403726,
+"len": 11168,
+"part": 1,
+"off": 1795799
+},
+{
+"file": "materials/models/props/water_bottle/water_bottle_n.vtf",
+"arch": 5,
+"src_off": 146381622,
+"len": 22104,
+"part": 1,
+"off": 1806967
+},
+{
+"file": "materials/models/props_bts/bts_clipboard.vtf",
+"arch": 1,
+"src_off": 54004551,
+"len": 43912,
+"part": 1,
+"off": 1829071
+},
+{
+"file": "materials/models/props_bts/bts_clipboard_a.vtf",
+"arch": 1,
+"src_off": 54048463,
+"len": 43912,
+"part": 1,
+"off": 1872983
+},
+{
+"file": "materials/models/props_bts/bts_clipboard_b.vtf",
+"arch": 1,
+"src_off": 54092375,
+"len": 43912,
+"part": 1,
+"off": 1916895
+},
+{
+"file": "materials/models/props_bts/bts_clipboard_c.vtf",
+"arch": 1,
+"src_off": 54136287,
+"len": 43936,
+"part": 1,
+"off": 1960807
+},
+{
+"file": "materials/models/props_bts/bts_clipboard_d.vtf",
+"arch": 1,
+"src_off": 54180223,
+"len": 43936,
+"part": 1,
+"off": 2004743
+},
+{
+"file": "materials/models/props_bts/light_cage001.vtf",
+"arch": 0,
+"src_off": 208436820,
+"len": 699264,
+"part": 1,
+"off": 2048679
+},
+{
+"file": "materials/models/props_bts/light_cage001_off.vtf",
+"arch": 0,
+"src_off": 209136084,
+"len": 349720,
+"part": 1,
+"off": 2747943
+},
+{
+"file": "materials/models/props_bts/light_hanging_1a.vtf",
+"arch": 0,
+"src_off": 131916713,
+"len": 1398360,
+"part": 1,
+"off": 3097663
+},
+{
+"file": "materials/models/props_bts/push_button_stand.vtf",
+"arch": 5,
+"src_off": 94777716,
+"len": 349784,
+"part": 1,
+"off": 4496023
+},
+{
+"file": "materials/models/props_bts/push_button_stand_active.vtf",
+"arch": 5,
+"src_off": 94427932,
+"len": 349784,
+"part": 1,
+"off": 4845807
+},
+{
+"file": "materials/models/props_bts/railing_bts.vtf",
+"arch": 0,
+"src_off": 147984961,
+"len": 1398360,
+"part": 1,
+"off": 5195591
+},
+{
+"file": "materials/models/props_bts/railing_bts_normal.vtf",
+"arch": 0,
+"src_off": 149383321,
+"len": 1398368,
+"part": 1,
+"off": 6593951
+},
+{
+"file": "materials/models/props_bts/track_metal.vtf",
+"arch": 0,
+"src_off": 133323454,
+"len": 22032,
+"part": 1,
+"off": 7992319
+},
+{
+"file": "materials/models/props_cables/black_cable.vtf",
+"arch": 0,
+"src_off": 198950252,
+"len": 11168,
+"part": 1,
+"off": 8014351
+},
+{
+"file": "materials/models/props_cables/cable_box_02.vtf",
+"arch": 5,
+"src_off": 71450260,
+"len": 87640,
+"part": 1,
+"off": 8025519
+},
+{
+"file": "materials/models/props_cables/cable_box_03.vtf",
+"arch": 5,
+"src_off": 71362620,
+"len": 87640,
+"part": 1,
+"off": 8113159
+},
+{
+"file": "materials/models/props_destruction/glass_192x128_b_frosted_002b.vtf",
+"arch": 5,
+"src_off": 68171748,
+"len": 349784,
+"part": 1,
+"off": 8200799
+},
+{
+"file": "materials/models/props_destruction/wall_dest_002.vtf",
+"arch": 0,
+"src_off": 195676989,
+"len": 2796448,
+"part": 1,
+"off": 8550583
+},
+{
+"file": "materials/models/props_factory/turret_factory_closed.vtf",
+"arch": 5,
+"src_off": 4370471,
+"len": 699296,
+"part": 1,
+"off": 11347031
+},
+{
+"file": "materials/models/props_factory/turret_factory_closed_normal.vtf",
+"arch": 5,
+"src_off": 3146656,
+"len": 1048807,
+"part": 1,
+"off": 12046327
+},
+{
+"file": "materials/models/props_foliage/leaves.vtf",
+"arch": 0,
+"src_off": 102076726,
+"len": 5592664,
+"part": 1,
+"off": 13095134
+},
+{
+"file": "materials/models/props_foliage/leaves_ref.vtf",
+"arch": 0,
+"src_off": 107669390,
+"len": 349784,
+"part": 1,
+"off": 18687798
+},
+{
+"file": "materials/models/props_foliage/leaves_skin2.vtf",
+"arch": 4,
+"src_off": 206453304,
+"len": 5592664,
+"part": 1,
+"off": 19037582
+},
+{
+"file": "materials/models/props_gameplay/power_lever.vtf",
+"arch": 4,
+"src_off": 184534888,
+"len": 175008,
+"part": 1,
+"off": 24630246
+},
+{
+"file": "materials/models/props_gameplay/push_button.vtf",
+"arch": 4,
+"src_off": 184185104,
+"len": 349784,
+"part": 1,
+"off": 24805254
+},
+{
+"file": "materials/models/props_gameplay/push_button_on.vtf",
+"arch": 4,
+"src_off": 183835320,
+"len": 349784,
+"part": 1,
+"off": 25155038
+},
+{
+"file": "materials/models/props_lab/observation_frame.vtf",
+"arch": 0,
+"src_off": 192710622,
+"len": 699296,
+"part": 1,
+"off": 25504822
+},
+{
+"file": "materials/models/props_lights/outside_light_old.vtf",
+"arch": 4,
+"src_off": 158051704,
+"len": 87640,
+"part": 1,
+"off": 26204118
+},
+{
+"file": "materials/models/props_lights/under_neonlamp.vtf",
+"arch": 4,
+"src_off": 157352136,
+"len": 349784,
+"part": 1,
+"off": 26291758
+},
+{
+"file": "materials/models/props_lights/under_neonlamp_orange.vtf",
+"arch": 4,
+"src_off": 157002352,
+"len": 349784,
+"part": 1,
+"off": 26641542
+},
+{
+"file": "materials/models/props_motel/clock_radio01.vtf",
+"arch": 4,
+"src_off": 150751336,
+"len": 699296,
+"part": 1,
+"off": 26991326
+},
+{
+"file": "materials/models/props_motel/clock_radio01_glass.vtf",
+"arch": 4,
+"src_off": 150729232,
+"len": 22104,
+"part": 1,
+"off": 27690622
+},
+{
+"file": "materials/models/props_motel/telephone_main.vtf",
+"arch": 4,
+"src_off": 134994896,
+"len": 175008,
+"part": 1,
+"off": 27712726
+},
+{
+"file": "materials/models/props_office/cardboardbox.vtf",
+"arch": 4,
+"src_off": 130623104,
+"len": 43936,
+"part": 1,
+"off": 27887734
+},
+{
+"file": "materials/models/props_office/coffee_mugs.vtf",
+"arch": 4,
+"src_off": 130404160,
+"len": 175008,
+"part": 1,
+"off": 27931670
+},
+{
+"file": "materials/models/props_office/computer_01_1970.vtf",
+"arch": 4,
+"src_off": 129704864,
+"len": 699296,
+"part": 2,
+"off": 0
+},
+{
+"file": "materials/models/props_office/computer_02_1970.vtf",
+"arch": 4,
+"src_off": 129005568,
+"len": 699296,
+"part": 2,
+"off": 699296
+},
+{
+"file": "materials/models/props_office/computer_03_1970.vtf",
+"arch": 4,
+"src_off": 128306272,
+"len": 699296,
+"part": 2,
+"off": 1398592
+},
+{
+"file": "materials/models/props_office/computer_04_1970.vtf",
+"arch": 4,
+"src_off": 127606976,
+"len": 699296,
+"part": 2,
+"off": 2097888
+},
+{
+"file": "materials/models/props_office/computer_cabinet01.vtf",
+"arch": 4,
+"src_off": 125509304,
+"len": 1398368,
+"part": 2,
+"off": 2797184
+},
+{
+"file": "materials/models/props_office/computer_cabinet02.vtf",
+"arch": 4,
+"src_off": 124110936,
+"len": 1398368,
+"part": 2,
+"off": 4195552
+},
+{
+"file": "materials/models/props_office/computer_monitor01.vtf",
+"arch": 4,
+"src_off": 122712576,
+"len": 1398360,
+"part": 2,
+"off": 5593920
+},
+{
+"file": "materials/models/props_office/computer_tall01.vtf",
+"arch": 4,
+"src_off": 119915848,
+"len": 1398368,
+"part": 2,
+"off": 6992280
+},
+{
+"file": "materials/models/props_office/computer_tall02.vtf",
+"arch": 4,
+"src_off": 118517488,
+"len": 1398360,
+"part": 2,
+"off": 8390648
+},
+{
+"file": "materials/models/props_office/control_desk_1980.vtf",
+"arch": 4,
+"src_off": 117119120,
+"len": 1398368,
+"part": 2,
+"off": 9789008
+},
+{
+"file": "materials/models/props_office/door_handle_1.vtf",
+"arch": 4,
+"src_off": 115796024,
+"len": 11168,
+"part": 2,
+"off": 11187376
+},
+{
+"file": "materials/models/props_office/file_cabinet_1970.vtf",
+"arch": 4,
+"src_off": 115446008,
+"len": 175008,
+"part": 2,
+"off": 11198544
+},
+{
+"file": "materials/models/props_office/file_rack_1970.vtf",
+"arch": 4,
+"src_off": 115434840,
+"len": 11168,
+"part": 2,
+"off": 11373552
+},
+{
+"file": "materials/models/props_office/keyboard_and_phone.vtf",
+"arch": 4,
+"src_off": 114734616,
+"len": 175008,
+"part": 2,
+"off": 11384720
+},
+{
+"file": "materials/models/props_office/lab_copy_machine.vtf",
+"arch": 4,
+"src_off": 114035320,
+"len": 699296,
+"part": 2,
+"off": 11559728
+},
+{
+"file": "materials/models/props_office/office_chair_1940_01.vtf",
+"arch": 4,
+"src_off": 110189056,
+"len": 349784,
+"part": 2,
+"off": 12259024
+},
+{
+"file": "materials/models/props_office/office_lamp_1970.vtf",
+"arch": 4,
+"src_off": 109095840,
+"len": 43936,
+"part": 2,
+"off": 12608808
+},
+{
+"file": "materials/models/props_office/office_lamp_1970_on.vtf",
+"arch": 4,
+"src_off": 109008200,
+"len": 87640,
+"part": 2,
+"off": 12652744
+},
+{
+"file": "materials/models/props_office/office_light002.vtf",
+"arch": 4,
+"src_off": 108658480,
+"len": 349720,
+"part": 2,
+"off": 12740384
+},
+{
+"file": "materials/models/props_office/office_typewriter_1940_01.vtf",
+"arch": 4,
+"src_off": 108133688,
+"len": 349784,
+"part": 2,
+"off": 13090104
+},
+{
+"file": "materials/models/props_office/paper.vtf",
+"arch": 4,
+"src_off": 108132760,
+"len": 928,
+"part": 2,
+"off": 13439888
+},
+{
+"file": "materials/models/props_office/pencilsharpener01.vtf",
+"arch": 4,
+"src_off": 107607968,
+"len": 349784,
+"part": 2,
+"off": 13440816
+},
+{
+"file": "materials/models/props_office/telephone_1970.vtf",
+"arch": 4,
+"src_off": 105246656,
+"len": 87640,
+"part": 2,
+"off": 13790600
+},
+{
+"file": "materials/models/props_office/tv_1970.vtf",
+"arch": 4,
+"src_off": 105071648,
+"len": 175008,
+"part": 2,
+"off": 13878240
+},
+{
+"file": "materials/models/props_office/whiteboard.vtf",
+"arch": 4,
+"src_off": 104372352,
+"len": 699296,
+"part": 2,
+"off": 14053248
+},
+{
+"file": "materials/models/props_trainstation/wrecked_boxcar_gate.vtf",
+"arch": 4,
+"src_off": 94582920,
+"len": 2796456,
+"part": 2,
+"off": 14752544
+},
+{
+"file": "materials/models/props_underground/cavejohnson_portrait01.vtf",
+"arch": 4,
+"src_off": 84794328,
+"len": 699296,
+"part": 2,
+"off": 17549000
+},
+{
+"file": "materials/models/props_underground/cavejohnson_portrait02.vtf",
+"arch": 4,
+"src_off": 84095032,
+"len": 699296,
+"part": 2,
+"off": 18248296
+},
+{
+"file": "materials/models/props_underground/cavejohnson_portrait03.vtf",
+"arch": 4,
+"src_off": 83395736,
+"len": 699296,
+"part": 2,
+"off": 18947592
+},
+{
+"file": "materials/models/props_underground/cavejohnson_portrait04.vtf",
+"arch": 4,
+"src_off": 82696440,
+"len": 699296,
+"part": 2,
+"off": 19646888
+},
+{
+"file": "materials/models/props_underground/chair_lobby.vtf",
+"arch": 4,
+"src_off": 81647352,
+"len": 699304,
+"part": 2,
+"off": 20346184
+},
+{
+"file": "materials/models/props_underground/chair_office_padded_1980.vtf",
+"arch": 4,
+"src_off": 81297632,
+"len": 349720,
+"part": 2,
+"off": 21045488
+},
+{
+"file": "materials/models/props_underground/chair_office_padded_1980_normal.vtf",
+"arch": 4,
+"src_off": 80598368,
+"len": 699264,
+"part": 2,
+"off": 21395208
+},
+{
+"file": "materials/models/props_underground/construction_crane01.vtf",
+"arch": 4,
+"src_off": 79700840,
+"len": 175008,
+"part": 2,
+"off": 22094472
+},
+{
+"file": "materials/models/props_underground/door_bipart_128.vtf",
+"arch": 4,
+"src_off": 71528528,
+"len": 1398360,
+"part": 2,
+"off": 22269480
+},
+{
+"file": "materials/models/props_underground/filecabinet_lobby.vtf",
+"arch": 4,
+"src_off": 67747704,
+"len": 699264,
+"part": 2,
+"off": 23667840
+},
+{
+"file": "materials/models/props_underground/floorlamp_lobby.vtf",
+"arch": 4,
+"src_off": 67048440,
+"len": 699264,
+"part": 2,
+"off": 24367104
+},
+{
+"file": "materials/models/props_underground/interactive_console.vtf",
+"arch": 4,
+"src_off": 53414040,
+"len": 175008,
+"part": 2,
+"off": 25066368
+},
+{
+"file": "materials/models/props_underground/interactive_console_backpanel01.vtf",
+"arch": 4,
+"src_off": 50617592,
+"len": 2796448,
+"part": 2,
+"off": 25241376
+},
+{
+"file": "materials/models/props_underground/moving_platform_motor.vtf",
+"arch": 4,
+"src_off": 42040568,
+"len": 175008,
+"part": 2,
+"off": 28037824
+},
+{
+"file": "materials/models/props_underground/paint_distillery_tank.vtf",
+"arch": 4,
+"src_off": 40116680,
+"len": 699296,
+"part": 3,
+"off": 0
+},
+{
+"file": "materials/models/props_underground/paint_distillery_tank_normal.vtf",
+"arch": 4,
+"src_off": 38718320,
+"len": 1398360,
+"part": 3,
+"off": 699296
+},
+{
+"file": "materials/models/props_underground/railing_underground_mip0.vtf",
+"arch": 0,
+"src_off": 133508329,
+"len": 1398360,
+"part": 3,
+"off": 2097656
+},
+{
+"file": "materials/models/props_underground/ramp_motor.vtf",
+"arch": 4,
+"src_off": 29015624,
+"len": 349784,
+"part": 3,
+"off": 3496016
+},
+{
+"file": "materials/models/props_underground/smokingtable_lobby.vtf",
+"arch": 4,
+"src_off": 24994616,
+"len": 699264,
+"part": 3,
+"off": 3845800
+},
+{
+"file": "materials/models/props_underground/tank_small_1.vtf",
+"arch": 3,
+"src_off": 194527303,
+"len": 699296,
+"part": 3,
+"off": 4545064
+},
+{
+"file": "materials/models/props_underground/tube_paint_under.vtf",
+"arch": 3,
+"src_off": 185742183,
+"len": 1398360,
+"part": 3,
+"off": 5244360
+},
+{
+"file": "materials/models/props_underground/tube_paint_under_normal.vtf",
+"arch": 3,
+"src_off": 184343823,
+"len": 1398360,
+"part": 3,
+"off": 6642720
+},
+{
+"file": "materials/models/props_underground/underground_door_dynamic.vtf",
+"arch": 3,
+"src_off": 181371903,
+"len": 1398360,
+"part": 3,
+"off": 8041080
+},
+{
+"file": "materials/traincar_interior/traincar_clipboard_c.vtf",
+"arch": 43,
+"src_off": 35228784,
+"len": 699288,
+"part": 3,
+"off": 9439440
+},
+{
+"file": "materials/traincar_interior/traincar_tabbed_folder_b.vtf",
+"arch": 43,
+"src_off": 22247176,
+"len": 43928,
+"part": 3,
+"off": 10138728
+},
+{
+"file": "materials/traincar_interior/traincar_tabbed_folder_c.vtf",
+"arch": 43,
+"src_off": 22072176,
+"len": 175000,
+"part": 3,
+"off": 10182656
+},
+{
+"file": "materials/traincars/undercarriage_2k_b.vtf",
+"arch": 114,
+"src_off": 12992718,
+"len": 2796440,
+"part": 3,
+"off": 10357656
+},
+{
+"file": "materials/traincars/undercarriage_2k_c.vtf",
+"arch": 43,
+"src_off": 175000,
+"len": 699288,
+"part": 3,
+"off": 13154096
+},
+{
+"file": "materials/traincars/undercarriage_2k_s.vtf",
+"arch": 43,
+"src_off": 0,
+"len": 175000,
+"part": 3,
+"off": 13853384
+}
+]
