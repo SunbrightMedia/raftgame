@@ -1,21 +1,21 @@
 {
   "_about": "How each material reflects light. roughness: 0 = mirror, 1 = fully matte (GGX, Disney remap). f0: reflectance straight on; ~0.04 for paint, plastic, varnish, glass (index 1.5); 0.02-0.03 for fibres. metal: 1 = metal (reflection tinted by the texture). bump: relief depth in inches (bump shading and parallax), from a height field built from the texture's fine detail. relief: size in inches of the detail read as relief (pile ~0.25, grout ~1). gloss: how much of the specular reflection shows (0 = matte, as paint and carpet look in the references). sheen: fibre sheen at grazing angles. cavity: darkening of the deepest crevices. 'textures' overrides a single texture by name.",
   "materials": {
-    "default": {"roughness": 0.7, "f0": 0.04, "metal": 0, "bump": 0.04, "relief": 0.4, "gloss": 0, "sheen": 0, "cavity": 0.3},
-    "carpet": {"roughness": 0.78, "f0": 0.03, "metal": 0, "bump": 0.22, "relief": 0.18, "gloss": 0, "sheen": 0.6, "cavity": 0.55},
-    "fabric": {"roughness": 0.9, "f0": 0.025, "metal": 0, "bump": 0.08, "relief": 0.15, "gloss": 0, "sheen": 0.4, "cavity": 0.35},
-    "plaster": {"roughness": 0.55, "f0": 0.04, "metal": 0, "bump": 0.05, "relief": 0.3, "gloss": 0, "sheen": 0, "cavity": 0.25},
-    "wallpaper": {"roughness": 0.42, "f0": 0.04, "metal": 0, "bump": 0.02, "relief": 0.25, "gloss": 0.15, "sheen": 0, "cavity": 0.15},
-    "ceiling": {"roughness": 0.92, "f0": 0.025, "metal": 0, "bump": 0.14, "relief": 0.4, "gloss": 0, "sheen": 0, "cavity": 0.45},
-    "tile": {"roughness": 0.3, "f0": 0.04, "metal": 0, "bump": 0.1, "relief": 1.2, "gloss": 1, "sheen": 0, "cavity": 0.5},
-    "laminate": {"roughness": 0.28, "f0": 0.045, "metal": 0, "bump": 0.02, "relief": 0.5, "gloss": 0.8, "sheen": 0, "cavity": 0.2},
-    "wood": {"roughness": 0.38, "f0": 0.04, "metal": 0, "bump": 0.04, "relief": 0.4, "gloss": 0.5, "sheen": 0, "cavity": 0.3},
-    "concrete": {"roughness": 0.85, "f0": 0.035, "metal": 0, "bump": 0.12, "relief": 0.5, "gloss": 0.1, "sheen": 0, "cavity": 0.45},
-    "metal": {"roughness": 0.35, "f0": 0.6, "metal": 1, "bump": 0.03, "relief": 0.3, "gloss": 1, "sheen": 0, "cavity": 0.2},
+    "default": {"roughness": 0.7, "f0": 0.04, "metal": 0, "bump": 0.08, "relief": 0.4, "gloss": 0, "sheen": 0, "cavity": 0.4},
+    "carpet": {"roughness": 0.78, "f0": 0.03, "metal": 0, "bump": 0.5, "relief": 0.18, "gloss": 0, "sheen": 0.6, "cavity": 0.8},
+    "fabric": {"roughness": 0.9, "f0": 0.025, "metal": 0, "bump": 0.16, "relief": 0.15, "gloss": 0, "sheen": 0.4, "cavity": 0.5},
+    "plaster": {"roughness": 0.55, "f0": 0.04, "metal": 0, "bump": 0.12, "relief": 0.3, "gloss": 0, "sheen": 0, "cavity": 0.35},
+    "wallpaper": {"roughness": 0.42, "f0": 0.04, "metal": 0, "bump": 0.05, "relief": 0.25, "gloss": 0.15, "sheen": 0, "cavity": 0.25},
+    "ceiling": {"roughness": 0.92, "f0": 0.025, "metal": 0, "bump": 0.3, "relief": 0.4, "gloss": 0, "sheen": 0, "cavity": 0.6},
+    "tile": {"roughness": 0.3, "f0": 0.04, "metal": 0, "bump": 0.16, "relief": 1.2, "gloss": 1, "sheen": 0, "cavity": 0.7},
+    "laminate": {"roughness": 0.28, "f0": 0.045, "metal": 0, "bump": 0.04, "relief": 0.5, "gloss": 0.8, "sheen": 0, "cavity": 0.3},
+    "wood": {"roughness": 0.38, "f0": 0.04, "metal": 0, "bump": 0.08, "relief": 0.4, "gloss": 0.5, "sheen": 0, "cavity": 0.4},
+    "concrete": {"roughness": 0.85, "f0": 0.035, "metal": 0, "bump": 0.25, "relief": 0.5, "gloss": 0.1, "sheen": 0, "cavity": 0.6},
+    "metal": {"roughness": 0.35, "f0": 0.6, "metal": 1, "bump": 0.05, "relief": 0.3, "gloss": 1, "sheen": 0, "cavity": 0.3},
     "glass": {"roughness": 0.05, "f0": 0.04, "metal": 0, "bump": 0, "relief": 0.3, "gloss": 1, "sheen": 0, "cavity": 0},
-    "plastic": {"roughness": 0.4, "f0": 0.045, "metal": 0, "bump": 0.015, "relief": 0.3, "gloss": 0.6, "sheen": 0, "cavity": 0.15},
-    "grass": {"roughness": 0.95, "f0": 0.03, "metal": 0, "bump": 0.7, "relief": 0.8, "gloss": 0, "sheen": 0.3, "cavity": 0.6},
-    "rubber": {"roughness": 0.6, "f0": 0.035, "metal": 0, "bump": 0.02, "relief": 0.3, "gloss": 0.3, "sheen": 0, "cavity": 0.2}
+    "plastic": {"roughness": 0.4, "f0": 0.045, "metal": 0, "bump": 0.03, "relief": 0.3, "gloss": 0.6, "sheen": 0, "cavity": 0.2},
+    "grass": {"roughness": 0.95, "f0": 0.03, "metal": 0, "bump": 1.2, "relief": 0.8, "gloss": 0, "sheen": 0.3, "cavity": 0.75},
+    "rubber": {"roughness": 0.6, "f0": 0.035, "metal": 0, "bump": 0.04, "relief": 0.3, "gloss": 0.3, "sheen": 0, "cavity": 0.3}
   },
   "textures": {}
 }
