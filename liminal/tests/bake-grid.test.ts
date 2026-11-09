@@ -6,7 +6,7 @@ import { parseMap } from '../src/data/map';
 
 // The bake's ray grid must answer exactly like testing every brush.
 describe.each(['laquinta', 'pmp_basement', 'flatgrass'])('ray grid on %s', (name) => {
-  const map = parseMap(JSON.parse(readFileSync(new URL(`../maps/${name}.json`, import.meta.url), 'utf8')));
+  const map = parseMap(JSON.parse(readFileSync(new URL(`../junk/maps/${name}.json`, import.meta.url), 'utf8')));
   const boxes = map.brushes.filter((b) => b.solid !== false).map(solidPlanes);
   const grid = new SolidGrid(boxes);
   const lo = [0, 1, 2].map((i) => Math.min(...boxes.map((b) => b.min[i])));

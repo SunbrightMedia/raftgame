@@ -33,7 +33,7 @@ describe('prism along y', () => {
 describe('flatgrass map', () => {
   it('keeps every structure piece between the grass (z 0) and the platform top (z 1024)', async () => {
     const { readFileSync } = await import('node:fs');
-    const m = parseMap(JSON.parse(readFileSync(new URL('../maps/flatgrass.json', import.meta.url), 'utf8')));
+    const m = parseMap(JSON.parse(readFileSync(new URL('../junk/maps/flatgrass.json', import.meta.url), 'utf8')));
     const bad = m.brushes.filter((b) => b.tex !== 'outdoor/grass' && (b.min[2] < -0.01 || b.max[2] > 1024.01));
     expect(bad.map((b) => `#${b.id} z ${b.min[2]}..${b.max[2]}`)).toEqual([]);
     expect(m.brushes.filter((b) => b.type === 'prism' && b.axis === 'y').length).toBe(56);

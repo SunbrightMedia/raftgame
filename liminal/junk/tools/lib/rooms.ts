@@ -1,4 +1,4 @@
-import type { Room } from './roomPaint';
+import type { Room } from '../../../tools/lib/roomPaint';
 export { PMP_ROOMS } from './pmpRooms';
 
 /** Reference 3 (measured): a half-wall window into a low room whose floor is the main floor. */

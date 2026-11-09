@@ -1,4 +1,4 @@
-import type { Room } from './roomPaint';
+import type { Room } from '../../../tools/lib/roomPaint';
 
 /** The PMP basement's rooms and their wall paint (STYLE.md reference 1). */
 export const PMP_ROOMS: Room[] = [

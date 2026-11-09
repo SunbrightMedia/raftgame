@@ -1,0 +1,17 @@
+{
+  "format": "liminal-map",
+  "version": 1,
+  "name": "blank",
+  "brushes": [
+    {"id":1,"type":"box","min":[-8,-8,-16],"max":[392,392,0],"tex":"office/carpet_blue"},
+    {"id":2,"type":"box","min":[-8,-8,120],"max":[392,392,136],"tex":"office/plaster"},
+    {"id":3,"type":"box","min":[-8,-8,0],"max":[392,0,120],"tex":"office/plaster"},
+    {"id":4,"type":"box","min":[-8,384,0],"max":[392,392,120],"tex":"office/plaster"},
+    {"id":5,"type":"box","min":[-8,0,0],"max":[0,384,120],"tex":"office/plaster"},
+    {"id":6,"type":"box","min":[384,0,0],"max":[392,384,120],"tex":"office/plaster"}
+  ],
+  "entities": [
+    {"id":1,"class":"player_start","origin":[192,48,0],"angles":[0,90,0]},
+    {"id":1001,"class":"light","origin":[192,192,116],"props":{"type":"bulb","lumens":1600,"kelvin":3500}}
+  ]
+}

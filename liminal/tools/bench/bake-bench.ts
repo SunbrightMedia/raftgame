@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { parseMap } from '../../src/data/map';
 import { buildFaces, layoutLightmap, solidPlanes } from '../../src/engine/light/faces';
 import { bake } from '../../src/engine/light/bake';
-const map = parseMap(JSON.parse(readFileSync(new URL('../../maps/test_room.json', import.meta.url), 'utf8')));
+const map = parseMap(JSON.parse(readFileSync(new URL('../../junk/maps/test_room.json', import.meta.url), 'utf8')));
 const faces = buildFaces(map.brushes);
 for (const lux of [16, 32]) for (const bounces of [0, 1]) {
   const lay = layoutLightmap(faces, lux);

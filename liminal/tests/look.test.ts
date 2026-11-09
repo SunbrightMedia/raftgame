@@ -93,7 +93,7 @@ describe('texture crusher', () => {
 describe.each(['test_room', 'pmp_basement', 'mall_hall', 'pmp_nook', 'rec_room', 'laquinta', 'industrial'])('map %s', (name) => {
   it('has no overlapping coplanar box faces (they z-fight and flicker)', async () => {
     const { readFileSync } = await import('node:fs');
-    const map = JSON.parse(readFileSync(new URL(`../maps/${name}.json`, import.meta.url), 'utf8'));
+    const map = JSON.parse(readFileSync(new URL(`../junk/maps/${name}.json`, import.meta.url), 'utf8'));
     const solids = map.brushes.filter((b: BrushDef) => b.solid !== false && b.type === 'box') as BrushDef[];
     const bad: string[] = [];
     for (let i = 0; i < solids.length; i++) for (let j = i + 1; j < solids.length; j++) {

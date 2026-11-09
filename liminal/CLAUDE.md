@@ -48,6 +48,8 @@ it *feels* right; that's the user's call.
   ignored (the game bakes a quick preview, then the full bake, and saves it).
 - **Shared walls get each room's paint.** A wall brush between two rooms has
   two sides; never give it one texture. Declare the map's rooms (extent +
-  wall paint, like `tools/lib/pmpRooms.ts`) and run `paintByRoom()`
+  wall paint, like `junk/tools/lib/pmpRooms.ts`) and run `paintByRoom()`
   (`tools/lib/roomPaint.ts`) before writing the map; add the map to
   `tests/room-paint.test.ts`.
+- **The old maps are in `junk/`** (kept, not used). Work follows
+  `docs/PIPELINE.md`; the game boots into `maps/blank.json` meanwhile.

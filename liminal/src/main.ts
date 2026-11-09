@@ -6,7 +6,7 @@ import { Game } from './game/game';
 import { DebugPanel } from './ui/debugPanel';
 import { Hud } from './ui/hud';
 
-const DEFAULT_MAP = 'maps/pmp_basement.json';
+const DEFAULT_MAP = 'maps/blank.json';
 
 /** Milliseconds since boot start at each step (window.liminal.bootTimes). */
 const bootTimes: Record<string, number> = {};

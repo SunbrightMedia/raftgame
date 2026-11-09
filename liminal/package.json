@@ -9,17 +9,10 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "preview": "vite preview",
-    "gen:testmap": "vite-node tools/gen-test-map.ts",
     "build:page": "vite build --mode page && node tools/make-page.mjs",
     "bench:bake": "vite-node tools/bench/bake-bench.ts",
-    "fetch:textures": "python3 tools/fetch_textures.py",
-    "gen:pmp": "vite-node tools/gen-pmp-basement.ts",
-    "gen:mall": "vite-node tools/gen-mall.ts",
-    "gen:flatgrass": "vite-node tools/gen-flatgrass.ts",
-    "gen:nook": "vite-node tools/gen-nook.ts",
-    "gen:rec": "vite-node tools/gen-rec-room.ts",
-    "gen:laquinta": "vite-node tools/gen-laquinta.ts",
-    "gen:industrial": "vite-node tools/gen-industrial.ts"
+    "gen:blank": "vite-node tools/gen-blank.ts",
+    "fetch:textures": "python3 tools/fetch_textures.py"
   },
   "dependencies": {
     "three": "^0.187.0"

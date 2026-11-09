@@ -154,7 +154,7 @@ describe('crouch', () => {
 
 describe('test map', () => {
   it('parses, and the player start is not inside a brush', () => {
-    const map = parseMap(JSON.parse(readFileSync(new URL('../maps/test_room.json', import.meta.url), 'utf8')));
+    const map = parseMap(JSON.parse(readFileSync(new URL('../junk/maps/test_room.json', import.meta.url), 'utf8')));
     const world = new CollisionWorld(map.brushes.filter((b) => b.solid !== false).map((b) => boxBrush(b.id, v3(...b.min), v3(...b.max))));
     const s = map.entities.find((e) => e.class === 'player_start')!;
     // Spawns sit on the floor; the game lifts the player until the hull fits. Make sure that's ~1 unit, not a wall.
