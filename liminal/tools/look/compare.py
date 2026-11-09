@@ -13,6 +13,8 @@ Reports, for each image and the difference between them:
     differ (same framing assumed).
 The summary lists the biggest differences first, as plain statements.
 --fast skips the models (levels only). Models download on first use.
+`compare.py serve` keeps the models loaded and answers on 127.0.0.1:5192
+(the studio's compare command starts and uses it).
 """
 import argparse, json, sys
 import numpy as np
@@ -89,7 +91,8 @@ def regions(im: Image.Image, labels: list[str], box_thr=0.25, text_thr=0.2) -> d
     import torch
     proc, gd = model('gdino')
     text = '. '.join(labels) + '.'
-    inp = proc(images=im, text=text, return_tensors='pt')
+    # Detection doesn't need full resolution: 480 px on the short side is ~3x faster on CPU than the default 800.
+    inp = proc(images=im, text=text, return_tensors='pt', size={'shortest_edge': 480, 'longest_edge': 800})
     with torch.no_grad():
         out = gd(**inp)
     res = proc.post_process_grounded_object_detection(out, inp.input_ids, threshold=box_thr, text_threshold=text_thr, target_sizes=[im.size[::-1]])[0]
@@ -116,6 +119,18 @@ def regions(im: Image.Image, labels: list[str], box_thr=0.25, text_thr=0.2) -> d
         masks[lab][take] = True
         best[take] = s
     return masks
+
+
+_ref_cache: dict = {}
+
+
+def cached_regions(path: str, im: Image.Image, labels: list[str]) -> dict[str, np.ndarray]:
+    """References don't change between comparisons: segment each one once per (file, mtime, labels)."""
+    import os
+    key = (os.path.abspath(path), os.path.getmtime(path), tuple(labels), im.size)
+    if key not in _ref_cache:
+        _ref_cache[key] = regions(im, labels)
+    return _ref_cache[key]
 
 
 def dino_similarity(a: Image.Image, b: Image.Image):
@@ -200,22 +215,16 @@ def draw_report(ref_im, ren_im, masks_ref, masks_ren, simmap, ref_lab, ren_lab, 
     canvas.save(path)
 
 
-def main():
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('ref'); ap.add_argument('render')
-    ap.add_argument('--regions', default='ceiling,floor,wall,light fixture,door')
-    ap.add_argument('--out', default='look_report.png'); ap.add_argument('--json', default=None)
-    ap.add_argument('--fast', action='store_true', help='levels only, no models')
-    a = ap.parse_args()
-    ref_im = load(a.ref)
-    ren_im = load(a.render, ref_im.width / ref_im.height).resize(ref_im.size, Image.LANCZOS)
+def run(ref: str, render: str, out: str = 'look_report.png', json_path: str | None = None, regions_arg: str = 'ceiling,floor,wall,light fixture,door', fast: bool = False) -> dict:
+    ref_im = load(ref)
+    ren_im = load(render, ref_im.width / ref_im.height).resize(ref_im.size, Image.LANCZOS)
     ref_lab, ren_lab = srgb_to_lab(np.asarray(ref_im)), srgb_to_lab(np.asarray(ren_im))
     result = {'reference': levels(ref_lab), 'render': levels(ren_lab), 'regions': {}}
     masks_ref = masks_ren = None
     simmap = None
-    if not a.fast:
-        labels = [s.strip() for s in a.regions.split(',') if s.strip()]
-        masks_ref, masks_ren = regions(ref_im, labels), regions(ren_im, labels)
+    if not fast:
+        labels = [s.strip() for s in regions_arg.split(',') if s.strip()]
+        masks_ref, masks_ren = cached_regions(ref, ref_im, labels), regions(ren_im, labels)
         for l in labels:
             result['regions'][l] = [
                 {**levels(ref_lab, masks_ref[l]), 'area_pct': float(masks_ref[l].mean() * 100)} if masks_ref[l].any() else {},
@@ -232,10 +241,46 @@ def main():
             continue
         lines.append(f"region {l}: area ref {r.get('area_pct', 0):.0f}% / render {n.get('area_pct', 0):.0f}%")
     result['summary'] = lines
-    draw_report(ref_im, ren_im, masks_ref, masks_ren, simmap, ref_lab, ren_lab, lines[:24], a.out)
-    if a.json:
-        json.dump(result, open(a.json, 'w'), indent=1, default=float)
-    print('\n'.join(lines) if lines else 'no notable differences')
+    result['report'] = out
+    draw_report(ref_im, ren_im, masks_ref, masks_ren, simmap, ref_lab, ren_lab, lines[:24], out)
+    if json_path:
+        json.dump(result, open(json_path, 'w'), indent=1, default=float)
+    return result
+
+
+def serve(port: int = 5192):
+    """Keep the models loaded and answer POST {ref, render, out, json, regions, fast} with the result."""
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+    for k in ('gdino', 'sam', 'dino'):
+        model(k)
+
+    class H(BaseHTTPRequestHandler):
+        def do_POST(self):
+            try:
+                a = json.loads(self.rfile.read(int(self.headers.get('content-length', 0))) or b'{}')
+                r = run(a['ref'], a['render'], a.get('out', 'look_report.png'), a.get('json'), a.get('regions') or 'ceiling,floor,wall,light fixture,door', bool(a.get('fast')))
+                body, code = json.dumps({'ok': True, 'summary': r['summary'], 'report': r['report']}, default=float), 200
+            except Exception as e:  # report, keep serving
+                body, code = json.dumps({'ok': False, 'error': repr(e)}), 500
+            self.send_response(code); self.send_header('content-type', 'application/json'); self.end_headers(); self.wfile.write(body.encode())
+
+        def log_message(self, *a):
+            pass
+    print(f'look server ready on {port}', flush=True)
+    HTTPServer(('127.0.0.1', port), H).serve_forever()
+
+
+def main():
+    if len(sys.argv) > 1 and sys.argv[1] == 'serve':
+        return serve()
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument('ref'); ap.add_argument('render')
+    ap.add_argument('--regions', default='ceiling,floor,wall,light fixture,door')
+    ap.add_argument('--out', default='look_report.png'); ap.add_argument('--json', default=None)
+    ap.add_argument('--fast', action='store_true', help='levels only, no models')
+    a = ap.parse_args()
+    r = run(a.ref, a.render, a.out, a.json, a.regions, a.fast)
+    print('\n'.join(r['summary']) if r['summary'] else 'no notable differences')
     print(f'report: {a.out}')
 
 

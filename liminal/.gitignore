@@ -2,3 +2,5 @@ node_modules/
 dist/
 dist-page/
 .venv-look/
+.studio.log
+.look.log
