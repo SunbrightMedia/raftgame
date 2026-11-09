@@ -44,10 +44,12 @@ export class Game {
     this.renderer = new LowResRenderer(canvas);
     this.lighting = new Lighting(storage);
     this.input = new Input(canvas);
-    this.lighting.onBaked = (layout, tex) => {
+    this.lighting.onBaked = (layout, tex, dir) => {
       if (!this.level) return;
       this.level.setLightmap(layout, tex);
+      worldUniforms.lightmapDir.value?.dispose();
       worldUniforms.lightmap.value = tex;
+      worldUniforms.lightmapDir.value = dir;
       this.updateLightUniforms(this.settings);
     };
   }
@@ -172,6 +174,11 @@ export class Game {
     this.updateSky(s);
     worldUniforms.roughnessAdd.value = s.surface.roughness;
     worldUniforms.bumpScale.value = s.surface.bump;
+    worldUniforms.parallaxScale.value = s.surface.parallax;
+    worldUniforms.bakedRelief.value = s.surface.bakedRelief;
+    worldUniforms.cavityScale.value = s.surface.cavity;
+    worldUniforms.sheenScale.value = s.surface.sheen;
+    worldUniforms.detailScale.value = s.surface.detail;
     this.input.rawInput = s.view.rawInput;
   }
 

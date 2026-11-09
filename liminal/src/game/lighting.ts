@@ -10,14 +10,14 @@ import type { Storage } from '../data/storage';
 
 
 /** Bump when the baker's output changes meaning, so old caches are ignored. */
-const BAKE_VERSION = 6;
+const BAKE_VERSION = 7;
 
 /**
  * Cached lightmap: RGBE (Ward's shared-exponent format, as in Radiance .hdr)
  * at 4 bytes per texel, deflated, base64. Lighting is smooth, so this is
  * ~10–20× smaller than raw half floats.
  */
-interface LightmapCache { format: 'liminal-lightmap'; version: number; encoding: 'rgbe-deflate'; key: string; width: number; height: number; luxel: number; data: string }
+interface LightmapCache { format: 'liminal-lightmap'; version: number; encoding: 'rgbe-deflate'; key: string; width: number; height: number; luxel: number; data: string; /** Light direction per texel, RGBA8 deflated (see BakeOutput.dirPixels). */ dir?: string }
 
 /** FNV-1a, enough to tell whether a map or its lighting settings changed. */
 function hash(text: string): string {
@@ -37,6 +37,16 @@ const fromBase64 = (b64: string) => {
   for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
   return bytes;
 };
+
+/** Light direction (unit xyz, directionality w) → RGBA8: xyz·0.5+0.5, w. */
+function encodeDir(px: Float32Array): Uint8Array {
+  const out = new Uint8Array(px.length);
+  for (let i = 0; i < px.length; i += 4) {
+    for (let c = 0; c < 3; c++) out[i + c] = Math.round(Math.max(0, Math.min(1, px[i + c] * 0.5 + 0.5)) * 255);
+    out[i + 3] = Math.round(Math.max(0, Math.min(1, px[i + 3])) * 255);
+  }
+  return out;
+}
 
 /** RGBA floats → 5 bytes per texel: RGBE irradiance + the 0..1 shadow fraction. */
 function encodeRGBE(px: Float32Array): Uint8Array {
@@ -105,7 +115,7 @@ export class Lighting {
   private timer: number | undefined;
   private lastKey = '';
   status = 'not baked';
-  onBaked: ((layout: LightmapLayout, tex: THREE.DataTexture) => void) | null = null;
+  onBaked: ((layout: LightmapLayout, tex: THREE.DataTexture, dir: THREE.DataTexture) => void) | null = null;
 
   constructor(private storage: Storage) {}
 
@@ -150,11 +160,12 @@ export class Lighting {
         const text = await this.storage.read(this.cachePath(level));
         const c = text ? (JSON.parse(text) as LightmapCache) : null;
         if (gen !== this.seq) return;
-        if (c && c.key === key && c.encoding === 'rgbe-deflate' && c.width === layout.width && c.height === layout.height) {
+        if (c && c.key === key && c.encoding === 'rgbe-deflate' && c.dir && c.width === layout.width && c.height === layout.height) {
           const t0 = performance.now();
           const half = decodeRGBEToHalf(await pipe(fromBase64(c.data), new DecompressionStream('deflate-raw')));
+          const dir = await pipe(fromBase64(c.dir), new DecompressionStream('deflate-raw'));
           if (gen !== this.seq) return;
-          this.apply(layout, half, L.filter);
+          this.apply(layout, half, L.filter, dir);
           this.status = `lighting loaded from cache (${Math.round(performance.now() - t0)} ms)`;
           this.shownAt = performance.now();
           return;
@@ -176,23 +187,24 @@ export class Lighting {
       const out = e.data.out;
       const half = new Uint16Array(out.pixels.length);
       for (let i = 0; i < half.length; i++) half[i] = THREE.DataUtils.toHalfFloat(Math.min(65000, out.pixels[i]));
+      const dir = encodeDir(out.dirPixels);
       if (e.data.id === 0) {
         if (fullDone) return;
-        this.apply(quickLayout, half, L.filter);
+        this.apply(quickLayout, half, L.filter, dir);
         this.status = `preview lighting (${out.ms} ms), full bake running…`;
         this.shownAt ||= performance.now();
         return;
       }
       fullDone = true;
-      this.apply(layout, half, L.filter);
+      this.apply(layout, half, L.filter, dir);
       this.status = `baked ${out.luxels.toLocaleString()} luxels, ${out.lights} lights in ${out.ms} ms`;
       this.shownAt ||= performance.now();
       this.worker?.terminate();
       this.worker = null;
       // Save wherever this build saves files (map folder on the dev server, the
       // artifact's db, localStorage), so the same map + settings never bakes twice.
-      void pipe(encodeRGBE(out.pixels), new CompressionStream('deflate-raw')).then((z) => {
-        const cache: LightmapCache = { format: 'liminal-lightmap', version: BAKE_VERSION, encoding: 'rgbe-deflate', key, width: out.width, height: out.height, luxel: L.luxelSize, data: toBase64(z) };
+      void Promise.all([pipe(encodeRGBE(out.pixels), new CompressionStream('deflate-raw')), pipe(dir, new CompressionStream('deflate-raw'))]).then(([z, zd]) => {
+        const cache: LightmapCache = { format: 'liminal-lightmap', version: BAKE_VERSION, encoding: 'rgbe-deflate', key, width: out.width, height: out.height, luxel: L.luxelSize, data: toBase64(z), dir: toBase64(zd) };
         return this.storage.write(this.cachePath(level), JSON.stringify(cache));
       }).then(() => { if (gen === this.seq) this.status += ' · cached'; }, (e) => console.warn('lightmap cache not saved', e));
     };
@@ -201,14 +213,20 @@ export class Lighting {
     this.worker.postMessage({ id: 1, input: full });
   }
 
-  private apply(layout: LightmapLayout, half: Uint16Array, filter: string): void {
+  private apply(layout: LightmapLayout, half: Uint16Array, filter: string, dir: Uint8Array): void {
     // Irradiance in lux, linear: half-float keeps the range and filters on every WebGL2 GPU.
     const tex = new THREE.DataTexture(half, layout.width, layout.height, THREE.RGBAFormat, THREE.HalfFloatType);
     tex.colorSpace = THREE.NoColorSpace;
     tex.magFilter = tex.minFilter = filter === 'nearest' ? THREE.NearestFilter : THREE.LinearFilter;
     tex.generateMipmaps = false;
     tex.needsUpdate = true;
-    this.onBaked?.(layout, tex);
+    // Light direction: smooth, so 8 bits and linear filtering are plenty.
+    const dtex = new THREE.DataTexture(dir, layout.width, layout.height, THREE.RGBAFormat, THREE.UnsignedByteType);
+    dtex.colorSpace = THREE.NoColorSpace;
+    dtex.magFilter = dtex.minFilter = THREE.LinearFilter;
+    dtex.generateMipmaps = false;
+    dtex.needsUpdate = true;
+    this.onBaked?.(layout, tex, dtex);
   }
 
   private buildInput(level: Level, s: Settings, textures: TextureRegistry, layout: LightmapLayout, over: Partial<{ bounces: number; bounceSamples: number }>): BakeInput {

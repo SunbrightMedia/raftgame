@@ -22,6 +22,9 @@ export const worldUniforms = {
   fogHaze: { value: 0 },
   tileBreakup: { value: 0 },
   lightmap: { value: null as THREE.Texture | null },
+  /** Where the baked light comes from (lighting.ts / bake.ts dirPixels): xyz·0.5+0.5, directionality. */
+  lightmapDir: { value: null as THREE.Texture | null },
+  bakedRelief: { value: 1 },
   lightmapOn: { value: 0 },
   // On-camera light riding just above the lens (candela, linear colour).
   flashOn: { value: 0 },
@@ -41,6 +44,11 @@ export const worldUniforms = {
   specScale: { value: 1 },
   bumpScale: { value: 1 },
   roughnessAdd: { value: 0 },
+  // Surface depth: parallax, crevice darkening, fibre sheen, close-up detail (all ×, 1 = as authored).
+  parallaxScale: { value: 1 },
+  cavityScale: { value: 1 },
+  sheenScale: { value: 1 },
+  detailScale: { value: 1 },
   ltc1: { value: (RectAreaLightTexturesLib as unknown as Record<string, THREE.Texture>).LTC_HALF_1 },
   ltc2: { value: (RectAreaLightTexturesLib as unknown as Record<string, THREE.Texture>).LTC_HALF_2 },
   // Light-emitting rectangles: 4 texels per row (centre, half-width, half-height, luminance rgb).
@@ -63,12 +71,17 @@ export const worldUniforms = {
  *       analytic environment BRDF, so grazing views pick up Fresnel sheen.
  *   Shadowing of reflections uses the lightmap's alpha (how much of the
  *   per-pixel and rectangle lights' direct light reaches this spot).
- * Relief: the texture's own luminance is read as a height field and bends
- * the normal (bump mapping) for everything computed per pixel.
+ * Relief: each texture has a height field built from its fine detail
+ * (textures.ts makeHeightCanvas). It drives parallax occlusion mapping (the
+ * texture shifts with the view as if grout and pile were sunk in: a ray march
+ * through the height field), bends the normal for everything computed per
+ * pixel, darkens crevices, and adds close-up detail. Per material
+ * (textures/surfaces.json): depth, gloss (how much specular shows), fibre
+ * sheen at grazing angles, crevice darkening.
  * Light sources output their own luminance instead (cd/m²).
  * The camera pass (digicam.ts) then exposes and encodes to sRGB.
  */
-export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { luminance: number; color: [number, number, number]; anim?: 'static' }): THREE.ShaderMaterial {
+export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { luminance: number; color: [number, number, number]; anim?: 'static' }, height?: THREE.Texture): THREE.ShaderMaterial {
   const src = source ? new THREE.Vector3(...source.color).multiplyScalar(source.luminance) : new THREE.Vector3();
   const img = map.image as { width?: number; height?: number } | undefined;
   return new THREE.ShaderMaterial({
@@ -76,7 +89,9 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
       ...worldUniforms,
       map: { value: map },
       texSize: { value: new THREE.Vector2(img?.width ?? 64, img?.height ?? 64) },
-      surf: { value: new THREE.Vector4(surf.roughness, surf.f0, surf.metal, surf.bump) },
+      surf: { value: new THREE.Vector4(surf.roughness, surf.f0, surf.metal, height ? surf.bump : 0) },
+      surf2: { value: new THREE.Vector4(surf.gloss, surf.sheen, surf.cavity, 0) },
+      hmap: { value: height ?? map },
       isSource: { value: source ? 1 : 0 },
       isStatic: { value: source?.anim === 'static' ? 1 : 0 },
       sourceLum: { value: src },
@@ -111,7 +126,15 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
       uniform sampler2D map;
       uniform vec2 texSize;
       uniform vec4 surf;
+      uniform vec4 surf2;
+      uniform sampler2D hmap;
+      uniform float parallaxScale;
+      uniform float cavityScale;
+      uniform float sheenScale;
+      uniform float detailScale;
       uniform sampler2D lightmap;
+      uniform sampler2D lightmapDir;
+      uniform float bakedRelief;
       uniform float lightmapOn;
       uniform float faceShade;
       uniform float brightness;
@@ -159,7 +182,7 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
         return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
       }
       vec3 toLinear(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }
-      float height(vec2 uv) { return dot(texture2D(map, uv).rgb, vec3(0.299, 0.587, 0.114)); }
+      float height(vec2 uv) { return texture2D(hmap, uv).r; }
 
       // ---- GGX (Walter et al. 2007; height-correlated Smith, Heitz 2014)
       float D_GGX(float a, float ndh) { float a2 = a * a; float d = ndh * ndh * (a2 - 1.0) + 1.0; return a2 / (PI * d * d); }
@@ -213,7 +236,38 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
       }
 
       void main() {
-        vec3 rho = toLinear(texture2D(map, vUv).rgb);
+        vec3 n0 = normalize(vNormal);
+        vec3 V = normalize(cameraPosition - vWorld);
+        vec2 uv = vUv;
+        vec2 gx = dFdx(vUv), gy = dFdy(vUv);
+        float depth = surf.w * bumpScale;
+        float nearF = 1.0 - smoothstep(240.0, 900.0, vDepth);   // parallax and detail fade out with distance
+        // Parallax occlusion mapping: march the view ray down through the height
+        // field (1 = top surface) until it goes under it, then interpolate.
+        if (isSource < 0.5 && depth > 0.0 && parallaxScale > 0.0 && nearF > 0.0) {
+          float ndv0 = max(dot(n0, V), 0.25);
+          vec3 Vt = V - n0 * dot(V, n0);
+          vec2 shift = vec2(dot(Vt, vGu), dot(Vt, vGv)) / ndv0 * depth * parallaxScale * nearF;
+          const int STEPS = 20;
+          float t = 0.0, prevT = 0.0;
+          float prevD = -(1.0 - textureGrad(hmap, uv, gx, gy).r);
+          if (prevD < 0.0) {
+            for (int i = 1; i <= STEPS; i++) {
+              t = float(i) / float(STEPS);
+              float d = t - (1.0 - textureGrad(hmap, uv - shift * t, gx, gy).r);
+              if (d >= 0.0) { t = mix(prevT, t, prevD / (prevD - d)); break; }
+              prevT = t; prevD = d;
+            }
+          } else t = 0.0;
+          uv -= shift * t;
+        }
+        vec3 rho = toLinear(textureGrad(map, uv, gx, gy).rgb);
+        float hgt = textureGrad(hmap, uv, gx, gy).r;
+        // Close up, the texture's own grain again at a finer scale, so near surfaces aren't a stretched photo.
+        if (isSource < 0.5 && detailScale > 0.0 && surf.w > 0.0) {
+          float dn = 1.0 - smoothstep(48.0, 200.0, vDepth);
+          if (dn > 0.0) rho *= 1.0 + detailScale * dn * 0.35 * (texture2D(hmap, uv * 3.71 + 0.37).r - 0.5);
+        }
         // Large-scale variation in world space, so a texture's repeats don't line up into a visible grid.
         if (tileBreakup > 0.0) {
           vec2 wp = vWorld.xy + vWorld.z * 0.7;
@@ -238,28 +292,45 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
           L = rho * sourceLum;
           L *= min(1.0, 30000.0 / max(1e-6, max(L.r, max(L.g, L.b))));
         } else {
-          vec3 n0 = normalize(vNormal);
-          // Relief from the texture: height gradient in texture space → world.
+          // Relief from the height field: its gradient in texture space → world.
           vec3 N = n0;
-          float bump = surf.w * bumpScale;
+          float bump = depth;
           if (bump > 0.0) {
             vec2 d = 1.0 / texSize;
-            float dhu = (height(vUv + vec2(d.x, 0.0)) - height(vUv - vec2(d.x, 0.0))) / (2.0 * d.x);
-            float dhv = (height(vUv + vec2(0.0, d.y)) - height(vUv - vec2(0.0, d.y))) / (2.0 * d.y);
+            float dhu = (height(uv + vec2(d.x, 0.0)) - height(uv - vec2(d.x, 0.0))) / (2.0 * d.x);
+            float dhv = (height(uv + vec2(0.0, d.y)) - height(uv - vec2(0.0, d.y))) / (2.0 * d.y);
             N = normalize(n0 - bump * (dhu * vGu + dhv * vGv));
           }
+          // Crevices (grout, between tufts) get less light, tops a little more: average kept.
+          float occl = surf.w > 0.0 ? max(0.05, 1.0 + surf2.z * cavityScale * (0.33 - (1.0 - hgt) * (1.0 - hgt))) : 1.0;
+          float gloss = surf2.x * specScale;
           float rough = clamp(surf.x + roughnessAdd, 0.04, 1.0);
           float metal = surf.z;
           vec3 F0 = mix(vec3(surf.y), rho, metal);
           // With reflections off, metals fall back to their albedo as a matte colour (else they'd be black).
-          vec3 diffuseColor = rho * (1.0 - metal * min(1.0, specScale));
-          vec3 V = normalize(cameraPosition - vWorld);
+          vec3 diffuseColor = rho * (1.0 - metal * min(1.0, gloss));
           float ndv = max(dot(N, V), 1e-4);
+          // Fibre sheen (carpet, fabric): pile seen edge-on catches light: soft, view-dependent brightening.
+          float sheenK = 1.0 + surf2.y * sheenScale * 0.8 * pow(1.0 - ndv, 4.0);
+          diffuseColor *= occl * sheenK;
 
           vec4 lm = texture2D(lightmap, vLm);
           vec3 E = lightmapOn > 0.5 ? lm.rgb : vec3(300.0 * mix(1.0, vShade, faceShade));
+          // The baked light shaded with this pixel's bumped normal: Lambert's ratio
+          // for the directional part (towards where the light comes from), the
+          // even part unchanged. So relief shows under baked lamps and panels too.
+          if (lightmapOn > 0.5 && bump > 0.0 && bakedRelief > 0.0) {
+            vec4 ld = texture2D(lightmapDir, vLm);
+            vec3 dd = ld.xyz * 2.0 - 1.0;
+            float dl = length(dd);
+            if (dl > 0.1) {
+              dd /= dl;
+              float ratio = clamp(max(dot(N, dd), 0.0) / max(dot(n0, dd), 0.2), 0.0, 2.5);
+              E *= mix(1.0, ratio, ld.w * bakedRelief);
+            }
+          }
           vec3 spec = vec3(0.0);
-          vec3 env = envBRDF(F0, rough, ndv) * specScale;
+          vec3 env = envBRDF(F0, rough, ndv) * gloss;
           // Baked light reflected: diffuse loses what the surface reflects specularly.
           vec3 Lbaked = E / PI * (diffuseColor * (1.0 - env) + env);
           vec3 Edyn = vec3(0.0);
@@ -317,7 +388,7 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
             Edyn += Ef * ndl;
             spec += Ef * specPoint(N, V, u, ndl, F0, rough, 1.0 / max(d, 1.0));
           }
-          L = (Lbaked + Edyn / PI * diffuseColor * (1.0 - env) + spec * specScale) * brightness;
+          L = (Lbaked + Edyn / PI * diffuseColor * (1.0 - env) + spec * gloss * occl) * brightness;
         }
         // Linear fog, or haze: exponential like real aerial perspective (95% by fogFar).
         float fd = max(0.0, vDepth - fogNear) / max(1.0, fogFar - fogNear);

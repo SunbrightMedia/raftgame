@@ -6,17 +6,25 @@ export interface Surface {
   f0: number;
   /** 1 = metal: reflection tinted by the albedo, no diffuse. */
   metal: number;
-  /** Relief height in inches, from the texture's luminance. */
+  /** Relief depth in inches: bump shading and parallax both use it. */
   bump: number;
+  /** Size of the detail read as relief, in inches (pile ~0.25, grout ~1). */
+  relief: number;
+  /** How much specular reflection this material shows (×, on top of the global slider). */
+  gloss: number;
+  /** Fibre sheen at grazing angles (carpet, fabric): soft brightening, not a mirror. */
+  sheen: number;
+  /** Darkening of the deepest crevices (grout, between pile tufts), 0..1. */
+  cavity: number;
 }
 
 interface SurfaceFile { materials: Record<string, Surface>; textures?: Record<string, Partial<Surface>> }
 
 const files = import.meta.glob('../../../textures/surfaces.json', { eager: true, import: 'default' }) as Record<string, SurfaceFile>;
 const data: SurfaceFile = Object.values(files)[0] ?? { materials: {} };
-const FALLBACK: Surface = { roughness: 0.7, f0: 0.04, metal: 0, bump: 0.03 };
+const FALLBACK: Surface = { roughness: 0.7, f0: 0.04, metal: 0, bump: 0.04, relief: 0.4, gloss: 0, sheen: 0, cavity: 0.3 };
 
 export function surfaceFor(texName: string, material: string): Surface {
   const base = data.materials[material] ?? data.materials.default ?? FALLBACK;
-  return { ...base, ...(data.textures?.[texName] ?? {}) };
+  return { ...FALLBACK, ...base, ...(data.textures?.[texName] ?? {}) };
 }

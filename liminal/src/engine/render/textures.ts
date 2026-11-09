@@ -12,6 +12,62 @@ export interface TexEntry {
   emissive?: TexImage['emissive'];
   /** Average LINEAR reflectance after crushing, 0..1: used for bounce light. */
   albedo: [number, number, number];
+  /** Height field for relief and parallax (1 = top of the surface), built lazily. */
+  height?: THREE.Texture;
+}
+
+/**
+ * A height field from a texture's own fine detail: luminance minus its local
+ * average (radius `radiusIn` inches), normalised by local contrast, so pile,
+ * grout and plaster peel read as relief while a carpet's big printed pattern
+ * (dark navy next to cream, at the same pile height) doesn't turn into holes.
+ * Edges wrap, so the height field tiles like the texture.
+ */
+export function makeHeightCanvas(src: HTMLCanvasElement, worldW: number, radiusIn: number): HTMLCanvasElement {
+  const w = src.width, h = src.height;
+  const d = src.getContext('2d', { willReadFrequently: true })!.getImageData(0, 0, w, h).data;
+  const L = new Float32Array(w * h);
+  for (let i = 0; i < w * h; i++) L[i] = (0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2]) / 255;
+  const r = Math.max(1, Math.round((radiusIn * w) / Math.max(1, worldW)));
+  const blur = (a: Float32Array, rad: number): Float32Array => {   // two passes of a wrapped box blur ≈ gaussian
+    let cur = a;
+    for (let pass = 0; pass < 2; pass++) {
+      const t = new Float32Array(w * h), o = new Float32Array(w * h), n = 2 * rad + 1;
+      for (let y = 0; y < h; y++) {
+        let acc = 0;
+        for (let k = -rad; k <= rad; k++) acc += cur[y * w + ((k % w) + w) % w];
+        for (let x = 0; x < w; x++) {
+          t[y * w + x] = acc / n;
+          acc += cur[y * w + (x + rad + 1) % w] - cur[y * w + ((x - rad) % w + w) % w];
+        }
+      }
+      for (let x = 0; x < w; x++) {
+        let acc = 0;
+        for (let k = -rad; k <= rad; k++) acc += t[(((k % h) + h) % h) * w + x];
+        for (let y = 0; y < h; y++) {
+          o[y * w + x] = acc / n;
+          acc += t[((y + rad + 1) % h) * w + x] - t[(((y - rad) % h + h) % h) * w + x];
+        }
+      }
+      cur = o;
+    }
+    return cur;
+  };
+  const low = blur(L, r);
+  const hp = new Float32Array(w * h), sq = new Float32Array(w * h);
+  for (let i = 0; i < w * h; i++) { hp[i] = L[i] - low[i]; sq[i] = hp[i] * hp[i]; }
+  const varc = blur(sq, r * 2);
+  const out = document.createElement('canvas');
+  out.width = w; out.height = h;
+  const g = out.getContext('2d')!;
+  const img = g.createImageData(w, h);
+  for (let i = 0; i < w * h; i++) {
+    const v = 0.5 + 0.5 * Math.max(-1, Math.min(1, hp[i] / (2.2 * (Math.sqrt(varc[i]) + 0.015))));
+    const b = Math.round(v * 255);
+    img.data[i * 4] = img.data[i * 4 + 1] = img.data[i * 4 + 2] = b; img.data[i * 4 + 3] = 255;
+  }
+  g.putImageData(img, 0, 0);
+  return out;
 }
 
 interface Source {
@@ -103,6 +159,7 @@ export class TextureRegistry {
         // Unlisted files: 1 pixel = 1 unit.
         if (!src.worldW) { src.worldW = img.naturalWidth; src.worldH = img.naturalHeight; }
         this.entries.get(n)?.texture.dispose();
+        this.entries.get(n)?.height?.dispose();
         this.entries.delete(n);
       } catch (e) {
         console.warn(`texture ${n} failed to load`, e);
@@ -128,6 +185,21 @@ export class TextureRegistry {
     return e;
   }
 
+  /** The height field for a texture (relief radius in inches from its material). */
+  heightOf(name: string, radiusIn: number): THREE.Texture {
+    const e = this.get(name);
+    if (!e.height) {
+      const t = new THREE.CanvasTexture(makeHeightCanvas(e.texture.image as HTMLCanvasElement, e.worldW, radiusIn));
+      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      t.colorSpace = THREE.NoColorSpace;
+      t.anisotropy = 16;
+      t.magFilter = THREE.LinearFilter;
+      t.minFilter = THREE.LinearMipmapLinearFilter;
+      e.height = t;
+    }
+    return e.height;
+  }
+
   /** Re-crush every texture with new parameters. Returns true if anything changed. */
   setCrush(p: CrushParams, filter: 'nearest' | 'linear'): boolean {
     const same = this.params && JSON.stringify(this.params) === JSON.stringify(p) && filter === this.filter;
@@ -135,7 +207,7 @@ export class TextureRegistry {
     this.params = { ...p };
     this.filter = filter;
     const names = [...this.entries.keys()];
-    for (const e of this.entries.values()) e.texture.dispose();
+    for (const e of this.entries.values()) { e.texture.dispose(); e.height?.dispose(); }
     this.entries.clear();
     this.sharedPalette = null;
     for (const n of names) this.get(n);
@@ -172,7 +244,7 @@ export class TextureRegistry {
     t.anisotropy = 16;
     t.magFilter = base.texture.magFilter;
     t.minFilter = THREE.LinearMipmapLinearFilter;
-    return { ...base, name: v.name, texture: t, albedo: averageLinear(d) };
+    return { ...base, name: v.name, texture: t, albedo: averageLinear(d), height: undefined };
   }
 
   private build(src: Source, name: string): TexEntry {

@@ -108,9 +108,14 @@ export const SETTINGS = {
     label: 'Surfaces & reflections',
     help: 'How surfaces reflect light (per material in textures/surfaces.json). Reflections of lamps and light panels, Fresnel sheen at grazing angles, relief from each texture.',
     defs: {
-      reflections: num('Reflections ×', 0, 0, 3, 0.01, '1 = physical. 0 = every surface fully matte (the old look).'),
+      reflections: num('Reflections ×', 1, 0, 3, 0.01, 'Scales every material\'s own gloss (surfaces.json): tile, vinyl and wood shine; paint and carpet stay matte. 0 = all matte.'),
       roughness: num('Roughness +', 0, -0.5, 0.5, 0.01, 'Added to every material\'s roughness. Negative = glossier everywhere.'),
-      bump: num('Relief ×', 1, 0, 4, 0.05, 'Scales the bump relief read from textures. 0 = flat.'),
+      bump: num('Relief ×', 1, 0, 4, 0.05, 'Scales each material\'s relief depth (bump shading and parallax). 0 = flat.'),
+      bakedRelief: num('Relief under baked light', 1, 0, 1, 0.01, 'Baked lamps and panels light the relief from where they actually are (directional lightmap). 0 = baked light ignores relief.'),
+      parallax: num('Parallax ×', 1, 0, 3, 0.05, 'Surfaces shift with the view as if they had depth: grout sinks in, carpet pile looks thick.'),
+      cavity: num('Crevice shading ×', 1, 0, 2, 0.05, 'Grout lines and the gaps between tufts get less light, the tops a little more.'),
+      sheen: num('Fibre sheen ×', 1, 0, 3, 0.05, 'Carpet and fabric brighten softly when seen at a low angle.'),
+      detail: num('Close-up detail ×', 1, 0, 3, 0.05, 'Finer grain fades in near the camera so close surfaces don\'t look like a stretched photo.'),
     },
   },
   textures: {

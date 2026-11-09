@@ -112,6 +112,13 @@ export interface BakeOutput {
    * and light-emitting surfaces) direct light that reaches this spot (1 = unshadowed).
    */
   pixels: Float32Array;
+  /**
+   * RGBA float, per texel: where the baked light (RGB above) comes from. XYZ:
+   * its brightness-weighted mean direction (unit, world space); W: how
+   * directional it is (|Σ lum·dir| / Σ lum: 1 = one light, 0 = even all round).
+   * The shader shades the baked light with each pixel's bumped normal from it.
+   */
+  dirPixels: Float32Array;
   width: number;
   height: number;
   ms: number;
@@ -159,6 +166,12 @@ interface FaceSamples {
   shadow: Float32Array;
   /** Average linear albedo of the surfaces this luxel sees (3 channels). */
   seen: Float32Array;
+  /** Σ luminance × direction of the baked direct light (xyz), and Σ luminance (3 equal channels). */
+  dirS: Float32Array;
+  dirT: Float32Array;
+  /** The same for the gathered (indirect) light of the last bounce pass. */
+  indS: Float32Array;
+  indT: Float32Array;
   emitting: boolean;
 }
 
@@ -207,6 +220,7 @@ export function bake(input: BakeInput): BakeOutput {
       pos: new Float64Array(n * 3), valid: new Uint8Array(n),
       direct: new Float32Array(n * 3), total: new Float32Array(n * 3), ao: new Float32Array(n * 3).fill(1),
       dynDirect: new Float32Array(n * 3), shadow: new Float32Array(n * 3).fill(1), seen: new Float32Array(n * 3),
+      dirS: new Float32Array(n * 3), dirT: new Float32Array(n * 3), indS: new Float32Array(n * 3), indT: new Float32Array(n * 3),
       emitting: !!input.emissive[f.tex],
     };
     for (let j = 0; j < rect.h; j++) {
@@ -249,7 +263,7 @@ export function bake(input: BakeInput): BakeOutput {
         nx = f.nS[0][0] + (f.nS[1][0] - f.nS[0][0]) * t; ny = f.nS[0][1] + (f.nS[1][1] - f.nS[0][1]) * t; nz = f.nS[0][2] + (f.nS[1][2] - f.nS[0][2]) * t;
         const l = Math.hypot(nx, ny, nz) || 1; nx /= l; ny /= l; nz /= l;
       }
-      let r = 0, g = 0, b = 0, dr = 0, dg = 0, db = 0, unshadowed = 0, lit = 0;
+      let r = 0, g = 0, b = 0, dr = 0, dg = 0, db = 0, unshadowed = 0, lit = 0, sx = 0, sy = 0, sz = 0, st = 0;
       for (const li of cand) {
         const l = lights[li];
         const dx = l.pos[0] - px, dy = l.pos[1] - py, dz = l.pos[2] - pz;
@@ -269,7 +283,13 @@ export function bake(input: BakeInput): BakeOutput {
         r += l.color[0] * w; g += l.color[1] * w; b += l.color[2] * w;
         if (perPixel) lit += w;
         if (l.dynamic) { dr += l.color[0] * w; dg += l.color[1] * w; db += l.color[2] * w; }
+        else {
+          const lum = (0.2126 * l.color[0] + 0.7152 * l.color[1] + 0.0722 * l.color[2]) * w;
+          sx += (lum * dx) / d; sy += (lum * dy) / d; sz += (lum * dz) / d; st += lum;
+        }
       }
+      fs.dirS[k * 3] = sx; fs.dirS[k * 3 + 1] = sy; fs.dirS[k * 3 + 2] = sz;
+      fs.dirT[k * 3] = fs.dirT[k * 3 + 1] = fs.dirT[k * 3 + 2] = st;
       fs.direct[k * 3] = r; fs.direct[k * 3 + 1] = g; fs.direct[k * 3 + 2] = b;
       fs.dynDirect[k * 3] = dr; fs.dynDirect[k * 3 + 1] = dg; fs.dynDirect[k * 3 + 2] = db;
       const sh = unshadowed > 1e-6 ? lit / unshadowed : 1;
@@ -287,6 +307,7 @@ export function bake(input: BakeInput): BakeOutput {
       const f = fs.face;
       const out = new Float32Array(fs.direct.length);
       gathered.set(fs, out);
+      const gS = new Float32Array(fs.direct.length), gT = new Float32Array(fs.direct.length);
       if (fs.emitting) continue;
       // Indirect light is smooth: gather on every 2nd luxel (plus the last
       // row/column) and interpolate the rest.
@@ -299,7 +320,11 @@ export function bake(input: BakeInput): BakeOutput {
         const px = fs.pos[k * 3], py = fs.pos[k * 3 + 1], pz = fs.pos[k * 3 + 2];
         const rot = hash(k * 7919 + f.id * 104729) * Math.PI * 2;
         const cr = Math.cos(rot), sr = Math.sin(rot);
-        let r = 0, g = 0, b = 0, occ = 0, qr = 0, qg = 0, qb = 0;
+        let r = 0, g = 0, b = 0, occ = 0, qr = 0, qg = 0, qb = 0, sx = 0, sy = 0, sz = 0, st = 0;
+        const acc = (lr: number, lg: number, lb: number, x: number, y: number, z: number) => {
+          const lum = 0.2126 * lr + 0.7152 * lg + 0.0722 * lb;
+          sx += lum * x; sy += lum * y; sz += lum * z; st += lum;
+        };
         const aoR = p.aoRadius ?? 24;
         for (const [a, c, h] of dirs) {
           const x = a * cr - c * sr, y = a * sr + c * cr; // rotate around the normal
@@ -311,9 +336,11 @@ export function bake(input: BakeInput): BakeOutput {
             // Escaped: open sky above the horizon adds its radiance (π·L as exitance).
             if (p.sky && dz > 0) {
               const t = 1 - Math.exp(-dz / p.sky.band), L = p.sky.luminance * Math.PI;
-              r += L * (p.sky.horizon[0] + (p.sky.zenith[0] - p.sky.horizon[0]) * t);
-              g += L * (p.sky.horizon[1] + (p.sky.zenith[1] - p.sky.horizon[1]) * t);
-              b += L * (p.sky.horizon[2] + (p.sky.zenith[2] - p.sky.horizon[2]) * t);
+              const kr = L * (p.sky.horizon[0] + (p.sky.zenith[0] - p.sky.horizon[0]) * t);
+              const kg = L * (p.sky.horizon[1] + (p.sky.zenith[1] - p.sky.horizon[1]) * t);
+              const kb = L * (p.sky.horizon[2] + (p.sky.zenith[2] - p.sky.horizon[2]) * t);
+              r += kr; g += kg; b += kb;
+              acc(kr, kg, kb, dx, dy, dz);
             }
             continue;
           }
@@ -324,11 +351,15 @@ export function bake(input: BakeInput): BakeOutput {
           const v = lookup(hs, px + dx * 4096 * hit.t, py + dy * 4096 * hit.t, pz + dz * 4096 * hit.t);
           const alb = hs.emitting ? [0, 0, 0] : (input.albedo[hs.face.tex] ?? [0.5, 0.5, 0.5]);
           r += v[0] * alb[0]; g += v[1] * alb[1]; b += v[2] * alb[2];
+          acc(v[0] * alb[0], v[1] * alb[1], v[2] * alb[2], dx, dy, dz);
           qr += alb[0]; qg += alb[1]; qb += alb[2];
         }
         out[k * 3] = (r / dirs.length) * p.bounceScale;
         out[k * 3 + 1] = (g / dirs.length) * p.bounceScale;
         out[k * 3 + 2] = (b / dirs.length) * p.bounceScale;
+        const ks = p.bounceScale / dirs.length;
+        gS[k * 3] = sx * ks; gS[k * 3 + 1] = sy * ks; gS[k * 3 + 2] = sz * ks;
+        gT[k * 3] = gT[k * 3 + 1] = gT[k * 3 + 2] = st * ks;
         if (pass === 0) {
           fs.seen[k * 3] = qr / dirs.length; fs.seen[k * 3 + 1] = qg / dirs.length; fs.seen[k * 3 + 2] = qb / dirs.length;
           // Occlusion 0..1; the curve shapes WHERE it darkens (higher = only the
@@ -341,6 +372,9 @@ export function bake(input: BakeInput): BakeOutput {
       fillSkipped(out, rw, rh, fs.valid, onGrid);
       // Indirect light is smooth in reality; blur away sampling noise (blotches).
       smooth(out, rw, rh, fs.valid, 2);
+      fillSkipped(gS, rw, rh, fs.valid, onGrid); smooth(gS, rw, rh, fs.valid, 2);
+      fillSkipped(gT, rw, rh, fs.valid, onGrid); smooth(gT, rw, rh, fs.valid, 2);
+      fs.indS = gS; fs.indT = gT;
       if (pass === 0) { fillSkipped(fs.ao, rw, rh, fs.valid, onGrid); smooth(fs.ao, rw, rh, fs.valid, 1); fillSkipped(fs.seen, rw, rh, fs.valid, onGrid); smooth(fs.seen, rw, rh, fs.valid, 2); }
     }
     // Next pass bounces what this one gathered.
@@ -368,13 +402,17 @@ export function bake(input: BakeInput): BakeOutput {
 
   // ---- write the atlas
   const pixels = new Float32Array(input.width * input.height * 4);
+  const dirPixels = new Float32Array(input.width * input.height * 4);
+  const ambLum = 0.2126 * p.ambient[0] + 0.7152 * p.ambient[1] + 0.0722 * p.ambient[2];
   for (const fs of samples) {
     dilate(fs, fs.total);
     dilate(fs, fs.direct);
     dilate(fs, fs.ao);
     dilate(fs, fs.dynDirect);
     dilate(fs, fs.shadow);
+    dilate(fs, fs.dirS); dilate(fs, fs.dirT); dilate(fs, fs.indS); dilate(fs, fs.indT);
     const { rect } = fs;
+    const fn = fs.face.n;
     for (let j = 0; j < rect.h; j++) {
       for (let i = 0; i < rect.w; i++) {
         const k = j * rect.w + i;
@@ -389,10 +427,20 @@ export function bake(input: BakeInput): BakeOutput {
           pixels[o + c] = bakedDirect * aoDirect + (indirect + p.ambient[c]) * ao;
         }
         pixels[o + 3] = fs.shadow[k * 3];
+        // Where the baked light comes from: direct (as attenuated above) + gathered + even ambient.
+        const sx = fs.dirS[k * 3] * aoDirect + fs.indS[k * 3] * ao;
+        const sy = fs.dirS[k * 3 + 1] * aoDirect + fs.indS[k * 3 + 1] * ao;
+        const sz = fs.dirS[k * 3 + 2] * aoDirect + fs.indS[k * 3 + 2] * ao;
+        const st = fs.dirT[k * 3] * aoDirect + fs.indT[k * 3] * ao + ambLum * ao;
+        const len = Math.hypot(sx, sy, sz);
+        if (len > 1e-9 && st > 1e-9) {
+          dirPixels[o] = sx / len; dirPixels[o + 1] = sy / len; dirPixels[o + 2] = sz / len;
+          dirPixels[o + 3] = Math.min(1, len / st);
+        } else { dirPixels[o] = fn[0]; dirPixels[o + 1] = fn[1]; dirPixels[o + 2] = fn[2]; dirPixels[o + 3] = 0; }
       }
     }
   }
-  return { pixels, width: input.width, height: input.height, ms: Date.now() - t0, luxels, lights: lights.length };
+  return { pixels, dirPixels, width: input.width, height: input.height, ms: Date.now() - t0, luxels, lights: lights.length };
 }
 
 
