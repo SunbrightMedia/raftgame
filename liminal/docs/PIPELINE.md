@@ -148,7 +148,8 @@ compiling and passing checks in seconds.
 ## Decisions
 
 1. Digicam look: an optional layer, off for Source-style maps. (decided)
-2. Props vertex-lit like Source, world geometry lightmapped. (open)
+2. Copy Source's lighting in every respect, including vertex-lit props and
+   lightmapped world geometry. (decided)
 3. Use the latest models (SAM 3, DINOv3): needs the user's Hugging Face
    access to Meta's gated repos. (decided; waiting on access)
 4. Old maps: moved to `junk/`, kept but not used. (done)
