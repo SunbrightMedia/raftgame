@@ -186,6 +186,48 @@
       "from": "office/plaster",
       "color": "#cbbd98",
       "contrast": 0.4
+    },
+    {
+      "name": "iw/steel",
+      "from": "ind/paint_worn",
+      "color": "#3a3d40",
+      "contrast": 0.7
+    },
+    {
+      "name": "iw/steel_light",
+      "from": "ind/paint_worn",
+      "color": "#a7abae",
+      "contrast": 0.5
+    },
+    {
+      "name": "iw/grate",
+      "from": "ind/diamondplate",
+      "color": "#44474a",
+      "contrast": 0.9
+    },
+    {
+      "name": "iw/pipe",
+      "from": "ind/metal_rust",
+      "color": "#4a4f53",
+      "contrast": 0.6
+    },
+    {
+      "name": "iw/concrete",
+      "from": "ind/concrete_forms",
+      "color": "#2e3032",
+      "contrast": 0.8
+    },
+    {
+      "name": "iw/scaffold",
+      "from": "ind/paint_worn",
+      "color": "#8f9397",
+      "contrast": 0.5
+    },
+    {
+      "name": "iw/rust",
+      "from": "ind/metal_rust",
+      "color": "#4b433d",
+      "contrast": 0.8
     }
   ]
 }

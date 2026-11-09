@@ -18,7 +18,8 @@
     "gen:flatgrass": "vite-node tools/gen-flatgrass.ts",
     "gen:nook": "vite-node tools/gen-nook.ts",
     "gen:rec": "vite-node tools/gen-rec-room.ts",
-    "gen:laquinta": "vite-node tools/gen-laquinta.ts"
+    "gen:laquinta": "vite-node tools/gen-laquinta.ts",
+    "gen:industrial": "vite-node tools/gen-industrial.ts"
   },
   "dependencies": {
     "three": "^0.187.0"

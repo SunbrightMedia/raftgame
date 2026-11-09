@@ -22,15 +22,27 @@ export interface TraceResult {
 }
 
 /**
- * The static collision world: a flat list of convex brushes with a per-trace
- * bounding-box rejection. Fine for hundreds of brushes; a BVH/grid can go in
- * behind the same `trace` signature once maps get big.
+ * The static collision world: convex brushes in a uniform grid (64-unit
+ * cells), so a trace only tests the brushes near its swept bounds, then a
+ * per-brush bounding-box rejection. Maps with thousands of brushes stay cheap.
  */
+const CELL = 64;
 export class CollisionWorld {
   brushes: CollisionBrush[] = [];
+  private grid = new Map<number, number[]>();
+  private stamp: Int32Array;
+  private mark = 0;
 
   constructor(brushes: CollisionBrush[] = []) {
     this.brushes = brushes;
+    brushes.forEach((b, i) => this.cells(b.min, b.max, (k) => { const l = this.grid.get(k); if (l) l.push(i); else this.grid.set(k, [i]); }));
+    this.stamp = new Int32Array(brushes.length);
+  }
+
+  /** Visit grid cells overlapping [lo, hi]; keys pack three cell indices (±2^16 cells each way). */
+  private cells(lo: Vec3, hi: Vec3, f: (k: number) => void): void {
+    const x0 = Math.floor(lo.x / CELL), x1 = Math.floor(hi.x / CELL), y0 = Math.floor(lo.y / CELL), y1 = Math.floor(hi.y / CELL), z0 = Math.floor(lo.z / CELL), z1 = Math.floor(hi.z / CELL);
+    for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) for (let z = z0; z <= z1; z++) f(((x + 32768) * 65536 + (y + 32768)) * 65536 + (z + 32768));
   }
 
   /**
@@ -51,11 +63,18 @@ export class CollisionWorld {
     const lo = v3(Math.min(start.x, end.x) + mins.x - 1, Math.min(start.y, end.y) + mins.y - 1, Math.min(start.z, end.z) + mins.z - 1);
     const hi = v3(Math.max(start.x, end.x) + maxs.x + 1, Math.max(start.y, end.y) + maxs.y + 1, Math.max(start.z, end.z) + maxs.z + 1);
 
-    for (const b of this.brushes) {
-      if (b.max.x < lo.x || b.min.x > hi.x || b.max.y < lo.y || b.min.y > hi.y || b.max.z < lo.z || b.min.z > hi.z) continue;
-      traceBrush(tr, b, start, end, mins, maxs);
-      if (tr.allsolid) break;
-    }
+    const m = ++this.mark;
+    // Long sweeps (noclip, huge falls) would visit many empty cells: test every brush instead.
+    const span = (hi.x - lo.x) * (hi.y - lo.y) * (hi.z - lo.z) / (CELL * CELL * CELL);
+    const test = (i: number) => {
+      if (this.stamp[i] === m) return;
+      this.stamp[i] = m;
+      const b = this.brushes[i];
+      if (b.max.x < lo.x || b.min.x > hi.x || b.max.y < lo.y || b.min.y > hi.y || b.max.z < lo.z || b.min.z > hi.z) return;
+      if (!tr.allsolid) traceBrush(tr, b, start, end, mins, maxs);
+    };
+    if (span > 4096) for (let i = 0; i < this.brushes.length; i++) test(i);
+    else this.cells(lo, hi, (k) => { const l = this.grid.get(k); if (l) for (const i of l) test(i); });
 
     if (tr.fraction < 1) {
       tr.endpos = v3(

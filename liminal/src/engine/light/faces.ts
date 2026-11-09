@@ -116,11 +116,25 @@ export function insideSolid(s: SolidPlanes, p: Axis, eps = 1e-3): boolean {
  */
 export function buildFaces(brushes: BrushDef[]): Face[] {
   const solids = brushes.filter((b) => b.solid !== false).map((b) => ({ b, s: solidPlanes(b) }));
+  // Spatial hash of the solids, so a face only checks the brushes near it
+  // (every face against every brush took ~9 s on a 6000-brush map).
+  const CELL = 128, grid = new Map<string, typeof solids>();
+  const cells = (lo: Axis, hi: Axis, f: (k: string) => void) => {
+    for (let x = Math.floor(lo[0] / CELL); x <= Math.floor(hi[0] / CELL); x++)
+      for (let y = Math.floor(lo[1] / CELL); y <= Math.floor(hi[1] / CELL); y++)
+        for (let z = Math.floor(lo[2] / CELL); z <= Math.floor(hi[2] / CELL); z++) f(`${x},${y},${z}`);
+  };
+  for (const x of solids) cells(x.s.min, x.s.max, (k) => { const l = grid.get(k); if (l) l.push(x); else grid.set(k, [x]); });
   const faces: Face[] = [];
   for (const b of brushes) {
     const own = b.type === 'box' ? boxFaces(b) : prismFaces(b);
     for (const f of own) {
-      if (!isBuried(f, solids.filter((x) => x.b !== b).map((x) => x.s))) faces.push(f);
+      const a = facePoint(f, 0, 0, 0.5), c = facePoint(f, f.width, f.height, 0.5);
+      const lo: Axis = [Math.min(a[0], c[0]) - 1, Math.min(a[1], c[1]) - 1, Math.min(a[2], c[2]) - 1];
+      const hi: Axis = [Math.max(a[0], c[0]) + 1, Math.max(a[1], c[1]) + 1, Math.max(a[2], c[2]) + 1];
+      const near = new Set<SolidPlanes>();
+      cells(lo, hi, (k) => { for (const x of grid.get(k) ?? []) if (x.b !== b && x.s.max[0] >= lo[0] && x.s.min[0] <= hi[0] && x.s.max[1] >= lo[1] && x.s.min[1] <= hi[1] && x.s.max[2] >= lo[2] && x.s.min[2] <= hi[2]) near.add(x.s); });
+      if (!isBuried(f, [...near])) faces.push(f);
     }
   }
   return faces;
@@ -266,12 +280,14 @@ export interface LightmapLayout { width: number; height: number; luxel: number; 
  * with samples on the face's edges, and pack the blocks into one atlas with a
  * simple shelf packer. 16 units per luxel is Source's default lightmap scale.
  */
-export function layoutLightmap(faces: Face[], luxel: number, maxWidth = 2048): LightmapLayout {
+export function layoutLightmap(faces: Face[], luxel: number, maxWidth = 2048, thin = 3): LightmapLayout {
   const items = faces.map((f) => {
-    // Thin faces (baseboards, casing, counter edges) get finer luxels so they
-    // have at least ~4 samples across, instead of one blurry/dotted row.
-    const l = Math.max(1, Math.min(luxel, Math.min(f.width, f.height) / 3));
-    return { id: f.id, w: Math.max(2, Math.ceil(f.width / l) + 1), h: Math.max(2, Math.ceil(f.height / l) + 1) };
+    // Thin faces (baseboards, casing, girder flanges) get finer luxels ACROSS
+    // so they have ~4 samples there, and keep the normal size along their
+    // length (light along a 30' girder is smooth; fine luxels there only
+    // bloated the atlas).
+    const ls = Math.max(1, Math.min(luxel, f.width / thin)), lt = Math.max(1, Math.min(luxel, f.height / thin));
+    return { id: f.id, w: Math.max(2, Math.ceil(f.width / ls) + 1), h: Math.max(2, Math.ceil(f.height / lt) + 1) };
   });
   items.sort((a, b) => b.h - a.h || b.w - a.w);
   const total = items.reduce((s, i) => s + i.w * i.h, 0);

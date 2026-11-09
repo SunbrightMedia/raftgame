@@ -245,6 +245,7 @@ export class Game {
     let steps = 0;
     while (this.acc >= tick && steps < 16) {
       this.player.tick(this.player.buildCmd(this.input), s, tick);
+      if (this.level && this.player.state.origin.z < s.hull.voidZ) this.player.respawn(this.level);
       this.input.endTick();
       this.acc -= tick;
       steps++;

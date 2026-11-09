@@ -317,6 +317,25 @@ Map: `laquinta`. Plan in `tools/gen-laquinta.ts`'s header.
 
 ---
 
+## World: industrial (reference: a tower under construction, looking straight up)
+
+Map: `industrial` (`tools/gen-industrial.ts`, seeded). An endless steel
+maze in grey fog, inspired by the reference photo and by the feel of an
+endless abandoned facility (no assets or layouts copied).
+
+- **No lamps.** The only light is a flat overcast sky; near steel reads as
+  dark silhouettes against bright grey fog, as in the photo. Near-monochrome
+  (camera saturation 0.25).
+- **Fog sells the endlessness:** structure fades out within ~300 ft in every
+  direction, including up and down. Falling into the void respawns you.
+- **Kit:** columns on 24' bays, I-beam girders every storey, X-bracing,
+  Warren trusses across rows, curved truss arcs around a central void,
+  pipe runs, scaffold-clad concrete shells, a rack-rail truss climbing
+  through the void, and a walkable maze of grated catwalks with railings on
+  three levels joined by open steel stairs.
+
+---
+
 ## Palettes (draft)
 
 A **palette** is a named set applied to a room: floor, walls, trim,

@@ -42,6 +42,7 @@ export const SETTINGS = {
       duckEyeHeight: num('Crouched eye height', M.duckEyeHeight, 4, 160, 1, undefined, 'u'),
       airDuckLift: num('Air crouch lift', M.airDuckLift, 0, 1, 0.05, 'Crouching mid-air lifts your feet by this fraction of (hull − crouched height). 1 = Source (big crouch-jumps with a 36 crouch hull), 0 = none.'),
       duckTime: num('Crouch view time', 0.15, 0, 1, 0.01, 'How long the view takes to lower/raise. Visual only.', 's'),
+      voidZ: num('Fall respawn height', -100000, -100000, 100000, 10, 'Falling below this height puts you back at the start (maps with a bottomless void set it).', 'u'),
     },
   },
   view: {
@@ -86,7 +87,8 @@ export const SETTINGS = {
     help: 'Baked lightmaps in physical units: lights in lumens/kelvin, irradiance in lux, inverse-square falloff, linear albedo for bounce. Changes re-bake in the background.',
     defs: {
       enabled: bool('Baked lighting', true, 'Off = fullbright with fake face shading (Hammer-style), handy while building.'),
-      luxelSize: num('Luxel size', 16, 2, 256, 1, 'World units per lightmap pixel. Source default is 16. Lower = sharper shadows and scallops, slower bake.', 'u'),
+      thinSamples: num('Samples across thin faces', 3, 1, 6, 1, 'Thin faces (trim, rails, girder flanges) get at least this many luxel steps across, so they light evenly. Maps made of thousands of thin members use 1 to keep the lightmap small.'),
+      luxelSize: num('Luxel size', 16, 2, 512, 1, 'World units per lightmap pixel. Source default is 16. Lower = sharper shadows and scallops, slower bake.', 'u'),
       filter: select('Lightmap filter', 'linear', ['linear', 'nearest'] as const, 'linear = smooth (Source), nearest = blocky (Quake software renderer).'),
       lightScale: num('All lights ×', 1, 0, 8, 0.01, '1 = physical. An artist override, not a fix.'),
       bounces: num('Bounces', 2, 0, 2, 1, 'Passes of indirect light. 2 is more accurate in small rooms; slower.'),

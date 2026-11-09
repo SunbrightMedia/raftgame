@@ -160,7 +160,7 @@ export class Lighting {
   private async start(level: Level, s: Settings, textures: TextureRegistry, key: string, tryCache: boolean): Promise<void> {
     const gen = ++this.seq;
     const L = s.light;
-    const layout = layoutLightmap(level.faces, Math.max(2, L.luxelSize));
+    const layout = layoutLightmap(level.faces, Math.max(2, L.luxelSize), 2048, L.thinSamples);
     if (tryCache) {
       try {
         const text = await this.storage.read(this.cachePath(level));
@@ -184,7 +184,7 @@ export class Lighting {
     this.worker = new BakeWorker();
     // 1) Quick preview: coarse luxels, few rays. 2) The full bake.
     const quickLuxel = Math.max(L.luxelSize, 32);
-    const quickLayout = layoutLightmap(level.faces, quickLuxel);
+    const quickLayout = layoutLightmap(level.faces, quickLuxel, 2048, L.thinSamples);
     // Light panels as a coarse grid of emitters (a 2x4 troffer = 1 light, not 18): the preview's cost is lights × luxels.
     const quick = this.buildInput(level, s, textures, quickLayout, { bounces: Math.min(1, L.bounces), bounceSamples: 8, surfaceSpacing: 48 });
     const full = this.buildInput(level, s, textures, layout, {});
