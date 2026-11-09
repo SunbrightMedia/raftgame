@@ -180,6 +180,12 @@
       "from": "office/plaster",
       "color": "#cfc8bd",
       "contrast": 0.4
+    },
+    {
+      "name": "nook/floor_pale",
+      "from": "office/plaster",
+      "color": "#cbbd98",
+      "contrast": 0.4
     }
   ]
 }

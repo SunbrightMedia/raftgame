@@ -1,10 +1,10 @@
 import type { Room } from './roomPaint';
 export { PMP_ROOMS } from './pmpRooms';
 
-/** Reference 3: the lit niche. */
+/** Reference 3 (measured): a half-wall window into a low room whose floor is the main floor. */
 export const NOOK_ROOMS: Room[] = [
-  { name: 'nook room', min: [0, 0, 0], max: [168, 180, 96], paint: 'nook/paint_tan' },
-  { name: 'niche', min: [36, 180, 30], max: [120, 228, 90], paint: 'nook/paint_tan' },
+  { name: 'front room', min: [0, 0, 0], max: [240, 170, 96], paint: 'nook/paint_tan' },
+  { name: 'lit room', min: [21, 176, 0], max: [230, 306, 77], paint: 'nook/paint_tan' },
 ];
 
 /** Reference 4: the trophy room and the arcade behind the window. */
@@ -13,9 +13,7 @@ export const REC_ROOMS: Room[] = [
   { name: 'arcade', min: [248, 0, 0], max: [560, 300, 108], paint: 'arcade/paint_dark' },
 ];
 
-/** Reference 5: La Quinta atrium (one paint throughout). */
+/** Reference 5 (measured): La Quinta atrium. */
 export const LQ_ROOMS: Room[] = [
-  { name: 'atrium', min: [0, 0, 0], max: [420, 290, 240], paint: 'lq/paint_beige' },
-  { name: 'ground corridor', min: [0, 290, 0], max: [260, 360, 112], paint: 'lq/paint_beige' },
-  { name: 'upper corridor', min: [0, 250, 120], max: [260, 360, 240], paint: 'lq/paint_beige' },
+  { name: 'atrium', min: [182, 0, 0], max: [600, 415, 216], paint: 'lq/paint_beige' },
 ];

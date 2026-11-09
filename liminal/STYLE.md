@@ -240,22 +240,25 @@ All confirmed by the user.
   matches the carpet; the curtains are the outlier. Rooms are colour-matched
   sets with one thing that doesn't belong, and the outlier is part of the feel.
 
-## Reference 3: the lit niche (PMP, "Dad's girlfriend Morgan")
+## Reference 3: the lit window (PMP, "Dad's girlfriend Morgan")
 
-Measured from the photo (sRGB, as shot). Map: `pmp_nook`.
+Measured with Depth Pro and checked by overlay at the photo's camera. Map: `pmp_nook`.
+(The first build guessed "a chest-height niche" and was badly wrong: always measure.)
 
-- **A big recessed niche at chest height** in an otherwise bare wall: about
-  7' wide, 5' tall, 4' deep, sill at ~30". No shelves, nothing in it.
-- **One light, inside the niche:** a small flush dome on the niche ceiling,
-  blown to white. The niche glows cream (216, 209, 174) while the room
-  outside sits in brown dusk (wall 134, 111, 63 near the niche, 94, 63, 31
-  up high). Light only where it's needed: the room has no visible source.
-- **A hard diagonal shadow on the niche floor** from the jamb: the only
-  hard shadow in the picture.
-- **Warm tan "orange-peel" texture paint** everywhere, walls and niche alike.
-- **Thick rounded sill trim** in the wall colour, a white-ish baseboard,
-  tan-brown plush carpet (93, 60, 30).
-- Camera: standing ~9' back, slightly left, eye ~5', looking a little up.
+- **A half-wall window, not a niche:** sill 17", top 69", ~150" wide, in a
+  6" wall. Behind it a low room ~130" deep with a 77" ceiling; its left wall
+  sits ~19" left of the jamb. No baseboard visible in the low room.
+- **One light, in the low room:** a 4"-deep dome ~48" behind the wall, its
+  bottom just showing under the header, blown to white. The low room glows
+  cream (216, 209, 174); the front room sits in warm brown (wall 134, 111,
+  63 near the window), lit dimly from behind the camera.
+- **A hard dark wedge low on the left wall** of the low room: the only hard
+  shadow in the picture (not modelled yet).
+- **Warm tan "orange-peel" texture paint** everywhere.
+- **Flat white sill** projecting ~1.5" with a small apron moulding under it,
+  white baseboard, tan-brown plush carpet (93, 60, 30).
+- Camera: eye 56", 109" from the wall, 83" right of the left jamb, turned
+  ~26° left of square, ~10° down.
 
 ## Reference 4: the trophy room with the arcade window
 
