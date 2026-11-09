@@ -13,6 +13,7 @@
     "bench:bake": "vite-node tools/bench/bake-bench.ts",
     "gen:blank": "vite-node tools/gen-blank.ts",
     "studio": "node tools/studio/cli.mjs",
+    "check": "vite-node tools/check/check.ts --",
     "fetch:textures": "python3 tools/fetch_textures.py"
   },
   "dependencies": {
