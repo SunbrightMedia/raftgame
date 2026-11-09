@@ -216,7 +216,9 @@ export function bake(input: BakeInput): BakeOutput {
   const ranges = lights.map(rangeOf);
 
   // Which brushes can shadow each light (only those inside its range).
-  const lightBoxes = lights.map((l, i) => boxes.filter((b) => sphereBox(l.pos, ranges[i], b)));
+  // One uniform grid over the solids: rays only test the brushes in the cells they pass through
+  // (La Quinta's railing alone is ~900 brushes; testing every brush per ray took minutes).
+  const grid = new SolidGrid(boxes);
 
   const samples: FaceSamples[] = [];
   const byId = new Map<number, FaceSamples>();
@@ -243,7 +245,7 @@ export function bake(input: BakeInput): BakeOutput {
         const q = facePoint(f, s, t, 1);
         const k = j * rect.w + i;
         fs.pos[k * 3] = q[0]; fs.pos[k * 3 + 1] = q[1]; fs.pos[k * 3 + 2] = q[2];
-        fs.valid[k] = insideAny(boxes, q) ? 0 : 1;
+        fs.valid[k] = grid.inside(q) ? 0 : 1;
       }
     }
     samples.push(fs);
@@ -295,7 +297,7 @@ export function bake(input: BakeInput): BakeOutput {
         if (perPixel) unshadowed += w;
         const ch = l.dynamic ? (l.channel ?? 0) : -1;
         if (ch >= 0) cu[ch] += w;
-        if (occluded(lightBoxes[li], px, py, pz, l.pos[0], l.pos[1], l.pos[2])) continue;
+        if (grid.occluded(px, py, pz, l.pos[0], l.pos[1], l.pos[2])) continue;
         r += l.color[0] * w; g += l.color[1] * w; b += l.color[2] * w;
         if (perPixel) lit += w;
         if (ch >= 0) cl[ch] += w;
@@ -350,7 +352,7 @@ export function bake(input: BakeInput): BakeOutput {
           const dx = f.r[0] * x + f.u[0] * y + f.n[0] * h;
           const dy = f.r[1] * x + f.u[1] * y + f.n[1] * h;
           const dz = f.r[2] * x + f.u[2] * y + f.n[2] * h;
-          const hit = castRay(boxes, px, py, pz, dx * 4096, dy * 4096, dz * 4096);
+          const hit = grid.cast(px, py, pz, dx * 4096, dy * 4096, dz * 4096);
           if (!hit) {
             // Escaped: open sky above the horizon adds its radiance (π·L as exitance).
             if (p.sky && dz > 0) {
@@ -580,13 +582,14 @@ function sphereBox(c: Axis, r: number, b: { min: Axis; max: Axis }): boolean {
   return d <= r * r;
 }
 
-function insideAny(boxes: BakeBox[], p: Axis): boolean {
+/** Reference (every brush) versions of the grid queries; tests check the grid against them. */
+export function insideAny(boxes: BakeBox[], p: Axis): boolean {
   for (const b of boxes) if (insideSolid(b, p, EPS)) return true;
   return false;
 }
 
 /** Does the segment (a → b) pass through any solid? */
-function occluded(boxes: BakeBox[], ax: number, ay: number, az: number, bx: number, by: number, bz: number): boolean {
+export function occluded(boxes: BakeBox[], ax: number, ay: number, az: number, bx: number, by: number, bz: number): boolean {
   const dx = bx - ax, dy = by - ay, dz = bz - az;
   for (const b of boxes) {
     const t = clipRay(b, ax, ay, az, dx, dy, dz);
@@ -596,7 +599,7 @@ function occluded(boxes: BakeBox[], ax: number, ay: number, az: number, bx: numb
 }
 
 /** Nearest solid hit along o + d·t, t in (0, 1], and which face of it was entered. */
-function castRay(boxes: BakeBox[], ox: number, oy: number, oz: number, dx: number, dy: number, dz: number): { t: number; faceId: number } | null {
+export function castRay(boxes: BakeBox[], ox: number, oy: number, oz: number, dx: number, dy: number, dz: number): { t: number; faceId: number } | null {
   let best: { t: number; faceId: number } | null = null;
   for (const b of boxes) {
     const t = clipRay(b, ox, oy, oz, dx, dy, dz);
@@ -608,6 +611,118 @@ function castRay(boxes: BakeBox[], ox: number, oy: number, oz: number, dx: numbe
     if (!best || t0 < best.t) best = { t: t0, faceId: b.brushId * FACES_PER_BRUSH + t.face };
   }
   return best;
+}
+
+/**
+ * Uniform grid over the solids (Amanatides & Woo 1987 traversal). Same answers
+ * as testing every brush, but a ray only looks at brushes in the cells it crosses.
+ */
+export class SolidGrid {
+  private min: Axis = [0, 0, 0];
+  private max: Axis = [0, 0, 0];
+  private cell = 1;
+  private n: [number, number, number] = [1, 1, 1];
+  private start: Int32Array;
+  private items: Int32Array;
+  private stamp: Int32Array;
+  private mark = 0;
+
+  constructor(private boxes: BakeBox[]) {
+    const lo: Axis = [Infinity, Infinity, Infinity], hi: Axis = [-Infinity, -Infinity, -Infinity];
+    for (const b of boxes) for (let i = 0; i < 3; i++) { lo[i] = Math.min(lo[i], b.min[i]); hi[i] = Math.max(hi[i], b.max[i]); }
+    if (!boxes.length) { lo[0] = lo[1] = lo[2] = 0; hi[0] = hi[1] = hi[2] = 1; }
+    for (let i = 0; i < 3; i++) { this.min[i] = lo[i] - 1; this.max[i] = hi[i] + 1; }
+    const ext = Math.max(this.max[0] - this.min[0], this.max[1] - this.min[1], this.max[2] - this.min[2]);
+    this.cell = Math.max(12, ext / 64);
+    this.n = [0, 1, 2].map((i) => Math.max(1, Math.ceil((this.max[i] - this.min[i]) / this.cell))) as [number, number, number];
+    const total = this.n[0] * this.n[1] * this.n[2];
+    const count = new Int32Array(total + 1);
+    const span = (b: BakeBox, f: (c: number) => void) => {
+      const a = [0, 1, 2].map((i) => this.idx(b.min[i], i)), z = [0, 1, 2].map((i) => this.idx(b.max[i], i));
+      for (let x = a[0]; x <= z[0]; x++) for (let y = a[1]; y <= z[1]; y++) for (let w = a[2]; w <= z[2]; w++) f((w * this.n[1] + y) * this.n[0] + x);
+    };
+    for (const b of boxes) span(b, (c) => count[c + 1]++);
+    for (let i = 0; i < total; i++) count[i + 1] += count[i];
+    this.start = count;
+    this.items = new Int32Array(count[total]);
+    const fill = count.slice();
+    boxes.forEach((b, bi) => span(b, (c) => { this.items[fill[c]++] = bi; }));
+    this.stamp = new Int32Array(boxes.length);
+  }
+
+  private idx(v: number, axis: number): number {
+    return Math.min(this.n[axis] - 1, Math.max(0, Math.floor((v - this.min[axis]) / this.cell)));
+  }
+
+  /** Visit the cells along o + d·t, t in [0, tMax], in order; `fn` returns true to stop. */
+  private walk(o: Axis, d: Axis, tMax: number, fn: (cell: number, tExit: number) => boolean): void {
+    let t0 = 0, t1 = tMax;
+    for (let i = 0; i < 3; i++) {
+      if (Math.abs(d[i]) < 1e-12) { if (o[i] < this.min[i] || o[i] > this.max[i]) return; continue; }
+      let a = (this.min[i] - o[i]) / d[i], b = (this.max[i] - o[i]) / d[i];
+      if (a > b) { const t = a; a = b; b = t; }
+      t0 = Math.max(t0, a); t1 = Math.min(t1, b);
+      if (t0 > t1) return;
+    }
+    const c = [0, 1, 2].map((i) => this.idx(o[i] + d[i] * t0, i));
+    const step = [0, 1, 2].map((i) => (d[i] > 0 ? 1 : d[i] < 0 ? -1 : 0));
+    const tNext = [0, 1, 2].map((i) => step[i] === 0 ? Infinity : (this.min[i] + (c[i] + (step[i] > 0 ? 1 : 0)) * this.cell - o[i]) / d[i]);
+    const tDelta = [0, 1, 2].map((i) => step[i] === 0 ? Infinity : this.cell / Math.abs(d[i]));
+    for (;;) {
+      const tExit = Math.min(tNext[0], tNext[1], tNext[2], t1);
+      if (fn((c[2] * this.n[1] + c[1]) * this.n[0] + c[0], tExit)) return;
+      if (tExit >= t1) return;
+      const a = tNext[0] <= tNext[1] && tNext[0] <= tNext[2] ? 0 : tNext[1] <= tNext[2] ? 1 : 2;
+      c[a] += step[a];
+      if (c[a] < 0 || c[a] >= this.n[a]) return;
+      tNext[a] += tDelta[a];
+    }
+  }
+
+  /** Nearest solid hit along o + d·t, t in (0, 1] (see castRay for the rules). */
+  cast(ox: number, oy: number, oz: number, dx: number, dy: number, dz: number): { t: number; faceId: number } | null {
+    let best: { t: number; faceId: number } | null = null;
+    const m = ++this.mark;
+    this.walk([ox, oy, oz], [dx, dy, dz], 1, (cell, tExit) => {
+      for (let k = this.start[cell]; k < this.start[cell + 1]; k++) {
+        const bi = this.items[k];
+        if (this.stamp[bi] === m) continue;
+        this.stamp[bi] = m;
+        const b = this.boxes[bi];
+        const t = clipRay(b, ox, oy, oz, dx, dy, dz);
+        if (!t || t.t0 > 1 || t.t1 <= EPS) continue;
+        const t0 = Math.max(t.t0, EPS);
+        if (!best || t0 < best.t) best = { t: t0, faceId: b.brushId * FACES_PER_BRUSH + t.face };
+      }
+      return best !== null && best.t <= tExit;
+    });
+    return best;
+  }
+
+  /** Does the segment a → b pass through any solid? (as occluded()) */
+  occluded(ax: number, ay: number, az: number, bx: number, by: number, bz: number): boolean {
+    const dx = bx - ax, dy = by - ay, dz = bz - az;
+    let hit = false;
+    const m = ++this.mark;
+    this.walk([ax, ay, az], [dx, dy, dz], 1, (cell) => {
+      for (let k = this.start[cell]; k < this.start[cell + 1]; k++) {
+        const bi = this.items[k];
+        if (this.stamp[bi] === m) continue;
+        this.stamp[bi] = m;
+        const t = clipRay(this.boxes[bi], ax, ay, az, dx, dy, dz);
+        if (t !== null && t.t0 < 1 - EPS && t.t1 > EPS) { hit = true; return true; }
+      }
+      return false;
+    });
+    return hit;
+  }
+
+  inside(p: Axis): boolean {
+    for (let i = 0; i < 3; i++) if (p[i] < this.min[i] || p[i] > this.max[i]) return false;
+    const cell = (this.idx(p[2], 2) * this.n[1] + this.idx(p[1], 1)) * this.n[0] + this.idx(p[0], 0);
+    for (let k = this.start[cell]; k < this.start[cell + 1]; k++) if (insideSolid(this.boxes[this.items[k]], p, EPS)) return true;
+    return false;
+  }
 }
 
 /** Clip a ray against a convex plane set: entry/exit parameters and the entry face. */

@@ -135,11 +135,10 @@ export class Lighting {
       delete b.skyZenith; delete b.skyHorizon; delete b.skyBand;
     }
     // Material colours matter too (bounce light): a recoloured texture must re-bake.
+    // Keyed on each texture's definition, not its measured pixels, so the key is
+    // the same in every browser (see TextureRegistry.identity).
     const mats: Record<string, unknown> = {};
-    for (const f of level.faces) if (!(f.tex in mats)) {
-      const t = textures.get(f.tex);
-      mats[f.tex] = [t.albedo.map((v) => Math.round(v * 1000)), t.emissive ?? null];
-    }
+    for (const f of level.faces) if (!(f.tex in mats)) mats[f.tex] = textures.identity(f.tex);
     return hash(JSON.stringify([BAKE_VERSION, bakeSettings, s.textures, level.map.brushes, level.map.entities, mats]));
   }
 
@@ -186,7 +185,8 @@ export class Lighting {
     // 1) Quick preview: coarse luxels, few rays. 2) The full bake.
     const quickLuxel = Math.max(L.luxelSize, 32);
     const quickLayout = layoutLightmap(level.faces, quickLuxel);
-    const quick = this.buildInput(level, s, textures, quickLayout, { bounces: Math.min(1, L.bounces), bounceSamples: 8 });
+    // Light panels as a coarse grid of emitters (a 2x4 troffer = 1 light, not 18): the preview's cost is lights × luxels.
+    const quick = this.buildInput(level, s, textures, quickLayout, { bounces: Math.min(1, L.bounces), bounceSamples: 8, surfaceSpacing: 48 });
     const full = this.buildInput(level, s, textures, layout, {});
     this.status = 'baking…';
     let fullDone = false;
@@ -243,7 +243,7 @@ export class Lighting {
     this.onBaked?.(layout, tex, dtex, mtex);
   }
 
-  private buildInput(level: Level, s: Settings, textures: TextureRegistry, layout: LightmapLayout, over: Partial<{ bounces: number; bounceSamples: number }>): BakeInput {
+  private buildInput(level: Level, s: Settings, textures: TextureRegistry, layout: LightmapLayout, over: Partial<{ bounces: number; bounceSamples: number; surfaceSpacing: number }>): BakeInput {
     const L = s.light;
     const emissive: BakeInput['emissive'] = {};
     const albedo: BakeInput['albedo'] = {};
@@ -267,7 +267,7 @@ export class Lighting {
         bounces: over.bounces ?? L.bounces,
         bounceScale: L.bounceScale,
         bounceSamples: over.bounceSamples ?? L.bounceSamples,
-        surfaceSpacing: 16,
+        surfaceSpacing: over.surfaceSpacing ?? 16,
         aoStrength: L.aoStrength,
         aoRadius: L.aoRadius,
         aoDirect: L.aoDirect,

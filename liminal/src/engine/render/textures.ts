@@ -28,7 +28,8 @@ export function makeHeightCanvas(src: HTMLCanvasElement, worldW: number, radiusI
   const d = src.getContext('2d', { willReadFrequently: true })!.getImageData(0, 0, w, h).data;
   const L = new Float32Array(w * h);
   for (let i = 0; i < w * h; i++) L[i] = (0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2]) / 255;
-  const r = Math.max(1, Math.round((radiusIn * w) / Math.max(1, worldW)));
+  // Never finer than 2 texels: single-texel relief turns a magnified texture into blobs.
+  const r = Math.max(2, Math.round((radiusIn * w) / Math.max(1, worldW)));
   const blur = (a: Float32Array, rad: number): Float32Array => {   // two passes of a wrapped box blur ≈ gaussian
     let cur = a;
     for (let pass = 0; pass < 2; pass++) {
@@ -114,7 +115,9 @@ export class TextureRegistry {
     // The published page (one HTML file, 16 MB cap) leaves out the Freedoom set except what maps use;
     // the dev server and the normal build have all of it.
     const urls = (import.meta.env.MODE === 'page'
-      ? import.meta.glob(['../../../textures/**/*.{png,jpg,jpeg}', '!../../../textures/freedoom/**', '../../../textures/freedoom/walls/{BROWN1,COMPSTA1}.png', '../../../textures/freedoom/flats/CEIL5_1.png'], { eager: true, query: '?url', import: 'default' })
+      // (two globs: a negative pattern would also drop the files listed after it)
+      ? { ...import.meta.glob(['../../../textures/**/*.{png,jpg,jpeg}', '!../../../textures/freedoom/**'], { eager: true, query: '?url', import: 'default' }),
+        ...import.meta.glob(['../../../textures/freedoom/walls/{BROWN1,COMPSTA1}.png', '../../../textures/freedoom/flats/CEIL5_1.png'], { eager: true, query: '?url', import: 'default' }) }
       : import.meta.glob('../../../textures/**/*.{png,jpg,jpeg}', { eager: true, query: '?url', import: 'default' })) as Record<string, string>;
     const manifests = import.meta.glob('../../../textures/index.json', { eager: true, import: 'default' }) as Record<string, { textures: ManifestEntry[] }>;
     const manifest = Object.values(manifests)[0]?.textures ?? [];
@@ -183,6 +186,20 @@ export class TextureRegistry {
       this.entries.set(name, e);
     }
     return e;
+  }
+
+  /**
+   * What a texture IS, as stable data (its definition, not its pixels), for
+   * cache keys: the same on every browser. Measured pixel averages differ a
+   * little between browsers' image decoders, which made every saved lightmap
+   * look stale on the player's machine and re-bake.
+   */
+  identity(name: string): unknown {
+    const v = this.variants.get(name);
+    if (v) return { ...v, from: this.identity(v.from) };
+    const s = this.sources.get(name);
+    if (!s) return name;
+    return [s.name, s.worldW, s.worldH, s.material, s.emissive ?? null, s.raw, s.pixelart];
   }
 
   /** The height field for a texture (relief radius in inches from its material). */
