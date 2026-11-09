@@ -4,7 +4,8 @@ Goal: a real mapmaking tool for liminal spaces, usable by a person (in the
 editor) and by Claude (from code), where quality comes from good assets and
 Source-faithful lighting, and iteration takes seconds, not minutes.
 
-Status: plan, not started. Phases are in order; each has an exit test.
+Status: Phase 0 done (studio, checks, comparison tool); Phase 1 next.
+Phases are in order; each has an exit test.
 Layouts and finished maps come after the tool, not before.
 
 ---
