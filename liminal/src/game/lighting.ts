@@ -257,7 +257,8 @@ export class Lighting {
       width: layout.width,
       height: layout.height,
       rects: [...layout.rects],
-      boxes: level.map.brushes.filter((b) => b.solid !== false).map(solidPlanes),
+      // Clip brushes (invisible player blockers, as Source's) don't block light.
+      boxes: level.map.brushes.filter((b) => b.solid !== false && b.group !== 'clip').map(solidPlanes),
       lights: mapLights(level),
       emissive,
       albedo,

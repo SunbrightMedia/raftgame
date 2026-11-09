@@ -19,7 +19,7 @@ const [cmdIn = 'stats', ...rest] = process.argv.slice(2);
 const compare = cmdIn === 'compare' ? { ref: rest[0], out: rest[1] ?? 'studio_compare', pose: rest[2] ?? '', regions: rest[3] } : null;
 const cmd = compare ? 'views' : cmdIn;
 const args = compare ? { out: compare.out, poses: [compare.pose] } :
-  cmd === 'load' ? { map: rest[0] } :
+  cmd === 'load' ? { map: rest[0], settings: rest[1] ? JSON.parse(rest[1]) : undefined } :
   cmd === 'views' ? { out: rest[0] ?? 'studio_views', poses: rest.slice(1).length ? rest.slice(1) : [''] } :
   cmd === 'set' ? JSON.parse(rest[0]) :
   cmd === 'eval' ? { js: rest.join(' ') } : {};

@@ -135,6 +135,8 @@ export function buildFaces(brushes: BrushDef[]): Face[] {
   for (const b of brushes) {
     const own = b.type === 'box' ? boxFaces(b) : b.type === 'convex' ? convexFaces(b) : prismFaces(b);
     for (const f of own) {
+      // Tool faces (Source's nodraw, clip, skybox...) and clip brushes are never drawn or lit; they stay solid.
+      if (f.tex.startsWith('tools/') || b.group === 'clip') continue;
       const a = facePoint(f, 0, 0, 0.5), c = facePoint(f, f.width, f.height, 0.5);
       const lo: Axis = [Math.min(a[0], c[0]) - 1, Math.min(a[1], c[1]) - 1, Math.min(a[2], c[2]) - 1];
       const hi: Axis = [Math.max(a[0], c[0]) + 1, Math.max(a[1], c[1]) + 1, Math.max(a[2], c[2]) + 1];

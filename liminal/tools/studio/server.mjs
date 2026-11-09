@@ -26,9 +26,15 @@ const page = await browser.newPage({ viewport: { width: 1000, height: 750 } });
 const log = [];
 page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') log.push(m.text().slice(0, 300)); });
 page.on('pageerror', (e) => log.push('pageerror: ' + e.message));
-await page.route('**/api/file/config/**', (r) => (r.request().method() === 'PUT' ? r.fulfill({ status: 204 }) : r.continue()));
+// Settings changes are never saved; `load` can start a map with given settings (served as the config file).
+let loadSettings = null;
+await page.route('**/api/file/config/**', (r) => {
+  if (r.request().method() === 'PUT') return r.fulfill({ status: 204 });
+  if (loadSettings && r.request().url().includes('settings.json')) return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ format: 'liminal-config', version: 1, settings: loadSettings }) });
+  return r.continue();
+});
 
-const ready = () => page.waitForFunction(() => window.liminal && window.liminal.game.lighting.shownAt > 0, null, { timeout: 180000 });
+const ready = () => page.waitForFunction(() => window.liminal && window.liminal.game.level && (window.liminal.game.lighting.shownAt > 0 || !window.liminal.config.values.light.enabled), null, { timeout: 180000 });
 let current = '';
 async function open(map) {
   await page.goto(`http://localhost:${GAME_PORT}/?map=${encodeURIComponent(map)}`);
@@ -56,8 +62,8 @@ async function pose(p) {
 }
 
 const commands = {
-  /** Open a map (name in maps/), fresh page. */
-  async load({ map }) { await open(map); return { map, status: await commands.stats() }; },
+  /** Open a map (name in maps/, e.g. "p2/shipyard_atrium"), fresh page; optional settings to start with. */
+  async load({ map, settings }) { loadSettings = settings ?? null; await open(map); return { map, status: await commands.stats() }; },
   /** Re-read the current map from disk (after a generator ran) without reloading the page. */
   async reload() {
     const t0 = Date.now();
