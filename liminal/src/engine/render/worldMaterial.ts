@@ -46,6 +46,8 @@ export const worldUniforms = {
   // Light-emitting rectangles: 4 texels per row (centre, half-width, half-height, luminance rgb).
   rectTex: { value: new THREE.DataTexture(new Float32Array(4 * MAX_RECTS * 4), 4, MAX_RECTS, THREE.RGBAFormat, THREE.FloatType) },
   rectCount: { value: 0 },
+  /** Seconds, for animated screens. */
+  time: { value: 0 },
 };
 
 /**
@@ -66,7 +68,7 @@ export const worldUniforms = {
  * Light sources output their own luminance instead (cd/m²).
  * The camera pass (digicam.ts) then exposes and encodes to sRGB.
  */
-export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { luminance: number; color: [number, number, number] }): THREE.ShaderMaterial {
+export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { luminance: number; color: [number, number, number]; anim?: 'static' }): THREE.ShaderMaterial {
   const src = source ? new THREE.Vector3(...source.color).multiplyScalar(source.luminance) : new THREE.Vector3();
   const img = map.image as { width?: number; height?: number } | undefined;
   return new THREE.ShaderMaterial({
@@ -76,6 +78,7 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
       texSize: { value: new THREE.Vector2(img?.width ?? 64, img?.height ?? 64) },
       surf: { value: new THREE.Vector4(surf.roughness, surf.f0, surf.metal, surf.bump) },
       isSource: { value: source ? 1 : 0 },
+      isStatic: { value: source?.anim === 'static' ? 1 : 0 },
       sourceLum: { value: src },
     },
     vertexShader: /* glsl */ `
@@ -138,6 +141,8 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
       uniform sampler2D rectTex;
       uniform int rectCount;
       uniform float isSource;
+      uniform float isStatic;
+      uniform float time;
       uniform vec3 sourceLum;
       varying vec3 vWorld;
       varying vec3 vNormal;
@@ -222,6 +227,14 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
           // thousands of times past white, so it blows out exactly the same.
           // Scale, don't clip per channel: clipping red and green at the same cap
           // turns an amber bulb yellow, and white balance then pushes it green.
+          if (isStatic > 0.5) {
+            // An untuned CRT: grey snow, new every frame, with a faint rolling band.
+            vec2 cell = floor(vUv * vec2(96.0, 72.0));
+            float fr = floor(time * 30.0);
+            float n = fract(sin(dot(cell + fr * vec2(17.13, 31.71), vec2(12.9898, 78.233))) * 43758.5453);
+            float band = 0.85 + 0.15 * sin((vUv.y + time * 0.35) * 6.2831);
+            rho = vec3(0.15 + 0.85 * n * n) * band;
+          }
           L = rho * sourceLum;
           L *= min(1.0, 30000.0 / max(1e-6, max(L.r, max(L.g, L.b))));
         } else {
@@ -311,7 +324,7 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
         float f = fogOn * (fogHaze > 0.5 ? 1.0 - exp(-3.0 * fd) : clamp(fd, 0.0, 1.0));
         // Alpha marks light sources (lamp lenses, panels) for the camera pass:
         // only they get the lamp-edge line and fringe, not overexposed surfaces.
-        gl_FragColor = vec4(mix(L, toLinear(fogColor) * fogLuminance, f), isSource);
+        gl_FragColor = vec4(mix(L, toLinear(fogColor) * fogLuminance, f), isSource * (1.0 - isStatic)); // screens aren't lamps
       }`,
   });
 }

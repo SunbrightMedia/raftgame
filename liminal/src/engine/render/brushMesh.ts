@@ -68,7 +68,7 @@ export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout
     geo.setIndex(bt.idx);
     geo.computeBoundingSphere();
     const entry = textures.get(tex);
-    const mat = makeWorldMaterial(entry.texture, surfaceFor(tex, entry.material), entry.emissive ? { luminance: entry.emissive.luminance, color: emitterColor(entry.emissive) } : undefined);
+    const mat = makeWorldMaterial(entry.texture, surfaceFor(tex, entry.material), entry.emissive ? { luminance: entry.emissive.luminance, color: emitterColor(entry.emissive), anim: entry.emissive.anim } : undefined);
     // Overlapping coplanar faces (common with hand-drawn brushes) would
     // z-fight and flicker. A small, distinct depth bias per texture batch
     // makes one surface win consistently instead.

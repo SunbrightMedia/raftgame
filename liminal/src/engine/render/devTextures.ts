@@ -23,7 +23,7 @@ export interface TexImage {
    * light the room from this surface in the bake (lights.rad-style), or only
    * glow (a pot-light lens, whose light is a separate entity).
    */
-  emissive?: { kelvin: number; luminance: number; castsLight: boolean; color?: string };
+  emissive?: { kelvin: number; luminance: number; castsLight: boolean; color?: string; anim?: 'static' };
   /** Skip the crusher (dev grids stay crisp and exact). */
   raw?: boolean;
   material: string;
@@ -517,15 +517,12 @@ const DEFS: Record<string, Def> = {
       noise(g, w, h, rnd, 10);
     },
   },
-  // CRT screen showing a pale, washed-out picture. Glows; too dim to light the room.
+  // CRT screen tuned to nothing: animated snow (the world shader draws the
+  // static; this texture is only its average colour, for the bake).
   'lq/tv_screen': {
-    px: [64, 48], world: [16, 12], material: 'glass',
-    emissive: { kelvin: 9000, luminance: 220, castsLight: false },
-    paint: (g, w, h) => {
-      g.fillStyle = '#bff6f7'; g.fillRect(0, 0, w, h);
-      g.fillStyle = '#e9fbff'; g.fillRect(w * 0.15, h * 0.2, w * 0.3, h * 0.1);
-      g.fillStyle = '#9fd0d8'; g.fillRect(w * 0.55, h * 0.55, w * 0.25, h * 0.12);
-    },
+    px: [16, 12], world: [16, 12], material: 'glass',
+    emissive: { kelvin: 7500, luminance: 45, castsLight: false, anim: 'static' },
+    paint: (g, w, h) => { g.fillStyle = '#8c8c8c'; g.fillRect(0, 0, w, h); },
   },
   // Arcade cabinet screen: saturated sprites on black.
   'arcade/screen': {

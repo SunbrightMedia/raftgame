@@ -261,6 +261,7 @@ export class Game {
     worldUniforms.flashBeamN.value = C.flashBeam >= 90 ? 0 : Math.log(0.5) / Math.log(Math.cos(half));
     worldUniforms.flashColor.value.set(...kelvinToLinear(C.flashKelvin));
 
+    worldUniforms.time.value = performance.now() / 1000;
     this.renderer.render(this.scene);
     this.onFrame?.(dt);
   }
