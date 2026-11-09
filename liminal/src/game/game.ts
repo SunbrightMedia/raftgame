@@ -44,12 +44,14 @@ export class Game {
     this.renderer = new LowResRenderer(canvas);
     this.lighting = new Lighting(storage);
     this.input = new Input(canvas);
-    this.lighting.onBaked = (layout, tex, dir) => {
+    this.lighting.onBaked = (layout, tex, dir, mask) => {
       if (!this.level) return;
       this.level.setLightmap(layout, tex);
       worldUniforms.lightmapDir.value?.dispose();
       worldUniforms.lightmap.value = tex;
       worldUniforms.lightmapDir.value = dir;
+      worldUniforms.lightmapMask.value?.dispose();
+      worldUniforms.lightmapMask.value = mask;
       this.updateLightUniforms(this.settings);
     };
   }
@@ -74,6 +76,7 @@ export class Game {
       const cos = (deg: number) => Math.cos((Math.min(180, Math.max(0, deg)) * Math.PI) / 180);
       // x: -(1 + spill) for a downward beam, 0 for a bare bulb.
       u.dynBeam.value[i].set(l.dir ? -(1 + (l.spill ?? 0)) : 0, l.n ?? 1, cos(c - sd), cos(c + sd));
+      u.dynChan.value[i] = l.channel ?? 0;
     });
   }
 

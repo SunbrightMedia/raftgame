@@ -39,6 +39,9 @@ export const worldUniforms = {
   dynPos: { value: Array.from({ length: 32 }, () => new THREE.Vector3()) },
   dynColor: { value: Array.from({ length: 32 }, () => new THREE.Vector3()) },
   dynBeam: { value: Array.from({ length: 32 }, () => new THREE.Vector4()) },
+  /** Each per-pixel light's shadow-mask channel (0..3) in lightmapMask. */
+  dynChan: { value: new Array<number>(32).fill(0) },
+  lightmapMask: { value: null as THREE.Texture | null },
   lightScale: { value: 1 },
   // Reflections.
   specScale: { value: 1 },
@@ -155,6 +158,8 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
       uniform vec3 dynPos[32];
       uniform vec3 dynColor[32];
       uniform vec4 dynBeam[32];
+      uniform float dynChan[32];
+      uniform sampler2D lightmapMask;
       uniform float lightScale;
       uniform float specScale;
       uniform float bumpScale;
@@ -335,7 +340,8 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
           vec3 Lbaked = E / PI * (diffuseColor * (1.0 - env) + env);
           vec3 Edyn = vec3(0.0);
           if (lightmapOn > 0.5) {
-            // Direct light from cans/bulbs, exact per pixel, times the baked shadow fraction.
+            // Direct light from cans/bulbs, exact per pixel, times its own channel of the baked shadow mask.
+            vec4 mk = texture2D(lightmapMask, vLm);
             for (int i = 0; i < 32; i++) {
               if (i >= dynCount) break;
               vec3 toL = dynPos[i] - vWorld;
@@ -352,12 +358,14 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
                 I = pow(c, bm.y) * (spill + (1.0 - spill) * smoothstep(bm.w, bm.z, c));
               }
               float dm = d * 0.0254;
-              vec3 Ei = dynColor[i] * I / max(dm * dm, 0.0025);
+              float ch = dynChan[i];
+              float sh = ch < 0.5 ? mk.r : ch < 1.5 ? mk.g : ch < 2.5 ? mk.b : mk.a;
+              vec3 Ei = dynColor[i] * I * sh / max(dm * dm, 0.0025);
               Edyn += Ei * ndl;
               spec += Ei * specPoint(N, V, u, ndl, F0, rough, 2.0 / max(d, 1.0));
             }
-            Edyn *= lightScale * lm.a;
-            spec *= lightScale * lm.a;
+            Edyn *= lightScale;
+            spec *= lightScale;
             // Light-emitting rectangles (troffers): their diffuse light is baked;
             // here only their reflection.
             vec2 luv = vec2(rough, sqrt(1.0 - ndv)) * (63.0 / 64.0) + 0.5 / 64.0;

@@ -43,6 +43,13 @@ export interface BakeLight {
    */
   dynamic?: boolean;
   /**
+   * Shadow-mask channel (0..3) of a dynamic light. Each luxel stores one
+   * shadow fraction per channel; lights near each other get different
+   * channels, so a lamp behind a closed door can't borrow the shadow value of
+   * a lamp in front of it (one shared value leaked light through doorways).
+   */
+  channel?: number;
+  /**
    * Reflected per pixel by the shader (light-emitting rectangles): counts
    * toward the alpha channel's shadow fraction, which hides reflections of
    * lights the spot can't see.
@@ -119,6 +126,8 @@ export interface BakeOutput {
    * The shader shades the baked light with each pixel's bumped normal from it.
    */
   dirPixels: Float32Array;
+  /** RGBA float: per shadow-mask channel, the fraction of that channel's dynamic lights' direct light that reaches each texel. */
+  maskPixels: Float32Array;
   width: number;
   height: number;
   ms: number;
@@ -166,6 +175,9 @@ interface FaceSamples {
   shadow: Float32Array;
   /** Average linear albedo of the surfaces this luxel sees (3 channels). */
   seen: Float32Array;
+  /** Shadow fraction per mask channel: channels 0-2 here, channel 3 in mask3 (3 equal values). */
+  mask: Float32Array;
+  mask3: Float32Array;
   /** Σ luminance × direction of the baked direct light (xyz), and Σ luminance (3 equal channels). */
   dirS: Float32Array;
   dirT: Float32Array;
@@ -221,6 +233,7 @@ export function bake(input: BakeInput): BakeOutput {
       direct: new Float32Array(n * 3), total: new Float32Array(n * 3), ao: new Float32Array(n * 3).fill(1),
       dynDirect: new Float32Array(n * 3), shadow: new Float32Array(n * 3).fill(1), seen: new Float32Array(n * 3),
       dirS: new Float32Array(n * 3), dirT: new Float32Array(n * 3), indS: new Float32Array(n * 3), indT: new Float32Array(n * 3),
+      mask: new Float32Array(n * 3).fill(1), mask3: new Float32Array(n * 3).fill(1),
       emitting: !!input.emissive[f.tex],
     };
     for (let j = 0; j < rect.h; j++) {
@@ -264,6 +277,7 @@ export function bake(input: BakeInput): BakeOutput {
         const l = Math.hypot(nx, ny, nz) || 1; nx /= l; ny /= l; nz /= l;
       }
       let r = 0, g = 0, b = 0, dr = 0, dg = 0, db = 0, unshadowed = 0, lit = 0, sx = 0, sy = 0, sz = 0, st = 0;
+      const cu = [0, 0, 0, 0], cl = [0, 0, 0, 0];
       for (const li of cand) {
         const l = lights[li];
         const dx = l.pos[0] - px, dy = l.pos[1] - py, dz = l.pos[2] - pz;
@@ -279,9 +293,12 @@ export function bake(input: BakeInput): BakeOutput {
         const w = (I * ndotl) / (dm * dm);
         const perPixel = l.dynamic || l.reflected;
         if (perPixel) unshadowed += w;
+        const ch = l.dynamic ? (l.channel ?? 0) : -1;
+        if (ch >= 0) cu[ch] += w;
         if (occluded(lightBoxes[li], px, py, pz, l.pos[0], l.pos[1], l.pos[2])) continue;
         r += l.color[0] * w; g += l.color[1] * w; b += l.color[2] * w;
         if (perPixel) lit += w;
+        if (ch >= 0) cl[ch] += w;
         if (l.dynamic) { dr += l.color[0] * w; dg += l.color[1] * w; db += l.color[2] * w; }
         else {
           const lum = (0.2126 * l.color[0] + 0.7152 * l.color[1] + 0.0722 * l.color[2]) * w;
@@ -294,6 +311,8 @@ export function bake(input: BakeInput): BakeOutput {
       fs.dynDirect[k * 3] = dr; fs.dynDirect[k * 3 + 1] = dg; fs.dynDirect[k * 3 + 2] = db;
       const sh = unshadowed > 1e-6 ? lit / unshadowed : 1;
       fs.shadow[k * 3] = fs.shadow[k * 3 + 1] = fs.shadow[k * 3 + 2] = sh;
+      for (let c = 0; c < 3; c++) fs.mask[k * 3 + c] = cu[c] > 1e-6 ? cl[c] / cu[c] : 1;
+      fs.mask3[k * 3] = fs.mask3[k * 3 + 1] = fs.mask3[k * 3 + 2] = cu[3] > 1e-6 ? cl[3] / cu[3] : 1;
     }
   }
 
@@ -403,6 +422,7 @@ export function bake(input: BakeInput): BakeOutput {
   // ---- write the atlas
   const pixels = new Float32Array(input.width * input.height * 4);
   const dirPixels = new Float32Array(input.width * input.height * 4);
+  const maskPixels = new Float32Array(input.width * input.height * 4).fill(1);
   const ambLum = 0.2126 * p.ambient[0] + 0.7152 * p.ambient[1] + 0.0722 * p.ambient[2];
   for (const fs of samples) {
     dilate(fs, fs.total);
@@ -411,6 +431,7 @@ export function bake(input: BakeInput): BakeOutput {
     dilate(fs, fs.dynDirect);
     dilate(fs, fs.shadow);
     dilate(fs, fs.dirS); dilate(fs, fs.dirT); dilate(fs, fs.indS); dilate(fs, fs.indT);
+    dilate(fs, fs.mask); dilate(fs, fs.mask3);
     const { rect } = fs;
     const fn = fs.face.n;
     for (let j = 0; j < rect.h; j++) {
@@ -427,6 +448,7 @@ export function bake(input: BakeInput): BakeOutput {
           pixels[o + c] = bakedDirect * aoDirect + (indirect + p.ambient[c]) * ao;
         }
         pixels[o + 3] = fs.shadow[k * 3];
+        maskPixels[o] = fs.mask[k * 3]; maskPixels[o + 1] = fs.mask[k * 3 + 1]; maskPixels[o + 2] = fs.mask[k * 3 + 2]; maskPixels[o + 3] = fs.mask3[k * 3];
         // Where the baked light comes from: direct (as attenuated above) + gathered + even ambient.
         const sx = fs.dirS[k * 3] * aoDirect + fs.indS[k * 3] * ao;
         const sy = fs.dirS[k * 3 + 1] * aoDirect + fs.indS[k * 3 + 1] * ao;
@@ -440,7 +462,7 @@ export function bake(input: BakeInput): BakeOutput {
       }
     }
   }
-  return { pixels, dirPixels, width: input.width, height: input.height, ms: Date.now() - t0, luxels, lights: lights.length };
+  return { pixels, dirPixels, maskPixels, width: input.width, height: input.height, ms: Date.now() - t0, luxels, lights: lights.length };
 }
 
 
@@ -578,8 +600,12 @@ function castRay(boxes: BakeBox[], ox: number, oy: number, oz: number, dx: numbe
   let best: { t: number; faceId: number } | null = null;
   for (const b of boxes) {
     const t = clipRay(b, ox, oy, oz, dx, dy, dz);
-    if (!t || t.t0 <= EPS || t.t0 > 1) continue;
-    if (!best || t.t0 < best.t) best = { t: t.t0, faceId: b.brushId * FACES_PER_BRUSH + t.face };
+    if (!t || t.t0 > 1 || t.t1 <= EPS) continue;
+    // A ray that starts on (or in) another solid and heads into it is blocked right there.
+    // Samples sit exactly on a solid where brushes touch (a jamb against a closed door);
+    // skipping that hit let them gather light from the room behind the door.
+    const t0 = Math.max(t.t0, EPS);
+    if (!best || t0 < best.t) best = { t: t0, faceId: b.brushId * FACES_PER_BRUSH + t.face };
   }
   return best;
 }
