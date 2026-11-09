@@ -53,6 +53,11 @@ Procedural textures (`dev/*`, `house/wallpaper_*`, `house/paneling`, `office/vin
 | [WoodFloor043 from ambientCG.com](https://ambientcg.com/a/WoodFloor043) | CC0 1.0 | `house/planks_old` |
 | [WoodFloor051 from ambientCG.com](https://ambientcg.com/a/WoodFloor051) | CC0 1.0 | `house/woodfloor` |
 
+## Carpets supplied by the user
+
+Photos of carpet samples supplied by the user, made tileable by `tools/make_carpets.py`
+(sources in `tools/carpet_sources/`): `carpet/chevron_blue`, `carpet/camo_olive`, `carpet/floral_navy`, `carpet/confetti_blue`.
+
 ## Freedoom (1226 textures, `freedoom/*`)
 
 From [Freedoom](https://freedoom.github.io), under the BSD 3-Clause licence, which requires this notice in any build that includes them. Full licence text: `textures/freedoom/LICENSE.txt`.

@@ -15517,6 +15517,54 @@
    "credit": "Sidewall, 1800s. Cooper Hewitt, Smithsonian Design Museum",
    "url": "https://collection.cooperhewitt.org/view/objects/asitem/id/156414",
    "license": "CC0 1.0"
+  },
+  {
+   "name": "carpet/chevron_blue",
+   "file": "carpet/chevron_blue.png",
+   "size": [
+    8,
+    8.11
+   ],
+   "material": "carpet",
+   "credit": "Photo of a carpet sample, supplied by the user",
+   "url": "",
+   "license": "user-supplied"
+  },
+  {
+   "name": "carpet/camo_olive",
+   "file": "carpet/camo_olive.png",
+   "size": [
+    24,
+    38.11
+   ],
+   "material": "carpet",
+   "credit": "Photo of a carpet sample, supplied by the user",
+   "url": "",
+   "license": "user-supplied"
+  },
+  {
+   "name": "carpet/floral_navy",
+   "file": "carpet/floral_navy.png",
+   "size": [
+    12,
+    12.09
+   ],
+   "material": "carpet",
+   "credit": "Photo of a carpet sample, supplied by the user",
+   "url": "",
+   "license": "user-supplied"
+  },
+  {
+   "name": "carpet/confetti_blue",
+   "file": "carpet/confetti_blue.png",
+   "size": [
+    24,
+    46.72
+   ],
+   "material": "carpet",
+   "credit": "Photo of a carpet sample, supplied by the user",
+   "url": "",
+   "license": "user-supplied"
   }
  ]
 }
