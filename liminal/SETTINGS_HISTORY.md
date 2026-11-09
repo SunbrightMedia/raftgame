@@ -6,6 +6,7 @@ in the tweak panel, or change the default back in code).
 
 | date | setting | old → new | why |
 |---|---|---|---|
+| 2026-11-09 | Lighting › Corner darkening strength / falloff | 0.9 / 2.5 (power on the result: creases fell to ~0.3% light, black headers/trim/baseboards) → 0.6 / 2 (power on the occlusion; floor = 1 − strength = 40%) | User: strange dark areas above the door and beside the opening |
 | 2026-11-08 | Camera › Bloom / Bloom threshold (new) | 0 / 0.8 × clip | User asked for a bloom slider (bright areas spilling past edges) |
 | 2026-11-08 | Camera › Film grain / Grain size / Grain motion | 0 (flatgrass map 0.35) / 1.6 / 12 Hz → 0.2 / 1 / 60 Hz, for every map | User's values |
 | 2026-11-08 | Camera › Grain motion | 0 → 12 Hz | User: frozen grain was more distracting than per-frame grain |

@@ -84,8 +84,8 @@ export interface BakeParams {
    * coloured from horizon to zenith (linear, luminance 1 each). Absent = indoors.
    */
   sky?: { luminance: number; zenith: RGB; horizon: RGB; band: number };
-  /** Falloff curve: AO is raised to this power, so open wall stays untouched
-   *  while creases (wall bases, corners) get much darker. 1 = linear. */
+  /** Falloff: occlusion is raised to this power before darkening, so open
+   *  wall stays untouched and only tight creases darken. 1 = linear. */
   aoCurve?: number;
 }
 
@@ -331,7 +331,10 @@ export function bake(input: BakeInput): BakeOutput {
         out[k * 3 + 2] = (b / dirs.length) * p.bounceScale;
         if (pass === 0) {
           fs.seen[k * 3] = qr / dirs.length; fs.seen[k * 3 + 1] = qg / dirs.length; fs.seen[k * 3 + 2] = qb / dirs.length;
-          const ao = Math.pow(Math.max(0, 1 - (p.aoStrength ?? 0) * Math.min(1, (occ / dirs.length) * 2.2)), p.aoCurve ?? 1);
+          // Occlusion 0..1; the curve shapes WHERE it darkens (higher = only the
+          // tightest creases), strength caps HOW MUCH (never below 1 - strength).
+          const o = Math.min(1, (occ / dirs.length) * 2.2);
+          const ao = 1 - (p.aoStrength ?? 0) * Math.pow(o, p.aoCurve ?? 1);
           fs.ao[k * 3] = fs.ao[k * 3 + 1] = fs.ao[k * 3 + 2] = ao;
         }
       }
