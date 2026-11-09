@@ -238,7 +238,8 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
           float rough = clamp(surf.x + roughnessAdd, 0.04, 1.0);
           float metal = surf.z;
           vec3 F0 = mix(vec3(surf.y), rho, metal);
-          vec3 diffuseColor = rho * (1.0 - metal);
+          // With reflections off, metals fall back to their albedo as a matte colour (else they'd be black).
+          vec3 diffuseColor = rho * (1.0 - metal * min(1.0, specScale));
           vec3 V = normalize(cameraPosition - vWorld);
           float ndv = max(dot(N, V), 1e-4);
 

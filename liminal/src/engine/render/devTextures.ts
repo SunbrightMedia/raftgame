@@ -483,6 +483,71 @@ const DEFS: Record<string, Def> = {
       g.fillText('EXIT', w / 2, h / 2 + 1);
     },
   },
+  // ---- Reference 3-5 rooms (original designs) ----
+  // Gold for trophies: warm metallic yellow with a soft vertical highlight. Matte by default (reflections off).
+  'rec/gold': {
+    px: [16, 32], world: [4, 8], material: 'plastic',
+    paint: (g, w, h) => {
+      const gr = g.createLinearGradient(0, 0, w, 0);
+      gr.addColorStop(0, '#8a6516'); gr.addColorStop(0.45, '#e2bd4f'); gr.addColorStop(0.6, '#f4dc84'); gr.addColorStop(1, '#7a5612');
+      g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    },
+  },
+  // Faux-painted mural: a potted tree on a muddy olive-gold wall, soft and smeared,
+  // the kind of thing a 1990s hotel had painted on its atrium wall.
+  'lq/mural_tree': {
+    px: [256, 256], world: [160, 100], material: 'plaster', raw: true,
+    paint: (g, w, h, rnd) => {
+      const bg = g.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#8a7d55'); bg.addColorStop(1, '#6f6444');
+      g.fillStyle = bg; g.fillRect(0, 0, w, h);
+      for (let k = 0; k < 900; k++) { g.fillStyle = `rgba(${60 + rnd() * 50},${55 + rnd() * 40},${30 + rnd() * 25},0.08)`; g.beginPath(); g.arc(rnd() * w, rnd() * h, 4 + rnd() * 14, 0, Math.PI * 2); g.fill(); }
+      const cx = w * 0.62;
+      g.fillStyle = '#4a3a26'; g.fillRect(cx - 4, h * 0.48, 8, h * 0.36);           // trunk
+      g.fillStyle = '#3d3424'; g.fillRect(cx - 22, h * 0.82, 44, h * 0.13);         // pot
+      for (let k = 0; k < 140; k++) {                                              // canopy
+        const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()) * w * 0.17;
+        g.fillStyle = `rgba(${28 + rnd() * 20},${38 + rnd() * 22},${20 + rnd() * 14},0.55)`;
+        g.beginPath(); g.arc(cx + Math.cos(a) * r, h * 0.3 + Math.sin(a) * r * 0.9, 5 + rnd() * 9, 0, Math.PI * 2); g.fill();
+      }
+      for (let k = 0; k < 40; k++) {                                               // a small plant left
+        const a = rnd() * Math.PI * 2, r = rnd() * w * 0.05;
+        g.fillStyle = `rgba(30,40,22,0.6)`; g.beginPath(); g.arc(w * 0.28 + Math.cos(a) * r, h * 0.72 + Math.sin(a) * r, 3 + rnd() * 5, 0, Math.PI * 2); g.fill();
+      }
+      noise(g, w, h, rnd, 10);
+    },
+  },
+  // CRT screen showing a pale, washed-out picture. Glows; too dim to light the room.
+  'lq/tv_screen': {
+    px: [64, 48], world: [16, 12], material: 'glass',
+    emissive: { kelvin: 9000, luminance: 220, castsLight: false },
+    paint: (g, w, h) => {
+      g.fillStyle = '#bff6f7'; g.fillRect(0, 0, w, h);
+      g.fillStyle = '#e9fbff'; g.fillRect(w * 0.15, h * 0.2, w * 0.3, h * 0.1);
+      g.fillStyle = '#9fd0d8'; g.fillRect(w * 0.55, h * 0.55, w * 0.25, h * 0.12);
+    },
+  },
+  // Arcade cabinet screen: saturated sprites on black.
+  'arcade/screen': {
+    px: [48, 36], world: [20, 15], material: 'glass',
+    emissive: { kelvin: 6500, luminance: 160, castsLight: false },
+    paint: (g, w, h, rnd) => {
+      g.fillStyle = '#101028'; g.fillRect(0, 0, w, h);
+      for (let k = 0; k < 18; k++) { g.fillStyle = ['#ff3a7a', '#3ac8ff', '#ffe23a', '#7aff5a'][k % 4]; g.fillRect(Math.floor(rnd() * w), Math.floor(rnd() * h), 2 + Math.floor(rnd() * 4), 2 + Math.floor(rnd() * 3)); }
+    },
+  },
+  // Purple neon tube: lights the arcade (and leaks through the window).
+  'arcade/neon_purple': {
+    px: [16, 4], world: [32, 2], material: 'glass',
+    emissive: { kelvin: 6500, color: '#b24dff', luminance: 900, castsLight: true },
+    paint: (g, w, h) => { g.fillStyle = '#ffffff'; g.fillRect(0, 0, w, h); },
+  },
+  // Flush dome light lens (frosted glass). Glows; the light itself is an entity.
+  'fixture/dome': {
+    px: [32, 32], world: [12, 12], material: 'glass',
+    emissive: { kelvin: 3000, luminance: 9000, castsLight: false },
+    paint: (g, w, h) => { g.fillStyle = '#f4efe4'; g.fillRect(0, 0, w, h); },
+  },
   missing: {
     px: [32, 32], world: [32, 32], raw: true,
     paint: (g, w, h) => {

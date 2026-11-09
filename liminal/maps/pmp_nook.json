@@ -1,0 +1,34 @@
+{
+  "format": "liminal-map",
+  "version": 1,
+  "name": "pmp_nook",
+  "settings": {"light":{"luxelSize":6},"camera":{"evComp":-0.6,"whiteBalanceK":3300},"fog":{"enabled":false}},
+  "brushes": [
+    {"id":1,"type":"box","min":[-6,-6,-16],"max":[174,240,0],"tex":"nook/carpet_tan"},
+    {"id":2,"type":"box","min":[-6,-6,96],"max":[174,240,112],"tex":"nook/ceiling"},
+    {"id":3,"type":"box","min":[-6,-6,0],"max":[174,0,96],"tex":"nook/paint_tan"},
+    {"id":4,"type":"box","min":[-6,0,0],"max":[0,180,96],"tex":"nook/paint_tan"},
+    {"id":5,"type":"box","min":[168,0,0],"max":[174,180,96],"tex":"nook/paint_tan"},
+    {"id":6,"type":"box","min":[-6,180,0],"max":[36,186,96],"tex":"nook/paint_tan"},
+    {"id":7,"type":"box","min":[120,180,0],"max":[174,186,96],"tex":"nook/paint_tan"},
+    {"id":8,"type":"box","min":[36,180,0],"max":[120,186,30],"tex":"nook/paint_tan"},
+    {"id":9,"type":"box","min":[36,180,90],"max":[120,186,96],"tex":"nook/paint_tan"},
+    {"id":10,"type":"box","min":[36,186,0],"max":[120,228,30],"tex":"nook/paint_tan"},
+    {"id":11,"type":"box","min":[30,186,0],"max":[36,234,96],"tex":"nook/paint_tan"},
+    {"id":12,"type":"box","min":[120,186,0],"max":[126,234,96],"tex":"nook/paint_tan"},
+    {"id":13,"type":"box","min":[36,228,0],"max":[120,234,96],"tex":"nook/paint_tan"},
+    {"id":14,"type":"box","min":[36,186,90],"max":[120,228,96],"tex":"nook/paint_tan"},
+    {"id":15,"type":"prism","axis":"x","points":[[180,31],[177.5,31],[177.174,30.979],[176.853,30.915],[176.543,30.81],[176.25,30.665],[175.978,30.483],[175.732,30.268],[175.517,30.022],[175.335,29.75],[175.19,29.457],[175.085,29.147],[175.021,28.826],[175,28.5],[175.021,28.174],[175.085,27.853],[175.19,27.543],[175.335,27.25],[175.517,26.978],[175.732,26.732],[175.978,26.517],[176.25,26.335],[176.543,26.19],[176.853,26.085],[177.174,26.021],[177.5,26],[180,26]],"z0":32,"z1":124,"tex":"nook/paint_tan"},
+    {"id":16,"type":"box","min":[0,0,0],"max":[168,0.6,3.5],"tex":"house/trim_white"},
+    {"id":17,"type":"box","min":[0,0.6,0],"max":[0.6,180,3.5],"tex":"house/trim_white"},
+    {"id":18,"type":"box","min":[167.4,0.6,0],"max":[168,180,3.5],"tex":"house/trim_white"},
+    {"id":19,"type":"box","min":[0.6,179.4,0],"max":[36,180,3.5],"tex":"house/trim_white"},
+    {"id":20,"type":"box","min":[120,179.4,0],"max":[167.4,180,3.5],"tex":"house/trim_white"},
+    {"id":21,"type":"box","min":[36,179.4,0],"max":[120,180,3.5],"tex":"house/trim_white"},
+    {"id":22,"type":"prism","points":[[106,197],[105.543,199.296],[104.243,201.243],[102.296,202.543],[100,203],[97.704,202.543],[95.757,201.243],[94.457,199.296],[94,197],[94.457,194.704],[95.757,192.757],[97.704,191.457],[100,191],[102.296,191.457],[104.243,192.757],[105.543,194.704]],"z0":88.5,"z1":90,"tex":"fixture/dome","solid":false}
+  ],
+  "entities": [
+    {"id":1,"class":"player_start","origin":[58,112,0],"angles":[-8,72,0]},
+    {"id":1001,"class":"light","origin":[100,197,87.5],"props":{"type":"dome","lumens":900,"kelvin":3000}}
+  ]
+}

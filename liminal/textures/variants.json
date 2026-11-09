@@ -78,6 +78,108 @@
       "from": "ind/concrete_wall",
       "color": "#7a7973",
       "contrast": 0.45
+    },
+    {
+      "name": "nook/paint_tan",
+      "from": "office/plaster",
+      "color": "#bfa57a",
+      "contrast": 0.6
+    },
+    {
+      "name": "nook/carpet_tan",
+      "from": "house/carpet_plush",
+      "color": "#7c5a3a",
+      "contrast": 0.9
+    },
+    {
+      "name": "nook/ceiling",
+      "from": "office/plaster",
+      "color": "#d6cab2",
+      "contrast": 0.5
+    },
+    {
+      "name": "rec/paint_green",
+      "from": "office/plaster",
+      "color": "#b8b986",
+      "contrast": 0.45
+    },
+    {
+      "name": "rec/door",
+      "from": "office/plaster",
+      "color": "#b2b380",
+      "contrast": 0.3
+    },
+    {
+      "name": "rec/vinyl_pale",
+      "from": "office/plaster",
+      "color": "#cbcab6",
+      "contrast": 0.35
+    },
+    {
+      "name": "rec/ceiling_dark",
+      "from": "office/ceiling",
+      "color": "#4c4b40",
+      "contrast": 0.6
+    },
+    {
+      "name": "rec/oak",
+      "from": "house/wood_orange",
+      "color": "#a27c40",
+      "contrast": 1.0
+    },
+    {
+      "name": "rec/dark_wood",
+      "from": "house/wood_orange",
+      "color": "#2b2219",
+      "contrast": 0.8
+    },
+    {
+      "name": "rec/case_back",
+      "from": "office/plaster",
+      "color": "#8d9178",
+      "contrast": 0.3
+    },
+    {
+      "name": "arcade/paint_dark",
+      "from": "office/plaster",
+      "color": "#2b2430",
+      "contrast": 0.5
+    },
+    {
+      "name": "lq/paint_beige",
+      "from": "office/plaster",
+      "color": "#d2c6b2",
+      "contrast": 0.5
+    },
+    {
+      "name": "lq/carpet",
+      "from": "mall/carpet_maroon",
+      "color": "#4a2629",
+      "contrast": 1.0
+    },
+    {
+      "name": "lq/counter_dark",
+      "from": "house/laminate_marble",
+      "color": "#2c2c2a",
+      "contrast": 0.6
+    },
+    {
+      "name": "lq/iron",
+      "from": "office/plaster",
+      "color": "#1d1c1a",
+      "contrast": 0.3
+    },
+    {
+      "name": "lq/seat",
+      "from": "house/upholstery",
+      "color": "#2f3d3c",
+      "contrast": 0.9
+    },
+    {
+      "name": "lq/ceiling",
+      "from": "office/plaster",
+      "color": "#cfc8bd",
+      "contrast": 0.4
     }
   ]
 }

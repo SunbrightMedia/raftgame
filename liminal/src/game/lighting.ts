@@ -109,7 +109,7 @@ export class Lighting {
 
   constructor(private storage: Storage) {}
 
-  private keyFor(level: Level, s: Settings): string {
+  private keyFor(level: Level, s: Settings, textures: TextureRegistry): string {
     const { filter: _f, ...bakeSettings } = s.light; // filtering doesn't need a re-bake
     void _f;
     // Indoors (no sky), the sky's colours don't affect the bake.
@@ -117,13 +117,19 @@ export class Lighting {
       const b = bakeSettings as Record<string, unknown>;
       delete b.skyZenith; delete b.skyHorizon; delete b.skyBand;
     }
-    return hash(JSON.stringify([BAKE_VERSION, bakeSettings, s.textures, level.map.brushes, level.map.entities]));
+    // Material colours matter too (bounce light): a recoloured texture must re-bake.
+    const mats: Record<string, unknown> = {};
+    for (const f of level.faces) if (!(f.tex in mats)) {
+      const t = textures.get(f.tex);
+      mats[f.tex] = [t.albedo.map((v) => Math.round(v * 1000)), t.emissive ?? null];
+    }
+    return hash(JSON.stringify([BAKE_VERSION, bakeSettings, s.textures, level.map.brushes, level.map.entities, mats]));
   }
 
   /** Ask for lighting if anything that affects it changed. */
   request(level: Level, s: Settings, textures: TextureRegistry, force = false): void {
     if (!s.light.enabled) return;
-    const key = this.keyFor(level, s);
+    const key = this.keyFor(level, s, textures);
     if (!force && key === this.lastKey) return;
     const firstForMap = force;
     if (force) this.shownAt = 0;

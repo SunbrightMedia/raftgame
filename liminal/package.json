@@ -15,7 +15,10 @@
     "fetch:textures": "python3 tools/fetch_textures.py",
     "gen:pmp": "vite-node tools/gen-pmp-basement.ts",
     "gen:mall": "vite-node tools/gen-mall.ts",
-    "gen:flatgrass": "vite-node tools/gen-flatgrass.ts"
+    "gen:flatgrass": "vite-node tools/gen-flatgrass.ts",
+    "gen:nook": "vite-node tools/gen-nook.ts",
+    "gen:rec": "vite-node tools/gen-rec-room.ts",
+    "gen:laquinta": "vite-node tools/gen-laquinta.ts"
   },
   "dependencies": {
     "three": "^0.187.0"

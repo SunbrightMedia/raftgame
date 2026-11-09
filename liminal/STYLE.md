@@ -240,6 +240,61 @@ All confirmed by the user.
   matches the carpet; the curtains are the outlier. Rooms are colour-matched
   sets with one thing that doesn't belong, and the outlier is part of the feel.
 
+## Reference 3: the lit niche (PMP, "Dad's girlfriend Morgan")
+
+Measured from the photo (sRGB, as shot). Map: `pmp_nook`.
+
+- **A big recessed niche at chest height** in an otherwise bare wall: about
+  7' wide, 5' tall, 4' deep, sill at ~30". No shelves, nothing in it.
+- **One light, inside the niche:** a small flush dome on the niche ceiling,
+  blown to white. The niche glows cream (216, 209, 174) while the room
+  outside sits in brown dusk (wall 134, 111, 63 near the niche, 94, 63, 31
+  up high). Light only where it's needed: the room has no visible source.
+- **A hard diagonal shadow on the niche floor** from the jamb: the only
+  hard shadow in the picture.
+- **Warm tan "orange-peel" texture paint** everywhere, walls and niche alike.
+- **Thick rounded sill trim** in the wall colour, a white-ish baseboard,
+  tan-brown plush carpet (93, 60, 30).
+- Camera: standing ~9' back, slightly left, eye ~5', looking a little up.
+
+## Reference 4: the trophy room with the arcade window
+
+Measured. Map: `rec_room`.
+
+- **Institutional green-beige paint** (170, 171, 111 lit; 130, 131, 73 in
+  shade): school / rec-centre walls.
+- **Pale vinyl tile floor** (179, 181, 134 near) with a dull sheen; drop
+  ceiling (99, 98, 54 in shadow) with a few dim 2×4 troffers and one dark tile.
+- **High display case:** a long glass cabinet built into the top of the
+  wall, dark inside, with mullions. Below it a **freestanding trophy case**
+  (glass, dark base and cap, gold trophies), a flush door painted the wall
+  colour, and a plain **oak cabinet**.
+- **The window into the arcade:** a long horizontal opening at chest height
+  in the right wall, filled with white turned balusters. Through it: a dark
+  arcade (37, 26, 23) lit only by **purple neon and screens** (92, 75, 93).
+  Again: you stand in the plain room and look into the coloured one.
+- Light: dim cool-white troffers; the arcade glow is the only colour.
+
+## Reference 5: La Quinta Inn, 2004 ("it's supposed to be fun, but everyone is yelling")
+
+Measured. Map: `laquinta`.
+
+- **A two-storey atrium breakfast area**: a balcony corridor wraps the
+  upper floor behind a **black wrought-iron railing with wavy balusters**;
+  **round white columns** run the full two storeys.
+- **Breakfast bar** against the back wall: light-wood cabinets (89, 63, 40),
+  dark counter, microwave, toaster, cereal. A **CRT TV on a wall bracket**
+  above it, screen glowing pale cyan (183, 251, 251).
+- **Two spotlights scallop the wall behind the bar** (blown, 254): hard
+  cones on beige paint. The rest of the lower floor is dim (62, 59, 67).
+- **A faux-painted mural** on the upper wall: a potted tree, muddy olive
+  and brown (38, 27, 27 in the dark), lit by nothing.
+- **Dark patterned hotel carpet** (46, 29, 28: burgundy with flecks), a
+  **ceramic tile path** by the doors (near white with teal diamond insets),
+  round café tables with four wooden chairs each, white panel doors.
+- Upper corridor lit by a single **blown wall sconce**. Ceiling dim (91, 82, 75).
+- Camera: from the upper balcony, looking down and across, ~25' up the scene.
+
 ---
 
 ## Palettes (draft)
