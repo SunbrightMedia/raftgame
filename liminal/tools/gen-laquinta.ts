@@ -195,7 +195,7 @@ for (let i = 0; i < steps - 1; i++) {
 m.box([700, LY, LZ - 8], [720, LY + 2, LZ + 38], IRON);   // stair rail end
 m.start([700, 0, LZ], 5.3, 131.8);
 m.write('laquinta', LQ_ROOMS, {
-  light: { luxelSize: 8 },
+  light: { luxelSize: 10 },
   camera: { evComp: -0.5, whiteBalanceK: 3300 },
   fog: { enabled: false },
 });

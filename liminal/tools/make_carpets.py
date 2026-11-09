@@ -11,7 +11,7 @@ to tile without a visible seam:
   - non-repeating patterns (camo, confetti): each edge is joined to the
     opposite one along the least visible path through an overlap band
     (minimum-error boundary cut, as in image quilting), never by fading.
-Writes textures/carpet/<name>.png and the entries in textures/index.json.
+Writes textures/carpet/<name>.jpg and the entries in textures/index.json.
 """
 import json, os
 import cv2
@@ -140,8 +140,8 @@ def main():
         s = 512 / max(h, w)
         if s < 1: t = cv2.resize(t, (round(w * s), round(h * s)), interpolation=cv2.INTER_AREA)
         h, w = t.shape[:2]
-        fname = name.split('/')[1] + '.png'
-        cv2.imwrite(os.path.join(OUT, fname), t[:, :, ::-1])
+        fname = name.split('/')[1] + '.jpg'
+        cv2.imwrite(os.path.join(OUT, fname), t[:, :, ::-1], [cv2.IMWRITE_JPEG_QUALITY, 90])
         entries.append({'name': name, 'file': 'carpet/' + fname, 'size': [world, round(world * h / w, 2)], 'material': 'carpet',
                         'credit': 'Photo of a carpet sample, supplied by the user', 'url': '', 'license': 'user-supplied'})
         print(f'  -> {w}x{h} px, {world}" wide')

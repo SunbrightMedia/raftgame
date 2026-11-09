@@ -55,7 +55,11 @@ export class TextureRegistry {
   async init(): Promise<void> {
     if (this.loaded) return;
     this.loaded = true;
-    const urls = import.meta.glob('../../../textures/**/*.{png,jpg,jpeg}', { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
+    // The published page (one HTML file, 16 MB cap) leaves out the Freedoom set except what maps use;
+    // the dev server and the normal build have all of it.
+    const urls = (import.meta.env.MODE === 'page'
+      ? import.meta.glob(['../../../textures/**/*.{png,jpg,jpeg}', '!../../../textures/freedoom/**', '../../../textures/freedoom/walls/{BROWN1,COMPSTA1}.png', '../../../textures/freedoom/flats/CEIL5_1.png'], { eager: true, query: '?url', import: 'default' })
+      : import.meta.glob('../../../textures/**/*.{png,jpg,jpeg}', { eager: true, query: '?url', import: 'default' })) as Record<string, string>;
     const manifests = import.meta.glob('../../../textures/index.json', { eager: true, import: 'default' }) as Record<string, { textures: ManifestEntry[] }>;
     const manifest = Object.values(manifests)[0]?.textures ?? [];
     const variantFiles = import.meta.glob('../../../textures/variants.json', { eager: true, import: 'default' }) as Record<string, { variants: Variant[] }>;

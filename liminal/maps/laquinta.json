@@ -2,7 +2,7 @@
   "format": "liminal-map",
   "version": 1,
   "name": "laquinta",
-  "settings": {"light":{"luxelSize":8},"camera":{"evComp":-0.5,"whiteBalanceK":3300},"fog":{"enabled":false}},
+  "settings": {"light":{"luxelSize":10},"camera":{"evComp":-0.5,"whiteBalanceK":3300},"fog":{"enabled":false}},
   "brushes": [
     {"id":1,"type":"box","min":[148,-60,-16],"max":[760,506,0],"tex":"lq/carpet"},
     {"id":2,"type":"box","min":[148,-60,0],"max":[274,506,0.25],"tex":"lq/tile"},
