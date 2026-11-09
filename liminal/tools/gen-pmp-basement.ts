@@ -14,6 +14,8 @@
  */
 import { writeFileSync } from 'node:fs';
 import { type BrushDef, type EntityDef, type FaceTex, type V3, MAP_FORMAT, MAP_VERSION, serializeMap } from '../src/data/map';
+import { paintByRoom } from './lib/roomPaint';
+import { PMP_ROOMS } from './lib/pmpRooms';
 
 const brushes: BrushDef[] = [];
 const entities: EntityDef[] = [];
@@ -288,6 +290,8 @@ function casingY(o0: number, o1: number, height: number, faceX: number, dir: 1 |
 
 entities.push({ id: 1, class: 'player_start', origin: [205, 25, 0], angles: [0, 122, 0] });
 
+// Shared walls: each side takes the paint of the room it faces.
+const repainted = paintByRoom(brushes, PMP_ROOMS);
 writeFileSync(new URL('../maps/pmp_basement.json', import.meta.url), serializeMap({
   format: MAP_FORMAT, version: MAP_VERSION, name: 'pmp_basement', brushes, entities,
   // This room's mood (STYLE.md: residential = moody and warm, never sterile).
@@ -299,4 +303,4 @@ writeFileSync(new URL('../maps/pmp_basement.json', import.meta.url), serializeMa
     fog: { enabled: true, color: '#3a2a20', luminance: 0.6, near: 120, far: 2600 },
   },
 }));
-console.log(`wrote maps/pmp_basement.json: ${brushes.length} brushes, ${entities.length} entities`);
+console.log(`wrote maps/pmp_basement.json: ${brushes.length} brushes, ${entities.length} entities, ${repainted} wall faces repainted per room`);
