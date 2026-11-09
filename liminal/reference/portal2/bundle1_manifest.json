@@ -1,0 +1,3938 @@
+[
+{
+"file": "materials/anim_wp/framework/squarebeams_main.vtf",
+"arch": 8,
+"src_off": 87510080,
+"len": 349784,
+"part": 1,
+"off": 0
+},
+{
+"file": "materials/carpet/office_carpet001a.vtf",
+"arch": 8,
+"src_off": 87332920,
+"len": 175008,
+"part": 1,
+"off": 349784
+},
+{
+"file": "materials/concrete/cinderblock01.vtf",
+"arch": 8,
+"src_off": 86633120,
+"len": 349784,
+"part": 1,
+"off": 524792
+},
+{
+"file": "materials/concrete/concrete_bts_floor002a.vtf",
+"arch": 0,
+"src_off": 48659270,
+"len": 699296,
+"part": 1,
+"off": 874576
+},
+{
+"file": "materials/concrete/concrete_bts_floor002a_normal.vtf",
+"arch": 8,
+"src_off": 84534768,
+"len": 349784,
+"part": 1,
+"off": 1573872
+},
+{
+"file": "materials/concrete/concrete_bts_floor002b.vtf",
+"arch": 8,
+"src_off": 83835472,
+"len": 699296,
+"part": 1,
+"off": 1923656
+},
+{
+"file": "materials/concrete/concrete_bts_floor002d.vtf",
+"arch": 0,
+"src_off": 54122850,
+"len": 699296,
+"part": 1,
+"off": 2622952
+},
+{
+"file": "materials/concrete/concrete_bts_modular_wall001a.vtf",
+"arch": 8,
+"src_off": 69676192,
+"len": 174984,
+"part": 1,
+"off": 3322248
+},
+{
+"file": "materials/concrete/concrete_bts_modular_wall001c.vtf",
+"arch": 8,
+"src_off": 69501208,
+"len": 174984,
+"part": 1,
+"off": 3497232
+},
+{
+"file": "materials/concrete/concrete_modular_ceiling001a.vtf",
+"arch": 8,
+"src_off": 69151192,
+"len": 175008,
+"part": 1,
+"off": 3672216
+},
+{
+"file": "materials/concrete/concrete_modular_floor001a.vtf",
+"arch": 8,
+"src_off": 68976184,
+"len": 175008,
+"part": 1,
+"off": 3847224
+},
+{
+"file": "materials/concrete/concrete_modular_floor001a_normal.vtf",
+"arch": 0,
+"src_off": 56919810,
+"len": 175008,
+"part": 1,
+"off": 4022232
+},
+{
+"file": "materials/concrete/concrete_modular_floor001c.vtf",
+"arch": 8,
+"src_off": 68801176,
+"len": 175008,
+"part": 1,
+"off": 4197240
+},
+{
+"file": "materials/concrete/concrete_modular_floor001e.vtf",
+"arch": 0,
+"src_off": 57094818,
+"len": 175008,
+"part": 1,
+"off": 4372248
+},
+{
+"file": "materials/concrete/concrete_modular_floor001f.vtf",
+"arch": 0,
+"src_off": 73715770,
+"len": 699296,
+"part": 1,
+"off": 4547256
+},
+{
+"file": "materials/concrete/concrete_modular_wall001_gradient05.vtf",
+"arch": 8,
+"src_off": 68101216,
+"len": 174984,
+"part": 1,
+"off": 5246552
+},
+{
+"file": "materials/concrete/concrete_modular_wall001a_height-ssbump.vtf",
+"arch": 8,
+"src_off": 66351648,
+"len": 349760,
+"part": 1,
+"off": 5421536
+},
+{
+"file": "materials/concrete/concrete_modular_wall001b.vtf",
+"arch": 8,
+"src_off": 66176664,
+"len": 174984,
+"part": 1,
+"off": 5771296
+},
+{
+"file": "materials/concrete/concretefloor003b.vtf",
+"arch": 8,
+"src_off": 64078272,
+"len": 349784,
+"part": 1,
+"off": 5946280
+},
+{
+"file": "materials/concrete/factory_concrete_wall001a.vtf",
+"arch": 8,
+"src_off": 57434592,
+"len": 175008,
+"part": 1,
+"off": 6296064
+},
+{
+"file": "materials/concrete/factory_concrete_wall001a_height-ssbump.vtf",
+"arch": 8,
+"src_off": 56560280,
+"len": 699304,
+"part": 1,
+"off": 6471072
+},
+{
+"file": "materials/concrete/observationwall_001b.vtf",
+"arch": 0,
+"src_off": 84930434,
+"len": 175008,
+"part": 1,
+"off": 7170376
+},
+{
+"file": "materials/concrete/underground_concrete_ceiling002.vtf",
+"arch": 8,
+"src_off": 50966104,
+"len": 699296,
+"part": 1,
+"off": 7345384
+},
+{
+"file": "materials/concrete/underground_concrete_tile001.vtf",
+"arch": 8,
+"src_off": 50266808,
+"len": 699296,
+"part": 1,
+"off": 8044680
+},
+{
+"file": "materials/concrete/underground_concrete_tile001b.vtf",
+"arch": 8,
+"src_off": 49567512,
+"len": 699296,
+"part": 1,
+"off": 8743976
+},
+{
+"file": "materials/de_chateau/woodm.vtf",
+"arch": 8,
+"src_off": 47718296,
+"len": 175008,
+"part": 1,
+"off": 9443272
+},
+{
+"file": "materials/detail/detail_concrete001a.vtf",
+"arch": 8,
+"src_off": 39751384,
+"len": 175008,
+"part": 1,
+"off": 9618280
+},
+{
+"file": "materials/detail/detail_concrete_01.vtf",
+"arch": 0,
+"src_off": 81411650,
+"len": 175008,
+"part": 1,
+"off": 9793288
+},
+{
+"file": "materials/detail/detail_dirt02a.vtf",
+"arch": 0,
+"src_off": 78264738,
+"len": 699304,
+"part": 1,
+"off": 9968296
+},
+{
+"file": "materials/detail/detail_fractal04c.vtf",
+"arch": 8,
+"src_off": 37653488,
+"len": 699296,
+"part": 1,
+"off": 10667600
+},
+{
+"file": "materials/detail/detail_tile.vtf",
+"arch": 0,
+"src_off": 60066554,
+"len": 349784,
+"part": 1,
+"off": 11366896
+},
+{
+"file": "materials/detail/white_floor_detail_height-ssbump.vtf",
+"arch": 0,
+"src_off": 53751062,
+"len": 22076,
+"part": 1,
+"off": 11716680
+},
+{
+"file": "materials/dev/dev_measuregeneric01b.vtf",
+"arch": 8,
+"src_off": 36094416,
+"len": 11128,
+"part": 1,
+"off": 11738756
+},
+{
+"file": "materials/dev/dev_measurewall01d.vtf",
+"arch": 8,
+"src_off": 35744480,
+"len": 174968,
+"part": 1,
+"off": 11749884
+},
+{
+"file": "materials/glass/glasswindow002a.vtf",
+"arch": 8,
+"src_off": 1923880,
+"len": 349792,
+"part": 1,
+"off": 11924852
+},
+{
+"file": "materials/glass/glasswindow007a.vtf",
+"arch": 0,
+"src_off": 85105442,
+"len": 349784,
+"part": 1,
+"off": 12274644
+},
+{
+"file": "materials/glass/glasswindow007a_mask.vtf",
+"arch": 0,
+"src_off": 85455226,
+"len": 175008,
+"part": 1,
+"off": 12624428
+},
+{
+"file": "materials/glass/glasswindow_frosted_003b.vtf",
+"arch": 8,
+"src_off": 349760,
+"len": 349784,
+"part": 1,
+"off": 12799436
+},
+{
+"file": "materials/liquids/toxicslime_color.vtf",
+"arch": 7,
+"src_off": 187450367,
+"len": 1398360,
+"part": 1,
+"off": 13149220
+},
+{
+"file": "materials/liquids/water_river_normal_sharp.vtf",
+"arch": 7,
+"src_off": 186750567,
+"len": 349784,
+"part": 1,
+"off": 14547580
+},
+{
+"file": "materials/metal/backstage_grate_001a.vtf",
+"arch": 7,
+"src_off": 185701563,
+"len": 349784,
+"part": 1,
+"off": 14897364
+},
+{
+"file": "materials/metal/black_wall_metal_002f.vtf",
+"arch": 7,
+"src_off": 160877473,
+"len": 699304,
+"part": 1,
+"off": 15247148
+},
+{
+"file": "materials/metal/black_wall_metal_002f_normal.vtf",
+"arch": 7,
+"src_off": 159479113,
+"len": 1398360,
+"part": 1,
+"off": 15946452
+},
+{
+"file": "materials/metal/black_wall_metal_004d.vtf",
+"arch": 7,
+"src_off": 143396833,
+"len": 1398368,
+"part": 1,
+"off": 17344812
+},
+{
+"file": "materials/metal/black_wall_metal_004d_normal.vtf",
+"arch": 7,
+"src_off": 141998473,
+"len": 1398360,
+"part": 1,
+"off": 18743180
+},
+{
+"file": "materials/metal/black_wall_metal_006b.vtf",
+"arch": 7,
+"src_off": 117526761,
+"len": 1398368,
+"part": 1,
+"off": 20141540
+},
+{
+"file": "materials/metal/black_wall_metal_006b_height-ssbump.vtf",
+"arch": 7,
+"src_off": 116128401,
+"len": 1398360,
+"part": 1,
+"off": 21539908
+},
+{
+"file": "materials/metal/factory_metal_floor001a.vtf",
+"arch": 7,
+"src_off": 102842321,
+"len": 349784,
+"part": 1,
+"off": 22938268
+},
+{
+"file": "materials/metal/factory_metal_floor001a-height-ssbump.vtf",
+"arch": 7,
+"src_off": 103192105,
+"len": 349784,
+"part": 1,
+"off": 23288052
+},
+{
+"file": "materials/metal/factory_metal_floor001b.vtf",
+"arch": 7,
+"src_off": 102492537,
+"len": 349784,
+"part": 1,
+"off": 23637836
+},
+{
+"file": "materials/metal/factory_metal_floor001c.vtf",
+"arch": 7,
+"src_off": 102317529,
+"len": 175008,
+"part": 1,
+"off": 23987620
+},
+{
+"file": "materials/metal/metal_modular_floor001_height-ssbump.vtf",
+"arch": 7,
+"src_off": 100568145,
+"len": 349784,
+"part": 1,
+"off": 24162628
+},
+{
+"file": "materials/metal/metal_modular_floor002.vtf",
+"arch": 7,
+"src_off": 100393137,
+"len": 175008,
+"part": 1,
+"off": 24512412
+},
+{
+"file": "materials/metal/metalwall_bts_001b.vtf",
+"arch": 7,
+"src_off": 93036653,
+"len": 174984,
+"part": 1,
+"off": 24687420
+},
+{
+"file": "materials/metal/metalwall_bts_003a.vtf",
+"arch": 7,
+"src_off": 91986605,
+"len": 175008,
+"part": 1,
+"off": 24862404
+},
+{
+"file": "materials/metal/metalwall_bts_006a.vtf",
+"arch": 0,
+"src_off": 46291387,
+"len": 175008,
+"part": 1,
+"off": 25037412
+},
+{
+"file": "materials/metal/metalwall_bts_006a_height-ssbump.vtf",
+"arch": 7,
+"src_off": 91287061,
+"len": 349784,
+"part": 1,
+"off": 25212420
+},
+{
+"file": "materials/metal/underground_metal_ceiling001.vtf",
+"arch": 7,
+"src_off": 82763405,
+"len": 175008,
+"part": 1,
+"off": 25562204
+},
+{
+"file": "materials/metal/underground_metal_corrugated001.vtf",
+"arch": 7,
+"src_off": 82588397,
+"len": 175008,
+"part": 1,
+"off": 25737212
+},
+{
+"file": "materials/metal/underground_wall_metal004a_normal.vtf",
+"arch": 7,
+"src_off": 71223445,
+"len": 349784,
+"part": 1,
+"off": 25912220
+},
+{
+"file": "materials/metal/underground_wall_metal004b.vtf",
+"arch": 7,
+"src_off": 70698653,
+"len": 349784,
+"part": 1,
+"off": 26262004
+},
+{
+"file": "materials/metal/underground_wall_metal004b_bottom.vtf",
+"arch": 7,
+"src_off": 70523645,
+"len": 175008,
+"part": 1,
+"off": 26611788
+},
+{
+"file": "materials/metal/underground_wall_metal004c_bottom.vtf",
+"arch": 7,
+"src_off": 69823845,
+"len": 175008,
+"part": 1,
+"off": 26786796
+},
+{
+"file": "materials/metal/underground_wall_metal004e.vtf",
+"arch": 7,
+"src_off": 69298821,
+"len": 175008,
+"part": 1,
+"off": 26961804
+},
+{
+"file": "materials/metal/underground_wall_rubber001a.vtf",
+"arch": 7,
+"src_off": 69123813,
+"len": 175008,
+"part": 1,
+"off": 27136812
+},
+{
+"file": "materials/models/anim_wp/framework/squarebeams_skin2.vtf",
+"arch": 0,
+"src_off": 49380734,
+"len": 175008,
+"part": 1,
+"off": 27311820
+},
+{
+"file": "materials/nature/dirtfloor004a.vtf",
+"arch": 3,
+"src_off": 132124807,
+"len": 699296,
+"part": 1,
+"off": 27486828
+},
+{
+"file": "materials/nature/forest_dirt_02.vtf",
+"arch": 3,
+"src_off": 131600015,
+"len": 175008,
+"part": 2,
+"off": 0
+},
+{
+"file": "materials/nature/rockblendtexture001a.vtf",
+"arch": 3,
+"src_off": 130199951,
+"len": 175008,
+"part": 2,
+"off": 175008
+},
+{
+"file": "materials/nature/rockwall_cave02a.vtf",
+"arch": 3,
+"src_off": 129500655,
+"len": 699296,
+"part": 2,
+"off": 350016
+},
+{
+"file": "materials/nature/rockwall_cave_02a_height-ssbump.vtf",
+"arch": 3,
+"src_off": 128102295,
+"len": 1398360,
+"part": 2,
+"off": 1049312
+},
+{
+"file": "materials/overlays/garagegroundmarking01f.vtf",
+"arch": 3,
+"src_off": 120603944,
+"len": 174944,
+"part": 2,
+"off": 2447672
+},
+{
+"file": "materials/plaster/paintwall006-normal.vtf",
+"arch": 3,
+"src_off": 85229170,
+"len": 1398360,
+"part": 2,
+"off": 2622616
+},
+{
+"file": "materials/plaster/plaster_wall007c.vtf",
+"arch": 3,
+"src_off": 82409178,
+"len": 175008,
+"part": 2,
+"off": 4020976
+},
+{
+"file": "materials/plastic/office_plasticwall001a.vtf",
+"arch": 0,
+"src_off": 194143322,
+"len": 175008,
+"part": 2,
+"off": 4195984
+},
+{
+"file": "materials/plastic/office_plasticwall001c.vtf",
+"arch": 3,
+"src_off": 80823186,
+"len": 175008,
+"part": 2,
+"off": 4370992
+},
+{
+"file": "materials/plastic/office_plasticwall001c_bottom.vtf",
+"arch": 3,
+"src_off": 80648178,
+"len": 175008,
+"part": 2,
+"off": 4546000
+},
+{
+"file": "materials/plastic/plasticwall001b.vtf",
+"arch": 3,
+"src_off": 78768250,
+"len": 174984,
+"part": 2,
+"off": 4721008
+},
+{
+"file": "materials/plastic/plasticwall001b_normal.vtf",
+"arch": 3,
+"src_off": 78593266,
+"len": 174984,
+"part": 2,
+"off": 4895992
+},
+{
+"file": "materials/plastic/plasticwall002a.vtf",
+"arch": 3,
+"src_off": 78418258,
+"len": 175008,
+"part": 2,
+"off": 5070976
+},
+{
+"file": "materials/plastic/plasticwall1970_01_bottom.vtf",
+"arch": 3,
+"src_off": 78002306,
+"len": 175008,
+"part": 2,
+"off": 5245984
+},
+{
+"file": "materials/props/metaldoor01_192.vtf",
+"arch": 3,
+"src_off": 73269626,
+"len": 349720,
+"part": 2,
+"off": 5420992
+},
+{
+"file": "materials/props/plasticwall002a.vtf",
+"arch": 3,
+"src_off": 71696058,
+"len": 699296,
+"part": 2,
+"off": 5770712
+},
+{
+"file": "materials/props/plasticwall003c-height-ssbump.vtf",
+"arch": 0,
+"src_off": 87028594,
+"len": 1398360,
+"part": 2,
+"off": 6470008
+},
+{
+"file": "materials/signage/signage_overlay_arrow.vtf",
+"arch": 3,
+"src_off": 59287450,
+"len": 22104,
+"part": 2,
+"off": 7868368
+},
+{
+"file": "materials/signage/sloped_surface.vtf",
+"arch": 3,
+"src_off": 56569834,
+"len": 349784,
+"part": 2,
+"off": 7890472
+},
+{
+"file": "materials/skybox/stars01.vtf",
+"arch": 3,
+"src_off": 10556570,
+"len": 699296,
+"part": 2,
+"off": 8240256
+},
+{
+"file": "materials/tile/1970_tile_floor_01.vtf",
+"arch": 3,
+"src_off": 9615904,
+"len": 175008,
+"part": 2,
+"off": 8939552
+},
+{
+"file": "materials/tile/1970_tile_floor_02.vtf",
+"arch": 3,
+"src_off": 9265888,
+"len": 175008,
+"part": 2,
+"off": 9114560
+},
+{
+"file": "materials/tile/aperture_ceiling001a.vtf",
+"arch": 3,
+"src_off": 8566592,
+"len": 699296,
+"part": 2,
+"off": 9289568
+},
+{
+"file": "materials/tile/ceiling_tile002b.vtf",
+"arch": 0,
+"src_off": 55521442,
+"len": 1398368,
+"part": 2,
+"off": 9988864
+},
+{
+"file": "materials/tile/ceiling_tile_height-ssbump.vtf",
+"arch": 0,
+"src_off": 54822146,
+"len": 699296,
+"part": 2,
+"off": 11387232
+},
+{
+"file": "materials/tile/lobby_tilefloor_1940_001b.vtf",
+"arch": 3,
+"src_off": 349784,
+"len": 699296,
+"part": 2,
+"off": 12086528
+},
+{
+"file": "materials/tile/observation_tileceiling001a.vtf",
+"arch": 0,
+"src_off": 81608690,
+"len": 175008,
+"part": 2,
+"off": 12785824
+},
+{
+"file": "materials/tile/observation_tilefloor001a.vtf",
+"arch": 0,
+"src_off": 83182058,
+"len": 699296,
+"part": 2,
+"off": 12960832
+},
+{
+"file": "materials/tile/observation_tilefloor001a-height-ssbump.vtf",
+"arch": 0,
+"src_off": 81783698,
+"len": 1398360,
+"part": 2,
+"off": 13660128
+},
+{
+"file": "materials/tile/office_tilefloor002a.vtf",
+"arch": 2,
+"src_off": 208417203,
+"len": 175008,
+"part": 2,
+"off": 15058488
+},
+{
+"file": "materials/tile/office_tilefloor003a.vtf",
+"arch": 2,
+"src_off": 208242195,
+"len": 175008,
+"part": 2,
+"off": 15233496
+},
+{
+"file": "materials/tile/tile_ceiling_001a.vtf",
+"arch": 0,
+"src_off": 94852466,
+"len": 175016,
+"part": 2,
+"off": 15408504
+},
+{
+"file": "materials/tile/tile_ceiling_001a_height-ssbump.vtf",
+"arch": 0,
+"src_off": 93454106,
+"len": 1398360,
+"part": 2,
+"off": 15583520
+},
+{
+"file": "materials/tile/underground_black_tile_002c.vtf",
+"arch": 2,
+"src_off": 203696867,
+"len": 175008,
+"part": 2,
+"off": 16981880
+},
+{
+"file": "materials/tile/underground_white_tile002b.vtf",
+"arch": 2,
+"src_off": 200724899,
+"len": 1398360,
+"part": 2,
+"off": 17156888
+},
+{
+"file": "materials/tile/underground_white_tile_001a.vtf",
+"arch": 2,
+"src_off": 200200107,
+"len": 175008,
+"part": 2,
+"off": 18555248
+},
+{
+"file": "materials/tile/underground_white_tile_001a-height-ssbump.vtf",
+"arch": 2,
+"src_off": 200375115,
+"len": 349784,
+"part": 2,
+"off": 18730256
+},
+{
+"file": "materials/tile/underground_white_tile_001b.vtf",
+"arch": 2,
+"src_off": 199500539,
+"len": 349784,
+"part": 2,
+"off": 19080040
+},
+{
+"file": "materials/tile/underground_white_tile_001b-height-ssbump.vtf",
+"arch": 2,
+"src_off": 199850323,
+"len": 349784,
+"part": 2,
+"off": 19429824
+},
+{
+"file": "materials/tile/white_ceiling_tile001a.vtf",
+"arch": 2,
+"src_off": 198975747,
+"len": 175008,
+"part": 2,
+"off": 19779608
+},
+{
+"file": "materials/tile/white_floor_tile001a.vtf",
+"arch": 2,
+"src_off": 195304715,
+"len": 175008,
+"part": 2,
+"off": 19954616
+},
+{
+"file": "materials/tile/white_floor_tile001b.vtf",
+"arch": 2,
+"src_off": 195129707,
+"len": 175008,
+"part": 2,
+"off": 20129624
+},
+{
+"file": "materials/tile/white_floor_tile002a_normal.vtf",
+"arch": 0,
+"src_off": 76167074,
+"len": 1398360,
+"part": 2,
+"off": 20304632
+},
+{
+"file": "materials/tile/white_floor_tile004c.vtf",
+"arch": 2,
+"src_off": 187438563,
+"len": 1398368,
+"part": 2,
+"off": 21702992
+},
+{
+"file": "materials/tools/toolsareaportal.vtf",
+"arch": 2,
+"src_off": 171519939,
+"len": 5680,
+"part": 2,
+"off": 23101360
+},
+{
+"file": "materials/tools/toolsareaportal-dx10.vtf",
+"arch": 2,
+"src_off": 44728602,
+"len": 5720,
+"part": 2,
+"off": 23107040
+},
+{
+"file": "materials/tools/toolsblack.vtf",
+"arch": 0,
+"src_off": 48302126,
+"len": 2936,
+"part": 2,
+"off": 23112760
+},
+{
+"file": "materials/tools/toolsclip.vtf",
+"arch": 2,
+"src_off": 171485779,
+"len": 5680,
+"part": 2,
+"off": 23115696
+},
+{
+"file": "materials/tools/toolsclip-dx10.vtf",
+"arch": 2,
+"src_off": 44734322,
+"len": 5720,
+"part": 2,
+"off": 23121376
+},
+{
+"file": "materials/tools/toolsinvisible.vtf",
+"arch": 2,
+"src_off": 171474419,
+"len": 5680,
+"part": 2,
+"off": 23127096
+},
+{
+"file": "materials/tools/toolsinvisible-dx10.vtf",
+"arch": 2,
+"src_off": 44722882,
+"len": 5720,
+"part": 2,
+"off": 23132776
+},
+{
+"file": "materials/tools/toolsnodraw.vtf",
+"arch": 0,
+"src_off": 97462170,
+"len": 2936,
+"part": 2,
+"off": 23138496
+},
+{
+"file": "materials/tools/toolsplayerclip.vtf",
+"arch": 2,
+"src_off": 171454363,
+"len": 5680,
+"part": 2,
+"off": 23141432
+},
+{
+"file": "materials/tools/toolsplayerclip-dx10.vtf",
+"arch": 2,
+"src_off": 44705722,
+"len": 5720,
+"part": 2,
+"off": 23147112
+},
+{
+"file": "materials/tools/toolsskybox.vtf",
+"arch": 0,
+"src_off": 66273930,
+"len": 11128,
+"part": 2,
+"off": 23152832
+},
+{
+"file": "materials/wood/milflr002.vtf",
+"arch": 2,
+"src_off": 75504818,
+"len": 175008,
+"part": 2,
+"off": 23163960
+},
+{
+"file": "materials/wood/underground_plywood_01a_bottom.vtf",
+"arch": 2,
+"src_off": 70435434,
+"len": 699296,
+"part": 2,
+"off": 23338968
+},
+{
+"file": "materials/wood/underground_plywood_01a_bottom-height-ssbump.vtf",
+"arch": 2,
+"src_off": 71134730,
+"len": 1398360,
+"part": 2,
+"off": 24038264
+},
+{
+"file": "materials/wood/woodpanel_002.vtf",
+"arch": 2,
+"src_off": 68161146,
+"len": 175008,
+"part": 2,
+"off": 25436624
+},
+{
+"file": "models/anim_wp/framework/squarebeam_off_2x2.mdl",
+"arch": 0,
+"src_off": 125902334,
+"len": 1980,
+"part": 2,
+"off": 25611632
+},
+{
+"file": "models/anim_wp/framework/squarebeam_off_2x2.vvd",
+"arch": 0,
+"src_off": 125904314,
+"len": 14400,
+"part": 2,
+"off": 25613612
+},
+{
+"file": "models/anim_wp/framework/squarebeam_off_2x2.dx90.vtx",
+"arch": 114,
+"src_off": 1110714,
+"len": 2845,
+"part": 2,
+"off": 25628012
+},
+{
+"file": "models/br_debris/deb_broken_radio.mdl",
+"arch": 43,
+"src_off": 115015873,
+"len": 1748,
+"part": 2,
+"off": 25630857
+},
+{
+"file": "models/br_debris/deb_broken_radio.vvd",
+"arch": 43,
+"src_off": 115017621,
+"len": 48704,
+"part": 2,
+"off": 25632605
+},
+{
+"file": "models/br_debris/deb_broken_radio.dx90.vtx",
+"arch": 114,
+"src_off": 110080066,
+"len": 10585,
+"part": 2,
+"off": 25681309
+},
+{
+"file": "models/br_debris/train_axle.mdl",
+"arch": 43,
+"src_off": 110313279,
+"len": 1812,
+"part": 2,
+"off": 25691894
+},
+{
+"file": "models/br_debris/train_axle.vvd",
+"arch": 43,
+"src_off": 110315091,
+"len": 65216,
+"part": 2,
+"off": 25693706
+},
+{
+"file": "models/br_debris/train_axle.dx90.vtx",
+"arch": 114,
+"src_off": 109326466,
+"len": 15691,
+"part": 2,
+"off": 25758922
+},
+{
+"file": "models/br_debris/train_axle.phy",
+"arch": 43,
+"src_off": 110395998,
+"len": 1461,
+"part": 2,
+"off": 25774613
+},
+{
+"file": "models/prop_cables/cable_box_02.mdl",
+"arch": 25,
+"src_off": 96465748,
+"len": 1752,
+"part": 2,
+"off": 25776074
+},
+{
+"file": "models/prop_cables/cable_box_02.vvd",
+"arch": 25,
+"src_off": 96467500,
+"len": 22720,
+"part": 2,
+"off": 25777826
+},
+{
+"file": "models/prop_cables/cable_box_02.dx90.vtx",
+"arch": 114,
+"src_off": 69115900,
+"len": 5767,
+"part": 2,
+"off": 25800546
+},
+{
+"file": "models/prop_cables/cable_box_03.mdl",
+"arch": 25,
+"src_off": 96448079,
+"len": 1752,
+"part": 2,
+"off": 25806313
+},
+{
+"file": "models/prop_cables/cable_box_03.vvd",
+"arch": 25,
+"src_off": 96449831,
+"len": 13120,
+"part": 2,
+"off": 25808065
+},
+{
+"file": "models/prop_cables/cable_box_03.dx90.vtx",
+"arch": 114,
+"src_off": 69113103,
+"len": 2797,
+"part": 2,
+"off": 25821185
+},
+{
+"file": "models/prop_cables/cable_floor_08.mdl",
+"arch": 25,
+"src_off": 96177665,
+"len": 1752,
+"part": 2,
+"off": 25823982
+},
+{
+"file": "models/prop_cables/cable_floor_08.vvd",
+"arch": 25,
+"src_off": 96179417,
+"len": 28160,
+"part": 2,
+"off": 25825734
+},
+{
+"file": "models/prop_cables/cable_floor_08.dx90.vtx",
+"arch": 114,
+"src_off": 69053185,
+"len": 8596,
+"part": 2,
+"off": 25853894
+},
+{
+"file": "models/props/de_train/ladderaluminium.mdl",
+"arch": 25,
+"src_off": 88401905,
+"len": 1812,
+"part": 2,
+"off": 25862490
+},
+{
+"file": "models/props/de_train/ladderaluminium.vvd",
+"arch": 25,
+"src_off": 88403717,
+"len": 41536,
+"part": 2,
+"off": 25864302
+},
+{
+"file": "models/props/de_train/ladderaluminium.dx90.vtx",
+"arch": 114,
+"src_off": 67015119,
+"len": 8805,
+"part": 2,
+"off": 25905838
+},
+{
+"file": "models/props/de_train/ladderaluminium.phy",
+"arch": 25,
+"src_off": 88454058,
+"len": 1502,
+"part": 2,
+"off": 25914643
+},
+{
+"file": "models/props/food_can/food_can_open.mdl",
+"arch": 25,
+"src_off": 84700010,
+"len": 1800,
+"part": 2,
+"off": 25916145
+},
+{
+"file": "models/props/food_can/food_can_open.vvd",
+"arch": 25,
+"src_off": 84701810,
+"len": 43264,
+"part": 2,
+"off": 25917945
+},
+{
+"file": "models/props/food_can/food_can_open.dx90.vtx",
+"arch": 114,
+"src_off": 66044846,
+"len": 8680,
+"part": 2,
+"off": 25961209
+},
+{
+"file": "models/props/food_can/food_can_open.phy",
+"arch": 25,
+"src_off": 84753754,
+"len": 1884,
+"part": 2,
+"off": 25969889
+},
+{
+"file": "models/props/lab_desk02/lab_desk02.mdl",
+"arch": 25,
+"src_off": 83127550,
+"len": 1732,
+"part": 2,
+"off": 25971773
+},
+{
+"file": "models/props/lab_desk02/lab_desk02.vvd",
+"arch": 25,
+"src_off": 83129282,
+"len": 58944,
+"part": 2,
+"off": 25973505
+},
+{
+"file": "models/props/lab_desk02/lab_desk02.dx90.vtx",
+"arch": 114,
+"src_off": 65694789,
+"len": 11461,
+"part": 2,
+"off": 26032449
+},
+{
+"file": "models/props/lab_desk02/lab_desk02.phy",
+"arch": 25,
+"src_off": 83199687,
+"len": 2672,
+"part": 2,
+"off": 26043910
+},
+{
+"file": "models/props/lab_desk05/lab_desk05.mdl",
+"arch": 0,
+"src_off": 193677535,
+"len": 1732,
+"part": 2,
+"off": 26046582
+},
+{
+"file": "models/props/lab_desk05/lab_desk05.vvd",
+"arch": 0,
+"src_off": 193679267,
+"len": 66368,
+"part": 2,
+"off": 26048314
+},
+{
+"file": "models/props/lab_desk05/lab_desk05.dx90.vtx",
+"arch": 114,
+"src_off": 4403455,
+"len": 12805,
+"part": 2,
+"off": 26114682
+},
+{
+"file": "models/props/lab_desk05/lab_desk05.phy",
+"arch": 0,
+"src_off": 209679050,
+"len": 3064,
+"part": 2,
+"off": 26127487
+},
+{
+"file": "models/props/terror/hamradio.mdl",
+"arch": 25,
+"src_off": 69037600,
+"len": 1736,
+"part": 2,
+"off": 26130551
+},
+{
+"file": "models/props/terror/hamradio.vvd",
+"arch": 25,
+"src_off": 69039336,
+"len": 121408,
+"part": 2,
+"off": 26132287
+},
+{
+"file": "models/props/terror/hamradio.dx90.vtx",
+"arch": 114,
+"src_off": 61799722,
+"len": 31211,
+"part": 2,
+"off": 26253695
+},
+{
+"file": "models/props/terror/hamradio.phy",
+"arch": 25,
+"src_off": 69191955,
+"len": 1512,
+"part": 2,
+"off": 26284906
+},
+{
+"file": "models/props/water_bottle/water_bottle.mdl",
+"arch": 25,
+"src_off": 62908095,
+"len": 1800,
+"part": 2,
+"off": 26286418
+},
+{
+"file": "models/props/water_bottle/water_bottle.vvd",
+"arch": 25,
+"src_off": 62909895,
+"len": 62144,
+"part": 2,
+"off": 26288218
+},
+{
+"file": "models/props/water_bottle/water_bottle.dx90.vtx",
+"arch": 114,
+"src_off": 60476250,
+"len": 12511,
+"part": 2,
+"off": 26350362
+},
+{
+"file": "models/props/water_bottle/water_bottle.phy",
+"arch": 25,
+"src_off": 62984550,
+"len": 3138,
+"part": 2,
+"off": 26362873
+},
+{
+"file": "models/props_bts/bts_clipboard.mdl",
+"arch": 1,
+"src_off": 53992290,
+"len": 2184,
+"part": 2,
+"off": 26366011
+},
+{
+"file": "models/props_bts/bts_clipboard.vvd",
+"arch": 1,
+"src_off": 53995504,
+"len": 7360,
+"part": 2,
+"off": 26368195
+},
+{
+"file": "models/props_bts/bts_clipboard.dx90.vtx",
+"arch": 114,
+"src_off": 6157144,
+"len": 1687,
+"part": 2,
+"off": 26375555
+},
+{
+"file": "models/props_bts/bts_clipboard.phy",
+"arch": 1,
+"src_off": 53994474,
+"len": 1030,
+"part": 2,
+"off": 26377242
+},
+{
+"file": "models/props_bts/hanging_stair_128.mdl",
+"arch": 0,
+"src_off": 158022602,
+"len": 1760,
+"part": 2,
+"off": 26378272
+},
+{
+"file": "models/props_bts/hanging_stair_128.vvd",
+"arch": 0,
+"src_off": 158024362,
+"len": 357056,
+"part": 2,
+"off": 26380032
+},
+{
+"file": "models/props_bts/hanging_stair_128.dx90.vtx",
+"arch": 114,
+"src_off": 1932486,
+"len": 90898,
+"part": 2,
+"off": 26737088
+},
+{
+"file": "models/props_bts/hanging_stair_128.phy",
+"arch": 0,
+"src_off": 209607063,
+"len": 4166,
+"part": 2,
+"off": 26827986
+},
+{
+"file": "models/props_bts/hanging_stair_256.mdl",
+"arch": 25,
+"src_off": 23399242,
+"len": 1760,
+"part": 2,
+"off": 26832152
+},
+{
+"file": "models/props_bts/hanging_stair_256.vvd",
+"arch": 25,
+"src_off": 23401002,
+"len": 509120,
+"part": 2,
+"off": 26833912
+},
+{
+"file": "models/props_bts/hanging_stair_256.dx90.vtx",
+"arch": 114,
+"src_off": 53054243,
+"len": 132622,
+"part": 2,
+"off": 27343032
+},
+{
+"file": "models/props_bts/hanging_stair_256.phy",
+"arch": 25,
+"src_off": 24042744,
+"len": 4198,
+"part": 2,
+"off": 27475654
+},
+{
+"file": "models/props_bts/hanging_walkway_512a.mdl",
+"arch": 25,
+"src_off": 21111385,
+"len": 1764,
+"part": 2,
+"off": 27479852
+},
+{
+"file": "models/props_bts/hanging_walkway_512a.vvd",
+"arch": 25,
+"src_off": 21113149,
+"len": 84544,
+"part": 2,
+"off": 27481616
+},
+{
+"file": "models/props_bts/hanging_walkway_512a.dx90.vtx",
+"arch": 114,
+"src_off": 52634762,
+"len": 17077,
+"part": 2,
+"off": 27566160
+},
+{
+"file": "models/props_bts/hanging_walkway_512a.phy",
+"arch": 25,
+"src_off": 21214770,
+"len": 1721,
+"part": 2,
+"off": 27583237
+},
+{
+"file": "models/props_bts/hanging_walkway_corner.mdl",
+"arch": 0,
+"src_off": 182411589,
+"len": 1764,
+"part": 2,
+"off": 27584958
+},
+{
+"file": "models/props_bts/hanging_walkway_corner.vvd",
+"arch": 0,
+"src_off": 182413353,
+"len": 175232,
+"part": 2,
+"off": 27586722
+},
+{
+"file": "models/props_bts/hanging_walkway_corner.dx90.vtx",
+"arch": 114,
+"src_off": 3457909,
+"len": 43006,
+"part": 2,
+"off": 27761954
+},
+{
+"file": "models/props_bts/hanging_walkway_corner.phy",
+"arch": 0,
+"src_off": 209641396,
+"len": 5066,
+"part": 2,
+"off": 27804960
+},
+{
+"file": "models/props_bts/light_cage001a.mdl",
+"arch": 0,
+"src_off": 208343286,
+"len": 1936,
+"part": 2,
+"off": 27810026
+},
+{
+"file": "models/props_bts/light_cage001a.vvd",
+"arch": 0,
+"src_off": 208345222,
+"len": 75520,
+"part": 2,
+"off": 27811962
+},
+{
+"file": "models/props_bts/light_cage001a.dx90.vtx",
+"arch": 114,
+"src_off": 4946306,
+"len": 16078,
+"part": 2,
+"off": 27887482
+},
+{
+"file": "models/props_bts/light_cage001a.phy",
+"arch": 1,
+"src_off": 0,
+"len": 713,
+"part": 2,
+"off": 27903560
+},
+{
+"file": "models/props_bts/light_hanging_1a.mdl",
+"arch": 0,
+"src_off": 131838794,
+"len": 1756,
+"part": 2,
+"off": 27904273
+},
+{
+"file": "models/props_bts/light_hanging_1a.vvd",
+"arch": 0,
+"src_off": 131840550,
+"len": 61888,
+"part": 2,
+"off": 27906029
+},
+{
+"file": "models/props_bts/light_hanging_1a.dx90.vtx",
+"arch": 114,
+"src_off": 1428354,
+"len": 14275,
+"part": 2,
+"off": 27967917
+},
+{
+"file": "models/props_bts/light_hanging_1a.phy",
+"arch": 0,
+"src_off": 209572071,
+"len": 13123,
+"part": 2,
+"off": 27982192
+},
+{
+"file": "models/props_bts/push_button_stand.mdl",
+"arch": 25,
+"src_off": 13245543,
+"len": 1868,
+"part": 2,
+"off": 27995315
+},
+{
+"file": "models/props_bts/push_button_stand.vvd",
+"arch": 25,
+"src_off": 13247411,
+"len": 154432,
+"part": 2,
+"off": 27997183
+},
+{
+"file": "models/props_bts/push_button_stand.dx90.vtx",
+"arch": 114,
+"src_off": 51243138,
+"len": 33817,
+"part": 2,
+"off": 28151615
+},
+{
+"file": "models/props_bts/push_button_stand.phy",
+"arch": 25,
+"src_off": 13435660,
+"len": 1448,
+"part": 2,
+"off": 28185432
+},
+{
+"file": "models/props_bts/rail_horizontal_straight_128.mdl",
+"arch": 0,
+"src_off": 133315073,
+"len": 1764,
+"part": 2,
+"off": 28186880
+},
+{
+"file": "models/props_bts/rail_horizontal_straight_128.vvd",
+"arch": 0,
+"src_off": 133316837,
+"len": 5440,
+"part": 2,
+"off": 28188644
+},
+{
+"file": "models/props_bts/rail_horizontal_straight_128.dx90.vtx",
+"arch": 114,
+"src_off": 1442629,
+"len": 1177,
+"part": 2,
+"off": 28194084
+},
+{
+"file": "models/props_bts/rail_horizontal_straight_128.phy",
+"arch": 0,
+"src_off": 209585194,
+"len": 731,
+"part": 2,
+"off": 28195261
+},
+{
+"file": "models/props_destruction/debris_dest_cluster01.mdl",
+"arch": 24,
+"src_off": 205953220,
+"len": 1776,
+"part": 2,
+"off": 28195992
+},
+{
+"file": "models/props_destruction/debris_dest_cluster01.vvd",
+"arch": 24,
+"src_off": 205954996,
+"len": 896256,
+"part": 3,
+"off": 0
+},
+{
+"file": "models/props_destruction/debris_dest_cluster01.dx90.vtx",
+"arch": 114,
+"src_off": 47496346,
+"len": 258469,
+"part": 3,
+"off": 896256
+},
+{
+"file": "models/props_destruction/debris_dest_cluster01.phy",
+"arch": 24,
+"src_off": 207109721,
+"len": 819,
+"part": 3,
+"off": 1154725
+},
+{
+"file": "models/props_destruction/debris_dest_phys_02_blacktiles.mdl",
+"arch": 0,
+"src_off": 195298095,
+"len": 1776,
+"part": 3,
+"off": 1155544
+},
+{
+"file": "models/props_destruction/debris_dest_phys_02_blacktiles.vvd",
+"arch": 0,
+"src_off": 195299871,
+"len": 307712,
+"part": 3,
+"off": 1157320
+},
+{
+"file": "models/props_destruction/debris_dest_phys_02_blacktiles.dx90.vtx",
+"arch": 114,
+"src_off": 4494847,
+"len": 69406,
+"part": 3,
+"off": 1465032
+},
+{
+"file": "models/props_destruction/debris_dest_phys_02_blacktiles.phy",
+"arch": 0,
+"src_off": 209690922,
+"len": 3352,
+"part": 3,
+"off": 1534438
+},
+{
+"file": "models/props_destruction/glass_192x128_b.mdl",
+"arch": 24,
+"src_off": 201812217,
+"len": 1808,
+"part": 3,
+"off": 1537790
+},
+{
+"file": "models/props_destruction/glass_192x128_b.vvd",
+"arch": 24,
+"src_off": 201814025,
+"len": 3136,
+"part": 3,
+"off": 1539598
+},
+{
+"file": "models/props_destruction/glass_192x128_b.dx90.vtx",
+"arch": 114,
+"src_off": 46769962,
+"len": 733,
+"part": 3,
+"off": 1542734
+},
+{
+"file": "models/props_destruction/glass_192x128_b.phy",
+"arch": 24,
+"src_off": 201817894,
+"len": 709,
+"part": 3,
+"off": 1543467
+},
+{
+"file": "models/props_factory/turret_factory_ajar/turret_factory_ajar.mdl",
+"arch": 24,
+"src_off": 172021408,
+"len": 1792,
+"part": 3,
+"off": 1544176
+},
+{
+"file": "models/props_factory/turret_factory_ajar/turret_factory_ajar.vvd",
+"arch": 24,
+"src_off": 172023200,
+"len": 164544,
+"part": 3,
+"off": 1545968
+},
+{
+"file": "models/props_factory/turret_factory_ajar/turret_factory_ajar.dx90.vtx",
+"arch": 114,
+"src_off": 42680222,
+"len": 36175,
+"part": 3,
+"off": 1710512
+},
+{
+"file": "models/props_factory/turret_factory_ajar/turret_factory_ajar.phy",
+"arch": 24,
+"src_off": 172223919,
+"len": 712,
+"part": 3,
+"off": 1746687
+},
+{
+"file": "models/props_factory/turret_factory_closed.mdl",
+"arch": 24,
+"src_off": 171844733,
+"len": 1772,
+"part": 3,
+"off": 1747399
+},
+{
+"file": "models/props_factory/turret_factory_closed.vvd",
+"arch": 24,
+"src_off": 171846505,
+"len": 140608,
+"part": 3,
+"off": 1749171
+},
+{
+"file": "models/props_factory/turret_factory_closed.dx90.vtx",
+"arch": 114,
+"src_off": 42646651,
+"len": 33571,
+"part": 3,
+"off": 1889779
+},
+{
+"file": "models/props_factory/turret_factory_closed.phy",
+"arch": 24,
+"src_off": 172020684,
+"len": 724,
+"part": 3,
+"off": 1923350
+},
+{
+"file": "models/props_factory/turret_factory_open/turret_factory_open.mdl",
+"arch": 24,
+"src_off": 171615533,
+"len": 1792,
+"part": 3,
+"off": 1924074
+},
+{
+"file": "models/props_factory/turret_factory_open/turret_factory_open.vvd",
+"arch": 24,
+"src_off": 171617325,
+"len": 159936,
+"part": 3,
+"off": 1925866
+},
+{
+"file": "models/props_factory/turret_factory_open/turret_factory_open.dx90.vtx",
+"arch": 114,
+"src_off": 42605807,
+"len": 35311,
+"part": 3,
+"off": 2085802
+},
+{
+"file": "models/props_factory/turret_factory_open/turret_factory_open.phy",
+"arch": 24,
+"src_off": 171812572,
+"len": 712,
+"part": 3,
+"off": 2121113
+},
+{
+"file": "models/props_foliage/bush01.mdl",
+"arch": 24,
+"src_off": 171123476,
+"len": 1884,
+"part": 3,
+"off": 2121825
+},
+{
+"file": "models/props_foliage/bush01.vvd",
+"arch": 24,
+"src_off": 171125360,
+"len": 104320,
+"part": 3,
+"off": 2123709
+},
+{
+"file": "models/props_foliage/bush01.dx90.vtx",
+"arch": 114,
+"src_off": 42499898,
+"len": 24858,
+"part": 3,
+"off": 2228029
+},
+{
+"file": "models/props_foliage/bush_angled_256.mdl",
+"arch": 24,
+"src_off": 170552911,
+"len": 1720,
+"part": 3,
+"off": 2252887
+},
+{
+"file": "models/props_foliage/bush_angled_256.vvd",
+"arch": 24,
+"src_off": 170554631,
+"len": 36288,
+"part": 3,
+"off": 2254607
+},
+{
+"file": "models/props_foliage/bush_angled_256.dx90.vtx",
+"arch": 114,
+"src_off": 42408797,
+"len": 7407,
+"part": 3,
+"off": 2290895
+},
+{
+"file": "models/props_foliage/bush_angled_64.mdl",
+"arch": 24,
+"src_off": 170491319,
+"len": 1720,
+"part": 3,
+"off": 2298302
+},
+{
+"file": "models/props_foliage/bush_angled_64.vvd",
+"arch": 24,
+"src_off": 170493039,
+"len": 12096,
+"part": 3,
+"off": 2300022
+},
+{
+"file": "models/props_foliage/bush_angled_64.dx90.vtx",
+"arch": 114,
+"src_off": 42399029,
+"len": 2361,
+"part": 3,
+"off": 2312118
+},
+{
+"file": "models/props_foliage/fern_cluster01.mdl",
+"arch": 0,
+"src_off": 122648848,
+"len": 1728,
+"part": 3,
+"off": 2314479
+},
+{
+"file": "models/props_foliage/fern_cluster01.vvd",
+"arch": 0,
+"src_off": 122650576,
+"len": 226880,
+"part": 3,
+"off": 2316207
+},
+{
+"file": "models/props_foliage/fern_cluster01.dx90.vtx",
+"arch": 114,
+"src_off": 523300,
+"len": 39477,
+"part": 3,
+"off": 2543087
+},
+{
+"file": "models/props_foliage/ferns02.mdl",
+"arch": 24,
+"src_off": 170180770,
+"len": 1724,
+"part": 3,
+"off": 2582564
+},
+{
+"file": "models/props_foliage/ferns02.vvd",
+"arch": 24,
+"src_off": 170182494,
+"len": 57344,
+"part": 3,
+"off": 2584288
+},
+{
+"file": "models/props_foliage/ferns02.dx90.vtx",
+"arch": 114,
+"src_off": 42352784,
+"len": 10578,
+"part": 3,
+"off": 2641632
+},
+{
+"file": "models/props_gameplay/circuit_breaker_box.mdl",
+"arch": 24,
+"src_off": 163078009,
+"len": 1764,
+"part": 3,
+"off": 2652210
+},
+{
+"file": "models/props_gameplay/circuit_breaker_box.vvd",
+"arch": 24,
+"src_off": 163079773,
+"len": 84800,
+"part": 3,
+"off": 2653974
+},
+{
+"file": "models/props_gameplay/circuit_breaker_box.dx90.vtx",
+"arch": 114,
+"src_off": 41125895,
+"len": 17677,
+"part": 3,
+"off": 2738774
+},
+{
+"file": "models/props_gameplay/circuit_breaker_box.phy",
+"arch": 24,
+"src_off": 163182250,
+"len": 1157,
+"part": 3,
+"off": 2756451
+},
+{
+"file": "models/props_gameplay/push_button_mp.mdl",
+"arch": 24,
+"src_off": 161875145,
+"len": 1864,
+"part": 3,
+"off": 2757608
+},
+{
+"file": "models/props_gameplay/push_button_mp.vvd",
+"arch": 24,
+"src_off": 161877009,
+"len": 63424,
+"part": 3,
+"off": 2759472
+},
+{
+"file": "models/props_gameplay/push_button_mp.dx90.vtx",
+"arch": 114,
+"src_off": 40912360,
+"len": 15655,
+"part": 3,
+"off": 2822896
+},
+{
+"file": "models/props_lab/glass_lightcover_large.mdl",
+"arch": 24,
+"src_off": 155242853,
+"len": 1916,
+"part": 3,
+"off": 2838551
+},
+{
+"file": "models/props_lab/glass_lightcover_large.vvd",
+"arch": 24,
+"src_off": 155244769,
+"len": 320,
+"part": 3,
+"off": 2840467
+},
+{
+"file": "models/props_lab/glass_lightcover_large.dx90.vtx",
+"arch": 114,
+"src_off": 39737953,
+"len": 205,
+"part": 3,
+"off": 2840787
+},
+{
+"file": "models/props_lab/glass_lightcover_large.phy",
+"arch": 24,
+"src_off": 155245294,
+"len": 705,
+"part": 3,
+"off": 2840992
+},
+{
+"file": "models/props_lab/window_192.mdl",
+"arch": 24,
+"src_off": 155066627,
+"len": 1752,
+"part": 3,
+"off": 2841697
+},
+{
+"file": "models/props_lab/window_192.vvd",
+"arch": 24,
+"src_off": 155068379,
+"len": 60992,
+"part": 3,
+"off": 2843449
+},
+{
+"file": "models/props_lab/window_192.dx90.vtx",
+"arch": 114,
+"src_off": 39712483,
+"len": 11701,
+"part": 3,
+"off": 2904441
+},
+{
+"file": "models/props_lab/window_192.phy",
+"arch": 24,
+"src_off": 155141072,
+"len": 3273,
+"part": 3,
+"off": 2916142
+},
+{
+"file": "models/props_lab/window_192_a.mdl",
+"arch": 24,
+"src_off": 155002135,
+"len": 1756,
+"part": 3,
+"off": 2919415
+},
+{
+"file": "models/props_lab/window_192_a.vvd",
+"arch": 24,
+"src_off": 155003891,
+"len": 50240,
+"part": 3,
+"off": 2921171
+},
+{
+"file": "models/props_lab/window_192_a.dx90.vtx",
+"arch": 114,
+"src_off": 39702870,
+"len": 9613,
+"part": 3,
+"off": 2971411
+},
+{
+"file": "models/props_lab/window_192_a.phy",
+"arch": 24,
+"src_off": 155063744,
+"len": 2883,
+"part": 3,
+"off": 2981024
+},
+{
+"file": "models/props_lights/light_array_underground.mdl",
+"arch": 24,
+"src_off": 153574416,
+"len": 1880,
+"part": 3,
+"off": 2983907
+},
+{
+"file": "models/props_lights/light_array_underground.vvd",
+"arch": 24,
+"src_off": 153576296,
+"len": 311104,
+"part": 3,
+"off": 2985787
+},
+{
+"file": "models/props_lights/light_array_underground.dx90.vtx",
+"arch": 114,
+"src_off": 39363070,
+"len": 108370,
+"part": 3,
+"off": 3296891
+},
+{
+"file": "models/props_lights/light_array_underground.phy",
+"arch": 24,
+"src_off": 153995770,
+"len": 725,
+"part": 3,
+"off": 3405261
+},
+{
+"file": "models/props_lights/under_neonlamp.mdl",
+"arch": 24,
+"src_off": 152330508,
+"len": 1868,
+"part": 3,
+"off": 3405986
+},
+{
+"file": "models/props_lights/under_neonlamp.vvd",
+"arch": 24,
+"src_off": 152332376,
+"len": 31872,
+"part": 3,
+"off": 3407854
+},
+{
+"file": "models/props_lights/under_neonlamp.dx90.vtx",
+"arch": 114,
+"src_off": 39096235,
+"len": 7210,
+"part": 3,
+"off": 3439726
+},
+{
+"file": "models/props_lights/under_neonlamp.phy",
+"arch": 24,
+"src_off": 152371458,
+"len": 719,
+"part": 3,
+"off": 3446936
+},
+{
+"file": "models/props_lights/wall_light_old.mdl",
+"arch": 24,
+"src_off": 152263350,
+"len": 1868,
+"part": 3,
+"off": 3447655
+},
+{
+"file": "models/props_lights/wall_light_old.vvd",
+"arch": 24,
+"src_off": 152265218,
+"len": 48576,
+"part": 3,
+"off": 3449523
+},
+{
+"file": "models/props_lights/wall_light_old.dx90.vtx",
+"arch": 114,
+"src_off": 39079521,
+"len": 16714,
+"part": 3,
+"off": 3498099
+},
+{
+"file": "models/props_motel/clock_radio01.mdl",
+"arch": 24,
+"src_off": 139321256,
+"len": 1972,
+"part": 3,
+"off": 3514813
+},
+{
+"file": "models/props_motel/clock_radio01.vvd",
+"arch": 24,
+"src_off": 139323228,
+"len": 191744,
+"part": 3,
+"off": 3516785
+},
+{
+"file": "models/props_motel/clock_radio01.dx90.vtx",
+"arch": 114,
+"src_off": 36980332,
+"len": 45929,
+"part": 3,
+"off": 3708529
+},
+{
+"file": "models/props_motel/telephone.mdl",
+"arch": 24,
+"src_off": 135347955,
+"len": 1744,
+"part": 3,
+"off": 3754458
+},
+{
+"file": "models/props_motel/telephone.vvd",
+"arch": 24,
+"src_off": 135349699,
+"len": 131904,
+"part": 3,
+"off": 3756202
+},
+{
+"file": "models/props_motel/telephone.dx90.vtx",
+"arch": 114,
+"src_off": 36218711,
+"len": 30301,
+"part": 3,
+"off": 3888106
+},
+{
+"file": "models/props_office/cardboardbox_c_1970.mdl",
+"arch": 24,
+"src_off": 134542019,
+"len": 1760,
+"part": 3,
+"off": 3918407
+},
+{
+"file": "models/props_office/cardboardbox_c_1970.vvd",
+"arch": 24,
+"src_off": 134543779,
+"len": 21056,
+"part": 3,
+"off": 3920167
+},
+{
+"file": "models/props_office/cardboardbox_c_1970.dx90.vtx",
+"arch": 114,
+"src_off": 36078049,
+"len": 5233,
+"part": 3,
+"off": 3941223
+},
+{
+"file": "models/props_office/cardboardbox_c_1970.phy",
+"arch": 24,
+"src_off": 134570068,
+"len": 719,
+"part": 3,
+"off": 3946456
+},
+{
+"file": "models/props_office/coffee_mug_01.mdl",
+"arch": 24,
+"src_off": 134480351,
+"len": 1764,
+"part": 3,
+"off": 3947175
+},
+{
+"file": "models/props_office/coffee_mug_01.vvd",
+"arch": 24,
+"src_off": 134482115,
+"len": 20480,
+"part": 3,
+"off": 3948939
+},
+{
+"file": "models/props_office/coffee_mug_01.dx90.vtx",
+"arch": 114,
+"src_off": 36065828,
+"len": 5644,
+"part": 3,
+"off": 3969419
+},
+{
+"file": "models/props_office/coffee_mug_01.phy",
+"arch": 24,
+"src_off": 134508239,
+"len": 2083,
+"part": 3,
+"off": 3975063
+},
+{
+"file": "models/props_office/coffee_mug_03.mdl",
+"arch": 24,
+"src_off": 134420437,
+"len": 1752,
+"part": 3,
+"off": 3977146
+},
+{
+"file": "models/props_office/coffee_mug_03.vvd",
+"arch": 24,
+"src_off": 134422189,
+"len": 20480,
+"part": 3,
+"off": 3978898
+},
+{
+"file": "models/props_office/coffee_mug_03.dx90.vtx",
+"arch": 114,
+"src_off": 36054540,
+"len": 5644,
+"part": 3,
+"off": 3999378
+},
+{
+"file": "models/props_office/coffee_mug_03.phy",
+"arch": 24,
+"src_off": 134448313,
+"len": 2081,
+"part": 3,
+"off": 4005022
+},
+{
+"file": "models/props_office/coffee_mug_04.mdl",
+"arch": 24,
+"src_off": 134390480,
+"len": 1752,
+"part": 3,
+"off": 4007103
+},
+{
+"file": "models/props_office/coffee_mug_04.vvd",
+"arch": 24,
+"src_off": 134392232,
+"len": 20480,
+"part": 3,
+"off": 4008855
+},
+{
+"file": "models/props_office/coffee_mug_04.dx90.vtx",
+"arch": 114,
+"src_off": 36048896,
+"len": 5644,
+"part": 3,
+"off": 4029335
+},
+{
+"file": "models/props_office/coffee_mug_04.phy",
+"arch": 24,
+"src_off": 134418356,
+"len": 2081,
+"part": 3,
+"off": 4034979
+},
+{
+"file": "models/props_office/computer_01_1970.mdl",
+"arch": 24,
+"src_off": 134041003,
+"len": 1760,
+"part": 3,
+"off": 4037060
+},
+{
+"file": "models/props_office/computer_01_1970.vvd",
+"arch": 24,
+"src_off": 134042763,
+"len": 63808,
+"part": 3,
+"off": 4038820
+},
+{
+"file": "models/props_office/computer_01_1970.dx90.vtx",
+"arch": 114,
+"src_off": 35984527,
+"len": 13573,
+"part": 3,
+"off": 4102628
+},
+{
+"file": "models/props_office/computer_01_1970.phy",
+"arch": 24,
+"src_off": 134120144,
+"len": 723,
+"part": 3,
+"off": 4116201
+},
+{
+"file": "models/props_office/computer_02_1970.mdl",
+"arch": 24,
+"src_off": 133973047,
+"len": 1760,
+"part": 3,
+"off": 4116924
+},
+{
+"file": "models/props_office/computer_02_1970.vvd",
+"arch": 24,
+"src_off": 133974807,
+"len": 52032,
+"part": 3,
+"off": 4118684
+},
+{
+"file": "models/props_office/computer_02_1970.dx90.vtx",
+"arch": 114,
+"src_off": 35971086,
+"len": 13441,
+"part": 3,
+"off": 4170716
+},
+{
+"file": "models/props_office/computer_02_1970.phy",
+"arch": 24,
+"src_off": 134040280,
+"len": 723,
+"part": 3,
+"off": 4184157
+},
+{
+"file": "models/props_office/computer_03_1970.mdl",
+"arch": 24,
+"src_off": 133847477,
+"len": 1760,
+"part": 3,
+"off": 4184880
+},
+{
+"file": "models/props_office/computer_03_1970.vvd",
+"arch": 24,
+"src_off": 133849237,
+"len": 99840,
+"part": 3,
+"off": 4186640
+},
+{
+"file": "models/props_office/computer_03_1970.dx90.vtx",
+"arch": 114,
+"src_off": 35947838,
+"len": 23248,
+"part": 3,
+"off": 4286480
+},
+{
+"file": "models/props_office/computer_03_1970.phy",
+"arch": 24,
+"src_off": 133972325,
+"len": 722,
+"part": 3,
+"off": 4309728
+},
+{
+"file": "models/props_office/computer_04_1970.mdl",
+"arch": 24,
+"src_off": 133699948,
+"len": 1760,
+"part": 3,
+"off": 4310450
+},
+{
+"file": "models/props_office/computer_04_1970.vvd",
+"arch": 24,
+"src_off": 133701708,
+"len": 117696,
+"part": 3,
+"off": 4312210
+},
+{
+"file": "models/props_office/computer_04_1970.dx90.vtx",
+"arch": 114,
+"src_off": 35921215,
+"len": 26623,
+"part": 3,
+"off": 4429906
+},
+{
+"file": "models/props_office/computer_04_1970.phy",
+"arch": 24,
+"src_off": 133846027,
+"len": 1450,
+"part": 3,
+"off": 4456529
+},
+{
+"file": "models/props_office/computer_cabinet01.mdl",
+"arch": 24,
+"src_off": 133269790,
+"len": 1768,
+"part": 3,
+"off": 4457979
+},
+{
+"file": "models/props_office/computer_cabinet01.vvd",
+"arch": 24,
+"src_off": 133271558,
+"len": 138688,
+"part": 3,
+"off": 4459747
+},
+{
+"file": "models/props_office/computer_cabinet01.dx90.vtx",
+"arch": 114,
+"src_off": 35827425,
+"len": 53545,
+"part": 3,
+"off": 4598435
+},
+{
+"file": "models/props_office/computer_cabinet01.phy",
+"arch": 24,
+"src_off": 133463791,
+"len": 719,
+"part": 3,
+"off": 4651980
+},
+{
+"file": "models/props_office/computer_cabinet02.mdl",
+"arch": 24,
+"src_off": 133020418,
+"len": 1768,
+"part": 3,
+"off": 4652699
+},
+{
+"file": "models/props_office/computer_cabinet02.vvd",
+"arch": 24,
+"src_off": 133022186,
+"len": 189248,
+"part": 3,
+"off": 4654467
+},
+{
+"file": "models/props_office/computer_cabinet02.dx90.vtx",
+"arch": 114,
+"src_off": 35769788,
+"len": 57637,
+"part": 3,
+"off": 4843715
+},
+{
+"file": "models/props_office/computer_cabinet02.phy",
+"arch": 24,
+"src_off": 133269071,
+"len": 719,
+"part": 3,
+"off": 4901352
+},
+{
+"file": "models/props_office/computer_monitor01.mdl",
+"arch": 24,
+"src_off": 132959573,
+"len": 1764,
+"part": 3,
+"off": 4902071
+},
+{
+"file": "models/props_office/computer_monitor01.vvd",
+"arch": 24,
+"src_off": 132961337,
+"len": 48448,
+"part": 3,
+"off": 4903835
+},
+{
+"file": "models/props_office/computer_monitor01.dx90.vtx",
+"arch": 114,
+"src_off": 35759155,
+"len": 10633,
+"part": 3,
+"off": 4952283
+},
+{
+"file": "models/props_office/computer_tall01.mdl",
+"arch": 24,
+"src_off": 132735112,
+"len": 1760,
+"part": 3,
+"off": 4962916
+},
+{
+"file": "models/props_office/computer_tall01.vvd",
+"arch": 24,
+"src_off": 132736872,
+"len": 162112,
+"part": 3,
+"off": 4964676
+},
+{
+"file": "models/props_office/computer_tall01.dx90.vtx",
+"arch": 114,
+"src_off": 35699283,
+"len": 59872,
+"part": 3,
+"off": 5126788
+},
+{
+"file": "models/props_office/computer_tall01.phy",
+"arch": 24,
+"src_off": 132958856,
+"len": 717,
+"part": 3,
+"off": 5186660
+},
+{
+"file": "models/props_office/computer_tall02.mdl",
+"arch": 24,
+"src_off": 132530642,
+"len": 1756,
+"part": 3,
+"off": 5187377
+},
+{
+"file": "models/props_office/computer_tall02.vvd",
+"arch": 24,
+"src_off": 132532398,
+"len": 166080,
+"part": 3,
+"off": 5189133
+},
+{
+"file": "models/props_office/computer_tall02.dx90.vtx",
+"arch": 114,
+"src_off": 35662649,
+"len": 36634,
+"part": 3,
+"off": 5355213
+},
+{
+"file": "models/props_office/control_desk_l.mdl",
+"arch": 24,
+"src_off": 132148196,
+"len": 1756,
+"part": 3,
+"off": 5391847
+},
+{
+"file": "models/props_office/control_desk_l.vvd",
+"arch": 24,
+"src_off": 132149952,
+"len": 297088,
+"part": 3,
+"off": 5393603
+},
+{
+"file": "models/props_office/control_desk_l.dx90.vtx",
+"arch": 114,
+"src_off": 35582335,
+"len": 80314,
+"part": 3,
+"off": 5690691
+},
+{
+"file": "models/props_office/control_desk_l.phy",
+"arch": 24,
+"src_off": 132527354,
+"len": 3288,
+"part": 3,
+"off": 5771005
+},
+{
+"file": "models/props_office/control_desk_r.mdl",
+"arch": 24,
+"src_off": 131765734,
+"len": 1756,
+"part": 3,
+"off": 5774293
+},
+{
+"file": "models/props_office/control_desk_r.vvd",
+"arch": 24,
+"src_off": 131767490,
+"len": 297088,
+"part": 3,
+"off": 5776049
+},
+{
+"file": "models/props_office/control_desk_r.dx90.vtx",
+"arch": 114,
+"src_off": 35502021,
+"len": 80314,
+"part": 3,
+"off": 6073137
+},
+{
+"file": "models/props_office/control_desk_r.phy",
+"arch": 24,
+"src_off": 132144892,
+"len": 3304,
+"part": 3,
+"off": 6153451
+},
+{
+"file": "models/props_office/door_handle_1.mdl",
+"arch": 24,
+"src_off": 131005279,
+"len": 1756,
+"part": 3,
+"off": 6156755
+},
+{
+"file": "models/props_office/door_handle_1.vvd",
+"arch": 24,
+"src_off": 131007035,
+"len": 19008,
+"part": 3,
+"off": 6158511
+},
+{
+"file": "models/props_office/door_handle_1.dx90.vtx",
+"arch": 114,
+"src_off": 35365747,
+"len": 4789,
+"part": 3,
+"off": 6177519
+},
+{
+"file": "models/props_office/file_cabient_1970.mdl",
+"arch": 24,
+"src_off": 130425912,
+"len": 1764,
+"part": 3,
+"off": 6182308
+},
+{
+"file": "models/props_office/file_cabient_1970.vvd",
+"arch": 24,
+"src_off": 130427676,
+"len": 18624,
+"part": 3,
+"off": 6184072
+},
+{
+"file": "models/props_office/file_cabient_1970.dx90.vtx",
+"arch": 114,
+"src_off": 35270763,
+"len": 4111,
+"part": 3,
+"off": 6202696
+},
+{
+"file": "models/props_office/file_cabient_1970.phy",
+"arch": 24,
+"src_off": 130450411,
+"len": 720,
+"part": 3,
+"off": 6206807
+},
+{
+"file": "models/props_office/file_rack_1970.mdl",
+"arch": 24,
+"src_off": 130417541,
+"len": 1756,
+"part": 3,
+"off": 6207527
+},
+{
+"file": "models/props_office/file_rack_1970.vvd",
+"arch": 24,
+"src_off": 130419297,
+"len": 5312,
+"part": 3,
+"off": 6209283
+},
+{
+"file": "models/props_office/file_rack_1970.dx90.vtx",
+"arch": 114,
+"src_off": 35269460,
+"len": 1303,
+"part": 3,
+"off": 6214595
+},
+{
+"file": "models/props_office/lab_copy_machine.mdl",
+"arch": 24,
+"src_off": 130315768,
+"len": 1760,
+"part": 3,
+"off": 6215898
+},
+{
+"file": "models/props_office/lab_copy_machine.vvd",
+"arch": 24,
+"src_off": 130317528,
+"len": 68864,
+"part": 3,
+"off": 6217658
+},
+{
+"file": "models/props_office/lab_copy_machine.dx90.vtx",
+"arch": 114,
+"src_off": 35253320,
+"len": 13954,
+"part": 3,
+"off": 6286522
+},
+{
+"file": "models/props_office/lab_copy_machine.phy",
+"arch": 24,
+"src_off": 130400346,
+"len": 722,
+"part": 3,
+"off": 6300476
+},
+{
+"file": "models/props_office/office_chair_1940_01.mdl",
+"arch": 24,
+"src_off": 129689532,
+"len": 1772,
+"part": 3,
+"off": 6301198
+},
+{
+"file": "models/props_office/office_chair_1940_01.vvd",
+"arch": 24,
+"src_off": 129691304,
+"len": 116928,
+"part": 3,
+"off": 6302970
+},
+{
+"file": "models/props_office/office_chair_1940_01.dx90.vtx",
+"arch": 114,
+"src_off": 35141354,
+"len": 30343,
+"part": 3,
+"off": 6419898
+},
+{
+"file": "models/props_office/office_chair_1940_01.phy",
+"arch": 24,
+"src_off": 129838575,
+"len": 10400,
+"part": 3,
+"off": 6450241
+},
+{
+"file": "models/props_office/office_keyboard.mdl",
+"arch": 24,
+"src_off": 129189595,
+"len": 1760,
+"part": 3,
+"off": 6460641
+},
+{
+"file": "models/props_office/office_keyboard.vvd",
+"arch": 24,
+"src_off": 129191355,
+"len": 167040,
+"part": 3,
+"off": 6462401
+},
+{
+"file": "models/props_office/office_keyboard.dx90.vtx",
+"arch": 114,
+"src_off": 35050543,
+"len": 32794,
+"part": 3,
+"off": 6629441
+},
+{
+"file": "models/props_office/office_lamp_1970.mdl",
+"arch": 24,
+"src_off": 129137226,
+"len": 1868,
+"part": 3,
+"off": 6662235
+},
+{
+"file": "models/props_office/office_lamp_1970.vvd",
+"arch": 24,
+"src_off": 129139094,
+"len": 37184,
+"part": 3,
+"off": 6664103
+},
+{
+"file": "models/props_office/office_lamp_1970.dx90.vtx",
+"arch": 114,
+"src_off": 35040444,
+"len": 10099,
+"part": 3,
+"off": 6701287
+},
+{
+"file": "models/props_office/office_lamp_1970.phy",
+"arch": 24,
+"src_off": 129186377,
+"len": 3218,
+"part": 3,
+"off": 6711386
+},
+{
+"file": "models/props_office/office_light002.mdl",
+"arch": 24,
+"src_off": 129120991,
+"len": 1988,
+"part": 3,
+"off": 6714604
+},
+{
+"file": "models/props_office/office_light002.vvd",
+"arch": 24,
+"src_off": 129122979,
+"len": 10304,
+"part": 3,
+"off": 6716592
+},
+{
+"file": "models/props_office/office_light002.dx90.vtx",
+"arch": 114,
+"src_off": 35037695,
+"len": 2749,
+"part": 3,
+"off": 6726896
+},
+{
+"file": "models/props_office/office_light002.phy",
+"arch": 24,
+"src_off": 129136032,
+"len": 1194,
+"part": 3,
+"off": 6729645
+},
+{
+"file": "models/props_office/office_typewriter_1940_01.mdl",
+"arch": 24,
+"src_off": 128470840,
+"len": 1784,
+"part": 3,
+"off": 6730839
+},
+{
+"file": "models/props_office/office_typewriter_1940_01.vvd",
+"arch": 24,
+"src_off": 128472624,
+"len": 264704,
+"part": 3,
+"off": 6732623
+},
+{
+"file": "models/props_office/office_typewriter_1940_01.dx90.vtx",
+"arch": 114,
+"src_off": 34914140,
+"len": 62026,
+"part": 3,
+"off": 6997327
+},
+{
+"file": "models/props_office/paper_single.mdl",
+"arch": 24,
+"src_off": 128468635,
+"len": 1680,
+"part": 3,
+"off": 7059353
+},
+{
+"file": "models/props_office/paper_single.vvd",
+"arch": 24,
+"src_off": 128470315,
+"len": 320,
+"part": 3,
+"off": 7061033
+},
+{
+"file": "models/props_office/paper_single.dx90.vtx",
+"arch": 114,
+"src_off": 34913935,
+"len": 205,
+"part": 3,
+"off": 7061353
+},
+{
+"file": "models/props_office/pencilsharpener01.mdl",
+"arch": 24,
+"src_off": 128299859,
+"len": 1760,
+"part": 3,
+"off": 7061558
+},
+{
+"file": "models/props_office/pencilsharpener01.vvd",
+"arch": 24,
+"src_off": 128301619,
+"len": 30144,
+"part": 3,
+"off": 7063318
+},
+{
+"file": "models/props_office/pencilsharpener01.dx90.vtx",
+"arch": 114,
+"src_off": 34883774,
+"len": 6931,
+"part": 3,
+"off": 7093462
+},
+{
+"file": "models/props_office/telephone_1970.mdl",
+"arch": 24,
+"src_off": 127707982,
+"len": 1756,
+"part": 3,
+"off": 7100393
+},
+{
+"file": "models/props_office/telephone_1970.vvd",
+"arch": 24,
+"src_off": 127709738,
+"len": 68224,
+"part": 3,
+"off": 7102149
+},
+{
+"file": "models/props_office/telephone_1970.dx90.vtx",
+"arch": 114,
+"src_off": 34775756,
+"len": 18718,
+"part": 3,
+"off": 7170373
+},
+{
+"file": "models/props_office/tv_1970.mdl",
+"arch": 24,
+"src_off": 127636888,
+"len": 1744,
+"part": 3,
+"off": 7189091
+},
+{
+"file": "models/props_office/tv_1970.vvd",
+"arch": 24,
+"src_off": 127638632,
+"len": 53824,
+"part": 3,
+"off": 7190835
+},
+{
+"file": "models/props_office/tv_1970.dx90.vtx",
+"arch": 114,
+"src_off": 34760947,
+"len": 14809,
+"part": 3,
+"off": 7244659
+},
+{
+"file": "models/props_office/tv_1970.phy",
+"arch": 24,
+"src_off": 127707265,
+"len": 717,
+"part": 3,
+"off": 7259468
+},
+{
+"file": "models/props_office/whiteboard.mdl",
+"arch": 24,
+"src_off": 126522359,
+"len": 1748,
+"part": 3,
+"off": 7260185
+},
+{
+"file": "models/props_office/whiteboard.vvd",
+"arch": 24,
+"src_off": 126524107,
+"len": 26432,
+"part": 3,
+"off": 7261933
+},
+{
+"file": "models/props_office/whiteboard.dx90.vtx",
+"arch": 114,
+"src_off": 34595755,
+"len": 5293,
+"part": 3,
+"off": 7288365
+},
+{
+"file": "models/props_office/whiteboard.phy",
+"arch": 24,
+"src_off": 126555832,
+"len": 4440,
+"part": 3,
+"off": 7293658
+},
+{
+"file": "models/props_trainstation/wrecked_boxcar_gate.mdl",
+"arch": 24,
+"src_off": 121414423,
+"len": 1744,
+"part": 3,
+"off": 7298098
+},
+{
+"file": "models/props_trainstation/wrecked_boxcar_gate.vvd",
+"arch": 24,
+"src_off": 121416167,
+"len": 796992,
+"part": 3,
+"off": 7299842
+},
+{
+"file": "models/props_trainstation/wrecked_boxcar_gate.dx90.vtx",
+"arch": 114,
+"src_off": 33294145,
+"len": 459520,
+"part": 3,
+"off": 8096834
+},
+{
+"file": "models/props_trainstation/wrecked_boxcar_gate.phy",
+"arch": 24,
+"src_off": 122672679,
+"len": 7851,
+"part": 3,
+"off": 8556354
+},
+{
+"file": "models/props_underground/cavejohnson_portrait01.mdl",
+"arch": 24,
+"src_off": 118644351,
+"len": 2076,
+"part": 3,
+"off": 8564205
+},
+{
+"file": "models/props_underground/cavejohnson_portrait01.vvd",
+"arch": 24,
+"src_off": 118646427,
+"len": 64000,
+"part": 3,
+"off": 8566281
+},
+{
+"file": "models/props_underground/cavejohnson_portrait01.dx90.vtx",
+"arch": 114,
+"src_off": 32577274,
+"len": 13972,
+"part": 3,
+"off": 8630281
+},
+{
+"file": "models/props_underground/chair_lobby.mdl",
+"arch": 24,
+"src_off": 118533815,
+"len": 1764,
+"part": 3,
+"off": 8644253
+},
+{
+"file": "models/props_underground/chair_lobby.vvd",
+"arch": 24,
+"src_off": 118535579,
+"len": 35840,
+"part": 3,
+"off": 8646017
+},
+{
+"file": "models/props_underground/chair_lobby.dx90.vtx",
+"arch": 114,
+"src_off": 32557886,
+"len": 8746,
+"part": 3,
+"off": 8681857
+},
+{
+"file": "models/props_underground/chair_lobby.phy",
+"arch": 24,
+"src_off": 118580165,
+"len": 4174,
+"part": 3,
+"off": 8690603
+},
+{
+"file": "models/props_underground/chair_office_padded_1980.mdl",
+"arch": 24,
+"src_off": 118444742,
+"len": 1780,
+"part": 3,
+"off": 8694777
+},
+{
+"file": "models/props_underground/chair_office_padded_1980.vvd",
+"arch": 24,
+"src_off": 118446522,
+"len": 64704,
+"part": 3,
+"off": 8696557
+},
+{
+"file": "models/props_underground/chair_office_padded_1980.dx90.vtx",
+"arch": 114,
+"src_off": 32540143,
+"len": 17743,
+"part": 3,
+"off": 8761261
+},
+{
+"file": "models/props_underground/chair_office_padded_1980.phy",
+"arch": 24,
+"src_off": 118528969,
+"len": 4846,
+"part": 3,
+"off": 8779004
+},
+{
+"file": "models/props_underground/construction_crane_01.mdl",
+"arch": 24,
+"src_off": 116771492,
+"len": 1784,
+"part": 3,
+"off": 8783850
+},
+{
+"file": "models/props_underground/construction_crane_01.vvd",
+"arch": 24,
+"src_off": 116773276,
+"len": 1166080,
+"part": 3,
+"off": 8785634
+},
+{
+"file": "models/props_underground/construction_crane_01.dx90.vtx",
+"arch": 114,
+"src_off": 32122816,
+"len": 400924,
+"part": 3,
+"off": 9951714
+},
+{
+"file": "models/props_underground/door_bipart_frame_128.mdl",
+"arch": 24,
+"src_off": 113466292,
+"len": 1776,
+"part": 3,
+"off": 10352638
+},
+{
+"file": "models/props_underground/door_bipart_frame_128.vvd",
+"arch": 24,
+"src_off": 113468068,
+"len": 27968,
+"part": 3,
+"off": 10354414
+},
+{
+"file": "models/props_underground/door_bipart_frame_128.dx90.vtx",
+"arch": 114,
+"src_off": 31546864,
+"len": 5833,
+"part": 3,
+"off": 10382382
+},
+{
+"file": "models/props_underground/door_bipart_frame_128.phy",
+"arch": 24,
+"src_off": 113501869,
+"len": 2107,
+"part": 3,
+"off": 10388215
+},
+{
+"file": "models/props_underground/filecabinet_lobby.mdl",
+"arch": 24,
+"src_off": 110599844,
+"len": 1776,
+"part": 3,
+"off": 10390322
+},
+{
+"file": "models/props_underground/filecabinet_lobby.vvd",
+"arch": 24,
+"src_off": 110601620,
+"len": 63680,
+"part": 3,
+"off": 10392098
+},
+{
+"file": "models/props_underground/filecabinet_lobby.dx90.vtx",
+"arch": 114,
+"src_off": 31023070,
+"len": 14455,
+"part": 3,
+"off": 10455778
+},
+{
+"file": "models/props_underground/filecabinet_lobby.phy",
+"arch": 24,
+"src_off": 110679755,
+"len": 716,
+"part": 3,
+"off": 10470233
+},
+{
+"file": "models/props_underground/floorlamp_lobby.mdl",
+"arch": 24,
+"src_off": 110446991,
+"len": 1772,
+"part": 3,
+"off": 10470949
+},
+{
+"file": "models/props_underground/floorlamp_lobby.vvd",
+"arch": 24,
+"src_off": 110448763,
+"len": 33792,
+"part": 3,
+"off": 10472721
+},
+{
+"file": "models/props_underground/floorlamp_lobby.dx90.vtx",
+"arch": 114,
+"src_off": 30997512,
+"len": 8056,
+"part": 3,
+"off": 10506513
+},
+{
+"file": "models/props_underground/floorlamp_lobby.phy",
+"arch": 24,
+"src_off": 110490611,
+"len": 3169,
+"part": 3,
+"off": 10514569
+},
+{
+"file": "models/props_underground/interactive_console.mdl",
+"arch": 24,
+"src_off": 103019051,
+"len": 1776,
+"part": 3,
+"off": 10517738
+},
+{
+"file": "models/props_underground/interactive_console.vvd",
+"arch": 24,
+"src_off": 103020827,
+"len": 89344,
+"part": 3,
+"off": 10519514
+},
+{
+"file": "models/props_underground/interactive_console.dx90.vtx",
+"arch": 114,
+"src_off": 29734763,
+"len": 19900,
+"part": 3,
+"off": 10608858
+},
+{
+"file": "models/props_underground/interactive_console.phy",
+"arch": 24,
+"src_off": 103130071,
+"len": 1386,
+"part": 3,
+"off": 10628758
+},
+{
+"file": "models/props_underground/interactive_console_backpanel01.mdl",
+"arch": 24,
+"src_off": 102230968,
+"len": 1804,
+"part": 3,
+"off": 10630144
+},
+{
+"file": "models/props_underground/interactive_console_backpanel01.vvd",
+"arch": 24,
+"src_off": 102232772,
+"len": 590848,
+"part": 3,
+"off": 10631948
+},
+{
+"file": "models/props_underground/interactive_console_backpanel01.dx90.vtx",
+"arch": 114,
+"src_off": 29542633,
+"len": 192130,
+"part": 3,
+"off": 11222796
+},
+{
+"file": "models/props_underground/interactive_console_backpanel01.phy",
+"arch": 24,
+"src_off": 103015750,
+"len": 3301,
+"part": 3,
+"off": 11414926
+},
+{
+"file": "models/props_underground/moving_platform_motor.mdl",
+"arch": 24,
+"src_off": 100382958,
+"len": 1780,
+"part": 3,
+"off": 11418227
+},
+{
+"file": "models/props_underground/moving_platform_motor.vvd",
+"arch": 24,
+"src_off": 100384738,
+"len": 76672,
+"part": 3,
+"off": 11420007
+},
+{
+"file": "models/props_underground/moving_platform_motor.dx90.vtx",
+"arch": 114,
+"src_off": 29190742,
+"len": 18322,
+"part": 3,
+"off": 11496679
+},
+{
+"file": "models/props_underground/moving_platform_motor.phy",
+"arch": 24,
+"src_off": 100479732,
+"len": 722,
+"part": 3,
+"off": 11515001
+},
+{
+"file": "models/props_underground/paint_distillery_tank.mdl",
+"arch": 24,
+"src_off": 99337738,
+"len": 1780,
+"part": 3,
+"off": 11515723
+},
+{
+"file": "models/props_underground/paint_distillery_tank.vvd",
+"arch": 24,
+"src_off": 99339518,
+"len": 211904,
+"part": 3,
+"off": 11517503
+},
+{
+"file": "models/props_underground/paint_distillery_tank.dx90.vtx",
+"arch": 114,
+"src_off": 28985970,
+"len": 66655,
+"part": 3,
+"off": 11729407
+},
+{
+"file": "models/props_underground/paint_distillery_tank.phy",
+"arch": 24,
+"src_off": 99618077,
+"len": 3185,
+"part": 3,
+"off": 11796062
+},
+{
+"file": "models/props_underground/railing_128b.mdl",
+"arch": 24,
+"src_off": 96055797,
+"len": 1772,
+"part": 3,
+"off": 11799247
+},
+{
+"file": "models/props_underground/railing_128b.vvd",
+"arch": 24,
+"src_off": 96057569,
+"len": 22016,
+"part": 3,
+"off": 11801019
+},
+{
+"file": "models/props_underground/railing_128b.dx90.vtx",
+"arch": 114,
+"src_off": 28374722,
+"len": 4504,
+"part": 3,
+"off": 11823035
+},
+{
+"file": "models/props_underground/railing_128b.phy",
+"arch": 24,
+"src_off": 96084089,
+"len": 715,
+"part": 3,
+"off": 11827539
+},
+{
+"file": "models/props_underground/railing_256b.mdl",
+"arch": 24,
+"src_off": 95981477,
+"len": 1772,
+"part": 3,
+"off": 11828254
+},
+{
+"file": "models/props_underground/railing_256b.vvd",
+"arch": 24,
+"src_off": 95983249,
+"len": 33984,
+"part": 3,
+"off": 11830026
+},
+{
+"file": "models/props_underground/railing_256b.dx90.vtx",
+"arch": 114,
+"src_off": 28363104,
+"len": 6883,
+"part": 3,
+"off": 11864010
+},
+{
+"file": "models/props_underground/railing_256b.phy",
+"arch": 24,
+"src_off": 96024116,
+"len": 715,
+"part": 3,
+"off": 11870893
+},
+{
+"file": "models/props_underground/railing_512b.mdl",
+"arch": 24,
+"src_off": 95916275,
+"len": 1772,
+"part": 3,
+"off": 11871608
+},
+{
+"file": "models/props_underground/railing_512b.vvd",
+"arch": 24,
+"src_off": 95918047,
+"len": 52160,
+"part": 3,
+"off": 11873380
+},
+{
+"file": "models/props_underground/railing_512b.dx90.vtx",
+"arch": 114,
+"src_off": 28352549,
+"len": 10555,
+"part": 3,
+"off": 11925540
+},
+{
+"file": "models/props_underground/railing_512b.phy",
+"arch": 24,
+"src_off": 95980762,
+"len": 715,
+"part": 3,
+"off": 11936095
+},
+{
+"file": "models/props_underground/railing_64b.mdl",
+"arch": 24,
+"src_off": 95893604,
+"len": 1772,
+"part": 3,
+"off": 11936810
+},
+{
+"file": "models/props_underground/railing_64b.vvd",
+"arch": 24,
+"src_off": 95895376,
+"len": 16704,
+"part": 3,
+"off": 11938582
+},
+{
+"file": "models/props_underground/railing_64b.dx90.vtx",
+"arch": 114,
+"src_off": 28349068,
+"len": 3481,
+"part": 3,
+"off": 11955286
+},
+{
+"file": "models/props_underground/railing_64b.phy",
+"arch": 24,
+"src_off": 95915561,
+"len": 714,
+"part": 3,
+"off": 11958767
+},
+{
+"file": "models/props_underground/ramp_motor.mdl",
+"arch": 24,
+"src_off": 95236957,
+"len": 1760,
+"part": 3,
+"off": 11959481
+},
+{
+"file": "models/props_underground/ramp_motor.vvd",
+"arch": 24,
+"src_off": 95238717,
+"len": 114624,
+"part": 3,
+"off": 11961241
+},
+{
+"file": "models/props_underground/ramp_motor.dx90.vtx",
+"arch": 114,
+"src_off": 28240977,
+"len": 27625,
+"part": 3,
+"off": 12075865
+},
+{
+"file": "models/props_underground/ramp_motor.phy",
+"arch": 24,
+"src_off": 95380966,
+"len": 723,
+"part": 3,
+"off": 12103490
+},
+{
+"file": "models/props_underground/smokingtable_lobby.mdl",
+"arch": 24,
+"src_off": 93865449,
+"len": 1776,
+"part": 3,
+"off": 12104213
+},
+{
+"file": "models/props_underground/smokingtable_lobby.vvd",
+"arch": 24,
+"src_off": 93867225,
+"len": 71488,
+"part": 3,
+"off": 12105989
+},
+{
+"file": "models/props_underground/smokingtable_lobby.dx90.vtx",
+"arch": 114,
+"src_off": 27986031,
+"len": 16021,
+"part": 3,
+"off": 12177477
+},
+{
+"file": "models/props_underground/smokingtable_lobby.phy",
+"arch": 24,
+"src_off": 93954734,
+"len": 9627,
+"part": 3,
+"off": 12193498
+},
+{
+"file": "models/props_underground/stair_256.mdl",
+"arch": 24,
+"src_off": 93239927,
+"len": 1776,
+"part": 3,
+"off": 12203125
+},
+{
+"file": "models/props_underground/stair_256.vvd",
+"arch": 24,
+"src_off": 93241703,
+"len": 310976,
+"part": 3,
+"off": 12204901
+},
+{
+"file": "models/props_underground/stair_256.dx90.vtx",
+"arch": 114,
+"src_off": 27886345,
+"len": 60271,
+"part": 3,
+"off": 12515877
+},
+{
+"file": "models/props_underground/stair_256.phy",
+"arch": 24,
+"src_off": 93612950,
+"len": 4462,
+"part": 3,
+"off": 12576148
+},
+{
+"file": "models/props_underground/tank_small_1.mdl",
+"arch": 24,
+"src_off": 85099972,
+"len": 1764,
+"part": 3,
+"off": 12580610
+},
+{
+"file": "models/props_underground/tank_small_1.vvd",
+"arch": 24,
+"src_off": 85101736,
+"len": 81088,
+"part": 3,
+"off": 12582374
+},
+{
+"file": "models/props_underground/tank_small_1.dx90.vtx",
+"arch": 114,
+"src_off": 26347069,
+"len": 20311,
+"part": 3,
+"off": 12663462
+},
+{
+"file": "models/props_underground/tank_small_1.phy",
+"arch": 24,
+"src_off": 85203135,
+"len": 1496,
+"part": 3,
+"off": 12683773
+},
+{
+"file": "models/props_underground/tube_paint_intersect_lod1.mdl",
+"arch": 24,
+"src_off": 76094056,
+"len": 1876,
+"part": 3,
+"off": 12685269
+},
+{
+"file": "models/props_underground/tube_paint_intersect_lod1.vvd",
+"arch": 24,
+"src_off": 76095932,
+"len": 58880,
+"part": 3,
+"off": 12687145
+},
+{
+"file": "models/props_underground/tube_paint_intersect_lod1.dx90.vtx",
+"arch": 114,
+"src_off": 24668109,
+"len": 12670,
+"part": 3,
+"off": 12746025
+},
+{
+"file": "models/props_underground/underground_door_dynamic.mdl",
+"arch": 24,
+"src_off": 74608727,
+"len": 6284,
+"part": 3,
+"off": 12758695
+},
+{
+"file": "models/props_underground/underground_door_dynamic.vvd",
+"arch": 24,
+"src_off": 74615011,
+"len": 161728,
+"part": 3,
+"off": 12764979
+},
+{
+"file": "models/props_underground/underground_door_dynamic.dx90.vtx",
+"arch": 114,
+"src_off": 24411465,
+"len": 34811,
+"part": 3,
+"off": 12926707
+},
+{
+"file": "models/props_underground/underground_door_dynamic.phy",
+"arch": 24,
+"src_off": 74811550,
+"len": 2880,
+"part": 3,
+"off": 12961518
+},
+{
+"file": "models/traincar_interior/traincar_clipboard.mdl",
+"arch": 43,
+"src_off": 94037725,
+"len": 1840,
+"part": 3,
+"off": 12964398
+},
+{
+"file": "models/traincar_interior/traincar_clipboard.vvd",
+"arch": 43,
+"src_off": 94039565,
+"len": 38336,
+"part": 3,
+"off": 12966238
+},
+{
+"file": "models/traincar_interior/traincar_clipboard.dx90.vtx",
+"arch": 114,
+"src_off": 17320131,
+"len": 8815,
+"part": 3,
+"off": 13004574
+},
+{
+"file": "models/traincar_interior/traincar_clipboard.phy",
+"arch": 43,
+"src_off": 94086716,
+"len": 699,
+"part": 3,
+"off": 13013389
+},
+{
+"file": "models/traincar_interior/traincar_tabbed_folder_1.mdl",
+"arch": 43,
+"src_off": 93795895,
+"len": 1788,
+"part": 3,
+"off": 13014088
+},
+{
+"file": "models/traincar_interior/traincar_tabbed_folder_1.vvd",
+"arch": 43,
+"src_off": 93797683,
+"len": 7744,
+"part": 3,
+"off": 13015876
+},
+{
+"file": "models/traincar_interior/traincar_tabbed_folder_1.dx90.vtx",
+"arch": 114,
+"src_off": 17277805,
+"len": 1981,
+"part": 3,
+"off": 13023620
+},
+{
+"file": "models/traincar_interior/traincar_tabbed_folder_1.phy",
+"arch": 43,
+"src_off": 93807408,
+"len": 509,
+"part": 3,
+"off": 13025601
+},
+{
+"file": "models/traincar_interior/traincar_tabbed_folder_2.mdl",
+"arch": 43,
+"src_off": 93783873,
+"len": 1788,
+"part": 3,
+"off": 13026110
+},
+{
+"file": "models/traincar_interior/traincar_tabbed_folder_2.vvd",
+"arch": 43,
+"src_off": 93785661,
+"len": 7744,
+"part": 3,
+"off": 13027898
+},
+{
+"file": "models/traincar_interior/traincar_tabbed_folder_2.dx90.vtx",
+"arch": 114,
+"src_off": 17275824,
+"len": 1981,
+"part": 3,
+"off": 13035642
+},
+{
+"file": "models/traincar_interior/traincar_tabbed_folder_2.phy",
+"arch": 43,
+"src_off": 93795386,
+"len": 509,
+"part": 3,
+"off": 13037623
+},
+{
+"file": "models/traincar_interior/traincar_tabbed_folder_3.mdl",
+"arch": 43,
+"src_off": 93771851,
+"len": 1788,
+"part": 3,
+"off": 13038132
+},
+{
+"file": "models/traincar_interior/traincar_tabbed_folder_3.vvd",
+"arch": 43,
+"src_off": 93773639,
+"len": 7744,
+"part": 3,
+"off": 13039920
+},
+{
+"file": "models/traincar_interior/traincar_tabbed_folder_3.dx90.vtx",
+"arch": 114,
+"src_off": 17273843,
+"len": 1981,
+"part": 3,
+"off": 13047664
+},
+{
+"file": "models/traincar_interior/traincar_tabbed_folder_3.phy",
+"arch": 43,
+"src_off": 93783364,
+"len": 509,
+"part": 3,
+"off": 13049645
+},
+{
+"file": "models/traincar_interior/traincar_tabbed_folder_4.mdl",
+"arch": 43,
+"src_off": 93760121,
+"len": 1788,
+"part": 3,
+"off": 13050154
+},
+{
+"file": "models/traincar_interior/traincar_tabbed_folder_4.vvd",
+"arch": 43,
+"src_off": 93761909,
+"len": 7488,
+"part": 3,
+"off": 13051942
+},
+{
+"file": "models/traincar_interior/traincar_tabbed_folder_4.dx90.vtx",
+"arch": 114,
+"src_off": 17271898,
+"len": 1945,
+"part": 3,
+"off": 13059430
+},
+{
+"file": "models/traincar_interior/traincar_tabbed_folder_4.phy",
+"arch": 43,
+"src_off": 93771342,
+"len": 509,
+"part": 3,
+"off": 13061375
+}
+]
