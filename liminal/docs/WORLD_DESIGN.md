@@ -188,13 +188,25 @@ other worlds; worlds made by a seeded generator, at random in the end.
 
 ## 9. The industrial world: what this changes
 
-Now (`src/world/industrial/`): masses and canyon streets with catwalks on
-five levels and a few halls; 7 districts that differ in what their masses
-are and how much pipe and tube they carry. Tunnels cut through about half
-the masses (straight, bent, dog-leg, dead end), each with its own section
-(from a low wide passage to a tall slot), with rooms at their junctions
-(some tall, some with a look-out slit), stair halls, and doorways with
-porches. Nothing floats. No chaos, no damage (the user's call, for now).
+Now (`src/world/industrial/`): the plan is shared between nine districts,
+each of one kind, no two neighbours alike. A kind sets the grain of the
+layout itself (`GRAIN` in layout.ts) and how it is dressed (`DRESS` in
+world.ts):
+
+| kind | blocks | streets | halls | tunnels | reads as |
+|---|---|---|---|---|---|
+| canyons | big | middling | few | some | deep streets between chamber stacks |
+| alleys | small | one tile | none | few | a tight maze of catwalks in the open |
+| yards | big | wide | half the blocks | some | open air, bridges over the halls |
+| works | huge | narrow | hardly any | every mass, up to six | you walk inside the masses |
+| racks | middling | middling | some | few | a forest of open steel |
+
+Catwalks run on five levels through the streets; tunnels cut through the
+masses (straight, bent, dog-leg, dead end), each with its own section (from
+a low wide passage to a tall slot), with rooms at their junctions (some
+tall, some with a look-out slit), stair halls, and doorways with porches;
+bridges cross the halls on trestles. Nothing floats. No chaos, no damage
+(the user's call, for now).
 
 The world is made from a seed, in the page too (map path
 `world:industrial:<seed>`; N and B change the seed in the private build).
@@ -212,7 +224,8 @@ Next, in this order:
 
 1. **Checks**: a walk test over the real collision (done, see above), and a
    metrics report per seed (to do).
-2. **District types with their own topology**, replacing "more of the same":
+2. **District types with their own topology** (begun: the five kinds above
+   differ in grain; still to do: the shaft, the nave, the tank yard, the ring):
    canyon streets (as now), a **shaft** (ledges round a core machine, grated
    floors, a landmark at the bottom), a **nave** (one huge machine, a spine
    across, a pit), a **warren** (closed corridors, ducts and rooms inside a

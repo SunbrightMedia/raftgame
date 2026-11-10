@@ -7,14 +7,19 @@ import type { Dir } from '../kit/aperture';
  * blocks left empty as halls, and a maze of catwalks through the streets on
  * several levels. Everything is on the kit's tile grid (one tile = 128 units).
  *
+ *  0. Districts: the plan is shared out between a few districts, each of one
+ *     kind (canyons, alleys, yards, works, racks). A kind sets the grain of
+ *     everything below: how big the blocks are, how wide the streets, how
+ *     many halls, how many tunnels. No two neighbours are of one kind.
  *  1. Blocks and streets: the plan is split again and again, each cut leaving
  *     a street. Cuts stop at random sizes, so streets meet at T-junctions and
  *     no two blocks are alike.
  *  2. Lanes: each street has one line of tiles a catwalk can run on. Some
  *     masses are cut by tunnels: lanes that leave a street's lane, cross the
  *     street, and run through the mass (straight, with a bend, or with a
- *     dog-leg), out to another street or to a dead end inside. Where lanes
- *     meet or turn is a junction; between junctions is a segment.
+ *     dog-leg), out to another street or to a dead end inside. Most halls
+ *     are crossed by a lane or two: a bridge through the open air. Where
+ *     lanes meet or turn is a junction; between junctions is a segment.
  *  3. The maze: over (junction, level) pairs. A segment can carry a level
  *     catwalk on any level, or stairs from one level to the next. A random
  *     tree is grown from the start (winding, with branches), then a few
@@ -23,7 +28,34 @@ import type { Dir } from '../kit/aperture';
  * Pure data, fixed by the seed: the same seed is always the same world.
  */
 export interface Rect { x0: number; y0: number; x1: number; y1: number }   // tiles, x1/y1 exclusive
-export interface Block { id: number; rect: Rect; kind: 'mass' | 'hall' }
+export interface Block { id: number; rect: Rect; kind: 'mass' | 'hall'; /** A hall with a bridge across it. */ bridged?: boolean }
+export type DistrictKind = 'canyons' | 'alleys' | 'yards' | 'works' | 'racks';
+/** The grain of one kind of district. */
+export interface Grain {
+  /** Blocks are cut until no side is longer than maxBlock (tiles), and never below minBlock. */
+  maxBlock: number; minBlock: number;
+  /** Street widths to pick from (tiles), with weights. */
+  streets: (readonly [number, number])[];
+  /** Chance that an inner block is left empty as a hall. */
+  halls: number;
+  /** Share of masses cut by tunnels, and the most tunnels one mass can have. */
+  tunnels: number; tunnelMax: number;
+}
+export interface District extends Grain { id: number; kind: DistrictKind; /** Its middle, in tiles. */ x: number; y: number }
+/**
+ * canyons: big masses, middling streets, some tunnels (the world as it was).
+ * alleys: small masses and one-tile streets: a tight maze of catwalks in the open.
+ * yards: wide streets and many halls: open, with bridges.
+ * works: huge solid masses with hardly a street between: you walk inside them.
+ * racks: middling blocks, most of them open steel.
+ */
+export const GRAIN: Record<DistrictKind, Grain> = {
+  canyons: { maxBlock: 30, minBlock: 12, streets: [[1, 1], [3, 5], [5, 2]], halls: 0.1, tunnels: 0.6, tunnelMax: 3 },
+  alleys: { maxBlock: 12, minBlock: 6, streets: [[1, 6], [3, 2]], halls: 0.03, tunnels: 0.3, tunnelMax: 1 },
+  yards: { maxBlock: 34, minBlock: 16, streets: [[3, 1], [5, 3], [7, 2]], halls: 0.5, tunnels: 0.5, tunnelMax: 2 },
+  works: { maxBlock: 36, minBlock: 20, streets: [[1, 3], [3, 3]], halls: 0.04, tunnels: 1, tunnelMax: 6 },
+  racks: { maxBlock: 22, minBlock: 10, streets: [[3, 4], [5, 1]], halls: 0.15, tunnels: 0.3, tunnelMax: 2 },
+};
 export interface Street { id: number; rect: Rect; /** 0 = runs along x, 1 = along y. */ axis: 0 | 1; /** The lane's fixed coordinate (y for axis 0, x for axis 1). */ lane: number; width: number }
 export interface Junction { id: number; x: number; y: number }
 /** A run of lane tiles between two junctions (a's and b's tiles not included). */
@@ -31,6 +63,8 @@ export interface Segment {
   id: number; a: number; b: number; /** Direction from a to b. */ dir: Dir; tiles: [number, number][];
   /** Some of its tiles are inside a mass (a closed corridor). */
   tunnel: boolean;
+  /** Some of its tiles cross a hall (a bridge). */
+  bridge: boolean;
   /** It is long enough for stairs, and the stairs would be wholly inside a mass or wholly in a street. */
   stair: boolean;
 }
@@ -40,16 +74,10 @@ export interface Walk { segment: number; la: number; lb: number; /** A spare con
 export interface LayoutParams {
   /** Plan size in tiles. */
   size: number;
-  /** Blocks are cut until no side is longer than this (tiles)... */
-  maxBlock: number;
-  /** ...and never below this. */
-  minBlock: number;
-  /** Street widths to pick from (tiles), with weights. */
-  streets: (readonly [number, number])[];
+  /** Districts along each side of the plan (so districts² in all). */
+  districts: number;
   /** Number of catwalk levels. */
   levels: number;
-  /** Share of blocks left empty as halls (by count, biggest favoured). */
-  hallShare: number;
   /** How much of the (junction, level) lattice the maze takes. */
   fill: number;
   /** Chance that a spare connection between two parts of the maze is built (loops). */
@@ -58,19 +86,18 @@ export interface LayoutParams {
   stairs: number;
   /** Tiles a stair segment needs (two flights of two tiles, with a tile to spare each end). */
   stairTiles: number;
-  /** Share of masses that are cut by tunnels. */
-  tunnels: number;
-  /** The most tunnels one mass can have. */
-  tunnelMax: number;
-  /** How much likelier the maze is to go on through a tunnel than along a street. */
+  /** How much likelier the maze is to go on through a tunnel or over a bridge than along a street. */
   tunnelBias: number;
+  /** Chance that a hall is crossed by a bridge. */
+  bridges: number;
+  /** One kind for every district (for trying a kind out); normally each district draws its own. */
+  only?: DistrictKind;
 }
 
 export const DEFAULT_LAYOUT: LayoutParams = {
-  size: 160, maxBlock: 30, minBlock: 9,
-  streets: [[2, 3], [3, 4], [4, 2], [6, 1]],
-  levels: 5, hallShare: 0.14, fill: 0.5, loops: 0.12, stairs: 0.3, stairTiles: 6,
-  tunnels: 0.6, tunnelMax: 3, tunnelBias: 2.5,
+  size: 160, districts: 3,
+  levels: 5, fill: 0.5, loops: 0.12, stairs: 0.3, stairTiles: 6,
+  tunnelBias: 2.5, bridges: 0.8,
 };
 
 export interface Layout {
@@ -85,6 +112,9 @@ export interface Layout {
   /** Maze nodes in use: key `${junction}:${level}` → bit mask of directions with a catwalk. */
   nodes: Map<string, number>;
   start: { junction: number; level: number };
+  districts: District[];
+  /** The district a tile is in. */
+  districtAt: (x: number, y: number) => District;
 }
 
 export function makeLayout(seed: number, params: Partial<LayoutParams> = {}): Layout {
@@ -92,19 +122,33 @@ export function makeLayout(seed: number, params: Partial<LayoutParams> = {}): La
   const root = new Rng(seed);
   const N = P.size;
 
-  // ---- 1. blocks and streets
+  // ---- 0. districts: one in each cell of a coarse grid, its middle moved about; a tile belongs to the nearest
+  const dr = root.fork('districts');
+  const G = P.districts;
+  const kinds = Object.keys(GRAIN) as DistrictKind[];
+  const districts: District[] = [];
+  for (let gy = 0; gy < G; gy++) for (let gx = 0; gx < G; gx++) {
+    // Not the kind of the district before it in the row, nor of the one below it.
+    const taken = [gx > 0 ? districts[districts.length - 1].kind : null, gy > 0 ? districts[(gy - 1) * G + gx].kind : null];
+    const kind = P.only ?? dr.pick(kinds.filter((k) => !taken.includes(k)));
+    districts.push({ id: districts.length, kind, x: ((gx + dr.range(0.25, 0.75)) * N) / G, y: ((gy + dr.range(0.25, 0.75)) * N) / G, ...GRAIN[kind] });
+  }
+  const districtAt = (x: number, y: number) => districts.reduce((b, d) => (Math.hypot(d.x - x, d.y - y) < Math.hypot(b.x - x, b.y - y) ? d : b));
+
+  // ---- 1. blocks and streets, in the grain of the district each piece lies in
   const blocks: Block[] = [], streets: Street[] = [];
   const cut = new Rng(root.fork('blocks').seed);
   const split = (r: Rect) => {
     const w = r.x1 - r.x0, h = r.y1 - r.y0;
     const big = Math.max(w, h);
+    const D = districtAt((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2);
     // Stop when small enough; sometimes earlier, for variety in block size.
-    if (big <= P.maxBlock && (big < 2 * P.minBlock + 2 || cut.chance(0.55))) { blocks.push({ id: blocks.length, rect: r, kind: 'mass' }); return; }
-    const sw = cut.weighted(P.streets);
+    if (big <= D.maxBlock && (big < 2 * D.minBlock + 2 || cut.chance(0.55))) { blocks.push({ id: blocks.length, rect: r, kind: 'mass' }); return; }
+    const sw = cut.weighted(D.streets);
     const along: 0 | 1 = w > h || (w === h && cut.chance(0.5)) ? 0 : 1;   // 0: cut the x extent
     const len = along === 0 ? w : h;
-    if (len < 2 * P.minBlock + sw) { blocks.push({ id: blocks.length, rect: r, kind: 'mass' }); return; }
-    const p = Math.round(cut.range(P.minBlock, len - sw - P.minBlock));
+    if (len < 2 * D.minBlock + sw) { blocks.push({ id: blocks.length, rect: r, kind: 'mass' }); return; }
+    const p = Math.round(cut.range(D.minBlock, len - sw - D.minBlock));
     if (along === 0) {
       const sx = r.x0 + p;
       streets.push({ id: streets.length, rect: { x0: sx, y0: r.y0, x1: sx + sw, y1: r.y1 }, axis: 1, lane: sx + Math.floor(sw / 2), width: sw });
@@ -116,15 +160,13 @@ export function makeLayout(seed: number, params: Partial<LayoutParams> = {}): La
     }
   };
   split({ x0: 0, y0: 0, x1: N, y1: N });
-  // Halls: some blocks stay empty. Bigger blocks are likelier, never ones on the plan's edge.
-  const inner = blocks.filter((b) => b.rect.x0 > 0 && b.rect.y0 > 0 && b.rect.x1 < N && b.rect.y1 < N);
+  const districtOf = (b: Block) => districtAt((b.rect.x0 + b.rect.x1) / 2, (b.rect.y0 + b.rect.y1) / 2);
+  // Halls: some blocks stay empty, by their district's share. Never ones on the plan's edge, nor too small to be a space.
   const hallRng = root.fork('halls');
-  const want = Math.round(blocks.length * P.hallShare);
-  const pool = inner.map((b) => [b, ((b.rect.x1 - b.rect.x0) * (b.rect.y1 - b.rect.y0)) ** 1.5] as const);
-  for (let i = 0; i < want && pool.length; i++) {
-    const b = hallRng.weighted(pool);
-    b.kind = 'hall';
-    pool.splice(pool.findIndex((e) => e[0] === b), 1);
+  for (const b of blocks) {
+    const inner = b.rect.x0 > 0 && b.rect.y0 > 0 && b.rect.x1 < N && b.rect.y1 < N;
+    const least = Math.min(b.rect.x1 - b.rect.x0, b.rect.y1 - b.rect.y0);
+    if (hallRng.chance(districtOf(b).halls) && inner && least >= 8) b.kind = 'hall';
   }
   const tileBlock = new Int16Array(N * N).fill(-1);
   for (const b of blocks) for (let y = b.rect.y0; y < b.rect.y1; y++) for (let x = b.rect.x0; x < b.rect.x1; x++) tileBlock[y * N + x] = b.id;
@@ -203,10 +245,11 @@ export function makeLayout(seed: number, params: Partial<LayoutParams> = {}): La
   for (const b of blocks) {
     if (b.kind !== 'mass') continue;
     const r = tn.fork(b.id);
-    if (!r.chance(P.tunnels)) continue;
+    const D = districtOf(b);
+    if (!r.chance(D.tunnels)) continue;
     const { x0, y0, x1, y1 } = b.rect;
     const w = x1 - x0, h = y1 - y0;
-    const want = r.int(1, Math.max(1, Math.min(P.tunnelMax, Math.floor(Math.max(w, h) / 7))));
+    const want = r.int(D.tunnelMax > 3 ? 2 : 1, Math.max(1, Math.min(D.tunnelMax, Math.floor(Math.max(w, h) / (D.tunnelMax > 3 ? 5 : 7)))));
     const rows: number[] = [], cols: number[] = [];   // rows (fixed y) and columns (fixed x) already taken in this block
     const clear = (taken: number[], v: number) => taken.every((t) => Math.abs(t - v) >= 4);
     // A row or column that keeps two tiles of wall to the block's sides and four tiles to its own kind.
@@ -272,6 +315,28 @@ export function makeLayout(seed: number, params: Partial<LayoutParams> = {}): La
     }
   }
 
+  // ---- 2c. bridges across the halls: a lane straight over, from the street on one side to the street on the other
+  const br = root.fork('bridges');
+  for (const b of blocks) {
+    if (b.kind !== 'hall') continue;
+    const r = br.fork(b.id);
+    if (!r.chance(P.bridges)) continue;
+    const { x0, y0, x1, y1 } = b.rect;
+    const w = x1 - x0, h = y1 - y0;
+    const want = r.chance(0.35) ? 2 : 1;
+    let made = 0;
+    let lastAlongX: boolean | null = null;
+    for (let t = 0; t < 10 && made < want; t++) {
+      // The second bridge crosses the first.
+      const alongX: boolean = lastAlongX === null ? r.chance(w / (w + h)) : !lastAlongX;
+      const c = alongX ? r.int(y0 + 2, y1 - 3) : r.int(x0 + 2, x1 - 3);
+      const mA = mouth(b, alongX ? 2 : 3, c), mB = mouth(b, alongX ? 0 : 1, c);
+      if (!mA || !mB) continue;
+      const over = alongX ? runTiles(x0, c, 0, w) : runTiles(c, y0, 1, h);
+      if (lanePath([...mA.reverse(), ...over, ...mB])) { made++; lastAlongX = alongX; b.bridged = true; }
+    }
+  }
+
   const isLane = (x: number, y: number) => x >= 0 && y >= 0 && x < N && y < N && lane[y * N + x] === 1;
   const junctions: Junction[] = [];
   const jAt = new Map<number, number>();
@@ -289,14 +354,16 @@ export function makeLayout(seed: number, params: Partial<LayoutParams> = {}): La
     while (isLane(x, y) && !jAt.has(y * N + x)) { tiles.push([x, y]); x += STEPX[d]; y += STEPY[d]; }
     const b = jAt.get(y * N + x);
     if (b === undefined) continue;
-    const inside = tiles.map(([tx, ty]) => tileBlock[ty * N + tx] >= 0);
-    // Stairs take the middle four tiles (or one further on, going the other way), with a level tile at each end in the same kind of place.
+    // What each tile is in: 0 = a street, 1 = a mass, 2 = a hall.
+    const medium = tiles.map(([tx, ty]) => { const k = tileBlock[ty * N + tx]; return k < 0 ? 0 : blocks[k].kind === 'mass' ? 1 : 2; });
+    // Stairs take the middle four tiles (or one further on, going the other way), with a level tile at each end in
+    // the same kind of place; never on a bridge.
     let stair = tiles.length >= P.stairTiles;
     if (stair) {
       const i0 = Math.floor((tiles.length - 4) / 2), i1 = tiles.length - 4 - i0;
-      for (let i = Math.min(i0, i1) - 1; i <= Math.max(i0, i1) + 4; i++) if (inside[i] !== inside[i0]) stair = false;
+      for (let i = Math.min(i0, i1) - 1; i <= Math.max(i0, i1) + 4; i++) if (medium[i] !== medium[i0] || medium[i] === 2) stair = false;
     }
-    segments.push({ id: segments.length, a: j.id, b, dir: d, tiles, tunnel: inside.includes(true), stair });
+    segments.push({ id: segments.length, a: j.id, b, dir: d, tiles, tunnel: medium.includes(1), bridge: medium.includes(2), stair });
   }
 
   // ---- 3. the maze over (junction, level)
@@ -346,7 +413,7 @@ export function makeLayout(seed: number, params: Partial<LayoutParams> = {}): La
     if (!opts.length) { active.splice(i, 1); continue; }
     const flat = opts.filter((o) => o[1] === o[2]), ramp = opts.filter((o) => o[1] !== o[2]);
     const from = ramp.length && (!flat.length || mz.chance(P.stairs)) ? ramp : flat;
-    const pick = mz.weighted(from.map((o) => [o, o[0].tunnel ? P.tunnelBias : 1] as const));
+    const pick = mz.weighted(from.map((o) => [o, o[0].tunnel || o[0].bridge ? P.tunnelBias : 1] as const));
     const [s, , l2, far] = pick;
     if (s.a === j) take(s, l, l2); else take(s, l2, l);
     visited.add(key(far, l2));
@@ -360,5 +427,5 @@ export function makeLayout(seed: number, params: Partial<LayoutParams> = {}): La
       if (visited.has(key(far, l2)) && free(s, l, l2) && mz.chance(P.loops)) { if (s.a === j) take(s, l, l2); else take(s, l2, l); }
     }
   }
-  return { params: P, blocks, streets, junctions, segments, walks, nodes, start, tileBlock };
+  return { params: P, blocks, streets, junctions, segments, walks, nodes, start, tileBlock, districts, districtAt };
 }

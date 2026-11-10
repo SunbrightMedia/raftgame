@@ -8,10 +8,11 @@ import { industrial } from '../../src/world/industrial/world';
 
 const args = process.argv.slice(2).filter((a) => a !== '--');
 const seed = Number(args[0] ?? 1), per = Number(args[1] ?? 4);
-const lay = makeLayout(seed, { streets: [[1, 2], [3, 5], [5, 2], [7, 1]] });
+const lay = makeLayout(seed);
 const N = lay.params.size, L = lay.params.levels, T = 128;
 const zOf = (l: number) => (l - Math.floor(L / 2)) * 256;
-const blockOf = (x: number, y: number) => lay.tileBlock[y * N + x];
+/** The mass a tile is inside, or −1 (a street or a hall). */
+const blockOf = (x: number, y: number) => { const b = lay.tileBlock[y * N + x]; return b >= 0 && lay.blocks[b].kind === 'mass' ? b : -1; };
 const DX = [1, 0, -1, 0], DY = [0, 1, 0, -1];
 const pose = (x: number, y: number, z: number, d: number, back = 0, pitch = 0) => `${Math.round(x * T + 64 - DX[d] * back)},${Math.round(y * T + 64 - DY[d] * back)},${z + 1},${d * 90},${pitch}`;
 const out: Record<string, string[]> = { door: [], corridor: [], stair: [], room: [], end: [], out: [] };

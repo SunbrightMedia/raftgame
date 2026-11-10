@@ -2,7 +2,7 @@ import { MapOut, type V3 } from '../mapOut';
 import { Rng } from '../rng';
 import { carve, type Finish, type Hollow } from '../carve';
 import { walkTile, stairs, tubePath, TILE, STEP, DX, DY, opposite, type Dir } from '../kit/aperture';
-import { makeLayout, type Block, type Layout, type LayoutParams, type Street } from './layout';
+import { makeLayout, type Block, type DistrictKind, type Layout, type LayoutParams, type Street } from './layout';
 
 /**
  * The industrial world's geometry, from a layout (layout.ts): what each mass
@@ -58,7 +58,15 @@ export type WorldParams = Partial<LayoutParams>;
 
 type MassKind = 'chambers' | 'machine' | 'pier' | 'frame' | 'bridge';
 interface MassBox { x0: number; y0: number; x1: number; y1: number; z0: number; z1: number; kind: MassKind }
-interface District { x: number; y: number; steel: string; mass: (readonly [MassKind, number])[]; cables: number; tubes: number; pipes: number }
+/** How a district is dressed: its steel, what its masses are, how many cables, tubes and pipes it carries. */
+interface District { steel: string; mass: (readonly [MassKind, number])[]; cables: number; tubes: number; pipes: number }
+const DRESS: Record<DistrictKind, Omit<District, 'steel'>> = {
+  canyons: { mass: [['chambers', 6], ['machine', 2], ['pier', 1], ['frame', 1]], cables: 1, tubes: 1, pipes: 0.6 },
+  alleys: { mass: [['pier', 5], ['machine', 3], ['chambers', 1]], cables: 0.5, tubes: 0.3, pipes: 1.6 },
+  yards: { mass: [['machine', 3], ['pier', 2], ['frame', 3], ['chambers', 1]], cables: 0, tubes: 1.6, pipes: 0.6 },
+  works: { mass: [['machine', 6], ['pier', 3]], cables: 1, tubes: 2.4, pipes: 1 },
+  racks: { mass: [['frame', 7], ['machine', 1], ['chambers', 1], ['pier', 1]], cables: 1, tubes: 0.7, pipes: 0.2 },
+};
 type Steel = (min: V3, max: V3, tex?: string) => number;
 type Box = { min: V3; max: V3 };
 export interface Note { kind: string; at: V3; yaw: number }
@@ -86,6 +94,8 @@ interface Ctx {
   decks: Map<string, { z: number; flat: boolean }[]>;
   /** Everything cut into the masses, doorways out to the block's edge included: nothing else may pass through these. */
   hollows: Box[];
+  /** Tiles where a bridge's columns stand, and the height they reach: nothing else may pass through them. */
+  trestle: Map<string, number>;
   districtAt: (x: number, y: number) => District;
   top: number; bottom: number; deep: number; size: number;
   /** Places worth a look when reviewing (kind, a point to stand on, the way to face). */
@@ -93,7 +103,7 @@ interface Ctx {
 }
 
 export function industrial(seed: number, params: WorldParams = {}): { map: MapOut; layout: Layout; notes: Note[] } {
-  const lay = makeLayout(seed, { streets: [[1, 2], [3, 5], [5, 2], [7, 1]], ...params });
+  const lay = makeLayout(seed, params);
   const m = new MapOut();
   const root = new Rng(seed).fork('world');
   const L = lay.params.levels, N = lay.params.size;
@@ -101,32 +111,23 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
   const centre = (x: number, y: number, level: number): V3 => [x * TILE + TILE / 2, y * TILE + TILE / 2, zOf(level)];
   const size = N * TILE;
   const steel: Steel = (min, max, tex = T.steel) => m.box(min, max, { tex, group: 'func_detail', lightmapscale: 64, scale: 0.25 });
-  const blockOf = (x: number, y: number) => lay.tileBlock[y * N + x];
 
-  // ---- districts
+  // ---- districts: the layout's, dressed. Steel is grey; one district in five has yellow.
   const dr = root.fork('districts');
-  const districts: District[] = Array.from({ length: 7 }, () => ({
-    x: dr.range(0, size), y: dr.range(0, size),
-    steel: dr.pick([T.steel, T.steel, T.steel, T.steel, T.yellow]),
-    mass: dr.pick([
-      [['chambers', 6], ['machine', 2], ['pier', 1], ['frame', 2]],
-      [['chambers', 2], ['machine', 5], ['pier', 2], ['frame', 1]],
-      [['chambers', 1], ['machine', 2], ['pier', 5], ['frame', 1]],
-      [['chambers', 2], ['machine', 2], ['pier', 1], ['frame', 6]],
-    ] as (readonly [MassKind, number])[][]),
-    cables: dr.pick([0, 0.5, 1, 1]), tubes: dr.pick([0.3, 0.7, 1, 1.6, 2.4]), pipes: dr.pick([0.2, 0.6, 1, 1.6]),
-  }));
-  const districtAt = (x: number, y: number) => districts.reduce((b, d) => (Math.hypot(d.x - x, d.y - y) < Math.hypot(b.x - x, b.y - y) ? d : b));
+  const dress: District[] = lay.districts.map((d) => ({ steel: dr.chance(0.2) ? T.yellow : T.steel, ...DRESS[d.kind] }));
+  const districtAt = (x: number, y: number) => dress[lay.districtAt(x / TILE, y / TILE).id];
+  /** The mass a tile is inside, or −1 (a street or a hall: open air). */
+  const massOf = (x: number, y: number) => { const b = lay.tileBlock[y * N + x]; return b >= 0 && lay.blocks[b].kind === 'mass' ? b : -1; };
 
   const bottom = zOf(0), top = zOf(L - 1);
-  const ctx: Ctx = { m, lay, root, L, zOf, steel, masses: [], walkZ: new Map(), decks: new Map(), hollows: [], districtAt, top, bottom, deep: bottom - DEPTH, size, notes: [] };
+  const ctx: Ctx = { m, lay, root, L, zOf, steel, masses: [], walkZ: new Map(), decks: new Map(), hollows: [], trestle: new Map(), districtAt, top, bottom, deep: bottom - DEPTH, size, notes: [] };
   const noteWalk = (x: number, y: number, z: number) => { const k = `${x},${y}`; const a = ctx.walkZ.get(k); if (a) a.push(z); else ctx.walkZ.set(k, [z]); };
   const noteDeck = (x: number, y: number, z: number, flat: boolean) => { const k = `${x},${y}`; const a = ctx.decks.get(k); if (a) a.push({ z, flat }); else ctx.decks.set(k, [{ z, flat }]); };
 
   // ---- what each mass is. One the maze goes through must be solid, stand from below and reach above every level.
   const cutBlocks = new Set<number>();
-  for (const w of lay.walks) for (const [x, y] of lay.segments[w.segment].tiles) if (blockOf(x, y) >= 0) cutBlocks.add(blockOf(x, y));
-  for (const k of lay.nodes.keys()) { const J = lay.junctions[Number(k.split(':')[0])]; if (blockOf(J.x, J.y) >= 0) cutBlocks.add(blockOf(J.x, J.y)); }
+  for (const w of lay.walks) for (const [x, y] of lay.segments[w.segment].tiles) if (massOf(x, y) >= 0) cutBlocks.add(massOf(x, y));
+  for (const k of lay.nodes.keys()) { const J = lay.junctions[Number(k.split(':')[0])]; if (massOf(J.x, J.y) >= 0) cutBlocks.add(massOf(J.x, J.y)); }
   interface Plan { r: Rng; D: District; kind: MassKind; x0: number; y0: number; x1: number; y1: number; z0: number; z1: number }
   const plans = new Map<number, Plan>();
   for (const b of lay.blocks) {
@@ -141,7 +142,7 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
     const raised = (kind === 'machine' || kind === 'chambers') && z1 > top && r.chance(0.2);
     let z0 = raised ? Math.min(zOf(r.int(1, L - 1)) + 160, z1 - 512) : ctx.deep;
     if (cutBlocks.has(b.id)) {
-      if (kind !== 'machine' && kind !== 'pier') kind = r.weighted(D.mass.filter(([k]) => k === 'machine' || k === 'pier'));
+      if (kind !== 'machine' && kind !== 'pier') kind = r.weighted([['machine', 1], ['pier', 1], ...D.mass.filter(([k]) => k === 'machine' || k === 'pier')] as (readonly [MassKind, number])[]);
       z0 = ctx.deep;
       if (z1 < top + 700) z1 = top + r.range(700, 3000);
     }
@@ -166,7 +167,7 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
     }
   }
 
-  // ---- catwalks (the parts of the maze out in the streets)
+  // ---- catwalks (the parts of the maze in the open: in the streets and over the halls)
   for (const w of lay.walks) {
     const s = lay.segments[w.segment];
     const up = w.lb >= w.la;
@@ -176,7 +177,7 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
     const axisMask = (1 << s.dir) | (1 << ((s.dir + 2) % 4));
     const i0 = lo === hi ? seq.length : Math.floor((seq.length - 4) / 2);
     seq.forEach(([x, y], i) => {
-      const open = blockOf(x, y) < 0;
+      const open = massOf(x, y) < 0;
       if (i >= i0 && i < i0 + 4) {   // the stairs are here
         noteWalk(x, y, zOf(lo)); noteWalk(x, y, zOf(lo) + STEP); noteWalk(x, y, zOf(hi));
         if (open) noteDeck(x, y, zOf(lo) + 32 + 64 * (i - i0), false);
@@ -188,7 +189,7 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
       walkTile(m, c, axisMask);
       noteDeck(x, y, c[2], true);
     });
-    if (lo !== hi && blockOf(seq[i0][0], seq[i0][1]) < 0) {
+    if (lo !== hi && massOf(seq[i0][0], seq[i0][1]) < 0) {
       const [x, y] = seq[i0];
       const c = centre(x, y, lo);
       const foot: V3 = [c[0] - DX[d] * TILE / 2, c[1] - DY[d] * TILE / 2, c[2]];
@@ -204,7 +205,7 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
     const J = lay.junctions[j];
     const c = centre(J.x, J.y, l);
     noteWalk(J.x, J.y, c[2]);
-    if (blockOf(J.x, J.y) >= 0) continue;   // inside a mass: a room or a corner, cut with the rest
+    if (massOf(J.x, J.y) >= 0) continue;   // inside a mass: a room or a corner, cut with the rest
     const open = ([0, 1, 2, 3] as Dir[]).filter((dd) => mask & (1 << dd));
     if (open.length === 1) ends.push({ c, open: open[0] });
     else walkTile(m, c, mask);
@@ -218,7 +219,9 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
     if (sheltered.length < 4 && farEnough) { shelter(ctx, er, e.c, e.open); sheltered.push(e.c); } else walkTile(m, e.c, 1 << e.open);
   }
 
-  // ---- streets: the frames that carry the catwalks and the tube lines; a few cables; bridges of machinery
+  // ---- what carries the bridges over the halls; then the streets: the frames that carry the catwalks and the
+  // tube lines, a few cables, boxes of machinery from wall to wall
+  trestles(ctx);
   for (const s of lay.streets) street(ctx, root.fork(`street${s.id}`), s);
 
   // ---- tubes that leave one wall and arrive in another; what stands in the halls
@@ -254,7 +257,8 @@ const along = (c: V3, d: Dir, from: number, to: number, w: number, z0: number, z
 function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<number, Inner> {
   const { lay, zOf, root } = ctx;
   const N = lay.params.size;
-  const blockOf = (x: number, y: number) => lay.tileBlock[y * N + x];
+  /** The mass a tile is inside, or −1 (open air: a street, or a hall). */
+  const blockOf = (x: number, y: number) => { const b = lay.tileBlock[y * N + x]; return b >= 0 && lay.blocks[b].kind === 'mass' ? b : -1; };
   const out = new Map<number, Inner>();
   const get = (blk: number): Inner => {
     let v = out.get(blk);
@@ -445,6 +449,7 @@ function fitOut(ctx: Ctx, p: { x0: number; y0: number; x1: number; y1: number; D
 
 /** Can a column (16 across) stand at p, from far below up to zTop, without passing through a doorway or a room? */
 function columnClear(ctx: Ctx, p: V3, zTop: number): boolean {
+  if (ctx.walkZ.has(`${Math.floor(p[0] / TILE)},${Math.floor(p[1] / TILE)}`)) return false;   // a doorway, or a bridge coming off a hall
   return !ctx.hollows.some((h) => p[0] > h.min[0] - 14 && p[0] < h.max[0] + 14 && p[1] > h.min[1] - 14 && p[1] < h.max[1] + 14 && h.min[2] < zTop + 8);
 }
 
@@ -628,7 +633,9 @@ function street(ctx: Ctx, r: Rng, s: Street): void {
   const last = new Map<number, number>();   // per deck height: where the last frame that carried it stands
   let next = a0;
   for (let i = a0; i < a1; i++) {
-    if (i < next || !blockBeside(i, 0) || !blockBeside(i, 1)) continue;
+    // Another street's mouth: no column can stand here, and no tie may cross it (a catwalk or a stair may come through it at any height).
+    if (!blockBeside(i, 0) || !blockBeside(i, 1)) { last.clear(); continue; }
+    if (i < next) continue;
     const decks = ctx.decks.get(tile(i).join(',')) ?? [];
     const carriesTube = tube !== null && i > tube.from && i < tube.to;
     if (!decks.length && !carriesTube) { last.clear(); continue; }
@@ -709,6 +716,8 @@ function hitsWalk(ctx: Ctx, p: V3, radius: number): boolean {
     const cx = Math.max(x * TILE - 8, Math.min(p[0], (x + 1) * TILE + 8)), cy = Math.max(y * TILE - 8, Math.min(p[1], (y + 1) * TILE + 8));
     if (Math.hypot(p[0] - cx, p[1] - cy) > radius) continue;
     for (const z of zs) if (p[2] > z - 18 - radius && p[2] < z + 248 + radius) return true;   // up to the beam over the walk
+    const columns = ctx.trestle.get(`${x},${y}`);
+    if (columns !== undefined && p[2] < columns + radius) return true;                          // a bridge's columns stand here, from far below
   }
   return false;
 }
@@ -802,6 +811,59 @@ function wanderingTubes(ctx: Ctx, r: Rng): void {
   }
 }
 
+// ---------------------------------------------------------------- bridges over the halls
+
+/**
+ * A bridge crosses a hall on a trestle: under each deck two stringers the
+ * whole way from lane to lane; in the hall, every third tile, a bent (two
+ * columns from out of sight below, one each side of the deck, with a beam
+ * across under each deck). Bridges on several levels of one line share their
+ * bents. Where two bridges cross, four columns carry the crossing.
+ */
+function trestles(ctx: Ctx): void {
+  const { lay, zOf, steel } = ctx;
+  const N = lay.params.size;
+  const hallAt = (x: number, y: number) => { const b = lay.tileBlock[y * N + x]; return b >= 0 && lay.blocks[b].kind === 'hall'; };
+  // The deck heights on each bridge segment.
+  const levels = new Map<number, number[]>();
+  for (const w of lay.walks) if (lay.segments[w.segment].bridge && w.la === w.lb) (levels.get(w.segment) ?? levels.set(w.segment, []).get(w.segment)!).push(zOf(w.la));
+  for (const [id, zs] of levels) {
+    const s = lay.segments[id];
+    const D = ctx.districtAt(s.tiles[0][0] * TILE, s.tiles[0][1] * TILE);
+    const c: V3 = [s.tiles[0][0] * TILE + TILE / 2, s.tiles[0][1] * TILE + TILE / 2, 0];
+    const zTop = Math.max(...zs);
+    const len = s.tiles.length * TILE;
+    for (const z of zs) for (const o of [-40, 40]) { const b = slab(c, s.dir, -TILE / 2, len - TILE / 2, o - 4, o + 4, z - 20, z - 4); steel(b[0], b[1], D.steel); }
+    const inHall = s.tiles.map(([x, y]) => hallAt(x, y));
+    const first = inHall.indexOf(true), last = inHall.lastIndexOf(true);
+    for (let i = first; i <= last; i++) {
+      if ((i - first) % 3 !== 0 && i !== last) continue;
+      const u = i * TILE;
+      for (const o of [-60, 60]) { const b = slab(c, s.dir, u - 8, u + 8, o - 8, o + 8, ctx.deep, zTop - 20); steel(b[0], b[1], D.steel); }
+      for (const z of zs) { const b = slab(c, s.dir, u - 6, u + 6, -68, 68, z - 36, z - 20); steel(b[0], b[1], D.steel); }
+      ctx.trestle.set(`${s.tiles[i][0]},${s.tiles[i][1]}`, zTop);
+    }
+    ctx.notes.push({ kind: 'bridge', at: [c[0] + DX[s.dir] * first * TILE, c[1] + DY[s.dir] * first * TILE, zs[0]], yaw: s.dir * 90 });
+  }
+  // Crossings in a hall.
+  const tops = new Map<number, number[]>();
+  for (const k of lay.nodes.keys()) {
+    const [j, l] = k.split(':').map(Number);
+    if (hallAt(lay.junctions[j].x, lay.junctions[j].y)) (tops.get(j) ?? tops.set(j, []).get(j)!).push(zOf(l));
+  }
+  for (const [j, zs] of tops) {
+    const J = lay.junctions[j], cx = J.x * TILE + TILE / 2, cy = J.y * TILE + TILE / 2, zTop = Math.max(...zs);
+    const D = ctx.districtAt(cx, cy);
+    for (const ox of [-60, 60]) for (const oy of [-60, 60]) steel([cx + ox - 8, cy + oy - 8, ctx.deep], [cx + ox + 8, cy + oy + 8, zTop - 20], D.steel);
+    for (const z of zs) {
+      // (The two ways sit a unit apart in height, so no two faces lie in one plane where they cross.)
+      for (const o of [-60, 60]) { steel([cx - 68, cy + o - 6, z - 36], [cx + 68, cy + o + 6, z - 20], D.steel); steel([cx + o - 6, cy - 68, z - 37], [cx + o + 6, cy + 68, z - 21], D.steel); }
+      for (const o of [-40, 40]) { steel([cx - 64, cy + o - 4, z - 20], [cx + 64, cy + o + 4, z - 4], D.steel); steel([cx + o - 4, cy - 64, z - 21], [cx + o + 4, cy + 64, z - 5], D.steel); }
+    }
+    ctx.trestle.set(`${J.x},${J.y}`, zTop);
+  }
+}
+
 // ---------------------------------------------------------------- halls
 
 /**
@@ -810,7 +872,7 @@ function wanderingTubes(ctx: Ctx, r: Rng): void {
  * standing out of sight below.
  */
 function hall(ctx: Ctx, r: Rng, b: Block): void {
-  if (r.chance(0.45)) return;
+  if (b.bridged || r.chance(0.45)) return;   // crossed by a bridge: the open space and the bridge are the point
   const x0 = b.rect.x0 * TILE, y0 = b.rect.y0 * TILE, x1 = b.rect.x1 * TILE, y1 = b.rect.y1 * TILE;
   const w = x1 - x0, d = y1 - y0;
   // The tower takes the middle; a wide ring of open air stays round it.

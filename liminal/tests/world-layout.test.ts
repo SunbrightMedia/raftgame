@@ -2,17 +2,15 @@ import { describe, it, expect } from 'vitest';
 import { makeLayout } from '../src/world/industrial/layout';
 import { industrial } from '../src/world/industrial/world';
 
-const STREETS: (readonly [number, number])[] = [[1, 2], [3, 5], [5, 2], [7, 1]];
-
 describe('industrial layout', () => {
   it('is fixed by its seed', () => {
-    const a = makeLayout(5, { streets: STREETS }), b = makeLayout(5, { streets: STREETS });
+    const a = makeLayout(5), b = makeLayout(5);
     expect(JSON.stringify([a.walks, a.segments.length, [...a.nodes]])).toBe(JSON.stringify([b.walks, b.segments.length, [...b.nodes]]));
-    expect(JSON.stringify(makeLayout(6, { streets: STREETS }).walks)).not.toBe(JSON.stringify(a.walks));
+    expect(JSON.stringify(makeLayout(6).walks)).not.toBe(JSON.stringify(a.walks));
   });
 
   for (const seed of [1, 2, 3, 4]) {
-    const lay = makeLayout(seed, { streets: STREETS });
+    const lay = makeLayout(seed);
     const N = lay.params.size;
     const blockOf = (x: number, y: number) => lay.tileBlock[y * N + x];
 
