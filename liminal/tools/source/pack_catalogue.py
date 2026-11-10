@@ -16,15 +16,50 @@ Model data per model (little-endian, 4-byte aligned parts): positions int16 x3
 int8 x3, then indices uint16 (or uint32 past 65535 vertices).
 
     .venv-look/bin/python tools/source/pack_catalogue.py
+    .venv-look/bin/python tools/source/pack_catalogue.py --maps maps/iw/industrial.json --out catalogue-iw --tex 512
+
+--maps: pack only the textures and models these maps use (a small page for one world).
+--out: the folder to write (default catalogue). --tex: texture size cap in the sheets (default 256).
 """
-import json, os, glob, struct, zlib, math
+import json, os, glob, struct, sys, zlib, math
 import numpy as np
 from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, '../..'))
-OUT = os.path.join(ROOT, 'catalogue')
-TEX, SHEET = 256, 2048
+ARGS = sys.argv[1:]
+def _opt(name, default):
+    return ARGS[ARGS.index(name) + 1] if name in ARGS else default
+OUT = os.path.join(ROOT, _opt('--out', 'catalogue'))
+TEX, SHEET = int(_opt('--tex', 256)), 2048
+# --maps a.json b.json ...: everything after the flag up to the next flag.
+MAPS = []
+if '--maps' in ARGS:
+    for a in ARGS[ARGS.index('--maps') + 1:]:
+        if a.startswith('--'):
+            break
+        MAPS.append(os.path.join(ROOT, a))
+
+
+def used_by_maps():
+    """(texture names, model names) the chosen maps use: face textures, glow textures, props and their materials."""
+    tex, models = set(), []
+    for p in MAPS:
+        m = json.load(open(p))
+        for b in m['brushes']:
+            if b.get('tex'):
+                tex.add(b['tex'])
+            for f in (b.get('faces') or {}).values():
+                if f and f.get('tex'):
+                    tex.add(f['tex'])
+        for e in m['entities']:
+            pr = e.get('props') or {}
+            if e['class'] == 'prop' and pr.get('model') not in models:
+                models.append(pr['model'])
+            for k in ('tex', 'halo'):
+                if e['class'] in ('glow', 'beam') and pr.get(k):
+                    tex.add(pr[k])
+    return tex, models
 PACK_BYTES = 11 * 1024 * 1024
 
 
@@ -37,8 +72,10 @@ def png_bytes(data: bytes) -> bytes:
     return b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', W, rows, 8, 0, 0, 0, 0)) + chunk(b'IDAT', zlib.compress(raw, 9)) + chunk(b'IEND', b'')
 
 
-def pack_textures():
+def pack_textures(only=None):
     index = json.load(open(os.path.join(ROOT, 'textures/p2lib/index.json')))['textures']
+    if only is not None:
+        index = [t for t in index if t['name'] in only]
     os.makedirs(os.path.join(OUT, 'sheets'), exist_ok=True)
     per = (SHEET // TEX) ** 2
     out, sheet, n = {}, None, 0
@@ -82,15 +119,17 @@ def encode_model(h, binpath):
     return blob, q
 
 
-def pack_models():
+def pack_models(only=None):
     # Models in the order the rooms place them, so a room reads few packs.
     order = []
     for r in range(10):
         p = os.path.join(ROOT, f'maps/p2lib/room{r}.json')
-        if os.path.exists(p):
+        if only is None and os.path.exists(p):
             for e in json.load(open(p))['entities']:
                 if e['class'] == 'prop' and e['props']['model'] not in order:
                     order.append(e['props']['model'])
+    if only is not None:
+        order = list(only)
     headers = {}
     for f in glob.glob(os.path.join(ROOT, 'models/p2lib/**/*.json'), recursive=True):
         h = json.load(open(f))
@@ -103,14 +142,14 @@ def pack_models():
         if buf:
             open(os.path.join(OUT, 'packs', f'pack_{n:03d}.png'), 'wb').write(png_bytes(bytes(buf)))
             n += 1; buf = bytearray()
-    for name in order + sorted(set(headers) - set(order)):
+    for name in order + (sorted(set(headers) - set(order)) if only is None else []):
         if name not in headers:
             continue
         h, binpath = headers[name]
         blob, q = encode_model(h, binpath)
         if buf and len(buf) + len(blob) > PACK_BYTES:
             flush()
-        hh = {k: h[k] for k in ('format', 'version', 'source', 'vertexCount', 'indexCount', 'materials', 'skins', 'bounds', 'hull', 'meshes')}
+        hh = {k: h[k] for k in ('format', 'version', 'source', 'vertexCount', 'indexCount', 'materials', 'skins', 'bounds', 'hull', 'meshes', 'collision') if k in h}
         hh['bin'] = ''
         hh['pack'] = {'n': n, 'offset': len(buf), 'length': len(blob), **q}
         out[name] = hh
@@ -121,5 +160,21 @@ def pack_models():
 
 
 if __name__ == '__main__':
-    pack_textures()
-    pack_models()
+    if MAPS:
+        tex, models = used_by_maps()
+        # A used model's materials are textures too.
+        heads = {}
+        for f in glob.glob(os.path.join(ROOT, 'models/p2lib/**/*.json'), recursive=True):
+            h = json.load(open(f))
+            if h.get('format') == 'liminal-mesh':
+                heads[h['source']] = h
+        for name in models:
+            tex.update(heads.get(name, {}).get('materials', []))
+        for d in ('sheets', 'packs'):
+            for f in glob.glob(os.path.join(OUT, d, '*')):
+                os.remove(f)
+        pack_textures(tex)
+        pack_models(models)
+    else:
+        pack_textures()
+        pack_models()

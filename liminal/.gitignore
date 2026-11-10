@@ -15,3 +15,5 @@ maps/p2ref/
 __pycache__/
 # Generated worlds (tools/world/gen.ts): made again from their seed, not committed while in progress.
 maps/iw/
+catalogue-iw/
+dist-industrial/

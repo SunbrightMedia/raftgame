@@ -8,7 +8,7 @@ import { DebugPanel } from './ui/debugPanel';
 import { Hud } from './ui/hud';
 
 // The private atrium build (npm run build:atrium) opens the Portal 2 reference map.
-const DEFAULT_MAP = import.meta.env.MODE === 'atrium' ? 'maps/p2/shipyard_atrium.json' : import.meta.env.MODE === 'catalogue' ? 'maps/p2lib/room0.json' : 'maps/blank.json';
+const DEFAULT_MAP = import.meta.env.MODE === 'atrium' ? 'maps/p2/shipyard_atrium.json' : import.meta.env.MODE === 'catalogue' ? 'maps/p2lib/room0.json' : import.meta.env.MODE === 'industrial' ? 'maps/iw/industrial.json' : 'maps/blank.json';
 
 /** Milliseconds since boot start at each step (window.liminal.bootTimes). */
 const bootTimes: Record<string, number> = {};
