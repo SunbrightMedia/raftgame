@@ -28,6 +28,7 @@
  */
 import { type Axis, type Face, type SolidPlanes, facePoint } from './faces';
 import { SolidGrid } from './bake';
+import { lightProps, type LightmapProbe, type PropInstance, type PropModelData } from './vradProps';
 
 export type RGB = [number, number, number];
 
@@ -391,6 +392,8 @@ export interface SourceBakeInput {
     supersample: boolean;
     maxWidth: number;
   };
+  /** Static props to light per vertex, as VRAD does (vradProps.ts). */
+  props?: { models: PropModelData[]; instances: PropInstance[] };
   /** Progress notes (stage, elapsed ms). */
   log?: (msg: string) => void;
 }
@@ -417,6 +420,9 @@ export interface SourceBakeOutput {
   bounces: number;
   /** Average light per face (for prop indirect lighting, Source's dface average colour). */
   faceAverage: [number, RGB][];
+  /** Per-vertex light of the props (Source linear, RGB per vertex; instance i starts at vertex propOffsets[i]). */
+  propColors?: Float32Array;
+  propOffsets?: Int32Array;
 }
 
 interface Lux {
@@ -878,8 +884,27 @@ export function bakeSource(input: SourceBakeInput): SourceBakeOutput {
     }
   }
 
+  // ---- static props, per vertex, against the finished lightmaps
+  let props: { colors: Float32Array; offsets: Int32Array } | undefined;
+  if (input.props?.instances.length) {
+    log(`lighting ${input.props.instances.length} props`);
+    const probe: LightmapProbe = (faceId, x, y, z) => {
+      const li = luxByFace.get(faceId);
+      if (li === undefined) return null;
+      const L = lux[li];
+      if (L.info.sky) return null;
+      const g = L.grid;
+      const s = Math.min(g.w - 1, Math.max(0, Math.floor(x * g.lmS[0] + y * g.lmS[1] + z * g.lmS[2] - g.minS + 0.5)));
+      const t = Math.min(g.h - 1, Math.max(0, Math.floor(x * g.lmT[0] + y * g.lmT[1] + z * g.lmT[2] - g.minT + 0.5)));
+      const o = ((L.rect.y + t) * W + L.rect.x + s) * 4;
+      return { light: [pixels[o], pixels[o + 1], pixels[o + 2]], reflectivity: L.info.reflectivity };
+    };
+    props = lightProps(input.props.models, input.props.instances, lights, grid, probe);
+  }
+
   return {
     width: W, height: H, pixels, rects: [...layout.rects], ms: Date.now() - t0, luxels, patches: patches.length, bounces, faceAverage,
+    propColors: props?.colors, propOffsets: props?.offsets,
   };
 }
 

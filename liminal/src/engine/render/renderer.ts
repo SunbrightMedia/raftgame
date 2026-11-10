@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Digicam, type CameraParams } from './digicam';
+import { SourcePost, type SourcePostParams } from './sourcePost';
 
 THREE.ColorManagement.enabled = false;
 THREE.Object3D.DEFAULT_UP.set(0, 0, 1);
@@ -22,6 +23,14 @@ export class LowResRenderer {
   /** The camera: exposure, white balance, response, sRGB, the medium's artifacts. */
   camera_: CameraParams | null = null;
   private digicam = new Digicam();
+  /** Source's camera instead of the digicam (Source-lit maps): exposure histogram, bloom, clamp. */
+  sourceCamera: SourcePostParams | null = null;
+  private sourcePost = new SourcePost();
+  /** Source light → radiance (see worldUniforms.sourceUnit). */
+  sourceUnit = 300 / Math.PI;
+  private lastFrame = performance.now();
+  /** The Source camera's current tonemap scale (for the HUD/tests). */
+  get sourceScale(): number { return this.sourcePost.scale; }
   upscale: 'nearest' | 'linear' = 'linear';
   /** Size actually rendered last frame, for the HUD. */
   readonly renderSize = new THREE.Vector2();
@@ -74,6 +83,12 @@ export class LowResRenderer {
     }
     this.gl.setRenderTarget(this.target);
     this.gl.render(scene, this.camera);
+    const now = performance.now(), dt = Math.min(0.25, (now - this.lastFrame) / 1000);
+    this.lastFrame = now;
+    if (this.sourceCamera) {
+      this.sourcePost.render(this.gl, this.target, null, this.sourceUnit, this.sourceCamera, dt);
+      return;
+    }
     if (this.camera_) {
       this.digicam.render(this.gl, this.target, null, this.camera_);
       return;

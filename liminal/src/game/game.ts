@@ -48,6 +48,7 @@ export class Game {
     this.renderer = new LowResRenderer(canvas);
     this.lighting = new Lighting(storage);
     this.input = new Input(canvas);
+    this.lighting.onPropLight = (colors, offsets) => this.level?.setPropLight(colors, offsets);
     this.lighting.onBaked = (layout, tex, dir, mask) => {
       if (!this.level) return;
       this.level.setLightmap(layout, tex);
@@ -162,6 +163,12 @@ export class Game {
     this.renderer.upscale = s.render.upscale as 'nearest' | 'linear';
     this.renderer.msaa = s.render.msaa;
     this.renderer.camera_ = s.camera;
+    const C = s.camera;
+    this.renderer.sourceCamera = C.model === 'source' ? {
+      autoExposure: C.autoExposure, scale: C.sourceScale, min: C.sourceExposureMin, max: C.sourceExposureMax, bloomScale: C.sourceBloom,
+      rate: C.adaptSpeed, percentBright: 2, percentTarget: 60, minAvgLum: 3,
+    } : null;
+    this.renderer.sourceUnit = worldUniforms.sourceUnit.value;
     this.renderer.setSourceFov(s.view.fov);
     this.renderer.setClearColor(s.fog.enabled ? s.fog.color : s.render.clearColor);
     const recrushed = this.textures.setCrush(s.textures, s.render.textureFilter as 'nearest' | 'linear');

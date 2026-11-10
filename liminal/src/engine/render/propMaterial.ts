@@ -4,12 +4,18 @@ import { worldUniforms } from './worldMaterial';
 import { applySourceBlend, sourceUniforms } from './sourceMaterial';
 
 /**
- * Model surfaces (props). Placeholder lighting until props get Source's
- * vertex lighting (docs/PIPELINE.md, phase 1): the same even light and
- * per-direction shade the world uses before its lightmap arrives.
+ * Model surfaces (props): Source's VertexLitGeneric with baked per-vertex
+ * light (vradProps.ts) — albedo × vertex light. Before a bake has lit them:
+ * an even light with the same per-direction shade the world uses.
  * Self-illumination follows Source's VertexLitGeneric: the lit colour moves
  * to albedo × tint by the base alpha (the mask), at Source's "1.0" of light.
  */
+/** Per-vertex baked light of all props (propMeshes.setPropLight). */
+export const propLightUniforms = {
+  propLight: { value: null as THREE.Texture | null },
+  propLightOn: { value: 0 },
+};
+
 export function makePropMaterial(tex: TexEntry): THREE.ShaderMaterial {
   const mat = new THREE.ShaderMaterial({
     uniforms: {
@@ -22,14 +28,25 @@ export function makePropMaterial(tex: TexEntry): THREE.ShaderMaterial {
       fogOn: worldUniforms.fogOn,
       fogHaze: worldUniforms.fogHaze,
       sourceUnit: worldUniforms.sourceUnit,
+      lightmapOn: worldUniforms.lightmapOn,
+      ...propLightUniforms,
       map: { value: tex.texture },
       ...sourceUniforms(tex.source),
     },
     vertexShader: /* glsl */ `
+      attribute float lightOffset;
+      uniform sampler2D propLight;
+      uniform float propLightOn;
       varying vec2 vUv;
       varying vec3 vNormal;
       varying float vDepth;
+      varying vec3 vLight;
       void main() {
+        vLight = vec3(-1.0);
+        if (propLightOn > 0.5) {
+          int i = int(lightOffset) + gl_VertexID;
+          vLight = texelFetch(propLight, ivec2(i % 2048, i / 2048), 0).rgb;
+        }
         mat4 m = modelMatrix;
         #ifdef USE_INSTANCING
           m = modelMatrix * instanceMatrix;
@@ -57,9 +74,11 @@ export function makePropMaterial(tex: TexEntry): THREE.ShaderMaterial {
       uniform float alphaMul;
       uniform float selfIllum;
       uniform vec3 selfIllumTint;
+      uniform float lightmapOn;
       varying vec2 vUv;
       varying vec3 vNormal;
       varying float vDepth;
+      varying vec3 vLight;
       vec3 toLinear(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }
       void main() {
         vec4 tx = texture2D(map, vUv);
@@ -69,7 +88,8 @@ export function makePropMaterial(tex: TexEntry): THREE.ShaderMaterial {
         if (!gl_FrontFacing) n = -n;
         vec3 n2 = n * n;
         float shade = n2.x * (n.x > 0.0 ? 0.82 : 0.74) + n2.y * (n.y > 0.0 ? 0.9 : 0.66) + n2.z * (n.z > 0.0 ? 1.0 : 0.58);
-        vec3 L = rho * 300.0 / PI * mix(1.0, shade, faceShade) * brightness;
+        // Baked per-vertex light (Source linear) once the bake has it; until then an even light with direction shading.
+        vec3 L = lightmapOn > 0.5 && vLight.r >= 0.0 ? rho * vLight * sourceUnit * brightness : rho * sourceUnit * mix(1.0, shade, faceShade) * brightness;
         if (selfIllum > 0.5) L = mix(L, rho * selfIllumTint * sourceUnit, tx.a);
         float fd = max(0.0, vDepth - fogNear) / max(1.0, fogFar - fogNear);
         float f = fogOn * (fogHaze > 0.5 ? 1.0 - exp(-3.0 * fd) : clamp(fd, 0.0, 1.0));

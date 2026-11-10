@@ -3,6 +3,9 @@ import type { Face, SolidPlanes } from '../engine/light/faces';
 import { solidPlanes } from '../engine/light/faces';
 import { lightForString, parseSourceLight, type SourceBakeFace, type SourceLight } from '../engine/light/vrad';
 import type { SourceMaterial } from '../engine/render/textures';
+import type { PropInstance, PropModelData } from '../engine/light/vradProps';
+import { propModel } from '../engine/collision/props';
+import { sourceAxes } from '../engine/collision/props';
 
 /** What the Source baker needs to know about a texture. */
 export interface SourceMatInfo { size: [number, number]; source?: SourceMaterial }
@@ -63,4 +66,32 @@ export function sourceBakeInfo(map: MapFile, faces: Face[], materialOf: (tex: st
     if (l) lights.push(l);
   }
   return { info, occluders, lights };
+}
+
+/**
+ * The props VRAD lights per vertex, in the order the renderer numbers them
+ * (map order, props whose model is available): each model's vertices once,
+ * each prop's world matrix (column-major, Source angles).
+ */
+export function propBakeData(map: MapFile, modelOf: (name: string) => PropModelData | undefined): { models: PropModelData[]; instances: PropInstance[] } {
+  const models: PropModelData[] = [];
+  const index = new Map<string, number>();
+  const instances: PropInstance[] = [];
+  for (const e of map.entities) {
+    const name = propModel(e);
+    if (!name) continue;
+    const key = name.toLowerCase();
+    let mi = index.get(key);
+    if (mi === undefined) {
+      const m = modelOf(name);
+      if (!m) continue;
+      mi = models.length;
+      models.push(m);
+      index.set(key, mi);
+    }
+    const s = typeof e.props?.scale === 'number' ? e.props.scale : 1;
+    const [f, l, u] = sourceAxes(e.angles as [number, number, number] | undefined);
+    instances.push({ model: mi, matrix: [f[0] * s, f[1] * s, f[2] * s, 0, l[0] * s, l[1] * s, l[2] * s, 0, u[0] * s, u[1] * s, u[2] * s, 0, e.origin[0], e.origin[1], e.origin[2], 1] });
+  }
+  return { models, instances };
 }

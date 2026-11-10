@@ -15,13 +15,15 @@ const SOURCE_BAKE = { bounces: 100, patchRays: 256, chop: 4, supersample: true }
 
 /** Bump when the baker's output changes meaning, so old caches are ignored. */
 const BAKE_VERSION = 8;
+/** The same for the Source baker (vrad.ts, vradProps.ts). */
+const SOURCE_BAKE_VERSION = 2;
 
 /**
  * Cached lightmap: RGBE (Ward's shared-exponent format, as in Radiance .hdr)
  * at 4 bytes per texel, deflated, base64. Lighting is smooth, so this is
  * ~10–20× smaller than raw half floats.
  */
-interface LightmapCache { format: 'liminal-lightmap'; version: number; encoding: 'rgbe-deflate'; key: string; width: number; height: number; luxel: number; data: string; /** Light direction per texel, RGBA8 deflated (see BakeOutput.dirPixels). */ dir?: string; /** Per-channel shadow mask of the per-pixel lights, RGBA8 deflated (BakeOutput.maskPixels). */ mask?: string }
+interface LightmapCache { /** Source-lit maps: the props' per-vertex light, RGBE deflated (instances in Level.source.props order). */ props?: string; format: 'liminal-lightmap'; version: number; encoding: 'rgbe-deflate'; key: string; width: number; height: number; luxel: number; data: string; /** Light direction per texel, RGBA8 deflated (see BakeOutput.dirPixels). */ dir?: string; /** Per-channel shadow mask of the per-pixel lights, RGBA8 deflated (BakeOutput.maskPixels). */ mask?: string }
 
 /** FNV-1a, enough to tell whether a map or its lighting settings changed. */
 function hash(text: string): string {
@@ -102,6 +104,24 @@ function decodeRGBEToHalf(bytes: Uint8Array): Uint16Array {
   }
   return half;
 }
+/** RGBE (5 bytes per texel, see encodeRGBE) → RGBA floats. */
+function decodeRGBEToFloat(bytes: Uint8Array): Float32Array {
+  const n = bytes.length / 5, out = new Float32Array(n * 4);
+  for (let i = 0; i < n; i++) {
+    const e = bytes[i * 5 + 3];
+    const sc = e ? Math.pow(2, e - 128) / 255 : 0;
+    out[i * 4] = bytes[i * 5] * sc; out[i * 4 + 1] = bytes[i * 5 + 1] * sc; out[i * 4 + 2] = bytes[i * 5 + 2] * sc; out[i * 4 + 3] = bytes[i * 5 + 4] / 255;
+  }
+  return out;
+}
+
+/** Vertex offset of each prop instance in the baked per-vertex light (as vradProps.lightProps numbers them). */
+function propOffsets(p: { models: { positions: Float32Array }[]; instances: { model: number }[] }): Int32Array {
+  const o = new Int32Array(p.instances.length + 1);
+  p.instances.forEach((inst, i) => { o[i + 1] = o[i] + p.models[inst.model].positions.length / 3; });
+  return o;
+}
+
 async function pipe(bytes: Uint8Array, stream: CompressionStream | DecompressionStream): Promise<Uint8Array> {
   const out = new Response(new Blob([bytes as Uint8Array<ArrayBuffer>]).stream().pipeThrough(stream));
   return new Uint8Array(await out.arrayBuffer());
@@ -127,6 +147,8 @@ export class Lighting {
   private lastKey = '';
   status = 'not baked';
   onBaked: ((layout: LightmapLayout, tex: THREE.DataTexture, dir: THREE.DataTexture, mask: THREE.DataTexture) => void) | null = null;
+  /** Per-vertex prop light from a Source bake (RGB per vertex; instance i from vertex offsets[i]). */
+  onPropLight: ((colors: Float32Array, offsets: Int32Array) => void) | null = null;
 
   constructor(private storage: Storage) {}
 
@@ -143,6 +165,7 @@ export class Lighting {
     // the same in every browser (see TextureRegistry.identity).
     const mats: Record<string, unknown> = {};
     for (const f of level.faces) if (!(f.tex in mats)) mats[f.tex] = textures.identity(f.tex);
+    if (level.source) return hash(JSON.stringify(['source', SOURCE_BAKE_VERSION, SOURCE_BAKE, level.map.brushes, level.map.entities, mats]));
     return hash(JSON.stringify([BAKE_VERSION, bakeSettings, s.textures, level.map.brushes, level.map.entities, mats]));
   }
 
@@ -181,6 +204,15 @@ export class Lighting {
           const half = decodeRGBEToHalf(await pipe(fromBase64(c.data), new DecompressionStream('deflate-raw')));
           if (gen !== this.seq) return;
           this.apply(layout, half, s.light.filter, none, none);
+          if (c.props) {
+            const px = decodeRGBEToFloat(await pipe(fromBase64(c.props), new DecompressionStream('deflate-raw')));
+            const offsets = propOffsets(src.props);
+            if (px.length / 4 === offsets[offsets.length - 1]) {
+              const rgb = new Float32Array(px.length / 4 * 3);
+              for (let i = 0; i < px.length / 4; i++) { rgb[i * 3] = px[i * 4]; rgb[i * 3 + 1] = px[i * 4 + 1]; rgb[i * 3 + 2] = px[i * 4 + 2]; }
+              this.onPropLight?.(rgb, offsets);
+            }
+          }
           this.status = `lighting loaded from cache (${Math.round(performance.now() - t0)} ms)`;
           this.shownAt = performance.now();
           return;
@@ -192,6 +224,7 @@ export class Lighting {
     const input = (quick: boolean): SourceBakeInput => ({
       faces: level.faces, info: src.info, occluders: src.occluders, lights: src.lights,
       params: quick ? { bounces: 1, patchRays: 16, chop: 8, supersample: false, maxWidth: SOURCE_LM_WIDTH } : { ...SOURCE_BAKE, maxWidth: SOURCE_LM_WIDTH },
+      props: quick ? undefined : src.props,
     });
     this.status = 'baking (Source)…';
     let fullDone = false;
@@ -210,12 +243,15 @@ export class Lighting {
       }
       fullDone = true;
       this.apply(layout, half, s.light.filter, none, none);
+      if (out.propColors && out.propOffsets) this.onPropLight?.(out.propColors, out.propOffsets);
       this.status = `baked (Source) ${out.luxels.toLocaleString()} luxels, ${out.patches.toLocaleString()} patches, ${out.bounces} bounces in ${out.ms} ms`;
       this.shownAt ||= performance.now();
       this.worker?.terminate();
       this.worker = null;
-      void pipe(encodeRGBE(out.pixels), new CompressionStream('deflate-raw')).then((z) => {
-        const cache: LightmapCache = { format: 'liminal-lightmap', version: BAKE_VERSION, encoding: 'rgbe-deflate', key, width: out.width, height: out.height, luxel: 16, data: toBase64(z) };
+      const pc = out.propColors;
+      const propPx = pc ? Float32Array.from({ length: pc.length / 3 * 4 }, (_, i) => (i % 4 === 3 ? 1 : pc[Math.floor(i / 4) * 3 + (i % 4)])) : null;
+      void Promise.all([pipe(encodeRGBE(out.pixels), new CompressionStream('deflate-raw')), propPx ? pipe(encodeRGBE(propPx), new CompressionStream('deflate-raw')) : Promise.resolve(null)]).then(([z, zp]) => {
+        const cache: LightmapCache = { format: 'liminal-lightmap', version: BAKE_VERSION, encoding: 'rgbe-deflate', key, width: out.width, height: out.height, luxel: 16, data: toBase64(z), ...(zp ? { props: toBase64(zp) } : {}) };
         return this.storage.write(this.cachePath(level), JSON.stringify(cache));
       }).then(() => { if (gen === this.seq) this.status += ' · cached'; }, (err) => console.warn('lightmap cache not saved', err));
     };

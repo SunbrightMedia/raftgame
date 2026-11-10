@@ -5,11 +5,12 @@ import { convexBrush } from '../engine/collision/brush';
 import { buildFaceMeshes, disposeGroup } from '../engine/render/brushMesh';
 import type { TextureRegistry } from '../engine/render/textures';
 import type { ModelRegistry } from '../engine/render/models';
-import { buildPropMeshes, disposeProps } from '../engine/render/propMeshes';
+import { buildPropMeshes, disposeProps, setPropLight } from '../engine/render/propMeshes';
 import { propSolids } from '../engine/collision/props';
 import { buildFaces, solidPlanes, type Face, type LightmapLayout } from '../engine/light/faces';
 import { type Vec3, v3 } from '../engine/vec3';
-import { isSourceLit, sourceBakeInfo } from './sourceLighting';
+import { isSourceLit, propBakeData, sourceBakeInfo } from './sourceLighting';
+import { propLightUniforms } from '../engine/render/propMaterial';
 import { sourceLayout, SOURCE_LM_WIDTH } from '../engine/light/vrad';
 
 /** A map turned into things the engine uses: collision, faces, render meshes, spawn. */
@@ -22,7 +23,7 @@ export class Level {
   private props: THREE.Group | null = null;
   layout: LightmapLayout | null = null;
   /** For Source-lit maps (lights imported from a VMF): what the Source baker needs. */
-  source: ReturnType<typeof sourceBakeInfo> | null = null;
+  source: (ReturnType<typeof sourceBakeInfo> & { props: ReturnType<typeof propBakeData> }) | null = null;
   lightmap: THREE.DataTexture | null = null;
 
   constructor(readonly map: MapFile, private textures: TextureRegistry, private models: ModelRegistry, readonly path?: string) {
@@ -36,9 +37,16 @@ export class Level {
       ...propSolids(map.entities, (m) => models.header(m)?.hull),
     ]);
     this.faces = buildFaces(map.brushes);
+    propLightUniforms.propLightOn.value = 0;
     if (isSourceLit(map)) {
       // Source lighting: the lightmap layout is fixed by the map (luxel grid on the texture axes), so it's known before any bake.
-      this.source = sourceBakeInfo(map, this.faces, (tex) => { const e = textures.get(tex); return { size: [e.worldW, e.worldH], source: e.source }; });
+      this.source = {
+        ...sourceBakeInfo(map, this.faces, (tex) => { const e = textures.get(tex); return { size: [e.worldW, e.worldH], source: e.source }; }),
+        props: propBakeData(map, (name) => {
+          const g = models.get(name)?.geometry;
+          return g ? { positions: g.getAttribute('position').array as Float32Array, normals: g.getAttribute('normal').array as Float32Array } : undefined;
+        }),
+      };
       const L = sourceLayout(this.faces, this.source.info, SOURCE_LM_WIDTH);
       this.layout = {
         width: L.width, height: L.height, luxel: 16, source: true,
@@ -60,6 +68,11 @@ export class Level {
     if (this.props) { this.root.remove(this.props); disposeProps(this.props); }
     this.props = buildPropMeshes(this.map.entities, this.models, this.textures);
     this.root.add(this.props);
+  }
+
+  /** Baked per-vertex light for the props (Source-lit maps). */
+  setPropLight(colors: Float32Array, offsets: Int32Array): void {
+    if (this.props) setPropLight(this.props, colors, offsets);
   }
 
   setLightmap(layout: LightmapLayout, tex: THREE.DataTexture): void {

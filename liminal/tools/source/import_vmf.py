@@ -216,9 +216,17 @@ def main():
         c = [(region[i] + region[i + 3]) / 2 for i in range(3)] if region else [0, 0, 64]
         entities.insert(0, {'id': 1, 'class': 'player_start', 'origin': c, 'angles': [0, 0, 0]})
     name = a.name or os.path.splitext(os.path.basename(a.out))[0]
+    # Seen through Source's camera; an env_tonemap_controller's exposure range and bloom carry over.
+    settings = {'camera': {'model': 'source'}}
+    for e in kv.children(blocks, 'entity'):
+        if kv.get(e, 'classname') == 'env_tonemap_controller':
+            for key, field in (('minexposure', 'sourceExposureMin'), ('maxexposure', 'sourceExposureMax'), ('bloomscale', 'sourceBloom')):
+                v = kv.get(e, key)
+                if v not in (None, '', '-1'):
+                    settings['camera'][field] = float(v)
     out = {'format': 'liminal-map', 'version': 1, 'name': name, 'brushes': brushes, 'entities': entities}
     with open(a.out, 'w') as f:
-        f.write('{\n  "format": "liminal-map",\n  "version": 1,\n  "name": ' + json.dumps(name) + ',\n  "brushes": [\n')
+        f.write('{\n  "format": "liminal-map",\n  "version": 1,\n  "name": ' + json.dumps(name) + ',\n  "settings": ' + json.dumps(settings) + ',\n  "brushes": [\n')
         f.write(',\n'.join('    ' + json.dumps(b, separators=(',', ':')) for b in brushes))
         f.write('\n  ],\n  "entities": [\n')
         f.write(',\n'.join('    ' + json.dumps(e, separators=(',', ':')) for e in entities))

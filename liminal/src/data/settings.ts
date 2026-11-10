@@ -139,6 +139,11 @@ export const SETTINGS = {
     label: 'Camera',
     help: 'A 2001–2006 consumer digicam: meters the scene and sets exposure itself, has its own white balance and a short dynamic range. The look comes from this, not from filters (STYLE.md, "The medium").',
     defs: {
+      model: select('Camera model', 'digicam', ['digicam', 'source'] as const, 'digicam = the 2000s point-and-shoot look below. source = Source engine\'s own camera (Portal 2): exposure puts the brightest 2% of the picture at 60%, soft whole-frame bloom, clean clip. Source-lit maps set this.'),
+      sourceExposureMin: num('Source: exposure min', 0.5, 0.05, 4, 0.01, 'Lowest tonemap scale auto exposure may use (env_tonemap_controller; 0.5 by default).'),
+      sourceExposureMax: num('Source: exposure max', 2, 0.1, 8, 0.01, 'Highest tonemap scale (2 by default).'),
+      sourceScale: num('Source: manual exposure', 1, 0.05, 8, 0.01, 'Tonemap scale when auto exposure is off.'),
+      sourceBloom: num('Source: bloom', 1, 0, 4, 0.01, 'Bloom scale (mat_bloomscale / env_tonemap_controller).'),
       autoExposure: bool('Auto exposure', true, 'Meter the scene like a point-and-shoot (centre-weighted average) and expose for it. Why lamps blow out while the room stays readable.'),
       brightness: num('Brightness', -0.18, -1.5, 1.5, 0.01, 'Picture brightness (midtones), applied after auto exposure so it stays put. 0 = neutral.'),
       contrast: num('Contrast', 0.95, 0.5, 3, 0.01, 'Camera contrast: an S-curve around mid-grey. 1 = flat (as before); consumer digicams pushed this hard.'),
