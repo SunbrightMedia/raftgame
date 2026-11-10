@@ -97,7 +97,12 @@ async function boot(): Promise<void> {
       setTimeout(() => void game.loadMapPath(`world:${world[1]}:${seed}`).then(() => toast(`World ${seed}  ·  N next, B back`)).catch((err) => showError((err as Error).message)), 50);
     }
   });
-  if (game.mapPath.startsWith('world:')) toast(`World ${game.mapPath.split(':')[2]}  ·  N next, B back`);
+  if (game.mapPath.startsWith('world:')) {
+    toast(`World ${game.mapPath.split(':')[2]}  ·  N next, B back`);
+    // The keys list under "click to play" gains the two for changing worlds.
+    const keys = document.querySelector('.hud-prompt span');
+    if (keys) keys.textContent += ' · N next world · B world before';
+  }
 
   window.addEventListener('dragover', (e) => e.preventDefault());
   window.addEventListener('drop', (e) => {

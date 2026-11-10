@@ -57,5 +57,19 @@ it *feels* right; that's the user's call.
   wall paint, like `junk/tools/lib/pmpRooms.ts`) and run `paintByRoom()`
   (`tools/lib/roomPaint.ts`) before writing the map; add the map to
   `tests/room-paint.test.ts`.
+- **The industrial world is made by code** (`src/world/`, seeded; rules in
+  STYLE.md "World: industrial v2", design in `docs/WORLD_DESIGN.md`). It uses
+  Portal 2 pieces as placeholders: the user allows them in this private repo
+  and in private artifacts, never in the published main page.
+  - After any change to the generator: `npm run world:walk -- <seed>` must
+    pass on a few seeds (the player's own movement walks every catwalk,
+    stair and corridor). Look at it with the studio and
+    `tools/world/spots.ts` / `tour.ts` poses (pose z = the feet, not the eyes).
+  - The private page makes the world from a seed (map path
+    `world:industrial:<seed>`; N and B change it), lit by lamps with no bake
+    (`engine/render/lightGrid.ts`). Build and stage it with
+    `tools/world/publish-prep.sh x <dir>`, publish to
+    https://claude.ai/artifact/39h7z8LBGcPg3DgeNXLd2c (send new files, null
+    the old hashed ones), and tell the user to keep that link private.
 - **The old maps are in `junk/`** (kept, not used). Work follows
   `docs/PIPELINE.md`; the game boots into `maps/blank.json` meanwhile.

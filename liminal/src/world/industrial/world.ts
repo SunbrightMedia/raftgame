@@ -632,6 +632,20 @@ function skeleton(ctx: Ctx, r: Rng, x0: number, y0: number, x1: number, y1: numb
     steel([x0 - OUT - 8, y0 - OUT + 8, z - 12], [x0 - OUT + 8, y1 + OUT - 8, z + 12], tex);
     steel([x1 + OUT - 8, y0 - OUT + 8, z - 12], [x1 + OUT + 8, y1 + OUT - 8, z + 12], tex);
   }
+  // On some masses a small amber lamp sits on each corner column every few storeys: strings of lights that go
+  // on up and down into the fog and give the mass its size. The ones near the catwalks light the steel round them.
+  if (r.chance(0.55)) {
+    const gap = r.pick([768, 1024]);
+    for (const [cx, sx] of [[x0, -1], [x1, 1]] as const) for (const [cy, sy] of [[y0 - OUT, -1], [y1 + OUT, 1]] as const) {
+      if (!clear(sy < 0 ? 3 : 1, cx)) continue;   // that column was left out for a doorway
+      for (let z = Math.ceil((ctx.bottom - 2300) / gap) * gap + 96; z < Math.min(z1 - 64, ctx.top + 3000); z += gap) {
+        const at: V3 = [cx + sx * (C / 2 + 4), cy + sy * (C / 2 + 4), z];
+        ctx.m.prop('props_bts/cage_light', at, [0, 0, 0], { solid: false });
+        ctx.m.glow(at, LAMP.amber, 34, 1.3);
+        if (z > ctx.bottom - 300 && z < ctx.top + 500) ctx.m.lamp(at, LAMP.amber, 0.8, 60, 300, { open: true });
+      }
+    }
+  }
   void z0;
 }
 
@@ -674,6 +688,10 @@ function frameTower(ctx: Ctx, r: Rng, x0: number, y0: number, x1: number, y1: nu
       if (!r.chance(0.16)) continue;
       const h = r.pick([256, 384, 448]);
       m.box([xs[i] + 16, ys[j] + 16, z], [xs[i + 1] - 16, ys[j + 1] - 16, z + h], { tex: r.pick([...T.dark, ...T.panels]), lightmapscale: 64 });
+    }
+    // Near the catwalk levels a bell lamp hangs under a beam here and there: the tower glows from inside.
+    if (z > ctx.bottom - 600 && z < ctx.top + 1100) {
+      for (let i = 0; i < xs.length - 1; i++) for (const y of ys) if (r.chance(0.07)) bellLamp(m, [(xs[i] + xs[i + 1]) / 2, y, z - 20], LAMP.warm, 1.6, 620);
     }
   }
 }
@@ -939,9 +957,11 @@ function wanderingTubes(ctx: Ctx, r: Rng): void {
           const p: V3 = [a[0] + dir[0] * u, a[1] + dir[1] * u, a[2] + dir[2] * u];
           if (inMass(ctx, p)) continue;
           const w = nearestWall(ctx, p);
-          // A strut must run square to the tube, not along it, and must not end in a doorway or a room.
-          const sound = w && w.dist <= REACH && Math.abs(w.dir[0] * dir[0] + w.dir[1] * dir[1]) < 0.5
+          // A strut must run square to the tube, not along it; must not end in a doorway or a room; and must not
+          // cross a catwalk or a stair on its way to the wall.
+          let sound = w !== null && w.dist <= REACH && Math.abs(w.dir[0] * dir[0] + w.dir[1] * dir[1]) < 0.5
             && [w.dist - 40, w.dist + 20, w.dist + 80, w.dist + 136].every((v) => !inHollow(ctx, [p[0] + w.dir[0] * v, p[1] + w.dir[1] * v, p[2]], 16));
+          for (let v = 56; sound && w && v < w.dist; v += 32) sound = !hitsWalk(ctx, [p[0] + w.dir[0] * v, p[1] + w.dir[1] * v, p[2]], 12);
           if (sound) struts.push({ p, w: w! });
           else if (len > 1024) held = false;
         }
