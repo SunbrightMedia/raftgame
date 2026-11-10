@@ -251,6 +251,7 @@ export class Game {
     if (!this.level) return;
     this.level.setMover(name, offset);
     this.player?.refreshWorld(this.level);
+    this.lighting.relightProps(this.level);
   }
 
   start(): void {

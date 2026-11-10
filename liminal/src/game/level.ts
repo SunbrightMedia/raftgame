@@ -9,6 +9,7 @@ import { buildPropMeshes, disposeProps, setPropLight } from '../engine/render/pr
 import { propSolids } from '../engine/collision/props';
 import { buildFaces, solidPlanes, type Face, type LightmapLayout } from '../engine/light/faces';
 import { type Vec3, v3 } from '../engine/vec3';
+import type { PropInstance } from '../engine/light/vradProps';
 import { isSourceLit, propBakeData, propShadowTris, sourceBakeInfo } from './sourceLighting';
 import { propLightUniforms } from '../engine/render/propMaterial';
 import { sourceLayout, SOURCE_LM_WIDTH } from '../engine/light/vrad';
@@ -100,6 +101,17 @@ export class Level {
     this.props = buildPropMeshes(this.map.entities, this.models, this.textures, this.movers.size ? (e) => this.propOffset(e) : undefined);
     this.root.add(this.props);
     if (this.propLight) setPropLight(this.props, this.propLight.colors, this.propLight.offsets);
+  }
+
+  /** The props' bake instances where they are now (movers applied). */
+  propInstancesNow(): PropInstance[] {
+    const src = this.source!;
+    return src.props.instances.map((inst, i) => {
+      const p = src.props.meta[i].parent, o = p ? this.movers.get(p) : undefined;
+      if (!o) return inst;
+      const m = inst.matrix.slice(); m[12] += o[0]; m[13] += o[1]; m[14] += o[2];
+      return { model: inst.model, matrix: m };
+    });
   }
 
   /** Baked per-vertex light for the props (Source-lit maps). */

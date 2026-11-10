@@ -8,6 +8,8 @@ import type { TextureRegistry } from '../engine/render/textures';
 import type { Settings } from '../data/settings';
 import type { Level } from './level';
 import type { Storage } from '../data/storage';
+import { AmbientTree, lightModelsRuntime } from '../engine/light/modelLight';
+import { SolidGrid } from '../engine/light/bake';
 
 
 /** VRAD's defaults: 100 bounces (stops early once a bounce adds < 1), patches of 4 luxels, supersampled edges. */
@@ -23,7 +25,7 @@ const SOURCE_BAKE_VERSION = 4;
  * at 4 bytes per texel, deflated, base64. Lighting is smooth, so this is
  * ~10–20× smaller than raw half floats.
  */
-interface LightmapCache { /** Source-lit maps: the props' per-vertex light, RGBE deflated (instances in Level.source.props order). */ props?: string; format: 'liminal-lightmap'; version: number; encoding: 'rgbe-deflate'; key: string; width: number; height: number; luxel: number; data: string; /** Light direction per texel, RGBA8 deflated (see BakeOutput.dirPixels). */ dir?: string; /** Per-channel shadow mask of the per-pixel lights, RGBA8 deflated (BakeOutput.maskPixels). */ mask?: string }
+interface LightmapCache { /** Valve lightmaps: BSP leaf ambient samples (modelLight.ts AmbientTree), float32 deflated. */ ambient?: string; /** Source-lit maps: the props' per-vertex light, RGBE deflated (instances in Level.source.props order). */ props?: string; format: 'liminal-lightmap'; version: number; encoding: 'rgbe-deflate'; key: string; width: number; height: number; luxel: number; data: string; /** Light direction per texel, RGBA8 deflated (see BakeOutput.dirPixels). */ dir?: string; /** Per-channel shadow mask of the per-pixel lights, RGBA8 deflated (BakeOutput.maskPixels). */ mask?: string }
 
 /** FNV-1a, enough to tell whether a map or its lighting settings changed. */
 function hash(text: string): string {
@@ -152,6 +154,24 @@ export class Lighting {
 
   constructor(private storage: Storage) {}
 
+  /** Valve lightmaps: the BSP's leaf ambient samples and the props' baked light, for lighting moving and physics props. */
+  private runtime: { level: Level; tree: AmbientTree; baked: Float32Array; offsets: Int32Array; vis: SolidGrid } | null = null;
+
+  /** Per run-time-lit prop instance: lighting origin, ambient cube, lights seen (for tools). */
+  runtimeDebug = new Map<number, unknown>();
+
+  /** Light the props Source lights at run time (moving, physics) where they are now; again after a mover moves. */
+  relightProps(level: Level): void {
+    const r = this.runtime;
+    if (!r || r.level !== level || !level.source) return;
+    const src = level.source;
+    const colors = r.baked.slice();
+    const which = src.props.meta.flatMap((m, i) => (m.runtime ? [i] : []));
+    this.runtimeDebug.clear();
+    lightModelsRuntime(src.props.models, level.propInstancesNow(), which, r.offsets, colors, src.lights, (p, out) => r.tree.cube(p, out), r.vis, this.runtimeDebug);
+    this.onPropLight?.(colors, r.offsets);
+  }
+
   private keyFor(level: Level, s: Settings, textures: TextureRegistry): string {
     const { filter: _f, ...bakeSettings } = s.light; // filtering doesn't need a re-bake
     void _f;
@@ -192,6 +212,7 @@ export class Lighting {
    */
   private async startSource(level: Level, s: Settings, key: string, tryCache: boolean): Promise<void> {
     const gen = ++this.seq;
+    this.runtime = null;
     const layout = level.layout!, src = level.source!;
     const none = new Uint8Array(layout.width * layout.height * 4).fill(255);
     // Valve's own lightmaps for this map (copied from its compiled BSP): for checking ours against.
@@ -210,7 +231,12 @@ export class Lighting {
           if (px.length / 4 === offsets[offsets.length - 1]) {
             const rgb = new Float32Array(px.length / 4 * 3);
             for (let i = 0; i < px.length / 4; i++) { rgb[i * 3] = px[i * 4]; rgb[i * 3 + 1] = px[i * 4 + 1]; rgb[i * 3 + 2] = px[i * 4 + 2]; }
-            this.onPropLight?.(rgb, offsets);
+            if (c.ambient) {
+              const amb = await pipe(fromBase64(c.ambient), new DecompressionStream('deflate-raw'));
+              if (gen !== this.seq) return;
+              this.runtime = { level, tree: new AmbientTree(new Float32Array(amb.slice().buffer)), baked: rgb, offsets, vis: new SolidGrid(src.occluders) };
+              this.relightProps(level);
+            } else this.onPropLight?.(rgb, offsets);
           }
         }
         this.status = 'lighting: Valve\'s lightmaps (from the BSP)';

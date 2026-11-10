@@ -150,10 +150,49 @@ for (let i = 0; i < W * H; i++) {
   enc[i * 5 + 4] = 255;
 }
 const out = mapPath.replace(/\.json$/, '.valve.lightmap.json');
+// Leaf ambient light (what Source lights moving and physics props with at run time): VRAD's samples
+// per BSP leaf (LDR lumps 52/56), with the BSP tree to find a point's leaf. Packed as float32:
+// [nNodes, nLeaves, nSamples, headnode], nodes (nx ny nz d child0 child1), leaves (first count),
+// samples (x y z, then 6 × rgb for +x −x +y −y +z −z, in the lightmaps' units).
+function ambientData(): string {
+  const N = lump(5), P = lump(1), LF = lump(10), AI = lump(52), AL = lump(56), M = lump(14);
+  const nNodes = N.l / 32, nLeaves = LF.l / 32, nSamples = AL.l / 28;
+  const out = new Float32Array(4 + nNodes * 6 + nLeaves * 2 + nSamples * 21);
+  out.set([nNodes, nLeaves, nSamples, i32(M.o + 36)]);
+  let o = 4;
+  for (let k = 0; k < nNodes; k++) {
+    const no = N.o + k * 32, po = P.o + i32(no) * 20;
+    out.set([f32(po), f32(po + 4), f32(po + 8), f32(po + 12), i32(no + 4), i32(no + 8)], o); o += 6;
+  }
+  const s16 = (q: number) => dv.getInt16(q, true), u16 = (q: number) => dv.getUint16(q, true);
+  const sampleLeaf = new Int32Array(nSamples).fill(-1);
+  for (let k = 0; k < nLeaves; k++) {
+    const io = AI.o + k * 4;
+    let count = u16(io), first = u16(io + 2);
+    // No samples of its own: VRAD points it at the nearest leaf that has some.
+    if (count === 0) { const ro = AI.o + first * 4; count = u16(ro); first = u16(ro + 2); }
+    else for (let i = first; i < first + count; i++) sampleLeaf[i] = k;
+    out.set([first, count], o); o += 2;
+  }
+  const c = [0, 0, 0];
+  for (let i = 0; i < nSamples; i++) {
+    const so = AL.o + i * 28, leaf = sampleLeaf[i];
+    const lo = leaf >= 0 ? LF.o + leaf * 32 : -1;
+    for (let a = 0; a < 3; a++) {
+      const mn = lo >= 0 ? s16(lo + 8 + a * 2) : 0, mx = lo >= 0 ? s16(lo + 14 + a * 2) : 0;
+      out[o + a] = mn + (mx - mn) * (b[so + 24 + a] / 255);
+    }
+    // Stored already in 0..1 units (TexLightToLinear: c·2^e), where lightmap luxels are 0..255: no ÷255.
+    for (let side = 0; side < 6; side++) { rgbe(so + side * 4, c); out.set([c[0] * 255, c[1] * 255, c[2] * 255], o + 3 + side * 3); }
+    o += 21;
+  }
+  return deflateRawSync(Buffer.from(out.buffer)).toString('base64');
+}
+
 // Keep prop vertex light added by valve_proplight.py.
 let keep: { props?: string } = {};
 try { keep = JSON.parse(readFileSync(out, 'utf8')); } catch { /* first run */ }
-writeFileSync(out, JSON.stringify({ format: 'liminal-lightmap', version: 0, encoding: 'rgbe-deflate', key: 'valve', width: W, height: H, luxel: 16, data: deflateRawSync(enc).toString('base64'), ...(keep.props ? { props: keep.props } : {}) }));
+writeFileSync(out, JSON.stringify({ format: 'liminal-lightmap', version: 0, encoding: 'rgbe-deflate', key: 'valve', width: W, height: H, luxel: 16, data: deflateRawSync(enc).toString('base64'), ...(keep.props ? { props: keep.props } : {}), ambient: ambientData() }));
 console.log(`wrote ${out}`);
 
 // ---- ours vs Valve's, by material (flat slot, luxels both have)

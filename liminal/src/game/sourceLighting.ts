@@ -81,10 +81,11 @@ export function sourceBakeInfo(map: MapFile, faces: Face[], materialOf: (tex: st
  * (map order, props whose model is available): each model's vertices once,
  * each prop's world matrix (column-major, Source angles).
  */
-export function propBakeData(map: MapFile, modelOf: (name: string) => PropModelData | undefined): { models: PropModelData[]; instances: PropInstance[] } {
+export function propBakeData(map: MapFile, modelOf: (name: string) => PropModelData | undefined): { models: PropModelData[]; instances: PropInstance[]; meta: PropMeta[] } {
   const models: PropModelData[] = [];
   const index = new Map<string, number>();
   const instances: PropInstance[] = [];
+  const meta: PropMeta[] = [];
   for (const e of map.entities) {
     const name = propModel(e);
     if (!name) continue;
@@ -100,9 +101,17 @@ export function propBakeData(map: MapFile, modelOf: (name: string) => PropModelD
     const s = typeof e.props?.scale === 'number' ? e.props.scale : 1;
     const [f, l, u] = sourceAxes(e.angles as [number, number, number] | undefined);
     instances.push({ model: mi, matrix: [f[0] * s, f[1] * s, f[2] * s, 0, l[0] * s, l[1] * s, l[2] * s, 0, u[0] * s, u[1] * s, u[2] * s, 0, e.origin[0], e.origin[1], e.origin[2], 1] });
+    const parent = typeof e.props?.parent === 'string' ? e.props.parent.toLowerCase() : undefined;
+    meta.push({ runtime: e.props?.source_class !== 'prop_static' || !!parent, parent });
   }
-  return { models, instances };
+  return { models, instances, meta };
 }
+
+/**
+ * Per prop: is it lit at run time (anything but prop_static, and anything
+ * riding a mover: Source only bakes static props), and what it's parented to.
+ */
+export interface PropMeta { runtime: boolean; parent?: string }
 
 /**
  * World-space shadow triangles of the static props that cast lightmap shadows
