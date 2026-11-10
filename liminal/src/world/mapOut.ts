@@ -164,6 +164,11 @@ export class MapOut {
     return this.ent('rope', a, undefined, { to: b.map(r3), sag: r3(sag), width });
   }
 
+  /** A box with fog of its own (any of the map's fog settings): the fog goes over to it while the camera is inside (game.ts). */
+  fogVolume(min: V3, max: V3, fog: Record<string, unknown>): number {
+    return this.ent('fog_volume', [(min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2], undefined, { min: min.map(r3), max: max.map(r3), fog });
+  }
+
   start(origin: V3, yaw = 0, pitch = 0): void {
     this.entities.unshift({ id: 1, class: 'player_start', origin, angles: [pitch, yaw, 0] });
   }

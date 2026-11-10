@@ -48,14 +48,16 @@ export function makeSourceWorldMaterial(tex: TexEntry, normal: THREE.Texture | n
       varying vec2 vLm;
       varying float vLmOff;
       varying float vShade;
-      varying float vDepth;
+      varying vec3 vViewPos;   // exact per pixel: a distance interpolated across a huge face is far off
+      #define vDepth length(vViewPos)
+      #define vFogZ (cameraPosition.z + dot(viewMatrix[2].xyz, vViewPos))
       void main() {
         vUv = uv;
         vLm = lmuv;
         vLmOff = lmoff;
         vShade = shade;
         vec4 mv = modelViewMatrix * vec4(position, 1.0);
-        vDepth = length(mv.xyz);
+        vViewPos = mv.xyz;
         gl_Position = projectionMatrix * mv;
       }`,
     fragmentShader: /* glsl */ `
@@ -84,7 +86,9 @@ export function makeSourceWorldMaterial(tex: TexEntry, normal: THREE.Texture | n
       varying vec2 vLm;
       varying float vLmOff;
       varying float vShade;
-      varying float vDepth;
+      varying vec3 vViewPos;   // exact per pixel: a distance interpolated across a huge face is far off
+      #define vDepth length(vViewPos)
+      #define vFogZ (cameraPosition.z + dot(viewMatrix[2].xyz, vViewPos))
       uniform float gamma22;
       vec3 toLinear(vec3 c) { return gamma22 > 0.5 ? pow(c, vec3(2.2)) : mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }
       const vec3 B0 = vec3(0.81649661, 0.0, 0.57735026);
@@ -145,9 +149,8 @@ export function makeSourceWorldMaterial(tex: TexEntry, normal: THREE.Texture | n
           L = albedo * light * sourceUnit * brightness;
           if (selfIllum > 0.5) L = mix(L, albedo * selfIllumTint * sourceUnit, tx.a);
         }
-        float f = fogFactor(vDepth);
         float a = alphaMode == 2 ? tx.a * alphaMul : alphaMode == 3 ? alphaMul : 0.0;
-        gl_FragColor = vec4(mix(L, fogRadiance, f), a);
+        gl_FragColor = vec4(applyFog(L, vDepth, vFogZ), a);
       }`,
   });
   applySourceBlend(mat, tex.source);

@@ -64,12 +64,14 @@ export function buildRopes(entities: EntityDef[]): THREE.Mesh | null {
       attribute vec3 color;
       varying vec3 vColor;
       varying vec3 vNormal;
-      varying float vDepth;
+      varying vec3 vViewPos;   // exact per pixel: a distance interpolated across a huge face is far off
+      #define vDepth length(vViewPos)
+      #define vFogZ (cameraPosition.z + dot(viewMatrix[2].xyz, vViewPos))
       void main() {
         vColor = color;
         vNormal = normal;
         vec4 mv = viewMatrix * vec4(position, 1.0);
-        vDepth = length(mv.xyz);
+        vViewPos = mv.xyz;
         gl_Position = projectionMatrix * mv;
       }`,
     fragmentShader: /* glsl */ `
@@ -79,12 +81,14 @@ export function buildRopes(entities: EntityDef[]): THREE.Mesh | null {
       ${FOG_PARS}
       varying vec3 vColor;
       varying vec3 vNormal;
-      varying float vDepth;
+      varying vec3 vViewPos;   // exact per pixel: a distance interpolated across a huge face is far off
+      #define vDepth length(vViewPos)
+      #define vFogZ (cameraPosition.z + dot(viewMatrix[2].xyz, vViewPos))
       void main() {
         // A matt cable under even light: a little brighter on top, as the world's flat shading does.
         float shade = mix(1.0, 0.72 + 0.28 * normalize(vNormal).z, faceShade);
         vec3 L = pow(vColor, vec3(2.2)) * sourceUnit * shade;
-        gl_FragColor = vec4(mix(L, fogRadiance, fogFactor(vDepth)), 0.0);
+        gl_FragColor = vec4(applyFog(L, vDepth, vFogZ), 0.0);
       }`,
   });
   const mesh = new THREE.Mesh(g, mat);

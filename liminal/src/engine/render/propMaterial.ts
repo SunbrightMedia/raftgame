@@ -37,7 +37,9 @@ export function makePropMaterial(tex: TexEntry): THREE.ShaderMaterial {
       uniform float propLightOn;
       varying vec2 vUv;
       varying vec3 vNormal;
-      varying float vDepth;
+      varying vec3 vViewPos;   // exact per pixel: a distance interpolated across a huge face is far off
+      #define vDepth length(vViewPos)
+      #define vFogZ (cameraPosition.z + dot(viewMatrix[2].xyz, vViewPos))
       varying vec3 vLight;
       void main() {
         vLight = vec3(-1.0);
@@ -60,7 +62,7 @@ export function makePropMaterial(tex: TexEntry): THREE.ShaderMaterial {
         vUv = uv;
         vNormal = normalize(mat3(m) * normal);
         vec4 mv = viewMatrix * m * vec4(position, 1.0);
-        vDepth = length(mv.xyz);
+        vViewPos = mv.xyz;
         gl_Position = projectionMatrix * mv;
       }`,
     fragmentShader: /* glsl */ `
@@ -78,7 +80,9 @@ export function makePropMaterial(tex: TexEntry): THREE.ShaderMaterial {
       uniform float lightmapOn;
       varying vec2 vUv;
       varying vec3 vNormal;
-      varying float vDepth;
+      varying vec3 vViewPos;   // exact per pixel: a distance interpolated across a huge face is far off
+      #define vDepth length(vViewPos)
+      #define vFogZ (cameraPosition.z + dot(viewMatrix[2].xyz, vViewPos))
       varying vec3 vLight;
       uniform float gamma22;
       vec3 toLinear(vec3 c) { return gamma22 > 0.5 ? pow(c, vec3(2.2)) : mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }
@@ -101,9 +105,8 @@ export function makePropMaterial(tex: TexEntry): THREE.ShaderMaterial {
           L = lightmapOn > 0.5 && vLight.r >= 0.0 ? rho * vLight * sourceUnit * brightness : rho * sourceUnit * mix(1.0, shade, faceShade) * brightness;
           if (selfIllum > 0.5) L = mix(L, rho * selfIllumTint * sourceUnit, tx.a);
         }
-        float f = fogFactor(vDepth);
         float a = alphaMode == 2 ? tx.a * alphaMul : alphaMode == 3 ? alphaMul : 0.0;
-        gl_FragColor = vec4(mix(L, fogRadiance, f), a);
+        gl_FragColor = vec4(applyFog(L, vDepth, vFogZ), a);
       }`,
   });
   applySourceBlend(mat, tex.source);

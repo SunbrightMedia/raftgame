@@ -11,7 +11,7 @@ import { propMaterials } from '../engine/render/propMeshes';
 import { glowTextures } from '../engine/render/glows';
 import { propModel } from '../engine/collision/props';
 import { worldUniforms, MAX_RECTS } from '../engine/render/worldMaterial';
-import { fogUniforms, fogAt, fogReach } from '../engine/render/fog';
+import { fogUniforms, fogAt, fogReach, fogThickness, FogBackdrop } from '../engine/render/fog';
 import { kelvinToLinear, emitterColor } from '../engine/light/units';
 import { angleVectors } from '../engine/vec3';
 import { Input } from './input';
@@ -43,11 +43,18 @@ export class Game {
   private last = performance.now();
   onFrame: ((dt: number) => void) | null = null;
   private holdUntil = 0;
+  /** Parts of the map with fog of their own (fog_volume entities): the fog is the one where the camera is. */
+  private fogVolumes: { min: number[]; max: number[]; fog: Record<string, unknown> }[] = [];
+  /** The fog of the volume the camera was last in, and how far the fog has gone over to it (0..1). */
+  private fogInside: Record<string, unknown> | null = null;
+  private fogMix = 0;
   readonly sky = new Sky();
+  readonly fogBackdrop = new FogBackdrop();
   private precompiled = false;
 
   constructor(canvas: HTMLCanvasElement, private storage: Storage, readonly config: ConfigStore) {
     this.scene.add(this.sky.mesh);
+    this.scene.add(this.fogBackdrop.mesh);
     this.renderer = new LowResRenderer(canvas);
     this.lighting = new Lighting(storage);
     this.input = new Input(canvas);
@@ -198,12 +205,30 @@ export class Game {
   }
 
   /**
+   * The fog in force: the map's, or part-way (fogMix) to the fog of the volume
+   * the camera is in. Numbers and colours go over smoothly; switches change
+   * half-way.
+   */
+  private fogNow(base: Settings['fog']): Settings['fog'] {
+    const k = this.fogMix, over = this.fogInside;
+    if (k <= 0 || !over) return base;
+    const out = { ...base } as Record<string, unknown>;
+    for (const [key, v] of Object.entries(over)) {
+      const b = (base as Record<string, unknown>)[key];
+      if (typeof v === 'number' && typeof b === 'number') out[key] = b + (v - b) * k;
+      else if (typeof v === 'string' && typeof b === 'string' && v.startsWith('#')) out[key] = `#${new THREE.Color(b).lerp(new THREE.Color(v), k).getHexString()}`;
+      else if (k > 0.5) out[key] = v;
+    }
+    return out as Settings['fog'];
+  }
+
+  /**
    * Fog uniforms from the settings, and the void behind everything drawn as the
    * fog at its densest. Source fog with two colours depends on where the camera
    * looks (c_baseplayer.cpp GetFogColor), so this also runs every frame.
    */
   private updateFog(s: Settings, forward?: { x: number; y: number; z: number }): void {
-    const F = s.fog, u = fogUniforms;
+    const F = this.fogNow(s.fog), u = fogUniforms;
     u.fogOn.value = F.enabled ? 1 : 0;
     u.fogNear.value = F.near;
     u.fogFar.value = F.far;
@@ -221,11 +246,29 @@ export class Game {
     const gamma22 = F.source || worldUniforms.gamma22.value > 0.5;
     const lin = (v: number) => (gamma22 ? Math.pow(v, 2.2) : v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
     const lum = F.source ? worldUniforms.sourceUnit.value * F.hdrScale : F.luminance;
+    const radiance = (hex: string, into: THREE.Vector3) => { const k = new THREE.Color(hex); into.set(lin(k.r) * lum, lin(k.g) * lum, lin(k.b) * lum); };
     u.fogRadiance.value.set(lin(c.r) * lum, lin(c.g) * lum, lin(c.b) * lum);
+    // Layers: the start, then three distances in rising order, each with how much it hides and its colour.
+    u.fogLayers.value = F.layers ? 1 : 0;
+    if (F.layers) u.fogSquare.value = 0;
+    const d1 = Math.max(F.near + 1, F.d1), d2 = Math.max(d1 + 1, F.d2), d3 = Math.max(d2 + 1, F.d3);
+    u.fogStopD.value.set(F.near, d1, d2, d3);
+    const t1 = fogThickness(F.a1), t2 = Math.max(t1, fogThickness(F.a2)), t3 = Math.max(t2, fogThickness(F.a3));   // fog only ever adds up
+    u.fogStopA.value.set(0, t1, t2, t3);
+    radiance(F.c1, u.fogStopC.value[0]); radiance(F.c2, u.fogStopC.value[1]); radiance(F.c3, u.fogStopC.value[2]);
+    // Height: where each begins, how far to full strength, how much thicker, how much of its colour.
+    u.fogLow.value.set(F.lowTop, Math.max(1, F.lowDepth), F.lowOn ? F.lowThicken : 0, F.lowOn ? F.lowTint : 0);
+    u.fogHigh.value.set(F.highBase, Math.max(1, F.highRise), F.highOn ? F.highThicken : 0, F.highOn ? F.highTint : 0);
+    radiance(F.lowColor, u.fogLowC.value); radiance(F.highColor, u.fogHighC.value);
+    // Behind everything: the fog at its end in every direction (FogBackdrop), over the void's own colour.
+    const clear = new THREE.Color(s.render.clearColor);
+    const voidRadiance = new THREE.Vector3(lin(clear.r), lin(clear.g), lin(clear.b)).multiplyScalar(F.enabled ? 0 : 1);
+    this.fogBackdrop.set(F.enabled && !this.sky.mesh.visible, voidRadiance);
     if (F.enabled) {
-      const f = fogAt(1e9), r = u.fogRadiance.value;
+      const f = fogAt(1e9), r = F.layers ? u.fogStopC.value[2] : u.fogRadiance.value;
       this.renderer.setClearRadiance(r.x * f, r.y * f, r.z * f);
     } else this.renderer.setClearColor(s.render.clearColor);
+    this.renderer.distanceBlur = F.enabled && F.blur > 0 ? { radius: F.blur, start: F.blurStart, end: Math.max(F.blurStart + 1, F.blurEnd) } : null;
   }
 
   async loadMapPath(path: string): Promise<void> {
@@ -267,6 +310,9 @@ export class Game {
     this.applySettings();
     this.uploadDynamicLights();
     this.collectRects();
+    this.fogVolumes = map.entities.filter((e) => e.class === 'fog_volume').map((e) => ({ min: e.props?.min as number[], max: e.props?.max as number[], fog: (e.props?.fog ?? {}) as Record<string, unknown> }));
+    this.fogInside = null;
+    this.fogMix = 0;
     this.lighting.request(level, this.settings, this.textures, true);
     this.holdUntil = performance.now() + this.settings.render.lightHoldMs;
     if (this.player) this.player.setLevel(level);
@@ -341,6 +387,7 @@ export class Game {
     cam.up.set(0, 0, 1);
     cam.lookAt(eye.x + forward.x, eye.y + forward.y, eye.z + forward.z);
     this.sky.follow(cam);
+    this.fogBackdrop.follow(cam);
     cam.rotateZ(((this.player.roll(s) + this.viewRoll) * Math.PI) / 180);
     const C = s.camera;
     worldUniforms.flashOn.value = C.flash ? 1 : 0;
@@ -352,7 +399,13 @@ export class Game {
     worldUniforms.flashBeamN.value = C.flashBeam >= 90 ? 0 : Math.log(0.5) / Math.log(Math.cos(half));
     worldUniforms.flashColor.value.set(...kelvinToLinear(C.flashKelvin));
 
-    if (s.fog.source && s.fog.blend) this.updateFog(s, forward);
+    // Fog of its own inside some parts of the map: go over to it (and back) in under half a second.
+    const vol = this.fogVolumes.find((v) => eye.x > v.min[0] && eye.x < v.max[0] && eye.y > v.min[1] && eye.y < v.max[1] && eye.z > v.min[2] && eye.z < v.max[2]);
+    if (vol) this.fogInside = vol.fog;
+    const want = vol ? 1 : 0;
+    const moving = this.fogMix !== want;
+    if (moving) this.fogMix += Math.sign(want - this.fogMix) * Math.min(Math.abs(want - this.fogMix), dt > 0 ? dt / 0.4 : 1);
+    if (moving || (s.fog.source && s.fog.blend)) this.updateFog(s, forward);
     this.level?.cull(cam.position, fogReach(), s.render.detailDistance);
     worldUniforms.time.value = performance.now() / 1000;
     this.renderer.render(this.scene);

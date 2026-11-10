@@ -65,12 +65,14 @@ const FRAG = /* glsl */ `
   ${FOG_PARS}
   varying vec2 vUv;
   varying vec3 vColor;
-  varying float vDepth;
+  varying vec3 vViewPos;   // exact per pixel: a distance interpolated across a huge face is far off
+  #define vDepth length(vViewPos)
+  #define vFogZ (cameraPosition.z + dot(viewMatrix[2].xyz, vViewPos))
   vec3 toLinear(vec3 c) { return gamma22 > 0.5 ? pow(c, vec3(2.2)) : mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }
   void main() {
     vec3 t = texture2D(map, vUv).rgb;
     if (linearTex < 0.5) t = toLinear(t);
-    gl_FragColor = vec4(t * vColor * sourceUnit * (1.0 - fogFactor(vDepth)), 0.0);
+    gl_FragColor = vec4(t * vColor * sourceUnit * fogOver(vDepth, vFogZ).a, 0.0);
   }`;
 
 interface Sprite { origin: number[]; size: number; color: number[]; dir?: number[]; width?: number }
@@ -104,7 +106,9 @@ function spriteMesh(tex: THREE.Texture, linearTex: boolean, sprites: Sprite[]): 
       attribute vec4 halo;
       varying vec2 vUv;
       varying vec3 vColor;
-      varying float vDepth;
+      varying vec3 vViewPos;   // exact per pixel: a distance interpolated across a huge face is far off
+      #define vDepth length(vViewPos)
+      #define vFogZ (cameraPosition.z + dot(viewMatrix[2].xyz, vViewPos))
       void main() {
         float s = size;
         vColor = tint;
@@ -121,7 +125,7 @@ function spriteMesh(tex: THREE.Texture, linearTex: boolean, sprites: Sprite[]): 
         vec4 mv = viewMatrix * vec4(centre, 1.0);
         mv.xy += position.xy * s;
         vUv = position.xy + 0.5;
-        vDepth = length(mv.xyz);
+        vViewPos = mv.xyz;
         gl_Position = projectionMatrix * mv;
       }`,
     fragmentShader: FRAG,
@@ -161,7 +165,9 @@ function beamMesh(tex: THREE.Texture, linearTex: boolean, beams: Beam[]): THREE.
       attribute vec3 tint;
       varying vec2 vUv;
       varying vec3 vColor;
-      varying float vDepth;
+      varying vec3 vViewPos;   // exact per pixel: a distance interpolated across a huge face is far off
+      #define vDepth length(vViewPos)
+      #define vFogZ (cameraPosition.z + dot(viewMatrix[2].xyz, vViewPos))
       void main() {
         vec3 dir = normalize(axis);
         vec3 p = position + axis * par.x;
@@ -177,7 +183,7 @@ function beamMesh(tex: THREE.Texture, linearTex: boolean, beams: Beam[]): THREE.
         vColor = tint * k * (1.0 - par.x);
         vUv = vec2(par.y * 0.5 + 0.5, par.x);
         vec4 mv = viewMatrix * vec4(p, 1.0);
-        vDepth = length(mv.xyz);
+        vViewPos = mv.xyz;
         gl_Position = projectionMatrix * mv;
       }`,
     fragmentShader: FRAG,

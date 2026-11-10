@@ -114,7 +114,9 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
       varying vec2 vUv;
       varying vec2 vLm;
       varying float vShade;
-      varying float vDepth;
+      varying vec3 vViewPos;   // exact per pixel: a distance interpolated across a huge face is far off
+      #define vDepth length(vViewPos)
+      #define vFogZ (cameraPosition.z + dot(viewMatrix[2].xyz, vViewPos))
       varying vec3 vWorld;
       varying vec3 vNormal;
       varying vec3 vGu;
@@ -128,7 +130,7 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
         vLm = lmuv;
         vShade = shade;
         vec4 mv = modelViewMatrix * vec4(position, 1.0);
-        vDepth = length(mv.xyz);
+        vViewPos = mv.xyz;
         gl_Position = projectionMatrix * mv;
       }`,
     fragmentShader: /* glsl */ `
@@ -187,7 +189,9 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
       varying vec2 vUv;
       varying vec2 vLm;
       varying float vShade;
-      varying float vDepth;
+      varying vec3 vViewPos;   // exact per pixel: a distance interpolated across a huge face is far off
+      #define vDepth length(vViewPos)
+      #define vFogZ (cameraPosition.z + dot(viewMatrix[2].xyz, vViewPos))
       float vnoise(vec2 p) {
         vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
         float a = fract(sin(dot(i, vec2(127.1, 311.7))) * 43758.5453), b = fract(sin(dot(i + vec2(1.0, 0.0), vec2(127.1, 311.7))) * 43758.5453);
@@ -409,12 +413,11 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
           L = (Lbaked + Edyn / PI * diffuseColor * (1.0 - env) + spec * gloss * occl) * brightness;
           if (selfIllum > 0.5) L = mix(L, rho * selfIllumTint * sourceUnit, tx.a);
         }
-        float f = fogFactor(vDepth);
         // Alpha marks light sources (lamp lenses, panels) for the camera pass:
         // only they get the lamp-edge line and fringe, not overexposed surfaces.
         // (Translucent surfaces blend with their own alpha and keep the frame's: see applySourceBlend.)
         float a = alphaMode == 2 ? tx.a * alphaMul : alphaMode == 3 ? alphaMul : isSource * (1.0 - isStatic); // screens aren't lamps
-        gl_FragColor = vec4(mix(L, fogRadiance, f), a);
+        gl_FragColor = vec4(applyFog(L, vDepth, vFogZ), a);
       }`,
   });
 }

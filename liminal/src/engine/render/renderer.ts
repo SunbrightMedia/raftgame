@@ -32,6 +32,46 @@ export class LowResRenderer {
   /** The Source camera's current tonemap scale (for the HUD/tests). */
   get sourceScale(): number { return this.sourcePost.scale; }
   upscale: 'nearest' | 'linear' = 'linear';
+  /**
+   * Far things drawn soft, as through thick air: the blur's radius at its
+   * strongest (pixels of a 720-line picture) and the distances where it
+   * begins and where it is full. Null = off.
+   */
+  distanceBlur: { radius: number; start: number; end: number } | null = null;
+  private blurTarget: THREE.WebGLRenderTarget | null = null;
+  private blurScene = new THREE.Scene();
+  private blurMat = new THREE.ShaderMaterial({
+    uniforms: { src: { value: null }, depthTex: { value: null }, texel: { value: new THREE.Vector2() }, near: { value: 2 }, far: { value: 65536 }, blur: { value: new THREE.Vector3() } },
+    vertexShader: /* glsl */ `varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
+    // Each pixel gathers from a disc as wide as its own distance asks for. A neighbour counts by how blurred it
+    // is itself, so a near, sharp thing does not spread into the soft air behind it.
+    fragmentShader: /* glsl */ `
+      uniform sampler2D src; uniform sampler2D depthTex; uniform vec2 texel; uniform float near; uniform float far; uniform vec3 blur;
+      varying vec2 vUv;
+      float amount(vec2 uv) {
+        float z = texture2D(depthTex, uv).x * 2.0 - 1.0;
+        float dist = 2.0 * near * far / (far + near - z * (far - near));
+        return smoothstep(blur.y, blur.z, dist);
+      }
+      void main() {
+        vec4 c0 = texture2D(src, vUv);
+        float a0 = amount(vUv);
+        if (a0 < 0.004) { gl_FragColor = c0; return; }
+        float r = a0 * blur.x;
+        vec3 sum = c0.rgb;
+        float wsum = 1.0;
+        for (int i = 1; i <= 20; i++) {
+          float fi = float(i);
+          vec2 uv = vUv + vec2(cos(fi * 2.39996323), sin(fi * 2.39996323)) * (r * sqrt(fi / 20.0)) * texel;
+          float w = amount(uv);
+          w = w * w + 0.002;
+          sum += texture2D(src, uv).rgb * w;
+          wsum += w;
+        }
+        gl_FragColor = vec4(sum / wsum, c0.a);
+      }`,
+    depthTest: false, depthWrite: false,
+  });
   /** Size actually rendered last frame, for the HUD. */
   readonly renderSize = new THREE.Vector2();
 
@@ -44,6 +84,7 @@ export class LowResRenderer {
     this.camera = new THREE.PerspectiveCamera(74, 16 / 9, 2, 65536);
     this.blitMat = new THREE.MeshBasicMaterial({ depthTest: false, depthWrite: false });
     this.blitScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.blitMat));
+    this.blurScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.blurMat));
   }
 
   /** Source fov_desired is horizontal at 4:3; derive the vertical FOV from it (Hor+). */
@@ -96,25 +137,43 @@ export class LowResRenderer {
     this.renderSize.set(iw, ih);
     const filter = this.upscale === 'nearest' ? THREE.NearestFilter : THREE.LinearFilter;
     const samples = Math.max(0, Math.round(this.msaa));
-    if (!this.target || this.target.width !== iw || this.target.height !== ih || this.target.texture.magFilter !== filter || this.target.samples !== samples) {
+    const wantDepth = this.distanceBlur !== null;
+    if (!this.target || this.target.width !== iw || this.target.height !== ih || this.target.texture.magFilter !== filter || this.target.samples !== samples || (this.target.depthTexture !== null) !== wantDepth) {
+      this.target?.depthTexture?.dispose();
       this.target?.dispose();
       this.target = new THREE.WebGLRenderTarget(iw, ih, {
         // Half-float keeps values above white, so the camera pass can bloom and clip them.
         depthBuffer: true, colorSpace: THREE.NoColorSpace, magFilter: filter, minFilter: filter, generateMipmaps: false, samples, type: THREE.HalfFloatType,
+        // The distance blur reads how far each pixel is.
+        ...(wantDepth ? { depthTexture: new THREE.DepthTexture(iw, ih, THREE.UnsignedIntType) } : {}),
       });
-      this.blitMat.map = this.target.texture;
-      this.blitMat.needsUpdate = true;
+      this.blurTarget?.dispose();
+      this.blurTarget = wantDepth ? new THREE.WebGLRenderTarget(iw, ih, { depthBuffer: false, colorSpace: THREE.NoColorSpace, magFilter: filter, minFilter: filter, generateMipmaps: false, type: THREE.HalfFloatType }) : null;
     }
     this.gl.setRenderTarget(this.target);
     this.gl.render(scene, this.camera);
+    let frame = this.target;
+    if (this.distanceBlur && this.blurTarget && this.target.depthTexture) {
+      const u = this.blurMat.uniforms, b = this.distanceBlur;
+      u.src.value = this.target.texture;
+      u.depthTex.value = this.target.depthTexture;
+      (u.texel.value as THREE.Vector2).set(1 / iw, 1 / ih);
+      u.near.value = this.camera.near;
+      u.far.value = this.camera.far;
+      (u.blur.value as THREE.Vector3).set((b.radius * ih) / 720, b.start, b.end);
+      this.gl.setRenderTarget(this.blurTarget);
+      this.gl.render(this.blurScene, this.blitCam);
+      frame = this.blurTarget;
+    }
+    if (this.blitMat.map !== frame.texture) { this.blitMat.map = frame.texture; this.blitMat.needsUpdate = true; }
     const now = performance.now(), dt = Math.min(0.25, (now - this.lastFrame) / 1000);
     this.lastFrame = now;
     if (this.sourceCamera) {
-      this.sourcePost.render(this.gl, this.target, null, this.sourceUnit, this.sourceCamera, dt);
+      this.sourcePost.render(this.gl, frame, null, this.sourceUnit, this.sourceCamera, dt);
       return;
     }
     if (this.camera_) {
-      this.digicam.render(this.gl, this.target, null, this.camera_);
+      this.digicam.render(this.gl, frame, null, this.camera_);
       return;
     }
     this.gl.setRenderTarget(null);

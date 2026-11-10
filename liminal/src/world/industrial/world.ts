@@ -162,7 +162,7 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
       const doors = cut?.doors ?? [];
       if (kind === 'machine') skeleton(ctx, r, x0, y0, x1, y1, z0, z1, 512, D.steel, doors);
       wallRuns(ctx, r, x0, y0, x1, y1, z0, z1, (kind === 'machine' ? 0.5 : 0.25) * D.pipes, doors);
-      if (cut) fitOut(ctx, p, cut);
+      if (cut) { fitOut(ctx, p, cut); m.fogVolume([x0, y0, bottom - 64], [x1, y1, z1], INSIDE_FOG); }
     }
   }
 
@@ -843,13 +843,34 @@ function shelter(ctx: Ctx, r: Rng, c: V3, open: Dir): void {
   m.prop(panel, at(-33, 31, 74), [r.range(-4, 2), yaw + r.range(-3, 3), 0], { scale: sc, solid: false });
 }
 
-/** Flat light, no bake: for judging geometry. A neutral haze hides what runs out of sight. */
+/**
+ * The air inside a mass: thin and dark, the same at every height. (The game
+ * goes over to it when the camera is inside the mass's box, which it can only
+ * be in a corridor or a room.)
+ */
+const INSIDE_FOG = {
+  near: 150, d1: 1500, a1: 0.05, c1: '#3d4043', d2: 4500, a2: 0.3, c2: '#45484b', d3: 12000, a3: 0.9, c3: '#4c4f52',
+  lowThicken: 0, lowTint: 0, highThicken: 0, highTint: 0, blur: 2,
+};
+
+/**
+ * Flat light, no bake: for judging geometry. The fog is in three layers
+ * (thin and dark near, thick and pale far), goes dark in the depths under the
+ * lowest catwalks and pale in the heights, and far things are a little soft.
+ * It hides what runs out of sight.
+ */
 export const GEOMETRY_SETTINGS = {
   camera: { model: 'source', sourceHdr: false },
   light: { enabled: false },
   render: { internalHeight: 0, textureFilter: 'linear', faceShade: 0.75 },
   surface: { reflections: 0 },
-  fog: { enabled: true, source: true, color: '#8f979f', near: 400, far: 9000, maxDensity: 1 },
+  fog: {
+    enabled: true, source: true, color: '#8f979f', near: 300, far: 9000, maxDensity: 1,
+    layers: true, d1: 1600, a1: 0.18, c1: '#7c858d', d2: 4200, a2: 0.62, c2: '#8d959c', d3: 8500, a3: 1, c3: '#a2a9ae',
+    lowOn: true, lowTop: -600, lowDepth: 3600, lowThicken: 0.8, lowTint: 0.9, lowColor: '#3b4249',
+    highOn: true, highBase: 900, highRise: 3000, highThicken: 0.5, highTint: 0.7, highColor: '#c3c8cb',
+    blur: 4, blurStart: 1200, blurEnd: 6500,
+  },
   // The Portal 2 kit is made for Source's player: 32 wide, 72 tall, eyes at 64.
   hull: { hullWidth: 32, standHeight: 72, duckHeight: 36, eyeHeight: 64, duckEyeHeight: 28, voidZ: -2600 },
 };

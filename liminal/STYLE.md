@@ -357,6 +357,13 @@ for every pass of this world, and the first two for every world.
   beams out of the wall and hangs by a rod from the wall above. No white
   pipes in rooms (they read as bright models).
 - Every change to the generator must still pass `npm run world:walk`.
+- **Fog** (the user asked for layers, more intense further back, and blur):
+  three layers by distance, each with its own density and colour (thin and
+  dark near, thick and pale far); the depths under the lowest catwalks go
+  dark, the heights go pale; far things are a little soft (distance blur).
+  Inside a mass the air is thin and dark (a fog volume). All of it is in
+  the tweak panel under Fog; the world's own values are in
+  `GEOMETRY_SETTINGS` and `INSIDE_FOG` (`src/world/industrial/world.ts`).
 
 ## World: industrial v1 (old; reference: a tower under construction, looking straight up)
 
