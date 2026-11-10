@@ -104,6 +104,12 @@ export function disposeProps(g: THREE.Group): void {
     const m = o as THREE.InstancedMesh;
     if (!m.isInstancedMesh) return;
     (Array.isArray(m.material) ? m.material : [m.material]).forEach((x) => { if (!seen.has(x)) { seen.add(x); x.dispose(); } });
+    // The batch's own geometry object goes (it would pile up, one per batch per map loaded), but not the model's
+    // buffers it shares: those are taken off it first, so only its own light offsets are freed.
+    const geo = m.geometry;
+    for (const k of Object.keys(geo.attributes)) if (k !== 'lightOffset') geo.deleteAttribute(k);
+    geo.setIndex(null);
+    geo.dispose();
     m.dispose();
   });
 }
