@@ -225,6 +225,16 @@ export class Lighting {
         // Props: Valve's per-vertex light from the BSP (tools/source/valve_proplight.py), else ours from our cache.
         const ours = c.props ? null : await this.storage.read(this.cachePath(level)).catch(() => null);
         const oc = c.props ? c : ours ? (JSON.parse(ours) as LightmapCache) : null;
+        if (!oc?.props && c.ambient) {
+          // No per-vertex prop light at all (a map imported from a BSP without its file pack):
+          // every prop is lit the run-time way, from the leaf ambient cubes and the lights.
+          const amb = await pipe(fromBase64(c.ambient), new DecompressionStream('deflate-raw'));
+          if (gen !== this.seq) return;
+          const offsets = propOffsets(src.props);
+          src.props.meta.forEach((m) => { m.runtime = true; });
+          this.runtime = { level, tree: new AmbientTree(new Float32Array(amb.slice().buffer)), baked: new Float32Array(offsets[offsets.length - 1] * 3), offsets, vis: new SolidGrid(src.occluders) };
+          this.relightProps(level);
+        }
         if (oc?.props) {
           const px = decodeRGBEToFloat(await pipe(fromBase64(oc.props), new DecompressionStream('deflate-raw')));
           const offsets = propOffsets(src.props);

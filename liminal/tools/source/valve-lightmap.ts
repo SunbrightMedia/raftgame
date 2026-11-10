@@ -10,7 +10,7 @@
  * when light.sourceBaker = valve) and, given our own baked cache, prints how
  * ours differs from Valve's by material.
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { deflateRawSync, inflateRawSync } from 'node:zlib';
 import { parseMap } from '../../src/data/map';
 import { buildFaces, facePoint, type Face } from '../../src/engine/light/faces';
@@ -19,7 +19,9 @@ import { sourceBakeInfo } from '../../src/game/sourceLighting';
 
 const [mapPath, bspPath, oursPath] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const map = parseMap(JSON.parse(readFileSync(mapPath, 'utf8')));
-const idx = JSON.parse(readFileSync('textures/p2/index.json', 'utf8')).textures as { name: string; size: [number, number]; source: Record<string, unknown> }[];
+// Every converted Portal 2 material: the atrium's set (textures/p2) and the whole library (textures/p2lib).
+const idx = ['textures/p2/index.json', 'textures/p2lib/index.json'].filter((f) => existsSync(f))
+  .flatMap((f) => JSON.parse(readFileSync(f, 'utf8')).textures as { name: string; size: [number, number]; source: Record<string, unknown> }[]);
 const mats = new Map(idx.map((t) => [t.name, { size: t.size, source: t.source }]));
 const faces = buildFaces(map.brushes);
 const { info } = sourceBakeInfo(map, faces, (tex) => mats.get(tex) as never);
@@ -151,11 +153,11 @@ for (let i = 0; i < W * H; i++) {
 }
 const out = mapPath.replace(/\.json$/, '.valve.lightmap.json');
 // Leaf ambient light (what Source lights moving and physics props with at run time): VRAD's samples
-// per BSP leaf (LDR lumps 52/56), with the BSP tree to find a point's leaf. Packed as float32:
+// per BSP leaf (lumps 52/56, or 51/55 in an HDR map), with the BSP tree to find a point's leaf. Packed as float32:
 // [nNodes, nLeaves, nSamples, headnode], nodes (nx ny nz d child0 child1), leaves (first count),
 // samples (x y z, then 6 × rgb for +x −x +y −y +z −z, in the lightmaps' units).
 function ambientData(): string {
-  const N = lump(5), P = lump(1), LF = lump(10), AI = lump(52), AL = lump(56), M = lump(14);
+  const N = lump(5), P = lump(1), LF = lump(10), AI = hdr ? lump(51) : lump(52), AL = hdr ? lump(55) : lump(56), M = lump(14);
   const nNodes = N.l / 32, nLeaves = LF.l / 32, nSamples = AL.l / 28;
   const out = new Float32Array(4 + nNodes * 6 + nLeaves * 2 + nSamples * 21);
   out.set([nNodes, nLeaves, nSamples, i32(M.o + 36)]);

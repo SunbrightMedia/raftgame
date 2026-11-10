@@ -10,3 +10,6 @@ textures/p2lib/
 models/p2lib/
 catalogue/
 dist-catalogue/
+# Portal 2 maps imported for study (tools/source/import_bsp.py): regenerated, not committed.
+maps/p2ref/
+__pycache__/
