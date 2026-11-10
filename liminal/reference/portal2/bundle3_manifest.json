@@ -1,0 +1,42 @@
+[
+{
+"file": "models/props_underground/underground_testchamber_button.mdl",
+"arch": 24,
+"src_off": 72021930,
+"len": 4812,
+"part": 1,
+"off": 0
+},
+{
+"file": "models/props_underground/underground_testchamber_button.vvd",
+"arch": 24,
+"src_off": 72026742,
+"len": 170880,
+"part": 1,
+"off": 4812
+},
+{
+"file": "models/props_underground/underground_testchamber_button.dx90.vtx",
+"arch": 114,
+"src_off": 23866735,
+"len": 64945,
+"part": 1,
+"off": 175692
+},
+{
+"file": "models/props_underground/underground_testchamber_button.phy",
+"arch": 24,
+"src_off": 72262567,
+"len": 705,
+"part": 1,
+"off": 240637
+},
+{
+"file": "materials/models/props_underground/underground_testchamber_button.vtf",
+"arch": 3,
+"src_off": 171538743,
+"len": 699304,
+"part": 1,
+"off": 241342
+}
+]
