@@ -64,6 +64,8 @@ export interface Layout {
   junctions: Junction[];
   segments: Segment[];
   walks: Walk[];
+  /** Per tile (y * size + x): the block that tile belongs to, or −1 for a street tile. */
+  tileBlock: Int16Array;
   /** Maze nodes in use: key `${junction}:${level}` → bit mask of directions with a catwalk. */
   nodes: Map<string, number>;
   start: { junction: number; level: number };
@@ -211,5 +213,7 @@ export function makeLayout(seed: number, params: Partial<LayoutParams> = {}): La
       if (visited.has(key(far, l2)) && free(s, l, l2) && mz.chance(P.loops)) { if (s.a === j) take(s, l, l2); else take(s, l2, l); }
     }
   }
-  return { params: P, blocks, streets, junctions, segments, walks, nodes, start };
+  const tileBlock = new Int16Array(N * N).fill(-1);
+  for (const b of blocks) for (let y = b.rect.y0; y < b.rect.y1; y++) for (let x = b.rect.x0; x < b.rect.x1; x++) tileBlock[y * N + x] = b.id;
+  return { params: P, blocks, streets, junctions, segments, walks, nodes, start, tileBlock };
 }
