@@ -27,7 +27,7 @@ export const PROP_REGION = 4096;
 export function buildPropMeshes(entities: EntityDef[], models: ModelRegistry, textures: TextureRegistry, offsetOf?: (e: EntityDef) => [number, number, number] | undefined): THREE.Group {
   const group = new THREE.Group();
   group.name = 'props';
-  const batches = new Map<string, { model: string; skin: number; mats: THREE.Matrix4[]; light: number[] }>();
+  const batches = new Map<string, { model: string; skin: number; twoSided: boolean; mats: THREE.Matrix4[]; light: number[] }>();
   let bakeIndex = 0;
   for (const e of entities) {
     const name = propModel(e);
@@ -35,18 +35,21 @@ export function buildPropMeshes(entities: EntityDef[], models: ModelRegistry, te
     const bi = bakeIndex++;
     const skin = typeof e.props?.skin === 'number' ? e.props.skin : 0;
     const R = PROP_REGION;
-    const key = `${name.toLowerCase()}#${skin}#${Math.floor(e.origin[0] / R)},${Math.floor(e.origin[1] / R)},${Math.floor(e.origin[2] / R)}`;
+    // Hollow things seen from inside (open tube and pipe ends) draw both sides of their surfaces.
+    const twoSided = e.props?.twosided === true;
+    const key = `${name.toLowerCase()}#${skin}#${twoSided ? 2 : 1}#${Math.floor(e.origin[0] / R)},${Math.floor(e.origin[1] / R)},${Math.floor(e.origin[2] / R)}`;
     let b = batches.get(key);
-    if (!b) { b = { model: name, skin, mats: [], light: [] }; batches.set(key, b); }
+    if (!b) { b = { model: name, skin, twoSided, mats: [], light: [] }; batches.set(key, b); }
     b.light.push(bi);
     const scale = typeof e.props?.scale === 'number' ? e.props.scale : 1;
     const off = offsetOf?.(e);
     b.mats.push(sourceAnglesMatrix(e.angles, off ? [e.origin[0] + off[0], e.origin[1] + off[1], e.origin[2] + off[2]] : e.origin, scale));
   }
   const materials = new Map<string, THREE.Material>();
-  const material = (tex: string) => {
-    let m = materials.get(tex);
-    if (!m) { m = makePropMaterial(textures.get(tex)); materials.set(tex, m); }
+  const material = (tex: string, twoSided = false) => {
+    const k = twoSided ? `${tex}#2` : tex;
+    let m = materials.get(k);
+    if (!m) { m = makePropMaterial(textures.get(tex)); if (twoSided) m.side = THREE.DoubleSide; materials.set(k, m); }
     return m;
   };
   for (const [key, b] of batches) {
@@ -54,7 +57,7 @@ export function buildPropMeshes(entities: EntityDef[], models: ModelRegistry, te
     const h = model.header;
     const table = h.skins[b.skin] ?? h.skins[0] ?? h.materials.map((_, i) => i);
     const slots = Math.max(table.length, ...h.meshes.map((m) => m.slot + 1));
-    const mats = Array.from({ length: slots }, (_, slot) => material(h.materials[table[slot] ?? slot] ?? 'missing'));
+    const mats = Array.from({ length: slots }, (_, slot) => material(h.materials[table[slot] ?? slot] ?? 'missing', b.twoSided));
     // Own geometry object (sharing the model's buffers) so each mesh carries its instances' light offsets.
     const geo = new THREE.BufferGeometry();
     for (const [k, a] of Object.entries(model.geometry.attributes)) geo.setAttribute(k, a);

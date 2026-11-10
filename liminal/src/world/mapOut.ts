@@ -99,11 +99,12 @@ export class MapOut {
   }
 
   /** A model. `model` is the Source path without "models/" and ".mdl" (e.g. "props_bts/truss_512"). */
-  prop(model: string, origin: V3, angles: V3 = [0, 0, 0], o: { skin?: number; scale?: number; solid?: boolean; noshadow?: boolean; dynamic?: boolean } = {}): number {
+  prop(model: string, origin: V3, angles: V3 = [0, 0, 0], o: { skin?: number; scale?: number; solid?: boolean; noshadow?: boolean; dynamic?: boolean; /** Hollow, open-ended piece: draw the inside too. */ hollow?: boolean } = {}): number {
     const props: Record<string, unknown> = { model: `${this.modelPrefix}models/${model}.mdl`, skin: o.skin ?? 0, source_class: o.dynamic ? 'prop_dynamic' : 'prop_static' };
     if (o.scale && o.scale !== 1) props.scale = o.scale;
     if (o.solid === false) props.solid = false;
     if (o.noshadow) props.noshadow = true;
+    if (o.hollow) props.twosided = true;
     return this.ent('prop', origin, angles, props);
   }
 
@@ -134,6 +135,11 @@ export class MapOut {
   /** A spotlight's visible shaft and halo (point_spotlight): see engine/render/glows.ts. */
   beam(origin: V3, dir: V3, length: number, width: number, color: V3, brightness = 1): number {
     return this.ent('beam', origin, undefined, { dir, length, width, color, brightness, tex: this.tex('sprites/glow_test02'), halo: this.tex('sprites/light_glow03') });
+  }
+
+  /** A cable hanging from a to b; its middle sags `sag` units below the straight line (engine/render/ropes.ts). */
+  rope(a: V3, b: V3, sag: number, width = 3): number {
+    return this.ent('rope', a, undefined, { to: b.map(r3), sag: r3(sag), width });
   }
 
   start(origin: V3, yaw = 0, pitch = 0): void {

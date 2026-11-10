@@ -161,7 +161,7 @@ function wallRuns(m: MapOut, r: Rng, x0: number, y0: number, x1: number, y1: num
     for (let a = 256; a < len - 256; a += 256) {
       if (!r.chance(0.12 * density)) continue;
       const px = o[0] + DX[along] * a + DX[out] * 34, py = o[1] + DY[along] * a + DY[out] * 34;
-      for (let z = Math.ceil(z0 / 256) * 256 + 128; z < z1; z += 256) m.prop('props_bts/pipe_64_256', [px, py, z], [0, 0, 0], { solid: false });
+      for (let z = Math.ceil(z0 / 256) * 256 + 128; z < z1; z += 256) m.prop('props_bts/pipe_64_256', [px, py, z], [0, 0, 0], { solid: false, hollow: true });
     }
     // Horizontal ducts (duct_512a: 512 long on its own x, 140 wide, 76 tall): flat against the wall.
     for (let z = Math.ceil(z0 / 384) * 384; z < z1; z += 384) {
@@ -170,7 +170,7 @@ function wallRuns(m: MapOut, r: Rng, x0: number, y0: number, x1: number, y1: num
       for (let i = 0; i < n; i++) {
         const a = (len - n * 512) / 2 + 256 + i * 512;
         // Turned so its 76 side stands off the wall: roll 90 puts the duct's height along the outward normal.
-        m.prop('props_bts/duct_512b', [o[0] + DX[along] * a + DX[out] * 22, o[1] + DY[along] * a + DY[out] * 22, z + 40], [0, along * 90, 90], { solid: false });
+        m.prop('props_bts/duct_512b', [o[0] + DX[along] * a + DX[out] * 22, o[1] + DY[along] * a + DY[out] * 22, z + 40], [0, along * 90, 90], { solid: false, hollow: true });
       }
     }
   }
@@ -209,7 +209,7 @@ function streetSteel(m: MapOut, r: Rng, s: Street, lay: Layout, zOf: (l: number)
     const z = zOf(r.int(0, L - 1)) + r.pick([128, 128, 144, -112]);
     for (let u = a0 * TILE; u < a1 * TILE; u += TILE) {
       // vactube_128_straight runs from its origin along its own +y.
-      m.prop('props_bts/vactube_128_straight', pt(u, off, z), [0, along * 90 - 90, 0], { solid: false });
+      m.prop('props_bts/vactube_128_straight', pt(u, off, z), [0, along * 90 - 90, 0], { solid: false, hollow: true });
       if ((u / TILE) % 4 === 0) m.prop('props_bts/vactube_connector', pt(u, off, z), [0, along * 90 - 90, 0], { solid: false });
     }
     // Hung from beams across the street every four tiles.
@@ -227,7 +227,8 @@ export const GEOMETRY_SETTINGS = {
   light: { enabled: false },
   render: { internalHeight: 0, textureFilter: 'linear', faceShade: 0.75 },
   fog: { enabled: true, source: true, color: '#8f979f', near: 600, far: 14000, maxDensity: 0.9 },
-  hull: { voidZ: -2600 },
+  // The Portal 2 kit is made for Source's player: 32 wide, 72 tall, eyes at 64.
+  hull: { hullWidth: 32, standHeight: 72, duckHeight: 36, eyeHeight: 64, duckEyeHeight: 28, voidZ: -2600 },
 };
 
 export type { Block };

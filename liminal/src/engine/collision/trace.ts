@@ -22,26 +22,40 @@ export interface TraceResult {
 }
 
 /**
- * The static collision world: convex brushes in a uniform grid (64-unit
- * cells), so a trace only tests the brushes near its swept bounds, then a
- * per-brush bounding-box rejection. Maps with thousands of brushes stay cheap.
+ * The static collision world: convex brushes in uniform grids, so a trace only
+ * tests the brushes near its swept bounds, then a per-brush bounding-box
+ * rejection. There are several grids, each with cells four times the size of
+ * the last (64, 256, 1024...): a brush goes in the finest grid where it covers
+ * only a few cells, so a wall a mile long costs as little to index as a chair.
+ * Maps with tens of thousands of brushes, of any size, stay cheap.
  */
 const CELL = 64;
+/** A brush is filed in the first grid where its longest side spans at most this many cells. */
+const MAX_SPAN = 4;
+interface Grid { cell: number; map: Map<number, number[]>; all: number[] }
 export class CollisionWorld {
   brushes: CollisionBrush[] = [];
-  private grid = new Map<number, number[]>();
+  private grids: Grid[] = [];
   private stamp: Int32Array;
   private mark = 0;
 
   constructor(brushes: CollisionBrush[] = []) {
     this.brushes = brushes;
-    brushes.forEach((b, i) => this.cells(b.min, b.max, (k) => { const l = this.grid.get(k); if (l) l.push(i); else this.grid.set(k, [i]); }));
+    brushes.forEach((b, i) => {
+      const size = Math.max(b.max.x - b.min.x, b.max.y - b.min.y, b.max.z - b.min.z);
+      let level = 0, cell = CELL;
+      while (size > cell * MAX_SPAN) { level++; cell *= 4; }
+      while (this.grids.length <= level) this.grids.push({ cell: CELL * 4 ** this.grids.length, map: new Map(), all: [] });
+      const g = this.grids[level];
+      g.all.push(i);
+      this.cells(g.cell, b.min, b.max, (k) => { const l = g.map.get(k); if (l) l.push(i); else g.map.set(k, [i]); });
+    });
     this.stamp = new Int32Array(brushes.length);
   }
 
-  /** Visit grid cells overlapping [lo, hi]; keys pack three cell indices (±2^16 cells each way). */
-  private cells(lo: Vec3, hi: Vec3, f: (k: number) => void): void {
-    const x0 = Math.floor(lo.x / CELL), x1 = Math.floor(hi.x / CELL), y0 = Math.floor(lo.y / CELL), y1 = Math.floor(hi.y / CELL), z0 = Math.floor(lo.z / CELL), z1 = Math.floor(hi.z / CELL);
+  /** Visit a grid's cells overlapping [lo, hi]; keys pack three cell indices (±2^16 cells each way). */
+  private cells(cell: number, lo: Vec3, hi: Vec3, f: (k: number) => void): void {
+    const x0 = Math.floor(lo.x / cell), x1 = Math.floor(hi.x / cell), y0 = Math.floor(lo.y / cell), y1 = Math.floor(hi.y / cell), z0 = Math.floor(lo.z / cell), z1 = Math.floor(hi.z / cell);
     for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) for (let z = z0; z <= z1; z++) f(((x + 32768) * 65536 + (y + 32768)) * 65536 + (z + 32768));
   }
 
@@ -64,8 +78,6 @@ export class CollisionWorld {
     const hi = v3(Math.max(start.x, end.x) + maxs.x + 1, Math.max(start.y, end.y) + maxs.y + 1, Math.max(start.z, end.z) + maxs.z + 1);
 
     const m = ++this.mark;
-    // Long sweeps (noclip, huge falls) would visit many empty cells: test every brush instead.
-    const span = (hi.x - lo.x) * (hi.y - lo.y) * (hi.z - lo.z) / (CELL * CELL * CELL);
     const test = (i: number) => {
       if (this.stamp[i] === m) return;
       this.stamp[i] = m;
@@ -73,8 +85,12 @@ export class CollisionWorld {
       if (b.max.x < lo.x || b.min.x > hi.x || b.max.y < lo.y || b.min.y > hi.y || b.max.z < lo.z || b.min.z > hi.z) return;
       if (!tr.allsolid) traceBrush(tr, b, start, end, mins, maxs);
     };
-    if (span > 4096) for (let i = 0; i < this.brushes.length; i++) test(i);
-    else this.cells(lo, hi, (k) => { const l = this.grid.get(k); if (l) for (const i of l) test(i); });
+    for (const g of this.grids) {
+      // Long sweeps (noclip, huge falls) would visit many empty cells of a fine grid: test all its brushes instead.
+      const span = ((hi.x - lo.x) / g.cell + 1) * ((hi.y - lo.y) / g.cell + 1) * ((hi.z - lo.z) / g.cell + 1);
+      if (span > 4096 || span > g.all.length) for (const i of g.all) test(i);
+      else this.cells(g.cell, lo, hi, (k) => { const l = g.map.get(k); if (l) for (const i of l) test(i); });
+    }
 
     if (tr.fraction < 1) {
       tr.endpos = v3(
