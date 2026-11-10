@@ -220,7 +220,9 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
   const sheltered: V3[] = [];
   for (const e of er.shuffle(ends)) {
     const farEnough = Math.hypot(e.c[0] - sc[0], e.c[1] - sc[1]) > size * 0.2 && sheltered.every((q) => Math.hypot(e.c[0] - q[0], e.c[1] - q[1]) > size * 0.25);
-    if (sheltered.length < 4 && farEnough) { shelter(ctx, er, e.c, e.open); sheltered.push(e.c); } else walkTile(m, e.c, 1 << e.open);
+    if (sheltered.length < 4 && farEnough) { shelter(ctx, er, e.c, e.open); sheltered.push(e.c); }
+    else if (er.chance(0.4)) lookoutLanding(ctx, e.c, e.open);
+    else walkTile(m, e.c, 1 << e.open);
   }
 
   // ---- what carries the bridges over the halls; then the streets: the frames that carry the catwalks and the
@@ -1140,6 +1142,28 @@ function shelter(ctx: Ctx, r: Rng, c: V3, open: Dir): void {
   m.prop(panel, at(-34, 64, 36), [90, yaw + 90, 0], { scale: sc, solid: false });
   m.prop(panel, at(-66, 30, 36), [90, yaw, 0], { scale: sc, solid: false });
   m.prop(panel, at(-33, 31, 74), [r.range(-4, 2), yaw + r.range(-3, 3), 0], { scale: sc, solid: false });
+}
+
+/**
+ * At some dead ends the catwalk widens into a landing to stand and look out
+ * from, with a small amber lamp on a post at its far corner: seen from a way
+ * off it looks like somewhere to go.
+ */
+function lookoutLanding(ctx: Ctx, c: V3, open: Dir): void {
+  const { m, steel } = ctx;
+  const away = ((open + 2) % 4) as Dir;
+  const yaw = away * 90 - 90;   // the landing's own +y points away from the way in
+  m.prop('props_bts/hanging_walkway_end_b', c, [0, yaw, 0]);
+  const a = (yaw * Math.PI) / 180;
+  // Its far corner (the landing spans x −70..40, y −40..70 in its own frame), just outside the rail.
+  const px = -74, py = 74;
+  const x = c[0] + px * Math.cos(a) - py * Math.sin(a), y = c[1] + px * Math.sin(a) + py * Math.cos(a);
+  steel([x - 3, y - 3, c[2] - 4], [x + 3, y + 3, c[2] + 104]);
+  const top: V3 = [x, y, c[2] + 114];
+  m.prop('props_bts/cage_light', top, [0, 0, 0], { solid: false });
+  m.lamp(top, LAMP.amber, 1, 80, 460, { open: true });
+  m.glow(top, LAMP.amber, 44, 1.6);
+  ctx.notes.push({ kind: 'landing', at: [c[0] + DX[open] * 200, c[1] + DY[open] * 200, c[2]], yaw: away * 90 });
 }
 
 /**

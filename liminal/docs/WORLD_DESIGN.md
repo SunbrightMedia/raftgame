@@ -243,8 +243,10 @@ Next, in this order:
    mass: the tight part of the maze), **aisles** (tall racks, 1–2 tile
    aisles), a **tank yard**, a **ring** round a sealed core. No two of a kind
    adjacent; squeeze before and after every release.
-3. **Pay-outs and gates**: rotating dead-end rewards; one-way drops with a
-   way back; far-side hatches; seen-before-reached views; loops across levels.
+3. **Pay-outs and gates**: rotating dead-end rewards (begun: a shelter, a
+   look-out landing with a lamp, a balcony off a doorway, a look-out room
+   with a slit, a plain end); still to do: one-way drops with a way back;
+   far-side hatches; loops across levels by design.
 4. **Landmarks**: one tall thing per district placed off the straight route.
 5. **Order before chaos**: tubes and pipes routed between ports with
    supports and capped ends, in layers with right-angle bends (pipe-routing,
