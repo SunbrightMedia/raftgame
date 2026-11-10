@@ -33,10 +33,15 @@ class DevServerStorage implements Storage {
 class BrowserStorage implements Storage {
   readonly kind = 'browser' as const;
   private bundled: Record<string, string>;
+  /** The atrium build's Portal 2 map files: big, so fetched as separate files when read. */
+  private fetched: Record<string, string>;
   constructor() {
     const raw = import.meta.glob(['../../maps/*.json', '../../config/*.json'], { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
     this.bundled = {};
     for (const [k, v] of Object.entries(raw)) this.bundled[k.replace(/^(\.\.\/)+/, '')] = v;
+    const urls = (import.meta.env.MODE === 'atrium' ? import.meta.glob('../../maps/p2/*.json', { query: '?url', import: 'default', eager: true }) : {}) as Record<string, string>;
+    this.fetched = {};
+    for (const [k, v] of Object.entries(urls)) this.fetched[k.replace(/^(\.\.\/)+/, '')] = v;
   }
   private key(p: string) { return `liminal:file:${p}`; }
   async read(path: string): Promise<string | null> {
@@ -44,14 +49,17 @@ class BrowserStorage implements Storage {
       const ls = localStorage.getItem(this.key(path));
       if (ls !== null) return ls;
     } catch { /* storage blocked */ }
-    return this.bundled[path] ?? null;
+    if (this.bundled[path] !== undefined) return this.bundled[path];
+    const url = this.fetched[path];
+    if (url) { const r = await fetch(url); return r.ok ? r.text() : null; }
+    return null;
   }
   async write(path: string, text: string): Promise<void> {
     try { localStorage.setItem(this.key(path), text); } catch { /* storage blocked */ }
   }
   async list(dir: string): Promise<string[]> {
     const names = new Set<string>();
-    for (const k of Object.keys(this.bundled)) if (k.startsWith(dir + '/')) names.add(k.slice(dir.length + 1));
+    for (const k of [...Object.keys(this.bundled), ...Object.keys(this.fetched)]) if (k.startsWith(dir + '/') && !k.includes('lightmap')) names.add(k.slice(dir.length + 1));
     try {
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i) ?? '';
@@ -113,7 +121,7 @@ export async function openStorage(): Promise<Storage> {
   if (host?.use) {
     // Inside the claude.ai viewer. use() resolves null if this view can't
     // run db; cap the wait so a silent host can't stall boot.
-    const db = await Promise.race([host.use('db'), new Promise((r) => setTimeout(() => r(null), 4000))]);
+    const db = await Promise.race([host.use('db'), new Promise((r) => setTimeout(() => r(null), 4000))]).catch(() => null);
     if (db) return new ArtifactStorage(db as ArtifactDb);
     return new BrowserStorage();
   }

@@ -7,7 +7,8 @@ import { Game } from './game/game';
 import { DebugPanel } from './ui/debugPanel';
 import { Hud } from './ui/hud';
 
-const DEFAULT_MAP = 'maps/blank.json';
+// The private atrium build (npm run build:atrium) opens the Portal 2 reference map.
+const DEFAULT_MAP = import.meta.env.MODE === 'atrium' ? 'maps/p2/shipyard_atrium.json' : 'maps/blank.json';
 
 /** Milliseconds since boot start at each step (window.liminal.bootTimes). */
 const bootTimes: Record<string, number> = {};
@@ -32,6 +33,12 @@ async function boot(): Promise<void> {
   try {
     await game.loadMapPath(mapPath);
     mark('map loaded');
+    if (import.meta.env.MODE === 'atrium' && !params.get('map')) {
+      // Start where the reference screenshot was taken: on the elevator, stopped at that floor.
+      game.setMover('office_elevator', [0, 0, 506.61]);
+      game.level!.spawn = { origin: { x: 10188.36, y: 1178.52, z: 1274.75 }, yaw: 217.6, pitch: -1.5 };
+      game.player!.respawn(game.level!);
+    }
   } catch (e) {
     showError(`Could not load ${mapPath}: ${(e as Error).message}`);
     return;

@@ -1,6 +1,7 @@
 node_modules/
 dist/
 dist-page/
+dist-atrium/
 .venv-look/
 .studio.log
 .look.log

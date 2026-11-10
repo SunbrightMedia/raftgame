@@ -62,13 +62,21 @@ export class ModelRegistry {
       const e = this.headers.get(n);
       if (!e || this.models.has(n)) return;
       try {
-        const buf = await (await fetch(e.url)).arrayBuffer();
+        // Builds that inline model data (npm run build:atrium) hand a data: URL; decode it without fetch.
+        const buf = e.url.startsWith('data:') ? dataUrlBytes(e.url) : await (await fetch(e.url)).arrayBuffer();
         this.models.set(n, { header: e.header, geometry: buildGeometry(e.header, buf) });
       } catch (err) {
         console.warn(`model ${n} failed to load`, err);
       }
     }));
   }
+}
+
+function dataUrlBytes(url: string): ArrayBuffer {
+  const b64 = atob(url.slice(url.indexOf(',') + 1));
+  const out = new Uint8Array(b64.length);
+  for (let i = 0; i < b64.length; i++) out[i] = b64.charCodeAt(i);
+  return out.buffer;
 }
 
 function buildGeometry(h: ModelHeader, buf: ArrayBuffer): THREE.BufferGeometry {

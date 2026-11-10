@@ -21,7 +21,8 @@ export class Level {
   private movers = new Map<string, [number, number, number]>();
   readonly faces: Face[];
   readonly root = new THREE.Group();
-  readonly spawn: { origin: Vec3; yaw: number; pitch: number };
+  /** Where the player starts (and R respawns). */
+  spawn: { origin: Vec3; yaw: number; pitch: number };
   private meshes: THREE.Group | null = null;
   private props: THREE.Group | null = null;
   layout: LightmapLayout | null = null;

@@ -74,7 +74,8 @@ function fileApi(): Plugin {
 // for publishing as a playable link. See tools/make-page.mjs.
 export default defineConfig(({ mode }) => ({
   plugins: mode === 'page' ? [fileApi(), viteSingleFile()] : [fileApi()],
-  build: mode === 'page' ? { outDir: 'dist-page', chunkSizeWarningLimit: 4000 } : {},
+  base: mode === 'atrium' ? './' : '/',
+  build: mode === 'page' ? { outDir: 'dist-page', chunkSizeWarningLimit: 4000 } : mode === 'atrium' ? { outDir: 'dist-atrium', chunkSizeWarningLimit: 16000, assetsInlineLimit: (file: string, content: Buffer) => file.endsWith('.bin') || content.length < 10 * 1024 } : {},
   server: {
     port: 5173,
     // Saving config/maps from the game must not trigger a page reload.

@@ -10,6 +10,7 @@
     "test": "vitest run",
     "preview": "vite preview",
     "build:page": "vite build --mode page && node tools/make-page.mjs",
+    "build:atrium": "vite build --mode atrium",
     "bench:bake": "vite-node tools/bench/bake-bench.ts",
     "bench:vrad": "vite-node tools/bench/vrad-bench.ts --",
     "validate:vrad": "vite-node tools/bench/vrad-validate.ts --",
