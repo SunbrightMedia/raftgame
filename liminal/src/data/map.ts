@@ -93,6 +93,8 @@ export interface ConvexBrushDef {
   tex?: string;
   faces?: Record<string, FaceTex>;
   group?: string;
+  /** The brush entity this belongs to, by name (imported maps): movers (elevators, doors) move their brushes together. */
+  entity?: string;
   material?: string;
   solid?: boolean;
   min: V3;
@@ -238,6 +240,7 @@ function parseConvex(r: Record<string, unknown>, i: number): ConvexBrushDef {
     tex: typeof r.tex === 'string' ? r.tex : undefined,
     faces: (r.faces && typeof r.faces === 'object' ? r.faces : undefined) as ConvexBrushDef['faces'],
     group: typeof r.group === 'string' ? r.group : undefined,
+    entity: typeof r.entity === 'string' ? r.entity : undefined,
     material: typeof r.material === 'string' ? r.material : undefined,
     solid: r.solid === false ? false : undefined,
     min: b.min, max: b.max,

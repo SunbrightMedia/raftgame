@@ -240,6 +240,13 @@ export class Game {
    */
   paused = false;
 
+  /** Move a brush entity (elevator, door...) and what's parented to it; see Level.setMover. */
+  setMover(name: string, offset: [number, number, number]): void {
+    if (!this.level) return;
+    this.level.setMover(name, offset);
+    this.player?.refreshWorld(this.level);
+  }
+
   start(): void {
     const frame = (now: number) => {
       requestAnimationFrame(frame);

@@ -16,7 +16,7 @@ const idx = JSON.parse(readFileSync('textures/p2/index.json', 'utf8')).textures 
 const mats = new Map(idx.map((t) => [t.name, { size: t.size, source: t.source }]));
 const t0 = Date.now();
 const faces = buildFaces(map.brushes);
-const { info, occluders, lights } = sourceBakeInfo(map, faces, (tex) => mats.get(tex) as never);
+const { info, occluders, reflectors, lights } = sourceBakeInfo(map, faces, (tex) => mats.get(tex) as never);
 console.log(`faces ${faces.length}, occluders ${occluders.length}, lights ${lights.length} (${Date.now() - t0} ms prep)`);
 const lay = sourceLayout(faces, info, 4096);
 let lux = 0;
@@ -35,7 +35,7 @@ for (const f of readdirSync('models', { recursive: true }) as string[]) {
 }
 const props = args.includes('--props') ? propBakeData(map, (n) => modelFiles.get(n.toLowerCase())) : undefined;
 if (props) console.log(`props: ${props.instances.length} instances, ${props.instances.reduce((a, i) => a + props.models[i.model].positions.length / 3, 0)} vertices`);
-const out = bakeSource({ faces, info, occluders, lights, props, params: { bounces: Number(args[args.indexOf('--bounces') + 1]) || 100, patchRays: Number(args[args.indexOf("--rays") + 1]) || 256, chop: 4, supersample: !args.includes('--fast'), maxWidth: 4096 }, log: (m) => console.log(m, `${Math.round(process.memoryUsage().rss / 1e6)} MB`) });
+const out = bakeSource({ faces, info, occluders, reflectors, lights, props, params: { bounces: Number(args[args.indexOf('--bounces') + 1]) || 100, patchRays: Number(args[args.indexOf("--rays") + 1]) || 256, chop: 4, supersample: !args.includes('--fast'), maxWidth: 4096 }, log: (m) => console.log(m, `${Math.round(process.memoryUsage().rss / 1e6)} MB`) });
 console.log(`baked in ${out.ms} ms: ${out.width}x${out.height}, ${out.luxels} luxels, ${out.patches} patches, ${out.bounces} bounces`);
 const v: number[] = [];
 for (let i = 0; i < out.pixels.length; i += 4) if (out.pixels[i + 3] > 0) v.push((out.pixels[i] + out.pixels[i + 1] + out.pixels[i + 2]) / 3);

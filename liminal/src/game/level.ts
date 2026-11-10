@@ -15,7 +15,9 @@ import { sourceLayout, SOURCE_LM_WIDTH } from '../engine/light/vrad';
 
 /** A map turned into things the engine uses: collision, faces, render meshes, spawn. */
 export class Level {
-  readonly collision: CollisionWorld;
+  collision: CollisionWorld;
+  /** Brush entities moved from where the map places them (by entity name), e.g. an elevator between floors. */
+  private movers = new Map<string, [number, number, number]>();
   readonly faces: Face[];
   readonly root = new THREE.Group();
   readonly spawn: { origin: Vec3; yaw: number; pitch: number };
@@ -27,15 +29,7 @@ export class Level {
   lightmap: THREE.DataTexture | null = null;
 
   constructor(readonly map: MapFile, private textures: TextureRegistry, private models: ModelRegistry, readonly path?: string) {
-    this.collision = new CollisionWorld([
-      ...map.brushes
-        .filter((b) => b.solid !== false)
-        .map((b) => {
-          const sp = solidPlanes(b);
-          return convexBrush(b.id, sp.planes.map((p) => ({ n: v3(...p.n), d: p.d })), v3(...b.min), v3(...b.max), b.material ?? 'default');
-        }),
-      ...propSolids(map.entities, (m) => models.header(m)?.hull),
-    ]);
+    this.collision = this.buildCollision();
     this.faces = buildFaces(map.brushes);
     propLightUniforms.propLightOn.value = 0;
     if (isSourceLit(map)) {
@@ -60,20 +54,59 @@ export class Level {
     this.rebuild();
   }
 
+  private brushOffset(b: MapFile['brushes'][number]): [number, number, number] | undefined {
+    return 'entity' in b && b.entity ? this.movers.get(b.entity) : undefined;
+  }
+
+  private propOffset(e: MapFile['entities'][number]): [number, number, number] | undefined {
+    const parent = e.props?.parent;
+    return typeof parent === 'string' ? this.movers.get(parent) : undefined;
+  }
+
+  private buildCollision(): CollisionWorld {
+    const map = this.map;
+    return new CollisionWorld([
+      ...map.brushes
+        .filter((b) => b.solid !== false)
+        .map((b) => {
+          const sp = solidPlanes(b);
+          const o = this.brushOffset(b) ?? [0, 0, 0];
+          const shift = (v: number[]) => v3(v[0] + o[0], v[1] + o[1], v[2] + o[2]);
+          return convexBrush(b.id, sp.planes.map((p) => ({ n: v3(...p.n), d: p.d + p.n[0] * o[0] + p.n[1] * o[1] + p.n[2] * o[2] })), shift(b.min), shift(b.max), b.material ?? 'default');
+        }),
+      ...propSolids(map.entities.map((e) => { const o = this.propOffset(e); return o ? { ...e, origin: [e.origin[0] + o[0], e.origin[1] + o[1], e.origin[2] + o[2]] as [number, number, number] } : e; }), (m) => this.models.header(m)?.hull),
+    ]);
+  }
+
+  /**
+   * Move a brush entity (and props parented to it) by `offset` from where the
+   * map places it, e.g. an elevator to the floor it stopped at. Its baked
+   * light comes along unchanged, as Source's does.
+   */
+  setMover(name: string, offset: [number, number, number]): void {
+    this.movers.set(name.toLowerCase(), offset);
+    this.collision = this.buildCollision();
+    this.rebuild();
+  }
+
   /** Rebuild render meshes (after a re-crush or a new lightmap layout). */
   rebuild(): void {
     if (this.meshes) { this.root.remove(this.meshes); disposeGroup(this.meshes); }
-    this.meshes = buildFaceMeshes(this.faces, this.textures, this.layout);
+    const byId = new Map(this.map.brushes.map((b) => [b.id, b]));
+    this.meshes = buildFaceMeshes(this.faces, this.textures, this.layout, this.movers.size ? (id) => { const b = byId.get(id); return b && this.brushOffset(b); } : undefined);
     this.root.add(this.meshes);
     if (this.props) { this.root.remove(this.props); disposeProps(this.props); }
-    this.props = buildPropMeshes(this.map.entities, this.models, this.textures);
+    this.props = buildPropMeshes(this.map.entities, this.models, this.textures, this.movers.size ? (e) => this.propOffset(e) : undefined);
     this.root.add(this.props);
+    if (this.propLight) setPropLight(this.props, this.propLight.colors, this.propLight.offsets);
   }
 
   /** Baked per-vertex light for the props (Source-lit maps). */
   setPropLight(colors: Float32Array, offsets: Int32Array): void {
+    this.propLight = { colors, offsets };
     if (this.props) setPropLight(this.props, colors, offsets);
   }
+  private propLight: { colors: Float32Array; offsets: Int32Array } | null = null;
 
   setLightmap(layout: LightmapLayout, tex: THREE.DataTexture): void {
     this.lightmap?.dispose();

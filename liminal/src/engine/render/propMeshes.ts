@@ -21,7 +21,7 @@ export function propMaterials(entities: EntityDef[], models: ModelRegistry): str
  * Props drawn instanced: one InstancedMesh per (model, skin), its materials
  * picked per mesh slot by the skin table.
  */
-export function buildPropMeshes(entities: EntityDef[], models: ModelRegistry, textures: TextureRegistry): THREE.Group {
+export function buildPropMeshes(entities: EntityDef[], models: ModelRegistry, textures: TextureRegistry, offsetOf?: (e: EntityDef) => [number, number, number] | undefined): THREE.Group {
   const group = new THREE.Group();
   group.name = 'props';
   const batches = new Map<string, { model: string; skin: number; mats: THREE.Matrix4[]; light: number[] }>();
@@ -36,7 +36,8 @@ export function buildPropMeshes(entities: EntityDef[], models: ModelRegistry, te
     if (!b) { b = { model: name, skin, mats: [], light: [] }; batches.set(key, b); }
     b.light.push(bi);
     const scale = typeof e.props?.scale === 'number' ? e.props.scale : 1;
-    b.mats.push(sourceAnglesMatrix(e.angles, e.origin, scale));
+    const off = offsetOf?.(e);
+    b.mats.push(sourceAnglesMatrix(e.angles, off ? [e.origin[0] + off[0], e.origin[1] + off[1], e.origin[2] + off[2]] : e.origin, scale));
   }
   const materials = new Map<string, THREE.Material>();
   const material = (tex: string) => {

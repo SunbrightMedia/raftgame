@@ -26,7 +26,7 @@ const seeThrough = (m?: SourceMaterial) => !!(m?.translucent || m?.additive);
  *    lightmap of the face underneath);
  *  - sky faces have no lightmap and swallow light.
  */
-export function sourceBakeInfo(map: MapFile, faces: Face[], materialOf: (tex: string) => SourceMatInfo | undefined): { info: SourceBakeFace[]; occluders: SolidPlanes[]; lights: SourceLight[] } {
+export function sourceBakeInfo(map: MapFile, faces: Face[], materialOf: (tex: string) => SourceMatInfo | undefined): { info: SourceBakeFace[]; occluders: SolidPlanes[]; reflectors: SolidPlanes[]; lights: SourceLight[] } {
   const brushes = new Map(map.brushes.map((b) => [b.id, b]));
   const info: SourceBakeFace[] = faces.map((f) => {
     const b = brushes.get(f.brushId);
@@ -58,6 +58,14 @@ export function sourceBakeInfo(map: MapFile, faces: Face[], materialOf: (tex: st
     .filter((b) => b.solid !== false && (b.group === undefined || b.group === 'func_detail'))
     .filter((b) => !Object.values(('faces' in b && b.faces) || {}).some((ft) => ft && seeThrough(materialOf((ft as { tex?: string }).tex ?? '')?.source)))
     .map(solidPlanes);
+  // Brush entities with visible, opaque faces: no shadows, but they reflect bounce (VRAD makes patches of their faces).
+  const visible = (b: (typeof map.brushes)[number]) => Object.values(('faces' in b && b.faces) || {}).some((ft) => {
+    const t = (ft as { tex?: string } | undefined)?.tex ?? '';
+    return t && !t.startsWith('tools/') && !seeThrough(materialOf(t)?.source);
+  });
+  const reflectors = map.brushes
+    .filter((b) => b.group !== undefined && b.group !== 'func_detail' && b.group !== 'clip' && b.group !== 'overlay' && visible(b))
+    .map(solidPlanes);
   const lights: SourceLight[] = [];
   for (const e of map.entities) {
     if (e.class !== 'light' || e.props?.type !== 'source') continue;
@@ -65,7 +73,7 @@ export function sourceBakeInfo(map: MapFile, faces: Face[], materialOf: (tex: st
     const l = parseSourceLight(keys, e.origin);
     if (l) lights.push(l);
   }
-  return { info, occluders, lights };
+  return { info, occluders, reflectors, lights };
 }
 
 /**

@@ -16,7 +16,7 @@ const SOURCE_BAKE = { bounces: 100, patchRays: 256, chop: 4, supersample: true }
 /** Bump when the baker's output changes meaning, so old caches are ignored. */
 const BAKE_VERSION = 8;
 /** The same for the Source baker (vrad.ts, vradProps.ts). */
-const SOURCE_BAKE_VERSION = 2;
+const SOURCE_BAKE_VERSION = 3;
 
 /**
  * Cached lightmap: RGBE (Ward's shared-exponent format, as in Radiance .hdr)
@@ -222,7 +222,7 @@ export class Lighting {
     this.worker?.terminate();
     this.worker = new BakeWorker();
     const input = (quick: boolean): SourceBakeInput => ({
-      faces: level.faces, info: src.info, occluders: src.occluders, lights: src.lights,
+      faces: level.faces, info: src.info, occluders: src.occluders, reflectors: src.reflectors, lights: src.lights,
       params: quick ? { bounces: 1, patchRays: 16, chop: 8, supersample: false, maxWidth: SOURCE_LM_WIDTH } : { ...SOURCE_BAKE, maxWidth: SOURCE_LM_WIDTH },
       props: quick ? undefined : src.props,
     });

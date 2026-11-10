@@ -38,6 +38,11 @@ export class Player {
     this.respawn(level);
   }
 
+  /** The level's collision changed (a mover moved): keep the player where they are. */
+  refreshWorld(level: Level): void {
+    this.move.world = level.collision;
+  }
+
   setLevel(level: Level): void {
     this.move.world = level.collision;
     this.respawn(level);

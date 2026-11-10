@@ -380,6 +380,12 @@ export interface SourceBakeInput {
   info: SourceBakeFace[];
   /** Shadow casters: world and func_detail brushes that aren't see-through. */
   occluders: SolidPlanes[];
+  /**
+   * Brush entities (func_brush, func_lod, doors, trains...): they cast no
+   * shadows in VRAD but their faces are patches like any other, so they
+   * catch and reflect bounced light.
+   */
+  reflectors?: SolidPlanes[];
   lights: SourceLight[];
   params: {
     /** VRAD -bounce (default 100). */
@@ -760,6 +766,8 @@ export function bakeSource(input: SourceBakeInput): SourceBakeOutput {
     local.push([r * Math.cos(phi), r * Math.sin(phi), Math.sqrt(Math.max(0, 1 - u1))]);
   }
   const FAR = 65536;
+  const bounceGrid = input.reflectors?.length ? new SolidGrid([...input.occluders, ...input.reflectors]) : grid;
+  let escaped = 0;
   for (let pi = 0; pi < patches.length; pi++) {
     const p = patches[pi];
     const L = lux[p.face];
@@ -782,8 +790,8 @@ export function bakeSource(input: SourceBakeInput): SourceBakeOutput {
           bw[k * 3 + b] = Math.max(0, dx * bn[0] + dy * bn[1] + dz * bn[2]) / Math.max(1e-4, lz);
         }
       }
-      const hit = grid.cast(ox, oy, oz, dx * FAR, dy * FAR, dz * FAR);
-      if (!hit) continue;
+      const hit = bounceGrid.cast(ox, oy, oz, dx * FAR, dy * FAR, dz * FAR);
+      if (!hit) { escaped++; continue; }
       const li = luxByFace.get(hit.faceId);
       if (li === undefined || lux[li].info.sky) continue;
       const t = hit.t * FAR;
@@ -793,7 +801,7 @@ export function bakeSource(input: SourceBakeInput): SourceBakeOutput {
     p.bumpW = bw;
   }
 
-  log('transfers');
+  log(`transfers (${(100 * escaped / Math.max(1, patches.length * local.length)).toFixed(1)}% of rays see nothing)`);
   // ---- bounce (BounceLight / GatherLight / CollectLight)
   const N = patches.length;
   const emit = new Float32Array(N * 3);

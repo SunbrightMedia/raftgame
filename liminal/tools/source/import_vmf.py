@@ -179,6 +179,9 @@ def main():
                 continue
             if cls != 'world':
                 b.setdefault('group', cls)
+                tn = kv.get(holder, 'targetname')
+                if tn:
+                    b['entity'] = tn.lower()   # movers (elevators, doors) move their brushes by name
             brushes.append(b)
     eid = 1
     for e in kv.children(blocks, 'entity'):
@@ -206,6 +209,8 @@ def main():
                 props['scale'] = float(keys['modelscale'])
             if keys.get('solid', '6') == '0':
                 props['solid'] = False
+            if keys.get('parentname'):
+                props['parent'] = keys['parentname'].lower()
             if keys.get('rendercolor') and keys['rendercolor'] != '255 255 255':
                 props['color'] = vec(keys['rendercolor'])
             entities.append({'id': 1000 + eid, 'class': 'prop', 'origin': o, 'angles': ang, 'props': props})

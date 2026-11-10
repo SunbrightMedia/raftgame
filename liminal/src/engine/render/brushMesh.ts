@@ -14,7 +14,7 @@ interface Batch { pos: number[]; nrm: number[]; uv: number[]; lm: number[]; lmof
  * With a lightmap layout, each vertex also gets a lightmap UV pointing at the
  * centre of its face's corner luxel.
  */
-export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout: LightmapLayout | null): THREE.Group {
+export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout: LightmapLayout | null, offsetOf?: (brushId: number) => [number, number, number] | undefined): THREE.Group {
   const batches = new Map<string, Batch>();
   for (const f of faces) {
     let bt = batches.get(f.tex);
@@ -33,9 +33,12 @@ export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout
     const gv = va ? [-va[0] / (sy * tex.worldH), -va[1] / (sy * tex.worldH), -va[2] / (sy * tex.worldH)] : [0, 1, 2].map((a) => (sr * f.r[a] + cr * f.u[a]) * kv);
     // Outline counter-clockwise seen from outside: the polygon, or the rectangle.
     const outline: [number, number][] = f.poly ?? [[0, 0], [f.width, 0], [f.width, f.height], [0, f.height]];
+    // A moved brush entity draws displaced; its texture and lightmap stay as baked (as in Source).
+    const off = offsetOf?.(f.brushId);
     for (const [s, t] of outline) {
       const p = facePoint(f, s, t);
-      bt.pos.push(p[0], p[1], p[2]);
+      if (off) bt.pos.push(p[0] + off[0], p[1] + off[1], p[2] + off[2]);
+      else bt.pos.push(p[0], p[1], p[2]);
       if (f.nS && !f.poly) {
         const nn = f.nS[s > f.width / 2 ? 1 : 0];
         bt.nrm.push(nn[0], nn[1], nn[2]);
