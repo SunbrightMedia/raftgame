@@ -205,8 +205,10 @@ Catwalks run on five levels through the streets; tunnels cut through the
 masses (straight, bent, dog-leg, dead end), each with its own section (from
 a low wide passage to a tall slot), with rooms at their junctions (some
 tall, some with a look-out slit), stair halls, and doorways with porches;
-bridges cross the halls on trestles. Nothing floats. No chaos, no damage
-(the user's call, for now).
+bridges cross the halls on trestles; some junctions inside a mass hang in a
+shaft (a hollow from far below to above every level, crossed by catwalks
+one over the other, hung from beams that span it). Nothing floats. No
+chaos, no damage (the user's call, for now).
 
 The world is made from a seed, in the page too (map path
 `world:industrial:<seed>`; N and B change the seed in the private build).
@@ -225,7 +227,8 @@ Next, in this order:
 1. **Checks**: a walk test over the real collision (done, see above), and a
    metrics report per seed (to do).
 2. **District types with their own topology** (begun: the five kinds above
-   differ in grain; still to do: the shaft, the nave, the tank yard, the ring):
+   differ in grain, and shafts open inside the masses; still to do: the nave,
+   the tank yard, the ring):
    canyon streets (as now), a **shaft** (ledges round a core machine, grated
    floors, a landmark at the bottom), a **nave** (one huge machine, a spine
    across, a pit), a **warren** (closed corridors, ducts and rooms inside a

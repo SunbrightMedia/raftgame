@@ -252,10 +252,11 @@ const along = (c: V3, d: Dir, from: number, to: number, w: number, z0: number, z
  * Each tunnel (one straight line of tiles through a block) has its own width
  * and height, the same on every level. Rooms differ in size, in height and
  * in which way they are long; a dead end one tile short of a face has a slit
- * to look out through.
+ * to look out through. Some junctions hang in a shaft: a hollow from far
+ * below to above every level, which the catwalks cross in the open.
  */
 function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<number, Inner> {
-  const { lay, zOf, root } = ctx;
+  const { m, lay, zOf, root } = ctx;
   const N = lay.params.size;
   /** The mass a tile is inside, or −1 (open air: a street, or a hall). */
   const blockOf = (x: number, y: number) => { const b = lay.tileBlock[y * N + x]; return b >= 0 && lay.blocks[b].kind === 'mass' ? b : -1; };
@@ -287,6 +288,85 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
   /** A doorway in a mass's face is never wider or taller than this, whatever the corridor behind it. */
   const DOOR_W = 128, DOOR_H = 168, NECK = 96;
   const dirs: Dir[] = [0, 1, 2, 3];
+
+  // ---- shafts: at some junctions the mass is hollow from far below to well above every level, and the catwalks
+  // cross it in the open, one over the other, hung from beams that span it wall to wall
+  const shafts = new Map<number, Box>();        // by junction
+  const shaftsIn = new Map<number, Box[]>();    // by block
+  const laneAt = new Set<number>(), junctionAt = new Set<number>(), stairAt = new Set<number>();
+  for (const J of lay.junctions) { laneAt.add(J.y * N + J.x); junctionAt.add(J.y * N + J.x); }
+  for (const s of lay.segments) for (const [x, y] of s.tiles) laneAt.add(y * N + x);
+  for (const w of lay.walks) {
+    if (w.la === w.lb) continue;
+    const s = lay.segments[w.segment], n = s.tiles.length;
+    const i0 = Math.floor((n - 4) / 2), first = w.lb >= w.la ? i0 : n - 4 - i0;
+    for (let i = first; i < first + 4; i++) stairAt.add(s.tiles[i][1] * N + s.tiles[i][0]);
+  }
+  const levelsOf = new Map<number, number[]>();
+  for (const k of lay.nodes.keys()) { const [j, l] = k.split(':').map(Number); (levelsOf.get(j) ?? levelsOf.set(j, []).get(j)!).push(l); }
+  for (const J of lay.junctions) {
+    const blk = blockOf(J.x, J.y), lv = levelsOf.get(J.id);
+    if (blk < 0 || !lv) continue;
+    const r = root.fork(`shaft${J.id}`);
+    if (!r.chance(lv.length >= 2 ? 0.5 : 0.15)) continue;
+    // How many tiles it reaches each way from the junction. It keeps two tiles of wall to the mass's faces, takes in
+    // no other junction, no lane that is not this junction's own, and no stairs; nor comes within a tile of any.
+    const R = lay.blocks[blk].rect;
+    const reach = dirs.map(() => r.int(1, 3));
+    const fits = () => {
+      const ax0 = J.x - reach[2], ax1 = J.x + reach[0], ay0 = J.y - reach[3], ay1 = J.y + reach[1];
+      if (ax0 < R.x0 + 2 || ax1 > R.x1 - 3 || ay0 < R.y0 + 2 || ay1 > R.y1 - 3) return false;
+      for (let y = ay0 - 1; y <= ay1 + 1; y++) for (let x = ax0 - 1; x <= ax1 + 1; x++) {
+        const t = y * N + x;
+        if (stairAt.has(t)) return false;
+        if (x === J.x && y === J.y) continue;
+        if (junctionAt.has(t) || (laneAt.has(t) && x !== J.x && y !== J.y)) return false;
+      }
+      return true;
+    };
+    while (!fits() && Math.max(...reach) > 0) reach[reach.indexOf(Math.max(...reach))]--;
+    if (!fits() || reach[0] + reach[2] < 2 || reach[1] + reach[3] < 2) continue;
+    const x0 = (J.x - reach[2]) * TILE, x1 = (J.x + reach[0] + 1) * TILE, y0 = (J.y - reach[3]) * TILE, y1 = (J.y + reach[1] + 1) * TILE;
+    const zTop = zOf(Math.max(...lv)) + r.pick([320, 448, 640]);
+    const box: Box = { min: [x0, y0, ctx.deep + 64], max: [x1, y1, zTop] };
+    shafts.set(J.id, box);
+    (shaftsIn.get(blk) ?? shaftsIn.set(blk, []).get(blk)!).push(box);
+    cut(blk, [box.min, box.max]);
+    const steelIn = get(blk).ribs;
+    for (const l of lv) {
+      const mask = lay.nodes.get(`${J.id}:${l}`)!;
+      const z = zOf(l), c: V3 = [J.x * TILE + TILE / 2, J.y * TILE + TILE / 2, z];
+      const open = dirs.filter((dd) => mask & (1 << dd));
+      // The decks: the junction's piece, then straight tiles out to the shaft's walls, where the corridors begin.
+      walkTile(m, c, mask);
+      for (const dd of open) for (let k = 1; k <= reach[dd]; k++) walkTile(m, [c[0] + DX[dd] * k * TILE, c[1] + DY[dd] * k * TILE, z], (1 << dd) | (1 << opposite(dd)));
+      // Over the junction, two beams across the shaft with a rod down to each corner of its piece (clear of every way on).
+      for (const o of [-47, 47]) {
+        steelIn.push([[c[0] + o - 6, y0, z + 216], [c[0] + o + 6, y1, z + 236]]);
+        for (const q of [-47, 47]) steelIn.push([[c[0] + o - 1.5, c[1] + q - 1.5, z - 10], [c[0] + o + 1.5, c[1] + q + 1.5, z + 216]]);
+      }
+      // Over each run of deck, at every other tile and at the last: a beam across, square to the run, and two rods.
+      for (const dd of open) for (let k = 1; k <= reach[dd]; k++) {
+        if (k % 2 !== 0 && k !== reach[dd]) continue;
+        const px = c[0] + DX[dd] * k * TILE, py = c[1] + DY[dd] * k * TILE;
+        if (dd % 2 === 0) {
+          steelIn.push([[px - 8, y0, z + 216], [px + 8, y1, z + 236]]);
+          for (const q of [-47, 47]) steelIn.push([[px - 1.5, py + q - 1.5, z - 10], [px + 1.5, py + q + 1.5, z + 216]]);
+        } else {
+          steelIn.push([[x0, py - 8, z + 216], [x1, py + 8, z + 236]]);
+          for (const q of [-47, 47]) steelIn.push([[px + q - 1.5, py - 1.5, z - 10], [px + q + 1.5, py + 1.5, z + 216]]);
+        }
+        m.prop('props_bts/hanging_walkway_hanger_a', [px, py, z], [0, (dd % 2 === 0 ? 1 : 0) * 90, 0], { solid: false });
+      }
+    }
+    // A narrow ledge round the walls just under each level's floor line, on down out of sight: it gives the depth its scale.
+    for (let z = zOf(0) - 6 * LEVEL; z < zTop - 64; z += LEVEL) {
+      steelIn.push([[x0, y0, z - 16], [x1, y0 + 8, z - 4]], [[x0, y1 - 8, z - 16], [x1, y1, z - 4]], [[x0, y0 + 8, z - 16], [x0 + 8, y1 - 8, z - 4]], [[x1 - 8, y0 + 8, z - 16], [x1, y1 - 8, z - 4]]);
+    }
+    const way = dirs.find((dd) => lay.nodes.get(`${J.id}:${lv[0]}`)! & (1 << dd))!;
+    ctx.notes.push({ kind: 'shaft', at: [J.x * TILE + TILE / 2 + DX[way] * (reach[way] + 1.2) * TILE, J.y * TILE + TILE / 2 + DY[way] * (reach[way] + 1.2) * TILE, zOf(lv[0])], yaw: opposite(way) * 90 });
+  }
+  const inShaft = (blk: number, x: number, y: number) => (shaftsIn.get(blk) ?? []).some((b) => x > b.min[0] - 8 && x < b.max[0] + 8 && y > b.min[1] - 8 && y < b.max[1] + 8);
 
   // ---- corridors and stair halls, walk by walk
   for (const w of lay.walks) {
@@ -329,6 +409,7 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
       cut(blk, along(c, d, u0, u1, p.w, z, z + p.h));
       // Steel ribs along it: two posts and a head, standing a little proud of the walls.
       if (p.ribs) for (let u = u0 + p.ribs / 2; u < u1 - 32; u += p.ribs) {
+        if (inShaft(blk, c[0] + DX[d] * u, c[1] + DY[d] * u)) continue;   // no walls to stand against in a shaft
         get(blk).ribs.push(slab(c, d, u - 3, u + 3, -p.w / 2, -p.w / 2 + 4, z, z + p.h), slab(c, d, u - 3, u + 3, p.w / 2 - 4, p.w / 2, z, z + p.h), slab(c, d, u - 3, u + 3, -p.w / 2 + 4, p.w / 2 - 4, z + p.h - 5, z + p.h));
       }
       i = e + 1;
@@ -358,6 +439,7 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
     const z = zOf(l), c: V3 = [J.x * TILE + TILE / 2, J.y * TILE + TILE / 2, z];
     const open = dirs.filter((dd) => mask & (1 << dd));
     const profs = open.map((dd) => profile(blk, dd % 2, dd % 2 === 0 ? J.y : J.x));
+    if (shafts.has(j)) continue;   // the junction hangs in a shaft
     open.forEach((dd, n) => cut(blk, along(c, dd, 0, TILE / 2, profs[n].w, z, z + profs[n].h)));
     const W = Math.max(...profs.map((p) => p.w)), H = Math.max(...profs.map((p) => p.h));
     const r = root.fork(`node${k}`);
