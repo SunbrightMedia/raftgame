@@ -34,17 +34,31 @@ await page.route('**/api/file/config/**', (r) => {
   return r.continue();
 });
 
+// On every page load (including Vite's own reloads after a code change): no HUD or
+// panels in shots, and exposure snaps to each new view instead of easing in.
+await page.addInitScript(() => {
+  addEventListener('DOMContentLoaded', () => {
+    const st = document.createElement('style');
+    st.textContent = '[class*=hud],[class*=panel],[class*=Panel]{visibility:hidden !important}';
+    document.head.append(st);
+  });
+  const t = setInterval(() => { const c = window.liminal?.config; if (c) { clearInterval(t); c.set('camera', 'adaptSpeed', 1000); c.set('view', 'viewBob', 0); window.liminal.game.paused = true; } }, 20);
+});
+
 const ready = () => page.waitForFunction(() => window.liminal && window.liminal.game.level && (window.liminal.game.lighting.shownAt > 0 || !window.liminal.config.values.light.enabled), null, { timeout: 180000 });
 let current = '';
 async function open(map) {
   await page.goto(`http://localhost:${GAME_PORT}/?map=${encodeURIComponent(map)}`);
   await ready();
   // Exposure snaps to each new view instead of easing in (shots are deterministic).
-  await page.evaluate(() => { const c = window.liminal.config; c.set('camera', 'adaptSpeed', 1000); c.set('view', 'viewBob', 0); });
-  await page.addStyleTag({ content: '[class*=hud],[class*=panel],[class*=Panel]{visibility:hidden !important}' });
   current = map;
 }
-const frames = (n) => page.evaluate((n) => new Promise((res) => { let k = 0; const f = () => (++k >= n ? res() : requestAnimationFrame(f)); requestAnimationFrame(f); }), n);
+// The game's own loop is paused in the studio (see Game.paused): frames are drawn
+// here, each waited for (a 1-pixel read), so nothing queues up behind a shot.
+const render = (n, dt = 1 / 60) => page.evaluate(([n, dt]) => {
+  const g = window.liminal.game, gl = g.renderer.gl.getContext(), px = new Uint8Array(4);
+  for (let i = 0; i < n; i++) { g.renderNow(dt); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); }
+}, [n, dt]);
 
 async function pose(p) {
   const [x, y, z, yaw, pitch] = p.split(',').map((s) => (s === '' ? NaN : Number(s)));
@@ -78,8 +92,11 @@ const commands = {
   },
   /** Set settings: {"camera": {"evComp": -0.5}, ...}. Not saved. */
   async set(patch) {
+    // Kept for the session: served as the config file, so they survive page reloads too.
+    loadSettings = loadSettings ?? {};
+    for (const [cat, kv] of Object.entries(patch)) loadSettings[cat] = { ...loadSettings[cat], ...kv };
     await page.evaluate((patch) => { for (const [cat, kv] of Object.entries(patch)) for (const [k, v] of Object.entries(kv)) window.liminal.config.set(cat, k, v); }, patch);
-    await frames(3);
+    await render(1);
     return commands.stats();
   },
   async stats() {
@@ -89,14 +106,17 @@ const commands = {
     });
   },
   /** Screenshots from poses "x,y,z,yaw,pitch" (blank z = walk on the floor). One PNG per view plus a contact sheet. */
-  async views({ poses = [''], out = 'studio_views', settle = 4 }) {
+  async views({ poses = [''], out = 'studio_views', settle = 2 }) {
     mkdirSync(dirname(resolve(out)), { recursive: true });
     const files = [];
     for (let i = 0; i < poses.length; i++) {
       if (poses[i]) await pose(poses[i]);
-      await frames(settle);
+      await render(settle);
       const f = `${out}_${i + 1}.png`;
-      await page.screenshot({ path: f });
+      // Render one frame and read the canvas in the same task (the drawing buffer is
+      // still intact): much faster than a page screenshot, which waits on compositing.
+      const png = await page.evaluate(() => { const g = window.liminal.game; g.renderNow(0); return g.renderer.gl.domElement.toDataURL('image/png').split(',')[1]; });
+      writeFileSync(f, Buffer.from(png, 'base64'));
       files.push(f);
     }
     if (files.length > 1) {

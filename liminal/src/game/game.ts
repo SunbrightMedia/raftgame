@@ -5,6 +5,9 @@ import { type Settings, DEFAULT_SETTINGS, cloneSettings } from '../data/settings
 import { parseMap, type MapFile } from '../data/map';
 import { LowResRenderer } from '../engine/render/renderer';
 import { TextureRegistry } from '../engine/render/textures';
+import { ModelRegistry } from '../engine/render/models';
+import { propMaterials } from '../engine/render/propMeshes';
+import { propModel } from '../engine/collision/props';
 import { worldUniforms, MAX_RECTS } from '../engine/render/worldMaterial';
 import { kelvinToLinear, emitterColor } from '../engine/light/units';
 import { angleVectors } from '../engine/vec3';
@@ -22,6 +25,7 @@ import { Sky } from '../engine/render/sky';
 export class Game {
   readonly renderer: LowResRenderer;
   readonly textures = new TextureRegistry();
+  readonly models = new ModelRegistry();
   readonly input: Input;
   readonly scene = new THREE.Scene();
   readonly lighting: Lighting;
@@ -194,9 +198,13 @@ export class Game {
 
   async setMap(map: MapFile, label: string): Promise<void> {
     const t0 = performance.now();
-    await this.textures.prepare(map.brushes.flatMap((b) => [b.tex ?? 'dev/gray', ...Object.values(b.faces ?? {}).map((f) => f?.tex ?? '')]).filter(Boolean));
+    await this.models.prepare(map.entities.map(propModel).filter((m): m is string => !!m));
+    await this.textures.prepare([
+      ...map.brushes.flatMap((b) => [b.tex ?? 'dev/gray', ...Object.values(b.faces ?? {}).map((f) => f?.tex ?? '')]).filter(Boolean),
+      ...propMaterials(map.entities, this.models),
+    ]);
     const t1 = performance.now();
-    const level = new Level(map, this.textures);
+    const level = new Level(map, this.textures, this.models);
     this.loadTimes = { texturesMs: Math.round(t1 - t0), levelMs: Math.round(performance.now() - t1) };
     if (this.level) {
       this.scene.remove(this.level.root);
@@ -217,14 +225,26 @@ export class Game {
     this.mapLabel = `${label}: ${map.brushes.length} brushes, ${map.entities.length} entities${own ? `, ${own} map settings` : ''}`;
   }
 
+  /**
+   * No frames of its own: a driver renders on demand with renderNow (the
+   * studio, whose software GPU can't keep up with requestAnimationFrame and
+   * would queue frames behind every screenshot).
+   */
+  paused = false;
+
   start(): void {
     const frame = (now: number) => {
       requestAnimationFrame(frame);
       const dt = Math.min(0.25, (now - this.last) / 1000);
       this.last = now;
-      this.frame(dt);
+      if (!this.paused) this.frame(dt);
     };
     requestAnimationFrame(frame);
+  }
+
+  /** Advance by dt seconds and draw one frame now (for drivers that pause the loop). */
+  renderNow(dt = 0): void {
+    this.frame(dt);
   }
 
   private frame(dt: number): void {

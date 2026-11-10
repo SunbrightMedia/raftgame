@@ -9,11 +9,12 @@
  *  - leaks: open space flooded from the spawn; reaching outside the map's
  *    bounds means a hole to the void (expected on maps with an open sky).
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { parseMap } from '../../src/data/map';
 import { solidPlanes, buildFaces, facePoint, inFace } from '../../src/engine/light/faces';
 import { CollisionWorld } from '../../src/engine/collision/trace';
 import { convexBrush } from '../../src/engine/collision/brush';
+import { propSolids } from '../../src/engine/collision/props';
 import { v3, type Vec3 } from '../../src/engine/vec3';
 import { DEFAULT_MOVE, hullMins, hullMaxs } from '../../src/engine/movement/pmove';
 
@@ -25,10 +26,23 @@ const t0 = performance.now();
 const map = parseMap(JSON.parse(readFileSync(path, 'utf8')));
 const hullOver = ((map.settings as Record<string, unknown> | undefined)?.hull ?? {}) as Partial<typeof DEFAULT_MOVE>;
 const P = { ...DEFAULT_MOVE, ...hullOver };
-const world = new CollisionWorld(map.brushes.filter((b) => b.solid !== false).map((b) => {
-  const sp = solidPlanes(b);
-  return convexBrush(b.id, sp.planes.map((p) => ({ n: v3(...p.n), d: p.d })), v3(...b.min), v3(...b.max));
-}));
+// Prop hulls from the converted models' headers (models/**/*.json, keyed by the name maps use).
+const hulls = new Map<string, [[number, number, number], [number, number, number]]>();
+if (existsSync('models')) {
+  for (const f of readdirSync('models', { recursive: true }) as string[]) {
+    if (!f.endsWith('.json')) continue;
+    const h = JSON.parse(readFileSync(`models/${f}`, 'utf8'));
+    if (h.format === 'liminal-mesh') hulls.set(String(h.source).toLowerCase(), h.hull);
+  }
+}
+const hullOf = (m: string) => hulls.get(m.toLowerCase());
+const world = new CollisionWorld([
+  ...map.brushes.filter((b) => b.solid !== false).map((b) => {
+    const sp = solidPlanes(b);
+    return convexBrush(b.id, sp.planes.map((p) => ({ n: v3(...p.n), d: p.d })), v3(...b.min), v3(...b.max));
+  }),
+  ...propSolids(map.entities, hullOf),
+]);
 const MINS = hullMins(P), STAND = hullMaxs(P, false), DUCK = hullMaxs(P, true);
 const STEP = P.stepHeight, G = 16;
 

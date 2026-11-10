@@ -134,8 +134,13 @@ def main():
         if im is None:
             missing.append(m); continue
         info = vtf.info(read(f'materials/{base.lower().replace(chr(92), "/")}.vtf'))
-        translucent, alphatest = flag(p, '$translucent'), flag(p, '$alphatest')
-        uses_alpha = translucent or alphatest
+        translucent, alphatest, selfillum = flag(p, '$translucent'), flag(p, '$alphatest'), flag(p, '$selfillum')
+        # Self-illumination is masked by the base texture's alpha, or by a separate mask texture.
+        if selfillum and p.get('$selfillummask'):
+            mask = decode_tex(p['$selfillummask'])
+            if mask is not None:
+                im = im.convert('RGBA'); im.putalpha(mask.convert('L').resize(im.size))
+        uses_alpha = translucent or alphatest or selfillum
         rel = m
         os.makedirs(os.path.dirname(os.path.join(OUT, rel)), exist_ok=True)
         if uses_alpha:
@@ -153,6 +158,11 @@ def main():
                 src[k] = True
         if p.get('$envmap'):
             src['envmap'] = True
+        for k, key in [('selfillumtint', '$selfillumtint'), ('alpha', '$alpha'), ('alphatestreference', '$alphatestreference')]:
+            if p.get(key):
+                v = [float(x) for x in re.findall(r'-?\d*\.?\d+', p[key])]
+                if v:
+                    src[k] = v if len(v) > 1 else v[0]
         src['reflectivity'] = [round(x, 4) for x in info['reflectivity']]
         r = rad.get(m)
         if r:

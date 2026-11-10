@@ -12,6 +12,8 @@ Import a Hammer map source (VMF) into our map format.
 - Entities: lights keep every Source key under props.source (the Source
   lighting model reads them); props become 'prop' entities (model, angles,
   skin, scale); info_player_start becomes the spawn.
+- Overlays (info_overlay) become thin non-solid brushes carrying the overlay
+  material (see overlay_brush).
 - --region keeps only brushes and entities whose bounds touch the box.
 """
 import argparse, json, math, re, sys, os
@@ -28,6 +30,9 @@ DROP_TOOLS = ('tools/toolstrigger', 'tools/toolshint', 'tools/toolsskip', 'tools
               'tools/toolsblock_los', 'tools/toolsblocklight', 'tools/toolsblockbullets', 'tools/toolsdotted', 'tools/toolsorigin', 'tools/toolsbrushshadow')
 INVISIBLE_SOLID = ('tools/toolsclip', 'tools/toolsplayerclip', 'tools/toolsinvisible', 'tools/toolsnpcclip', 'tools/toolsgrenadeclip')
 LIGHT_ENTS = {'light', 'light_spot', 'light_environment', 'light_dynamic', 'env_lightglow'}
+# Entities that draw a fixed model (the FGD's studioprop) when the map doesn't name one.
+MODEL_ENTS = {'prop_under_button': 'models/props_underground/underground_testchamber_button.mdl',
+              'prop_under_floor_button': 'models/props_underground/underground_floor_button.mdl'}
 PROP_ENTS = {'prop_static', 'prop_dynamic', 'prop_dynamic_override', 'prop_physics', 'prop_physics_override', 'prop_physics_multiplayer'}
 
 
@@ -75,6 +80,54 @@ def convert_solid(solid: list, sid: int, prefix: str, solid_flag: bool):
     if not solid_flag:
         b['solid'] = False
     return b
+
+
+def tex_size(name: str):
+    """A converted material's size in texels (textures/p2/index.json), for overlay texture axes."""
+    global _SIZES
+    if '_SIZES' not in globals():
+        f = os.path.join(HERE, '../../textures/p2/index.json')
+        _SIZES = {t['name']: t['size'] for t in json.load(open(f))['textures']} if os.path.exists(f) else {}
+    return _SIZES.get(name, [512, 512])
+
+
+def overlay_brush(keys: dict, oid: int, prefix: str):
+    """
+    An info_overlay as a paper-thin, non-solid brush lying on its surface: the
+    top face carries the overlay material with texture axes that reproduce the
+    overlay's own mapping (corner 0 = StartU,StartV ... corner 2 = EndU,EndV),
+    so it is lit and drawn like any face. The other sides are nodraw.
+    """
+    O, U, V, N = (vec(keys.get(k)) for k in ('basisorigin', 'basisu', 'basisv', 'basisnormal'))
+    corners = [vec(keys.get(f'uv{i}')) for i in range(4)]
+    su, eu, sv, ev = (float(keys.get(k, d)) for k, d in (('startu', 0), ('endu', 1), ('startv', 0), ('endv', 1)))
+    tex = prefix + keys.get('material', '').lower().replace('\\', '/')
+    W, H = tex_size(tex)
+    us, vs = [c[0] for c in corners], [c[1] for c in corners]
+    umin, umax, vmin, vmax = min(us), max(us), min(vs), max(vs)
+    if umax - umin < 1e-3 or vmax - vmin < 1e-3:
+        return None
+    # Texture axes as Source writes them: texel = p·axis/scale + shift.
+    sc_u = (umax - umin) / ((eu - su) * W) if eu != su else 1
+    sc_v = (vmax - vmin) / ((ev - sv) * H) if ev != sv else 1
+    dot = lambda a, b: sum(a[i] * b[i] for i in range(3))
+    sh_u = su * W - (dot(U, O) + umin) / sc_u
+    sh_v = sv * H - (dot(V, O) + vmin) / sc_v
+    pts = [[O[i] + c[0] * U[i] + c[1] * V[i] for i in range(3)] for c in corners]
+    cen = [sum(p[i] for p in pts) / 4 for i in range(3)]
+    planes = [N + [dot(N, O) + 0.15], [-N[0], -N[1], -N[2], -dot(N, O) - 0.05]]
+    faces = {'0': {'tex': tex, 'uaxis': U + [sh_u], 'vaxis': V + [sh_v], 'scale': [sc_u, sc_v]}, '1': {'tex': 'tools/toolsnodraw'}}
+    for k in range(4):
+        a, b = pts[k], pts[(k + 1) % 4]
+        e = [b[i] - a[i] for i in range(3)]
+        n = [e[1] * N[2] - e[2] * N[1], e[2] * N[0] - e[0] * N[2], e[0] * N[1] - e[1] * N[0]]
+        l = math.sqrt(dot(n, n)) or 1
+        n = [c / l for c in n]
+        if dot(n, [cen[i] - a[i] for i in range(3)]) > 0:
+            n = [-c for c in n]
+        planes.append(n + [dot(n, a)])
+        faces[str(len(planes) - 1)] = {'tex': 'tools/toolsnodraw'}
+    return {'id': oid, 'type': 'convex', 'planes': [[round(c, 6) for c in p] for p in planes], 'faces': faces, 'group': 'overlay', 'solid': False}
 
 
 def bounds_of(planes):
@@ -129,6 +182,14 @@ def main():
             brushes.append(b)
     eid = 1
     for e in kv.children(blocks, 'entity'):
+        if kv.get(e, 'classname') == 'info_overlay':
+            keys = {k: v for k, v in e if not isinstance(v, list)}
+            o = vec(keys.get('origin'))
+            b = overlay_brush(keys, 900000 + eid, a.tex_prefix) if inside(o, o) else None
+            if b:
+                brushes.append(b)
+            eid += 1
+    for e in kv.children(blocks, 'entity'):
         cls = kv.get(e, 'classname', '')
         keys = {k: v for k, v in e if not isinstance(v, list)}
         o = vec(keys.get('origin'))
@@ -139,8 +200,8 @@ def main():
             entities.insert(0, {'id': eid, 'class': 'player_start', 'origin': o, 'angles': ang})
         elif cls in LIGHT_ENTS:
             entities.append({'id': 1000 + eid, 'class': 'light', 'origin': o, 'props': {'type': 'source', 'source': keys}})
-        elif cls in PROP_ENTS:
-            props = {'model': keys.get('model', '').lower(), 'skin': int(float(keys.get('skin', '0'))), 'source_class': cls}
+        elif cls in PROP_ENTS or cls in MODEL_ENTS:
+            props = {'model': (keys.get('model') or MODEL_ENTS.get(cls, '')).lower(), 'skin': int(float(keys.get('skin', '0'))), 'source_class': cls}
             if keys.get('modelscale') and float(keys['modelscale']) != 1:
                 props['scale'] = float(keys['modelscale'])
             if keys.get('solid', '6') == '0':

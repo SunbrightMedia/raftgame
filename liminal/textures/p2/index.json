@@ -10,6 +10,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -20,8 +21,7 @@
      0.1219,
      0.1219
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/anim_wp/framework/squarebeams_rusty_01",
@@ -31,6 +31,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -41,8 +42,7 @@
      0.526,
      0.5233
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/carpet/office_carpet001a",
@@ -52,6 +52,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -62,8 +63,7 @@
      0.185,
      0.0531
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/concrete/cinderblock01",
@@ -73,6 +73,7 @@
     512
    ],
    "material": "concrete",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -83,8 +84,7 @@
      0.2635,
      0.2539
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/concrete/concrete_bts_floor002a_cheap",
@@ -94,6 +94,7 @@
     1024
    ],
    "material": "concrete",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -104,8 +105,7 @@
      0.1022,
      0.0927
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/concrete/concrete_bts_floor002a_noportal",
@@ -115,6 +115,7 @@
     1024
    ],
    "material": "concrete",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -126,8 +127,7 @@
      0.1022,
      0.0927
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/concrete/concrete_bts_floor002b",
@@ -137,6 +137,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -148,8 +149,7 @@
      0.1347,
      0.1246
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/concrete/concrete_bts_floor002d",
@@ -159,6 +159,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -169,8 +170,7 @@
      0.0835,
      0.0681
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/concrete/concrete_bts_modular_wall001a",
@@ -180,6 +180,7 @@
     512
    ],
    "material": "concrete",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -190,8 +191,7 @@
      0.3558,
      0.3431
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/concrete/concrete_bts_modular_wall001c",
@@ -201,6 +201,7 @@
     512
    ],
    "material": "concrete",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -211,8 +212,7 @@
      0.2976,
      0.2487
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/concrete/concrete_modular_ceiling001a",
@@ -222,6 +222,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -232,8 +233,7 @@
      0.3561,
      0.3512
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/concrete/concrete_modular_floor001a",
@@ -243,6 +243,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -254,8 +255,7 @@
      0.2689,
      0.2864
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/concrete/concrete_modular_floor001c",
@@ -265,6 +265,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -276,8 +277,7 @@
      0.3141,
      0.3281
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/concrete/concrete_modular_floor001e",
@@ -287,6 +287,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -298,8 +299,7 @@
      0.4263,
      0.4051
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/concrete/concrete_modular_floor001f",
@@ -309,6 +309,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -319,8 +320,7 @@
      0.3539,
      0.2355
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/concrete/concrete_modular_wall001_gradient05",
@@ -330,6 +330,7 @@
     512
    ],
    "material": "concrete",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -340,8 +341,7 @@
      0.1725,
      0.16
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/concrete/concrete_modular_wall001b",
@@ -351,6 +351,7 @@
     512
    ],
    "material": "concrete",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -361,8 +362,7 @@
      0.3103,
      0.2908
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/concrete/concretefloor003b",
@@ -372,6 +372,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -383,8 +384,7 @@
      0.2826,
      0.246
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/concrete/factory_concrete_wall001a",
@@ -394,6 +394,7 @@
     512
    ],
    "material": "concrete",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -405,8 +406,7 @@
      0.7718,
      0.6695
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/concrete/observationwall_001b",
@@ -416,6 +416,7 @@
     512
    ],
    "material": "concrete",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -426,8 +427,7 @@
      0.6199,
      0.5664
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/concrete/underground_concrete_ceiling002",
@@ -437,6 +437,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -448,8 +449,7 @@
      0.072,
      0.0629
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/concrete/underground_concrete_tile001",
@@ -459,6 +459,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -469,8 +470,7 @@
      0.0519,
      0.0488
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/concrete/underground_concrete_tile001b",
@@ -480,6 +480,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -490,8 +491,7 @@
      0.0514,
      0.0482
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/de_chateau/woodm",
@@ -501,6 +501,7 @@
     512
    ],
    "material": "wood",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -511,8 +512,7 @@
      0.0364,
      0.0247
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/dev/dev_measuregeneric01b",
@@ -522,6 +522,7 @@
     128
    ],
    "material": "concrete",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -532,8 +533,7 @@
      0.1098,
      0.1098
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/dev/dev_measurewall01d",
@@ -543,6 +543,7 @@
     512
    ],
    "material": "concrete",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -553,8 +554,7 @@
      0.1137,
      0.1136
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/glass/glasswindow002a",
@@ -564,6 +564,7 @@
     512
    ],
    "material": "glass",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -576,8 +577,7 @@
      0.1463,
      0.1463
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/glass/glasswindow007a",
@@ -587,6 +587,7 @@
     512
    ],
    "material": "glass",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -599,8 +600,7 @@
      0.1417,
      0.1599
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/glass/glasswindow_frosted_003b",
@@ -610,6 +610,7 @@
     512
    ],
    "material": "glass",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -623,8 +624,7 @@
      0.3776,
      0.3776
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/glass/glasswindow_refract01",
@@ -634,6 +634,7 @@
     512
    ],
    "material": "glass",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -646,8 +647,7 @@
      0.5382,
      0.5382
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/glass/glasswindow_refract01_neutral",
@@ -657,6 +657,7 @@
     512
    ],
    "material": "glass",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -669,8 +670,7 @@
      0.5382,
      0.5382
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/glass/glasswindow_refract01_warm",
@@ -680,6 +680,7 @@
     512
    ],
    "material": "glass",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -692,8 +693,7 @@
      0.5382,
      0.5382
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/liquids/water_underground_cave",
@@ -703,6 +703,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -715,8 +716,7 @@
      0.094,
      0.0431
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/metal/backstage_grate_001a",
@@ -726,6 +726,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -737,8 +738,7 @@
      0.0377,
      0.0286
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/metal/black_wall_metal_002f",
@@ -748,6 +748,7 @@
     1024
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -760,8 +761,7 @@
      0.0148,
      0.0148
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/metal/black_wall_metal_004d",
@@ -771,6 +771,7 @@
     1024
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -783,8 +784,7 @@
      0.0132,
      0.0132
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/metal/black_wall_metal_006b",
@@ -794,6 +794,7 @@
     1024
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -806,8 +807,7 @@
      0.0473,
      0.0473
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/metal/factory_metal_floor001a",
@@ -817,6 +817,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -829,8 +830,7 @@
      0.0451,
      0.0483
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/metal/factory_metal_floor001b",
@@ -840,6 +840,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -852,8 +853,7 @@
      0.1094,
      0.139
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/metal/factory_metal_floor001c",
@@ -863,6 +863,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -875,8 +876,7 @@
      0.0979,
      0.0674
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/metal/metal_modular_floor002",
@@ -886,6 +886,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -898,8 +899,7 @@
      0.0134,
      0.0108
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/metal/metalwall_bts_001b",
@@ -909,6 +909,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -920,8 +921,7 @@
      0.0438,
      0.0489
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/metal/metalwall_bts_003a",
@@ -931,6 +931,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -942,8 +943,7 @@
      0.0327,
      0.0216
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/metal/metalwall_bts_006a",
@@ -953,6 +953,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -965,8 +966,7 @@
      0.0375,
      0.0303
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/metal/metalwall_bts_006a_cheap",
@@ -976,6 +976,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -986,8 +987,7 @@
      0.0375,
      0.0303
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/metal/underground_metal_ceiling001",
@@ -997,6 +997,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1007,8 +1008,7 @@
      0.027,
      0.0217
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/metal/underground_metal_corrugated001",
@@ -1018,6 +1018,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1028,8 +1029,7 @@
      0.2623,
      0.2717
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/metal/underground_wall_metal004b",
@@ -1039,6 +1039,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1051,8 +1052,7 @@
      0.1694,
      0.1284
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/metal/underground_wall_metal004b_bottom",
@@ -1062,6 +1062,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1074,8 +1075,7 @@
      0.1499,
      0.1424
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/metal/underground_wall_metal004c_bottom",
@@ -1085,6 +1085,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1097,8 +1098,7 @@
      0.1182,
      0.0956
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/metal/underground_wall_metal004e",
@@ -1108,6 +1108,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1120,8 +1121,7 @@
      0.0704,
      0.0854
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/metal/underground_wall_rubber001a",
@@ -1131,6 +1131,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1141,8 +1142,7 @@
      0.1641,
      0.0926
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/anim_wp/framework/squarebeams",
@@ -1152,6 +1152,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1162,8 +1163,7 @@
      0.8114,
      0.8129
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/anim_wp/framework/squarebeams_skin2",
@@ -1173,6 +1173,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1183,8 +1184,7 @@
      0.526,
      0.5233
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/anim_wp/framework/squarebeams_skin3",
@@ -1194,6 +1194,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1204,8 +1205,7 @@
      0.1428,
      0.2753
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props/de_train/ladderaluminium",
@@ -1215,6 +1215,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1226,8 +1227,7 @@
      0.1765,
      0.1734
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props/food_can/food_can",
@@ -1237,6 +1237,7 @@
     256
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1249,8 +1250,7 @@
      0.1765,
      0.1608
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props/lab_desk02/lab_desk02",
@@ -1260,6 +1260,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1270,8 +1271,7 @@
      0.1262,
      0.1253
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props/lab_desk05/lab_desk05",
@@ -1281,6 +1281,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1291,8 +1292,7 @@
      0.1502,
      0.1493
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props/terror/hamradio01",
@@ -1302,6 +1302,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1313,8 +1314,7 @@
      0.0531,
      0.0342
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props/water_bottle/water_bottle",
@@ -1324,6 +1324,7 @@
     256
    ],
    "material": "plastic",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1335,8 +1336,7 @@
      0.2076,
      0.1613
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_bts/bts_clipboard",
@@ -1346,6 +1346,7 @@
     256
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1356,8 +1357,7 @@
      0.1925,
      0.1914
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_bts/bts_clipboard_a",
@@ -1367,6 +1367,7 @@
     256
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1377,8 +1378,7 @@
      0.182,
      0.1805
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_bts/bts_clipboard_b",
@@ -1388,6 +1388,7 @@
     256
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1398,8 +1399,7 @@
      0.1837,
      0.1789
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_bts/bts_clipboard_c",
@@ -1409,6 +1409,7 @@
     256
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1419,8 +1420,7 @@
      0.2641,
      0.1522
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_bts/bts_clipboard_d",
@@ -1430,6 +1430,7 @@
     256
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1440,17 +1441,17 @@
      0.1875,
      0.1827
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_bts/light_cage001",
-   "file": "p2/models/props_bts/light_cage001.jpg",
+   "file": "p2/models/props_bts/light_cage001.png",
    "size": [
     512,
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1462,8 +1463,7 @@
      0.2949,
      0.3947
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_bts/light_cage001_off",
@@ -1473,6 +1473,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1483,39 +1484,44 @@
      0.1218,
      0.1506
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_bts/light_cage001_warm_on",
-   "file": "p2/models/props_bts/light_cage001_warm_on.jpg",
+   "file": "p2/models/props_bts/light_cage001_warm_on.png",
    "size": [
     512,
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
     "shader": "vertexlitgeneric",
     "basetexture": "models/props_bts/light_cage001",
     "selfillum": true,
+    "selfillumtint": [
+     1.0,
+     0.8,
+     0.5
+    ],
     "reflectivity": [
      0.2505,
      0.2949,
      0.3947
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_bts/light_hanging_1a",
-   "file": "p2/models/props_bts/light_hanging_1a.jpg",
+   "file": "p2/models/props_bts/light_hanging_1a.png",
    "size": [
     1024,
     1024
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1527,17 +1533,17 @@
      0.0659,
      0.0612
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_bts/push_button_stand",
-   "file": "p2/models/props_bts/push_button_stand.jpg",
+   "file": "p2/models/props_bts/push_button_stand.png",
    "size": [
     512,
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1549,17 +1555,17 @@
      0.0875,
      0.0762
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_bts/push_button_stand_active",
-   "file": "p2/models/props_bts/push_button_stand_active.jpg",
+   "file": "p2/models/props_bts/push_button_stand_active.png",
    "size": [
     512,
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1571,8 +1577,7 @@
      0.1138,
      0.0786
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_bts/railing_bts",
@@ -1582,6 +1587,7 @@
     1024
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1589,13 +1595,13 @@
     "basetexture": "models/props_bts/railing_bts",
     "normal": "p2/models/props_bts/railing_bts_n.png",
     "alphatest": true,
+    "alphatestreference": 0.65,
     "reflectivity": [
      0.0713,
      0.0735,
      0.0659
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_bts/track_metal",
@@ -1605,6 +1611,7 @@
     64
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1615,8 +1622,7 @@
      0.1053,
      0.1087
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_cables/black_cable",
@@ -1626,6 +1632,7 @@
     128
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1636,17 +1643,17 @@
      0.0242,
      0.0242
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_cables/cable_box_02",
-   "file": "p2/models/props_cables/cable_box_02.jpg",
+   "file": "p2/models/props_cables/cable_box_02.png",
    "size": [
     256,
     256
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1658,17 +1665,17 @@
      0.2215,
      0.2149
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_cables/cable_box_03",
-   "file": "p2/models/props_cables/cable_box_03.jpg",
+   "file": "p2/models/props_cables/cable_box_03.png",
    "size": [
     256,
     256
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1680,8 +1687,7 @@
      0.2028,
      0.198
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_destruction/glass_192x128_b_normal",
@@ -1691,6 +1697,7 @@
     512
    ],
    "material": "glass",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1704,8 +1711,7 @@
      0.7215,
      0.7392
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_destruction/wall_dest_002",
@@ -1715,6 +1721,7 @@
     2048
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1725,8 +1732,7 @@
      0.3158,
      0.2865
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_factory/turret_factory_closed",
@@ -1736,6 +1742,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1747,8 +1754,7 @@
      0.1228,
      0.1009
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_foliage/leaves",
@@ -1758,6 +1764,7 @@
     2048
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1765,13 +1772,13 @@
     "basetexture": "models\\props_foliage\\leaves",
     "alphatest": true,
     "nocull": true,
+    "alphatestreference": 0.5,
     "reflectivity": [
      0.0304,
      0.0305,
      0.0081
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_foliage/leaves_bushes",
@@ -1781,6 +1788,7 @@
     2048
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1789,13 +1797,13 @@
     "alphatest": true,
     "nocull": true,
     "envmap": true,
+    "alphatestreference": 0.5,
     "reflectivity": [
      0.0304,
      0.0305,
      0.0081
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_foliage/leaves_skin2",
@@ -1805,6 +1813,7 @@
     2048
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1812,13 +1821,13 @@
     "basetexture": "models/props_foliage/leaves_skin2",
     "alphatest": true,
     "nocull": true,
+    "alphatestreference": 0.5,
     "reflectivity": [
      0.0272,
      0.0102,
      0.003
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_gameplay/power_lever",
@@ -1828,6 +1837,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1838,17 +1848,17 @@
      0.1938,
      0.193
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_gameplay/push_button",
-   "file": "p2/models/props_gameplay/push_button.jpg",
+   "file": "p2/models/props_gameplay/push_button.png",
    "size": [
     512,
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1860,17 +1870,17 @@
      0.1647,
      0.051
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_gameplay/push_button_on",
-   "file": "p2/models/props_gameplay/push_button_on.jpg",
+   "file": "p2/models/props_gameplay/push_button_on.png",
    "size": [
     512,
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1882,8 +1892,7 @@
      0.1647,
      0.051
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_lab/observation_frame",
@@ -1893,6 +1902,7 @@
     1024
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1903,17 +1913,17 @@
      0.179,
      0.1267
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_lights/outside_light_old",
-   "file": "p2/models/props_lights/outside_light_old.jpg",
+   "file": "p2/models/props_lights/outside_light_old.png",
    "size": [
     256,
     256
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1925,8 +1935,7 @@
      0.1508,
      0.1619
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_lights/outside_light_old_off",
@@ -1936,6 +1945,7 @@
     256
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1946,17 +1956,17 @@
      0.1508,
      0.1619
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_lights/under_neonlamp",
-   "file": "p2/models/props_lights/under_neonlamp.jpg",
+   "file": "p2/models/props_lights/under_neonlamp.png",
    "size": [
     512,
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1968,17 +1978,17 @@
      0.34,
      0.3096
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_lights/under_neonlamp_orange",
-   "file": "p2/models/props_lights/under_neonlamp_orange.jpg",
+   "file": "p2/models/props_lights/under_neonlamp_orange.png",
    "size": [
     512,
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -1990,17 +2000,17 @@
      0.2061,
      0.167
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_motel/clock_radio01",
-   "file": "p2/models/props_motel/clock_radio01.jpg",
+   "file": "p2/models/props_motel/clock_radio01.png",
    "size": [
     1024,
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2012,8 +2022,7 @@
      0.1119,
      0.1043
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_motel/clock_radio01_glass",
@@ -2023,6 +2032,7 @@
     128
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2035,8 +2045,7 @@
      0.3847,
      0.3847
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_motel/telephone",
@@ -2046,6 +2055,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2056,8 +2066,7 @@
      0.08,
      0.061
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/cardboardbox",
@@ -2067,6 +2076,7 @@
     256
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2077,8 +2087,7 @@
      0.1689,
      0.0919
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/coffee_mugs",
@@ -2088,6 +2097,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2098,8 +2108,7 @@
      0.1749,
      0.1363
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/computer_01_1970",
@@ -2109,6 +2118,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2119,8 +2129,7 @@
      0.1819,
      0.1254
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/computer_02_1970",
@@ -2130,6 +2139,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2140,8 +2150,7 @@
      0.1427,
      0.0966
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/computer_03_1970",
@@ -2151,6 +2160,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2161,8 +2171,7 @@
      0.5188,
      0.3778
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/computer_04_1970",
@@ -2172,6 +2181,7 @@
     1024
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2182,8 +2192,7 @@
      0.3885,
      0.3157
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/computer_cabinet01",
@@ -2193,6 +2202,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2203,8 +2213,7 @@
      0.2039,
      0.2031
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/computer_cabinet02",
@@ -2214,6 +2223,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2224,8 +2234,7 @@
      0.3279,
      0.3022
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/computer_monitor01",
@@ -2235,6 +2244,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2245,8 +2255,7 @@
      0.1272,
      0.0962
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/computer_tall01",
@@ -2256,6 +2265,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2266,8 +2276,7 @@
      0.3739,
      0.3521
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/computer_tall02",
@@ -2277,6 +2286,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2287,8 +2297,7 @@
      0.2092,
      0.2092
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/control_desk_1980",
@@ -2298,6 +2307,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2308,8 +2318,7 @@
      0.3122,
      0.2572
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/door_handle_1",
@@ -2319,6 +2328,7 @@
     128
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2329,8 +2339,7 @@
      0.223,
      0.223
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/file_cabinet_1970",
@@ -2340,6 +2349,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2350,8 +2360,7 @@
      0.5015,
      0.4182
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/file_rack_1970",
@@ -2361,6 +2370,7 @@
     128
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2371,8 +2381,7 @@
      0.3537,
      0.1267
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/keyboard_and_phone",
@@ -2382,6 +2391,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2392,8 +2402,7 @@
      0.1345,
      0.1201
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/lab_copy_machine",
@@ -2403,6 +2412,7 @@
     1024
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2413,8 +2423,7 @@
      0.0872,
      0.0854
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/office_chair_1940_01",
@@ -2424,6 +2433,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2434,8 +2444,7 @@
      0.0674,
      0.0729
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/office_lamp_1970",
@@ -2445,6 +2454,7 @@
     256
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2455,17 +2465,17 @@
      0.0276,
      0.0276
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/office_lamp_1970_on",
-   "file": "p2/models/props_office/office_lamp_1970_on.jpg",
+   "file": "p2/models/props_office/office_lamp_1970_on.png",
    "size": [
     256,
     256
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2477,17 +2487,17 @@
      0.0276,
      0.0276
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/office_light002",
-   "file": "p2/models/props_office/office_light002.jpg",
+   "file": "p2/models/props_office/office_light002.png",
    "size": [
     256,
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2499,30 +2509,34 @@
      0.4043,
      0.3261
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/office_light002_cool_on",
-   "file": "p2/models/props_office/office_light002_cool_on.jpg",
+   "file": "p2/models/props_office/office_light002_cool_on.png",
    "size": [
     256,
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
     "shader": "vertexlitgeneric",
     "basetexture": "models/props_office/office_light002",
     "selfillum": true,
+    "selfillumtint": [
+     0.6,
+     0.7,
+     1.0
+    ],
     "reflectivity": [
      0.4222,
      0.4043,
      0.3261
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/office_light002_off",
@@ -2532,6 +2546,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2542,8 +2557,7 @@
      0.4043,
      0.3261
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/office_typewriter_1940_01",
@@ -2553,6 +2567,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2564,8 +2579,7 @@
      0.0989,
      0.072
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/paper",
@@ -2575,6 +2589,7 @@
     32
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2585,8 +2600,7 @@
      0.9743,
      0.9323
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/pencilsharpener01",
@@ -2596,6 +2610,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2606,8 +2621,7 @@
      0.2094,
      0.2094
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/telephone_1970",
@@ -2617,6 +2631,7 @@
     256
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2627,8 +2642,7 @@
      0.2628,
      0.0793
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/tv_1970",
@@ -2638,6 +2652,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2648,8 +2663,7 @@
      0.0427,
      0.0255
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_office/whiteboard",
@@ -2659,6 +2673,7 @@
     1024
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2669,8 +2684,7 @@
      0.1848,
      0.179
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_trainstation/wrecked_boxcar_gate",
@@ -2680,6 +2694,7 @@
     2048
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2690,8 +2705,7 @@
      0.0263,
      0.0257
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_underground/cavejohnson_portrait01",
@@ -2701,6 +2715,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2711,8 +2726,7 @@
      0.0427,
      0.0251
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_underground/cavejohnson_portrait02",
@@ -2722,6 +2736,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2732,8 +2747,7 @@
      0.0317,
      0.0145
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_underground/cavejohnson_portrait03",
@@ -2743,6 +2757,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2753,8 +2768,7 @@
      0.0417,
      0.0158
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_underground/cavejohnson_portrait04",
@@ -2764,6 +2778,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2774,8 +2789,7 @@
      0.0453,
      0.0237
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_underground/chair_lobby",
@@ -2785,6 +2799,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2795,8 +2810,7 @@
      0.1396,
      0.0913
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_underground/chair_office_padded_1980",
@@ -2806,6 +2820,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2818,8 +2833,7 @@
      0.2004,
      0.1502
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_underground/construction_crane01",
@@ -2829,6 +2843,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2839,8 +2854,7 @@
      0.0423,
      0.033
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_underground/door_bipart_128",
@@ -2850,6 +2864,7 @@
     1024
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2860,8 +2875,7 @@
      0.0394,
      0.0401
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_underground/filecabinet_lobby",
@@ -2871,6 +2885,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2881,8 +2896,7 @@
      0.2923,
      0.2444
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_underground/floorlamp_lobby",
@@ -2892,6 +2906,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2903,8 +2918,7 @@
      0.3804,
      0.338
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_underground/interactive_console",
@@ -2914,6 +2928,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2924,8 +2939,7 @@
      0.2431,
      0.2317
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_underground/interactive_console_backpanel01",
@@ -2935,6 +2949,7 @@
     2048
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2945,8 +2960,7 @@
      0.1488,
      0.1385
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_underground/moving_platform_motor",
@@ -2956,6 +2970,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2967,8 +2982,7 @@
      0.1027,
      0.1221
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_underground/paint_distillery_tank",
@@ -2978,6 +2992,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -2990,8 +3005,7 @@
      0.1109,
      0.0818
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_underground/railing_underground",
@@ -3001,19 +3015,20 @@
     1024
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
     "shader": "vertexlitgeneric",
     "basetexture": "models/props_underground/railing_underground_mip0",
     "alphatest": true,
+    "alphatestreference": 0.5,
     "reflectivity": [
      0.1239,
      0.0988,
      0.0861
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_underground/ramp_motor",
@@ -3023,6 +3038,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3034,8 +3050,7 @@
      0.0249,
      0.0166
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_underground/smokingtabel_lobby",
@@ -3045,6 +3060,7 @@
     1024
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3056,8 +3072,7 @@
      0.0595,
      0.0495
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_underground/tank_small_1",
@@ -3067,6 +3082,7 @@
     1024
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3077,8 +3093,7 @@
      0.097,
      0.0964
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_underground/tube_paint_under",
@@ -3088,6 +3103,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3100,8 +3116,7 @@
      0.1413,
      0.1076
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_underground/tube_paint_under_vertex",
@@ -3111,6 +3126,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3121,8 +3137,7 @@
      0.1413,
      0.1076
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/models/props_underground/underground_door_dynamic",
@@ -3132,6 +3147,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3143,8 +3159,7 @@
      0.1144,
      0.1113
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/nature/blendrockdirt_tunnel03a",
@@ -3154,6 +3169,7 @@
     1024
    ],
    "material": "concrete",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3164,8 +3180,7 @@
      0.1255,
      0.1189
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/nature/dirtfloor004a",
@@ -3175,6 +3190,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3185,8 +3201,7 @@
      0.4417,
      0.4243
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/nature/forest_dirt_02",
@@ -3196,6 +3211,7 @@
     512
    ],
    "material": "concrete",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3206,8 +3222,7 @@
      0.0402,
      0.0298
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/overlays/garagegroundmarking01f",
@@ -3217,6 +3232,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3228,8 +3244,7 @@
      0.1758,
      0.0007
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/plaster/plaster_wall007c",
@@ -3239,6 +3254,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3249,8 +3265,7 @@
      0.152,
      0.1288
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/plastic/office_plasticwall001a",
@@ -3260,6 +3275,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3270,8 +3286,7 @@
      0.6668,
      0.5868
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/plastic/office_plasticwall001c",
@@ -3281,6 +3296,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3291,8 +3307,7 @@
      0.5645,
      0.477
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/plastic/office_plasticwall001c_bottom",
@@ -3302,6 +3317,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3312,8 +3328,7 @@
      0.5388,
      0.46
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/plastic/plasticwall001b",
@@ -3323,6 +3338,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3334,8 +3350,7 @@
      0.1369,
      0.1369
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/plastic/plasticwall002a",
@@ -3345,6 +3360,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3355,8 +3371,7 @@
      0.3511,
      0.261
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/plastic/plasticwall1970_01_bottom",
@@ -3366,6 +3381,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3376,8 +3392,7 @@
      0.2952,
      0.0739
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/props/metaldoor01_192",
@@ -3387,6 +3402,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3397,8 +3413,7 @@
      0.1872,
      0.1901
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/props/plasticwall002a",
@@ -3408,6 +3423,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3419,17 +3435,17 @@
      0.3968,
      0.109
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/signage/a4_wallbutton_arrow",
-   "file": "p2/signage/a4_wallbutton_arrow.jpg",
+   "file": "p2/signage/a4_wallbutton_arrow.png",
    "size": [
     128,
     128
    ],
    "material": "glass",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3441,8 +3457,7 @@
      0.4992,
      0.5377
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/signage/sloped_surface",
@@ -3452,6 +3467,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3463,8 +3479,7 @@
      0.2082,
      0.114
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/skybox/stars01",
@@ -3474,6 +3489,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3484,8 +3500,7 @@
      0.0007,
      0.0007
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/tile/1970_tile_floor_01",
@@ -3495,6 +3510,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3505,8 +3521,7 @@
      0.1631,
      0.0464
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/tile/1970_tile_floor_02",
@@ -3516,6 +3531,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3526,8 +3542,7 @@
      0.4819,
      0.4748
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/tile/aperture_ceiling001a",
@@ -3537,6 +3552,7 @@
     1024
    ],
    "material": "concrete",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3547,8 +3563,7 @@
      0.704,
      0.5686
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/tile/ceiling_tile002b",
@@ -3558,6 +3573,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3569,8 +3585,7 @@
      0.6513,
      0.6034
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/tile/lobby_tilefloor_1940_001b",
@@ -3580,6 +3595,7 @@
     1024
    ],
    "material": "tile",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3592,8 +3608,7 @@
      0.1392,
      0.1029
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/tile/observation_tileceiling001a",
@@ -3603,6 +3618,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3613,8 +3629,7 @@
      0.616,
      0.5862
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/tile/observation_tilefloor001a",
@@ -3624,6 +3639,7 @@
     1024
    ],
    "material": "tile",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3635,8 +3651,7 @@
      0.1099,
      0.0919
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/tile/office_tilefloor002a",
@@ -3646,6 +3661,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3656,8 +3672,7 @@
      0.1088,
      0.0954
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/tile/office_tilefloor003a",
@@ -3667,6 +3682,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3677,8 +3693,7 @@
      0.1526,
      0.0688
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/tile/tile_ceiling_001a",
@@ -3688,6 +3703,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3699,8 +3715,7 @@
      0.5799,
      0.568
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/tile/underground_black_tile_002c",
@@ -3710,6 +3725,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3722,8 +3738,7 @@
      0.0495,
      0.0442
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/tile/underground_white_tile002b",
@@ -3733,6 +3748,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3743,8 +3759,7 @@
      0.4412,
      0.3884
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/tile/underground_white_tile_001a",
@@ -3754,6 +3769,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3766,8 +3782,7 @@
      0.6305,
      0.5045
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/tile/underground_white_tile_001b",
@@ -3777,6 +3792,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3789,8 +3805,7 @@
      0.381,
      0.3063
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/tile/white_ceiling_tile001a",
@@ -3800,6 +3815,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3810,8 +3826,7 @@
      0.6981,
      0.6283
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/tile/white_floor_tile001a",
@@ -3821,6 +3836,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3831,8 +3847,7 @@
      0.4762,
      0.4122
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/tile/white_floor_tile001b",
@@ -3842,6 +3857,7 @@
     512
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3852,8 +3868,7 @@
      0.4064,
      0.3518
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/tile/white_floor_tile004c",
@@ -3863,6 +3878,7 @@
     1024
    ],
    "material": "metal",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3874,8 +3890,7 @@
      0.5224,
      0.4854
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/traincar_interior/traincar_clipboard",
@@ -3885,6 +3900,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3896,8 +3912,7 @@
      0.2418,
      0.2374
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/traincar_interior/traincar_tabbed_folder",
@@ -3907,6 +3922,7 @@
     512
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3919,8 +3935,7 @@
      0.7552,
      0.5811
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/traincars/undercarriage",
@@ -3930,6 +3945,7 @@
     1024
    ],
    "material": "default",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3942,8 +3958,7 @@
      0.0345,
      0.0356
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/wood/milflr002",
@@ -3953,6 +3968,7 @@
     512
    ],
    "material": "wood",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3963,8 +3979,7 @@
      0.0804,
      0.0674
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/wood/underground_plywood_01a_bottom",
@@ -3974,6 +3989,7 @@
     1024
    ],
    "material": "wood",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -3985,8 +4001,7 @@
      0.2623,
      0.2179
     ]
-   },
-   "raw": true
+   }
   },
   {
    "name": "p2/wood/woodpanel_002",
@@ -3996,6 +4011,7 @@
     512
    ],
    "material": "wood",
+   "raw": true,
    "credit": "Portal 2 (Valve): reference only, never published",
    "license": "reference-only",
    "source": {
@@ -4006,8 +4022,7 @@
      0.1472,
      0.0584
     ]
-   },
-   "raw": true
+   }
   }
  ]
 }

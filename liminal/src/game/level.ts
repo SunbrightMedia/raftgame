@@ -4,6 +4,9 @@ import { CollisionWorld } from '../engine/collision/trace';
 import { convexBrush } from '../engine/collision/brush';
 import { buildFaceMeshes, disposeGroup } from '../engine/render/brushMesh';
 import type { TextureRegistry } from '../engine/render/textures';
+import type { ModelRegistry } from '../engine/render/models';
+import { buildPropMeshes, disposeProps } from '../engine/render/propMeshes';
+import { propSolids } from '../engine/collision/props';
 import { buildFaces, solidPlanes, type Face, type LightmapLayout } from '../engine/light/faces';
 import { type Vec3, v3 } from '../engine/vec3';
 
@@ -14,18 +17,20 @@ export class Level {
   readonly root = new THREE.Group();
   readonly spawn: { origin: Vec3; yaw: number; pitch: number };
   private meshes: THREE.Group | null = null;
+  private props: THREE.Group | null = null;
   layout: LightmapLayout | null = null;
   lightmap: THREE.DataTexture | null = null;
 
-  constructor(readonly map: MapFile, private textures: TextureRegistry) {
-    this.collision = new CollisionWorld(
-      map.brushes
+  constructor(readonly map: MapFile, private textures: TextureRegistry, private models: ModelRegistry) {
+    this.collision = new CollisionWorld([
+      ...map.brushes
         .filter((b) => b.solid !== false)
         .map((b) => {
           const sp = solidPlanes(b);
           return convexBrush(b.id, sp.planes.map((p) => ({ n: v3(...p.n), d: p.d })), v3(...b.min), v3(...b.max), b.material ?? 'default');
         }),
-    );
+      ...propSolids(map.entities, (m) => models.header(m)?.hull),
+    ]);
     this.faces = buildFaces(map.brushes);
     const start = map.entities.find((e) => e.class === 'player_start');
     this.spawn = start
@@ -39,6 +44,9 @@ export class Level {
     if (this.meshes) { this.root.remove(this.meshes); disposeGroup(this.meshes); }
     this.meshes = buildFaceMeshes(this.faces, this.textures, this.layout);
     this.root.add(this.meshes);
+    if (this.props) { this.root.remove(this.props); disposeProps(this.props); }
+    this.props = buildPropMeshes(this.map.entities, this.models, this.textures);
+    this.root.add(this.props);
   }
 
   setLightmap(layout: LightmapLayout, tex: THREE.DataTexture): void {
@@ -51,6 +59,7 @@ export class Level {
 
   dispose(): void {
     if (this.meshes) disposeGroup(this.meshes);
+    if (this.props) disposeProps(this.props);
     this.lightmap?.dispose();
   }
 }

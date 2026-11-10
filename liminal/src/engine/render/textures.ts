@@ -108,6 +108,9 @@ export interface SourceMaterial {
   envmap?: boolean;
   reflectivity?: [number, number, number];
   rad?: [number, number, number, number];
+  selfillumtint?: number[] | number;
+  alpha?: number;
+  alphatestreference?: number;
 }
 
 interface ManifestEntry { name: string; file: string; size: [number, number]; material?: string; credit?: string; pixelart?: boolean; raw?: boolean; source?: SourceMaterial }

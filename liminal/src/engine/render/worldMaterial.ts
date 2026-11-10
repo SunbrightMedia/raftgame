@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { RectAreaLightTexturesLib } from 'three/examples/jsm/lights/RectAreaLightTexturesLib.js';
 import type { Surface } from './surfaces';
+import type { SourceMaterial } from './textures';
+import { sourceUniforms } from './sourceMaterial';
 
 /** Most light-emitting rectangles (troffers) whose reflections are drawn at once. */
 export const MAX_RECTS = 64;
@@ -59,6 +61,12 @@ export const worldUniforms = {
   rectCount: { value: 0 },
   /** Seconds, for animated screens. */
   time: { value: 0 },
+  /**
+   * Radiance of a white surface at Source's light level 1.0 (what a lightmap
+   * value of 1 or a self-illuminated texel shows), in this renderer's units.
+   * Calibrated with the Source lighting model (docs/SOURCE_LIGHTING.md).
+   */
+  sourceUnit: { value: 300 / Math.PI },
 };
 
 /**
@@ -84,7 +92,7 @@ export const worldUniforms = {
  * Light sources output their own luminance instead (cd/m²).
  * The camera pass (digicam.ts) then exposes and encodes to sRGB.
  */
-export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { luminance: number; color: [number, number, number]; anim?: 'static' }, height?: THREE.Texture): THREE.ShaderMaterial {
+export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { luminance: number; color: [number, number, number]; anim?: 'static' }, height?: THREE.Texture, imported?: SourceMaterial): THREE.ShaderMaterial {
   const src = source ? new THREE.Vector3(...source.color).multiplyScalar(source.luminance) : new THREE.Vector3();
   const img = map.image as { width?: number; height?: number } | undefined;
   return new THREE.ShaderMaterial({
@@ -98,6 +106,7 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
       isSource: { value: source ? 1 : 0 },
       isStatic: { value: source?.anim === 'static' ? 1 : 0 },
       sourceLum: { value: src },
+      ...sourceUniforms(imported),
     },
     vertexShader: /* glsl */ `
       attribute float shade;
@@ -172,6 +181,12 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
       uniform float isStatic;
       uniform float time;
       uniform vec3 sourceLum;
+      uniform float sourceUnit;
+      uniform int alphaMode;
+      uniform float alphaRef;
+      uniform float alphaMul;
+      uniform float selfIllum;
+      uniform vec3 selfIllumTint;
       varying vec3 vWorld;
       varying vec3 vNormal;
       varying vec3 vGu;
@@ -266,7 +281,9 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
           } else t = 0.0;
           uv -= shift * t;
         }
-        vec3 rho = toLinear(textureGrad(map, uv, gx, gy).rgb);
+        vec4 tx = textureGrad(map, uv, gx, gy);
+        if (alphaMode == 1 && tx.a < alphaRef) discard;
+        vec3 rho = toLinear(tx.rgb);
         float hgt = textureGrad(hmap, uv, gx, gy).r;
         // Close up, the texture's own grain again at a finer scale, so near surfaces aren't a stretched photo.
         if (isSource < 0.5 && detailScale > 0.0 && surf.w > 0.0) {
@@ -397,13 +414,16 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
             spec += Ef * specPoint(N, V, u, ndl, F0, rough, 1.0 / max(d, 1.0));
           }
           L = (Lbaked + Edyn / PI * diffuseColor * (1.0 - env) + spec * gloss * occl) * brightness;
+          if (selfIllum > 0.5) L = mix(L, rho * selfIllumTint * sourceUnit, tx.a);
         }
         // Linear fog, or haze: exponential like real aerial perspective (95% by fogFar).
         float fd = max(0.0, vDepth - fogNear) / max(1.0, fogFar - fogNear);
         float f = fogOn * (fogHaze > 0.5 ? 1.0 - exp(-3.0 * fd) : clamp(fd, 0.0, 1.0));
         // Alpha marks light sources (lamp lenses, panels) for the camera pass:
         // only they get the lamp-edge line and fringe, not overexposed surfaces.
-        gl_FragColor = vec4(mix(L, toLinear(fogColor) * fogLuminance, f), isSource * (1.0 - isStatic)); // screens aren't lamps
+        // (Translucent surfaces blend with their own alpha and keep the frame's: see applySourceBlend.)
+        float a = alphaMode == 2 ? tx.a * alphaMul : alphaMode == 3 ? alphaMul : isSource * (1.0 - isStatic); // screens aren't lamps
+        gl_FragColor = vec4(mix(L, toLinear(fogColor) * fogLuminance, f), a);
       }`,
   });
 }
