@@ -35,8 +35,24 @@ const L = { planes: lump(1), texinfo: lump(6), verts: lump(3), edges: lump(12), 
 const f32 = (o: number) => dv.getFloat32(o, true), i32 = (o: number) => dv.getInt32(o, true);
 const vert = (i: number): [number, number, number] => { const o = L.verts.o + i * 12; return [f32(o), f32(o + 4), f32(o + 8)]; };
 interface VFace { n: [number, number, number]; d: number; poly: [number, number, number][]; lmS: number[]; lmT: number[]; minS: number; minT: number; w: number; h: number; lightofs: number; slots: number; lo: number[]; hi: number[] }
+// Brush entities with an origin (func_tracktrain, doors...) are stored relative to it; VRAD lights them at
+// face + entity origin (the compile-time position, which is where our brushes are).
+const faceOffset = new Map<number, [number, number, number]>();
+{
+  const E = lump(0), text = b.subarray(E.o, E.o + E.l).toString('latin1');
+  const M = lump(14);
+  for (const block of text.split('}')) {
+    const model = /"model"\s+"\*(\d+)"/.exec(block), origin = /"origin"\s+"([^"]+)"/.exec(block);
+    if (!model || !origin) continue;
+    const o = origin[1].trim().split(/\s+/).map(Number) as [number, number, number];
+    if (!o.some((v) => v)) continue;
+    const mo = M.o + Number(model[1]) * 48, first = i32(mo + 40), num = i32(mo + 44);
+    for (let k = first; k < first + num; k++) faceOffset.set(k, o);
+  }
+}
 const vfaces: VFace[] = [];
 for (let fo = L.faces.o; fo + 56 <= L.faces.o + L.faces.l; fo += 56) {
+  const off = faceOffset.get((fo - L.faces.o) / 56) ?? [0, 0, 0];
   const planenum = dv.getUint16(fo, true), side = dv.getUint8(fo + 2);
   const firstedge = i32(fo + 4), numedges = dv.getInt16(fo + 8, true), ti = dv.getInt16(fo + 10, true), disp = dv.getInt16(fo + 12, true);
   const style0 = dv.getUint8(fo + 16), lightofs = i32(fo + 20);
@@ -49,11 +65,15 @@ for (let fo = L.faces.o; fo + 56 <= L.faces.o + L.faces.l; fo += 56) {
   for (let k = 0; k < numedges; k++) {
     const se = i32(L.surfedges.o + (firstedge + k) * 4);
     const eo = L.edges.o + Math.abs(se) * 4;
-    poly.push(vert(se >= 0 ? dv.getUint16(eo, true) : dv.getUint16(eo + 2, true)));
+    const v = vert(se >= 0 ? dv.getUint16(eo, true) : dv.getUint16(eo + 2, true));
+    poly.push([v[0] + off[0], v[1] + off[1], v[2] + off[2]]);
   }
   const to = L.texinfo.o + ti * 72;
   const flags = i32(to + 64);
+  // Lightmap axes are in the model's own space: fold the offset into their constants.
   const lmS = [0, 1, 2, 3].map((k) => f32(to + 32 + k * 4)), lmT = [0, 1, 2, 3].map((k) => f32(to + 48 + k * 4));
+  lmS[3] -= lmS[0] * off[0] + lmS[1] * off[1] + lmS[2] * off[2]; lmT[3] -= lmT[0] * off[0] + lmT[1] * off[1] + lmT[2] * off[2];
+  d += n[0] * off[0] + n[1] * off[1] + n[2] * off[2];
   const lo = [0, 1, 2].map((k) => Math.min(...poly.map((p) => p[k]))), hi = [0, 1, 2].map((k) => Math.max(...poly.map((p) => p[k])));
   vfaces.push({ n, d, poly, lmS, lmT, minS: i32(fo + 28), minT: i32(fo + 32), w: i32(fo + 36) + 1, h: i32(fo + 40) + 1, lightofs, slots: flags & 0x800 ? 4 : 1, lo, hi });
 }
@@ -130,7 +150,10 @@ for (let i = 0; i < W * H; i++) {
   enc[i * 5 + 4] = 255;
 }
 const out = mapPath.replace(/\.json$/, '.valve.lightmap.json');
-writeFileSync(out, JSON.stringify({ format: 'liminal-lightmap', version: 0, encoding: 'rgbe-deflate', key: 'valve', width: W, height: H, luxel: 16, data: deflateRawSync(enc).toString('base64') }));
+// Keep prop vertex light added by valve_proplight.py.
+let keep: { props?: string } = {};
+try { keep = JSON.parse(readFileSync(out, 'utf8')); } catch { /* first run */ }
+writeFileSync(out, JSON.stringify({ format: 'liminal-lightmap', version: 0, encoding: 'rgbe-deflate', key: 'valve', width: W, height: H, luxel: 16, data: deflateRawSync(enc).toString('base64'), ...(keep.props ? { props: keep.props } : {}) }));
 console.log(`wrote ${out}`);
 
 // ---- ours vs Valve's, by material (flat slot, luxels both have)

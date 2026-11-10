@@ -140,6 +140,8 @@ const commands = {
     }
     return { views: files };
   },
+  /** Render size in pixels (default 1000×750), e.g. a reference screenshot's. */
+  async size({ width = 1000, height = 750 }) { await page.setViewportSize({ width, height }); await render(1); return { width, height }; },
   /** Run JS in the page (window.liminal is the game). */
   async eval({ js }) { return page.evaluate(js); },
   /** Console errors and warnings since the last call. */

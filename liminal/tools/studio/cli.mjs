@@ -4,6 +4,7 @@
  *   npm run studio -- load industrial
  *   npm run studio -- views out/shot "100,200,,90,10" "300,40,,180,0"
  *   npm run studio -- set '{"camera":{"evComp":-0.5}}'
+ *   npm run studio -- size 1080 770
  *   npm run studio -- reload | bake | stats | log | quit
  *   npm run studio -- eval "window.liminal.game.lighting.status"
  *   npm run studio -- compare REF.png out/shot "x,y,z,yaw,pitch" ["ceiling,floor,wall"]
@@ -22,6 +23,7 @@ const args = compare ? { out: compare.out, poses: [compare.pose] } :
   cmd === 'load' ? { map: rest[0], settings: rest[1] ? JSON.parse(rest[1]) : undefined } :
   cmd === 'views' ? { out: rest[0] ?? 'studio_views', poses: rest.slice(1).length ? rest.slice(1) : [''] } :
   cmd === 'set' ? JSON.parse(rest[0]) :
+  cmd === 'size' ? { width: Number(rest[0]), height: Number(rest[1]) } :
   cmd === 'eval' ? { js: rest.join(' ') } : {};
 
 const send = async () => {

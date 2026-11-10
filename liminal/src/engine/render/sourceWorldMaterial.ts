@@ -13,6 +13,9 @@ import { applySourceBlend, sourceUniforms } from './sourceMaterial';
  * Lightmap values are Source's linear light (1 = full); `sourceUnit` turns
  * that into this renderer's radiance, and the camera pass exposes it.
  */
+/** Dev views for calibration (shared by every world material): 0 shaded, 1 albedo, 2 light ÷ 2, 3 flat lightmap ÷ 2 (gamma, non-HDR path). */
+export const sourceWorldDebug = { value: 0 };
+
 export function makeSourceWorldMaterial(tex: TexEntry, normal: THREE.Texture | null, detail: THREE.Texture | null = null): THREE.ShaderMaterial {
   const d = tex.source?.detail;
   const mat = new THREE.ShaderMaterial({
@@ -29,6 +32,7 @@ export function makeSourceWorldMaterial(tex: TexEntry, normal: THREE.Texture | n
       fogHaze: worldUniforms.fogHaze,
       sourceUnit: worldUniforms.sourceUnit,
       gamma22: worldUniforms.gamma22,
+      debugView: sourceWorldDebug,
       map: { value: tex.texture },
       normalMap: { value: normal ?? tex.texture },
       hasNormal: { value: normal ? 1 : 0 },
@@ -79,6 +83,7 @@ export function makeSourceWorldMaterial(tex: TexEntry, normal: THREE.Texture | n
       uniform float fogOn;
       uniform float fogHaze;
       uniform float sourceUnit;
+      uniform int debugView;
       uniform int alphaMode;
       uniform float alphaRef;
       uniform float alphaMul;
@@ -141,6 +146,9 @@ export function makeSourceWorldMaterial(tex: TexEntry, normal: THREE.Texture | n
           // Gamma-space result, clamped like the 8-bit frame buffer; handed on as linear for the camera pass to re-encode.
           vec3 g = albedo * light;
           if (selfIllum > 0.5) g = mix(g, albedo * selfIllumTint, tx.a);
+          if (debugView == 1) g = albedo;
+          else if (debugView == 2) g = light * 0.5;
+          else if (debugView == 3) g = texture2D(lightmap, vLm).rgb * (lightmapOn > 0.5 ? 1.0 : 0.0);
           L = pow(clamp(g, 0.0, 1.0), vec3(2.2)) * sourceUnit;
         } else {
           L = albedo * light * sourceUnit * brightness;
