@@ -10,7 +10,7 @@ import { propMaterials } from '../engine/render/propMeshes';
 import { glowTextures } from '../engine/render/glows';
 import { propModel } from '../engine/collision/props';
 import { worldUniforms, MAX_RECTS } from '../engine/render/worldMaterial';
-import { fogUniforms, fogAt } from '../engine/render/fog';
+import { fogUniforms, fogAt, fogReach } from '../engine/render/fog';
 import { kelvinToLinear, emitterColor } from '../engine/light/units';
 import { angleVectors } from '../engine/vec3';
 import { Input } from './input';
@@ -343,6 +343,7 @@ export class Game {
     worldUniforms.flashColor.value.set(...kelvinToLinear(C.flashKelvin));
 
     if (s.fog.source && s.fog.blend) this.updateFog(s, forward);
+    this.level?.cull(cam.position, fogReach(), s.render.detailDistance);
     worldUniforms.time.value = performance.now() / 1000;
     this.renderer.render(this.scene);
     this.onFrame?.(dt);

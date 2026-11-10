@@ -36,7 +36,9 @@ export class LowResRenderer {
   readonly renderSize = new THREE.Vector2();
 
   constructor(readonly canvas: HTMLCanvasElement) {
-    this.gl = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
+    // premultipliedAlpha off: the clear colour is used as given even with alpha 0 (three.js would
+    // otherwise multiply it to black), so the void can be the fog's colour without counting as a light.
+    this.gl = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance', premultipliedAlpha: false });
     this.gl.outputColorSpace = THREE.LinearSRGBColorSpace;
     this.gl.setPixelRatio(1);
     this.camera = new THREE.PerspectiveCamera(74, 16 / 9, 2, 65536);

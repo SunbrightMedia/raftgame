@@ -79,6 +79,7 @@ export const SETTINGS = {
       textureFilter: select('Texture filter', 'linear', ['nearest', 'linear'] as const, 'nearest = crisp texels (retro), linear = smooth.'),
       tileBreakup: num('Texture repeat breakup', 0, 0, 1, 0.01, 'Large, soft brightness variation across surfaces so repeating textures don\'t line up into a visible grid (big outdoor floors).'),
       lightHoldMs: num('Wait for lighting', 4000, 0, 30000, 100, 'On map load, draw nothing until the lightmap is ready (at most this long), instead of flashing the flat unlit world.', 'ms'),
+      detailDistance: num('Small prop draw distance', 400, 0, 5000, 10, 'A prop is drawn up to this many times its own size away (a 1 ft lamp at 400 = 400 ft). Saves work in huge maps; 0 = always drawn.', '×'),
       clearColor: color('Void colour', '#0b0c0e'),
     },
   },

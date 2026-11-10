@@ -5,7 +5,7 @@ import { convexBrush } from '../engine/collision/brush';
 import { buildFaceMeshes, disposeGroup } from '../engine/render/brushMesh';
 import type { TextureRegistry } from '../engine/render/textures';
 import type { ModelRegistry } from '../engine/render/models';
-import { buildPropMeshes, disposeProps, setPropLight } from '../engine/render/propMeshes';
+import { buildPropMeshes, cullProps, disposeProps, setPropLight } from '../engine/render/propMeshes';
 import { buildLabels } from '../engine/render/labels';
 import { buildGlows, disposeGlows } from '../engine/render/glows';
 import { propSolids } from '../engine/collision/props';
@@ -109,6 +109,11 @@ export class Level {
     this.props = buildPropMeshes(this.map.entities, this.models, this.textures, this.movers.size ? (e) => this.propOffset(e) : undefined);
     this.root.add(this.props);
     if (this.propLight) setPropLight(this.props, this.propLight.colors, this.propLight.offsets);
+  }
+
+  /** Skip drawing props lost in the fog or too small to see from `eye` (see cullProps). */
+  cull(eye: THREE.Vector3, reach: number, detail: number): void {
+    if (this.props) cullProps(this.props, eye, reach, detail);
   }
 
   /** The props' bake instances where they are now (movers applied). */

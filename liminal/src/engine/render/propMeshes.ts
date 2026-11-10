@@ -17,9 +17,12 @@ export function propMaterials(entities: EntityDef[], models: ModelRegistry): str
   return [...out];
 }
 
+/** Props are batched per region of this size, so the renderer can skip whole regions (out of view, or lost in fog). */
+export const PROP_REGION = 4096;
+
 /**
- * Props drawn instanced: one InstancedMesh per (model, skin), its materials
- * picked per mesh slot by the skin table.
+ * Props drawn instanced: one InstancedMesh per (model, skin, region of the
+ * map), its materials picked per mesh slot by the skin table.
  */
 export function buildPropMeshes(entities: EntityDef[], models: ModelRegistry, textures: TextureRegistry, offsetOf?: (e: EntityDef) => [number, number, number] | undefined): THREE.Group {
   const group = new THREE.Group();
@@ -31,7 +34,8 @@ export function buildPropMeshes(entities: EntityDef[], models: ModelRegistry, te
     if (!name || !models.get(name)) continue;
     const bi = bakeIndex++;
     const skin = typeof e.props?.skin === 'number' ? e.props.skin : 0;
-    const key = `${name.toLowerCase()}#${skin}`;
+    const R = PROP_REGION;
+    const key = `${name.toLowerCase()}#${skin}#${Math.floor(e.origin[0] / R)},${Math.floor(e.origin[1] / R)},${Math.floor(e.origin[2] / R)}`;
     let b = batches.get(key);
     if (!b) { b = { model: name, skin, mats: [], light: [] }; batches.set(key, b); }
     b.light.push(bi);
@@ -64,10 +68,30 @@ export function buildPropMeshes(entities: EntityDef[], models: ModelRegistry, te
     // Which baked prop each instance is (propBakeData order), for its per-vertex light (setPropLight).
     mesh.userData.bakeIndex = b.light;
     mesh.computeBoundingSphere();
+    // For cullProps: how big one of these is (the model's own radius × the largest scale among the instances).
+    const sx = new THREE.Vector3();
+    mesh.userData.size = (model.geometry.boundingSphere?.radius ?? 64) * Math.max(...b.mats.map((m) => sx.setFromMatrixScale(m).x));
     mesh.name = `prop:${key}`;
     group.add(mesh);
   }
   return group;
+}
+
+/**
+ * Hide the prop batches nobody could see from `eye`: regions wholly past
+ * `reach` (where the fog has swallowed everything), and things too small to
+ * matter at their distance (`detail` = how many times its own size away a
+ * thing is still drawn; 0 = always). Out-of-view batches are skipped by the
+ * renderer itself.
+ */
+export function cullProps(g: THREE.Group, eye: THREE.Vector3, reach: number, detail: number): void {
+  for (const o of g.children) {
+    const m = o as THREE.InstancedMesh;
+    const bs = m.boundingSphere;
+    if (!m.isInstancedMesh || !bs) continue;
+    const d = Math.max(0, bs.center.distanceTo(eye) - bs.radius);
+    m.visible = d <= reach && (detail <= 0 || d <= (m.userData.size as number) * detail);
+  }
 }
 
 /** Dispose prop materials (geometry belongs to the ModelRegistry and is shared). */
