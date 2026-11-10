@@ -350,6 +350,13 @@ for every pass of this world, and the first two for every world.
 - Player: Source size (32 × 72, eyes at 64): the kit is made for it.
 - Judge geometry in flat light with no bake; keep passes short and send the
   link each time. Lighting and atmosphere come after the geometry is right.
+- **Closed parts** (pass 3b): what is cut into a mass is finished in that
+  mass's own material (concrete in a pier, dark plate in a machine). A
+  doorway is never bigger than a door (128 × 168), whatever the corridor
+  behind it. The catwalk from a doorway to the street's lane rests on two
+  beams out of the wall and hangs by a rod from the wall above. No white
+  pipes in rooms (they read as bright models).
+- Every change to the generator must still pass `npm run world:walk`.
 
 ## World: industrial v1 (old; reference: a tower under construction, looking straight up)
 

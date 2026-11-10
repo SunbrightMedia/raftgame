@@ -1,12 +1,14 @@
 #!/bin/bash
-# Generate the industrial world, pack what it uses, build the private page and stage it for publishing.
-#   tools/world/publish-prep.sh [seed] [stage dir]
+# Pack what the industrial world's generator uses, build the private page and stage it for publishing.
+# The page makes the world from a seed (N and B change it; ?seed=7 in the address sets it).
+#   tools/world/publish-prep.sh [unused] [stage dir]
 set -e
 cd "$(dirname "$0")/../.."
 SEED=${1:-1}
 STAGE=${2:-dist-industrial-stage}
-npx vite-node tools/world/gen.ts -- industrial "$SEED" | tail -2
-.venv-look/bin/python tools/source/pack_catalogue.py --maps maps/iw/industrial.json --out catalogue-iw --tex 512
+# The page makes the world itself (any seed), so pack every texture and model the generator can use.
+npx vite-node tools/world/gen.ts -- kit | tail -1
+.venv-look/bin/python tools/source/pack_catalogue.py --maps maps/iw/industrial-kit.json --out catalogue-iw --tex 512
 npx vite build --mode industrial | tail -3
 rm -rf "$STAGE/assets"; mkdir -p "$STAGE"; cp -r dist-industrial/assets "$STAGE/"
 JS=$(ls dist-industrial/assets | grep -E '^index-.*\.js$'); CSS=$(ls dist-industrial/assets | grep -E '^index-.*\.css$')

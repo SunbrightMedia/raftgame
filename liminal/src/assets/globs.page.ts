@@ -9,3 +9,5 @@ export const modelHeads = import.meta.glob(['../../models/**/*.json', '!../../mo
 export const modelBins = import.meta.glob(['../../models/**/*.bin', '!../../models/p2/**', '!../../models/p2lib/**'], { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
 export const mapUrls: Record<string, string> = {};
 export const catalogue: { textures?: unknown; sheets: Record<string, string>; models?: unknown; packs: Record<string, string> } = { sheets: {}, packs: {} };
+/** Worlds made in the page from a seed: none in this build. */
+export const worlds: Record<string, (seed: number) => unknown> = {};

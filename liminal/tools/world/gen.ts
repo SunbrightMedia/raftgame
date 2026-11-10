@@ -4,6 +4,8 @@
  *   npx vite-node tools/world/gen.ts -- testbed [seed]        → maps/iw/testbed.json
  *   npx vite-node tools/world/gen.ts -- blockout [seed]       → maps/iw/blockout.json (the bare layout)
  *   npx vite-node tools/world/gen.ts -- industrial [seed]     → maps/iw/industrial.json (the world's geometry)
+ *   npx vite-node tools/world/gen.ts -- kit [seeds]           → maps/iw/industrial-kit.json: one of every texture and
+ *       model the worlds of seeds 1..N use (default 16), for packing the private page, which makes its world itself
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { serializeMap } from '../../src/data/map';
@@ -14,6 +16,23 @@ import { industrial, GEOMETRY_SETTINGS } from '../../src/world/industrial/world'
 const [what = 'testbed', seedArg] = process.argv.slice(2).filter((a) => a !== '--');
 const seed = seedArg ? Number(seedArg) : 1;
 const t0 = performance.now();
+if (what === 'kit') {
+  const tex = new Set<string>(), ents = new Map<string, unknown>();
+  for (let n = 1; n <= (seedArg ? seed : 16); n++) {
+    const m = industrial(n).map.toMap('kit', GEOMETRY_SETTINGS);
+    for (const b of m.brushes as unknown as { faces: Record<string, { tex: string }> }[]) for (const f of Object.values(b.faces)) tex.add(f.tex);
+    for (const e of m.entities) {
+      const p = (e.props ?? {}) as Record<string, unknown>;
+      if (e.class === 'prop') ents.set(`prop ${p.model} ${p.skin}`, e);
+      else if (e.class === 'glow' || e.class === 'beam') ents.set(`${e.class} ${p.tex} ${p.halo}`, e);
+    }
+  }
+  mkdirSync('maps/iw', { recursive: true });
+  const brushes = [...tex].filter((t) => !t.startsWith('tools/')).map((t, i) => ({ id: i + 1, type: 'box', min: [i * 80, 0, 0], max: [i * 80 + 64, 64, 64], tex: t }));
+  writeFileSync('maps/iw/industrial-kit.json', JSON.stringify({ format: 'liminal-map', version: 1, name: 'kit', settings: {}, brushes, entities: [...ents.values()] }));
+  console.log(`maps/iw/industrial-kit.json: ${brushes.length} textures, ${ents.size} models and sprites`);
+  process.exit(0);
+}
 const made = what === 'blockout' ? blockout(seed) : what === 'industrial' ? industrial(seed) : null;
 const out = what === 'testbed' ? testbed(seed) : made?.map ?? null;
 if (made) {

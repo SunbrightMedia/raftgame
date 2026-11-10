@@ -42,6 +42,7 @@ function worldAxes(n: V3): [V3, V3] {
 }
 
 const r3 = (v: number) => Math.round(v * 1000) / 1000;
+const r6 = (v: number) => Math.round(v * 1e6) / 1e6;
 
 export class MapOut {
   readonly brushes: BrushDef[] = [];
@@ -83,8 +84,29 @@ export class MapOut {
     return this.push(planes, faces, o);
   }
 
+  /**
+   * A straight bar of rectangular section from a to b, in any direction:
+   * `wide` across (level), `deep` the other way. For braces and struts that
+   * are not square to the grid.
+   */
+  bar(a: V3, b: V3, wide: number, deep: number, tex: string, o: Omit<BoxOpts, 'tex' | 'sides'> = {}): number {
+    const len = Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
+    const u: V3 = [(b[0] - a[0]) / len, (b[1] - a[1]) / len, (b[2] - a[2]) / len];
+    const flat = Math.hypot(u[0], u[1]);
+    const s: V3 = flat < 1e-6 ? [1, 0, 0] : [u[1] / flat, -u[0] / flat, 0];                          // level, square to the bar
+    const t: V3 = [s[1] * u[2] - s[2] * u[1], s[2] * u[0] - s[0] * u[2], s[0] * u[1] - s[1] * u[0]];   // square to both
+    const dot = (p: V3, q: V3) => p[0] * q[0] + p[1] * q[1] + p[2] * q[2];
+    const pl = (n: V3, d: number): [number, number, number, number] => [n[0], n[1], n[2], d];
+    const neg = (p: V3): V3 => [-p[0], -p[1], -p[2]];
+    return this.convex([
+      pl(s, dot(s, a) + wide / 2), pl(neg(s), -dot(s, a) + wide / 2),
+      pl(t, dot(t, a) + deep / 2), pl(neg(t), -dot(t, a) + deep / 2),
+      pl(u, dot(u, b)), pl(neg(u), -dot(u, a))], tex, o);
+  }
+
   private push(planes: number[][], faces: Record<string, unknown>, o: { group?: string; solid?: boolean }): number {
-    const b: Record<string, unknown> = { id: this.nextId++, type: 'convex', planes: planes.map((p) => p.map(r3)), faces };
+    // Normals keep six places: at three, a slanted plane would drift by inches far from the origin.
+    const b: Record<string, unknown> = { id: this.nextId++, type: 'convex', planes: planes.map((p) => [r6(p[0]), r6(p[1]), r6(p[2]), r3(p[3])]), faces };
     if (o.group) b.group = o.group;
     if (o.solid === false) b.solid = false;
     this.brushes.push(b as unknown as BrushDef);

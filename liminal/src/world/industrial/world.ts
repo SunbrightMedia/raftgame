@@ -1,18 +1,21 @@
 import { MapOut, type V3 } from '../mapOut';
 import { Rng } from '../rng';
-import { walkTile, stairs, tubePath, TILE, STEP, DX, DY, type Dir } from '../kit/aperture';
+import { carve, type Finish, type Hollow } from '../carve';
+import { walkTile, stairs, tubePath, TILE, STEP, DX, DY, opposite, type Dir } from '../kit/aperture';
 import { makeLayout, type Block, type Layout, type LayoutParams, type Street } from './layout';
 
 /**
  * The industrial world's geometry, from a layout (layout.ts): what each mass
  * is made of, the steel that carries everything, what runs through the
- * streets, what stands in the halls. A clean, working, empty plant. No lights
+ * streets, what stands in the halls, and what is cut into the masses
+ * (corridors, rooms, stair halls). A clean, working, empty plant. No lights
  * yet: this is judged in flat light.
  *
  * The rules it keeps (STYLE.md, "World: industrial v2"):
  *  - Nothing floats. Masses and columns run down out of sight (DEEP). Every
  *    catwalk hangs by rods from a beam; every beam ends on two columns that
- *    stand at the street's edges; tubes rest on brackets from those columns
+ *    stand at the street's edges; a catwalk from a doorway out to the lane
+ *    rests on brackets from the wall; tubes rest on brackets from the columns
  *    or on struts from a wall, and both their ends go into a wall.
  *  - A cable is tied at both ends, to beams.
  *  - Only the short kit list: walkways, stairs, beams, wall panels, tubes,
@@ -22,7 +25,8 @@ import { makeLayout, type Block, type Layout, type LayoutParams, type Street } f
  *
  * Every mass keeps a margin of MARGIN units inside its block for its own
  * steel (columns, ring beams, pipes), so nothing it carries can reach a
- * catwalk, however narrow the street.
+ * catwalk, however narrow the street. A doorway crosses that margin in a
+ * porch.
  */
 const LEVEL = 2 * STEP;   // one catwalk level = two flights of stairs
 const MARGIN = 64;
@@ -38,6 +42,17 @@ const T = {
   steel: 'anim_wp/framework/squarebeams',
   yellow: 'metal/metalbeam_bts_001c',
 };
+/** What a corridor or a room cut into a mass is finished in, by what the mass is. */
+const FINISH: Record<'machine' | 'pier', Finish[]> = {
+  pier: [
+    { floor: 'concrete/concrete_bts_floor001a', wall: 'concrete/concrete_bts_wall001a', ceil: 'concrete/concrete_bts_ceiling001a', scale: 0.25, lightmapscale: 16 },
+    { floor: 'concrete/concrete_bts_floor001a', wall: 'concrete/concrete_bts_modular_wall001a', ceil: 'concrete/concrete_bts_ceiling001a', scale: 0.25, lightmapscale: 16 },
+  ],
+  machine: [
+    { floor: 'metal/black_floor_metal_001c', wall: 'metal/metalwall_bts_001b', ceil: 'metal/black_ceiling_metal_001a', scale: 0.25, lightmapscale: 16 },
+    { floor: 'concrete/concrete_bts_floor001a', wall: 'metal/metalwall_bts_001b', ceil: 'concrete/concrete_bts_ceiling001a', scale: 0.25, lightmapscale: 16 },
+  ],
+};
 
 export type WorldParams = Partial<LayoutParams>;
 
@@ -45,27 +60,48 @@ type MassKind = 'chambers' | 'machine' | 'pier' | 'frame' | 'bridge';
 interface MassBox { x0: number; y0: number; x1: number; y1: number; z0: number; z1: number; kind: MassKind }
 interface District { x: number; y: number; steel: string; mass: (readonly [MassKind, number])[]; cables: number; tubes: number; pipes: number }
 type Steel = (min: V3, max: V3, tex?: string) => number;
+type Box = { min: V3; max: V3 };
+export interface Note { kind: string; at: V3; yaw: number }
+
+/** An opening in a mass's face: a doorway (with a porch across the margin) or a look-out slit. */
+interface Door {
+  /** Which face of the mass. */ side: Dir;
+  /** Its middle along the face (y on the east and west faces, x on the north and south). */ at: number;
+  z: number; w: number; h: number;
+  slit?: boolean;
+  /** Tiles of catwalk between the porch and the street's lane, and whether the catwalk ends there (a balcony). */
+  stub: number; balcony: boolean;
+}
+/** What is cut into one mass. */
+interface Inner { finish: Finish; hollows: Hollow[]; doors: Door[]; steps: { min: V3; max: V3; riser: Dir }[]; ribs: [V3, V3][] }
 
 interface Ctx {
   m: MapOut; lay: Layout; root: Rng; L: number;
   zOf: (level: number) => number;
   steel: Steel;
   masses: MassBox[];
-  /** Floor heights of catwalk and stair tiles, by `${tileX},${tileY}`. */
+  /** Floor heights of catwalk, stair and corridor tiles, by `${tileX},${tileY}`. */
   walkZ: Map<string, number[]>;
+  /** What a street's frames must carry, by tile: deck heights, and whether the deck there is level (or a stair). */
+  decks: Map<string, { z: number; flat: boolean }[]>;
+  /** Everything cut into the masses, doorways out to the block's edge included: nothing else may pass through these. */
+  hollows: Box[];
   districtAt: (x: number, y: number) => District;
   top: number; bottom: number; deep: number; size: number;
+  /** Places worth a look when reviewing (kind, a point to stand on, the way to face). */
+  notes: Note[];
 }
 
-export function industrial(seed: number, params: WorldParams = {}): { map: MapOut; layout: Layout } {
+export function industrial(seed: number, params: WorldParams = {}): { map: MapOut; layout: Layout; notes: Note[] } {
   const lay = makeLayout(seed, { streets: [[1, 2], [3, 5], [5, 2], [7, 1]], ...params });
   const m = new MapOut();
   const root = new Rng(seed).fork('world');
-  const L = lay.params.levels;
+  const L = lay.params.levels, N = lay.params.size;
   const zOf = (level: number) => (level - Math.floor(L / 2)) * LEVEL;
   const centre = (x: number, y: number, level: number): V3 => [x * TILE + TILE / 2, y * TILE + TILE / 2, zOf(level)];
-  const size = lay.params.size * TILE;
+  const size = N * TILE;
   const steel: Steel = (min, max, tex = T.steel) => m.box(min, max, { tex, group: 'func_detail', lightmapscale: 64, scale: 0.25 });
+  const blockOf = (x: number, y: number) => lay.tileBlock[y * N + x];
 
   // ---- districts
   const dr = root.fork('districts');
@@ -83,32 +119,54 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
   const districtAt = (x: number, y: number) => districts.reduce((b, d) => (Math.hypot(d.x - x, d.y - y) < Math.hypot(b.x - x, b.y - y) ? d : b));
 
   const bottom = zOf(0), top = zOf(L - 1);
-  const ctx: Ctx = { m, lay, root, L, zOf, steel, masses: [], walkZ: new Map(), districtAt, top, bottom, deep: bottom - DEPTH, size };
+  const ctx: Ctx = { m, lay, root, L, zOf, steel, masses: [], walkZ: new Map(), decks: new Map(), hollows: [], districtAt, top, bottom, deep: bottom - DEPTH, size, notes: [] };
   const noteWalk = (x: number, y: number, z: number) => { const k = `${x},${y}`; const a = ctx.walkZ.get(k); if (a) a.push(z); else ctx.walkZ.set(k, [z]); };
+  const noteDeck = (x: number, y: number, z: number, flat: boolean) => { const k = `${x},${y}`; const a = ctx.decks.get(k); if (a) a.push({ z, flat }); else ctx.decks.set(k, [{ z, flat }]); };
 
-  // ---- masses: all stand on something that runs down out of sight
+  // ---- what each mass is. One the maze goes through must be solid, stand from below and reach above every level.
+  const cutBlocks = new Set<number>();
+  for (const w of lay.walks) for (const [x, y] of lay.segments[w.segment].tiles) if (blockOf(x, y) >= 0) cutBlocks.add(blockOf(x, y));
+  for (const k of lay.nodes.keys()) { const J = lay.junctions[Number(k.split(':')[0])]; if (blockOf(J.x, J.y) >= 0) cutBlocks.add(blockOf(J.x, J.y)); }
+  interface Plan { r: Rng; D: District; kind: MassKind; x0: number; y0: number; x1: number; y1: number; z0: number; z1: number }
+  const plans = new Map<number, Plan>();
   for (const b of lay.blocks) {
     if (b.kind !== 'mass') continue;
     const r = root.fork(`mass${b.id}`);
     const x0 = b.rect.x0 * TILE + MARGIN, y0 = b.rect.y0 * TILE + MARGIN, x1 = b.rect.x1 * TILE - MARGIN, y1 = b.rect.y1 * TILE - MARGIN;
     const D = districtAt((x0 + x1) / 2, (y0 + y1) / 2);
-    const kind = r.weighted(D.mass);
+    let kind = r.weighted(D.mass);
     // Most run out of sight above; some stop short, so you can see over them.
-    const z1 = r.chance(0.3) ? zOf(r.int(1, L - 1)) + r.pick([-64, 96, 160]) : top + r.range(1500, 4500);
+    let z1 = r.chance(0.3) ? zOf(r.int(1, L - 1)) + r.pick([-64, 96, 160]) : top + r.range(1500, 4500);
     // A machine or a chamber stack may begin part-way up: then it stands on its steel frame, which goes on down.
     const raised = (kind === 'machine' || kind === 'chambers') && z1 > top && r.chance(0.2);
-    const z0 = raised ? Math.min(zOf(r.int(1, L - 1)) + 160, z1 - 512) : ctx.deep;
+    let z0 = raised ? Math.min(zOf(r.int(1, L - 1)) + 160, z1 - 512) : ctx.deep;
+    if (cutBlocks.has(b.id)) {
+      if (kind !== 'machine' && kind !== 'pier') kind = r.weighted(D.mass.filter(([k]) => k === 'machine' || k === 'pier'));
+      z0 = ctx.deep;
+      if (z1 < top + 700) z1 = top + r.range(700, 3000);
+    }
+    plans.set(b.id, { r, D, kind, x0, y0, x1, y1, z0, z1 });
+  }
+  const inner = interiors(ctx, (blk) => plans.get(blk)!.kind as 'machine' | 'pier');
+
+  // ---- masses: all stand on something that runs down out of sight
+  for (const [id, p] of plans) {
+    const { r, D, kind, x0, y0, x1, y1, z0, z1 } = p;
     ctx.masses.push({ x0, y0, x1, y1, z0, z1, kind });
     if (kind === 'chambers') chamberStack(ctx, r, x0, y0, x1, y1, z0, z1, D.steel);
     else if (kind === 'frame') frameTower(ctx, r, x0, y0, x1, y1, z1, D.steel);
     else {
-      m.box([x0, y0, z0], [x1, y1, z1], { tex: r.pick(kind === 'machine' ? T.dark : T.concrete), lightmapscale: 64, scale: kind === 'pier' ? 0.5 : 0.25 });
-      if (kind === 'machine') skeleton(ctx, r, x0, y0, x1, y1, z0, z1, 512, D.steel);
-      wallRuns(ctx, r, x0, y0, x1, y1, z0, z1, (kind === 'machine' ? 0.5 : 0.25) * D.pipes);
+      const cut = inner.get(id);
+      const shell = { tex: r.pick(kind === 'machine' ? T.dark : T.concrete), lightmapscale: 64, scale: kind === 'pier' ? 0.5 : 0.25 };
+      carve(m, [x0, y0, z0], [x1, y1, z1], cut?.hollows ?? [], shell);
+      const doors = cut?.doors ?? [];
+      if (kind === 'machine') skeleton(ctx, r, x0, y0, x1, y1, z0, z1, 512, D.steel, doors);
+      wallRuns(ctx, r, x0, y0, x1, y1, z0, z1, (kind === 'machine' ? 0.5 : 0.25) * D.pipes, doors);
+      if (cut) fitOut(ctx, p, cut);
     }
   }
 
-  // ---- catwalks
+  // ---- catwalks (the parts of the maze out in the streets)
   for (const w of lay.walks) {
     const s = lay.segments[w.segment];
     const up = w.lb >= w.la;
@@ -118,12 +176,19 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
     const axisMask = (1 << s.dir) | (1 << ((s.dir + 2) % 4));
     const i0 = lo === hi ? seq.length : Math.floor((seq.length - 4) / 2);
     seq.forEach(([x, y], i) => {
-      if (i >= i0 && i < i0 + 4) { noteWalk(x, y, zOf(lo)); noteWalk(x, y, zOf(lo) + STEP); noteWalk(x, y, zOf(hi)); return; }   // the stairs are here
+      const open = blockOf(x, y) < 0;
+      if (i >= i0 && i < i0 + 4) {   // the stairs are here
+        noteWalk(x, y, zOf(lo)); noteWalk(x, y, zOf(lo) + STEP); noteWalk(x, y, zOf(hi));
+        if (open) noteDeck(x, y, zOf(lo) + 32 + 64 * (i - i0), false);
+        return;
+      }
       const c = centre(x, y, i < i0 ? lo : hi);
-      walkTile(m, c, axisMask);
       noteWalk(x, y, c[2]);
+      if (!open) return;
+      walkTile(m, c, axisMask);
+      noteDeck(x, y, c[2], true);
     });
-    if (lo !== hi) {
+    if (lo !== hi && blockOf(seq[i0][0], seq[i0][1]) < 0) {
       const [x, y] = seq[i0];
       const c = centre(x, y, lo);
       const foot: V3 = [c[0] - DX[d] * TILE / 2, c[1] - DY[d] * TILE / 2, c[2]];
@@ -139,6 +204,7 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
     const J = lay.junctions[j];
     const c = centre(J.x, J.y, l);
     noteWalk(J.x, J.y, c[2]);
+    if (blockOf(J.x, J.y) >= 0) continue;   // inside a mass: a room or a corner, cut with the rest
     const open = ([0, 1, 2, 3] as Dir[]).filter((dd) => mask & (1 << dd));
     if (open.length === 1) ends.push({ c, open: open[0] });
     else walkTile(m, c, mask);
@@ -153,32 +219,262 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
   }
 
   // ---- streets: the frames that carry the catwalks and the tube lines; a few cables; bridges of machinery
-  const walkAt = new Set<string>();   // `${tileX},${tileY},${level}` with a level catwalk tile
-  for (const w of lay.walks) if (w.la === w.lb) for (const [x, y] of lay.segments[w.segment].tiles) walkAt.add(`${x},${y},${w.la}`);
-  for (const s of lay.streets) street(ctx, root.fork(`street${s.id}`), s, walkAt);
+  for (const s of lay.streets) street(ctx, root.fork(`street${s.id}`), s);
 
   // ---- tubes that leave one wall and arrive in another; what stands in the halls
   wanderingTubes(ctx, root.fork('tubes'));
   for (const b of lay.blocks) if (b.kind === 'hall') hall(ctx, root.fork(`hall${b.id}`), b);
 
   m.start([sc[0], sc[1], sc[2] + 2], 0, 0);
-  return { map: m, layout: lay };
+  return { map: m, layout: lay, notes: ctx.notes };
+}
+
+// ---------------------------------------------------------------- inside the masses
+
+/** A box that runs from `from` to `to` along direction d (measured from c), from l0 to l1 across (left of d is positive), between two heights. */
+function slab(c: V3, d: Dir, from: number, to: number, l0: number, l1: number, z0: number, z1: number): [V3, V3] {
+  const lx = -DY[d], ly = DX[d];
+  const xs = [c[0] + DX[d] * from + lx * l0, c[0] + DX[d] * to + lx * l1], ys = [c[1] + DY[d] * from + ly * l0, c[1] + DY[d] * to + ly * l1];
+  return [[Math.min(...xs), Math.min(...ys), z0], [Math.max(...xs), Math.max(...ys), z1]];
+}
+/** The same, `w` wide about the line through c. */
+const along = (c: V3, d: Dir, from: number, to: number, w: number, z0: number, z1: number) => slab(c, d, from, to, -w / 2, w / 2, z0, z1);
+
+/**
+ * Everything the maze needs cut into the masses, decided before any mass is
+ * built: a corridor for each run of tiles a walk has inside a block, a stair
+ * hall where the walk climbs, a corner or a room at each junction, a doorway
+ * where a corridor comes out to a street.
+ *
+ * Each tunnel (one straight line of tiles through a block) has its own width
+ * and height, the same on every level. Rooms differ in size, in height and
+ * in which way they are long; a dead end one tile short of a face has a slit
+ * to look out through.
+ */
+function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<number, Inner> {
+  const { lay, zOf, root } = ctx;
+  const N = lay.params.size;
+  const blockOf = (x: number, y: number) => lay.tileBlock[y * N + x];
+  const out = new Map<number, Inner>();
+  const get = (blk: number): Inner => {
+    let v = out.get(blk);
+    if (!v) { v = { finish: root.fork(`finish${blk}`).pick(FINISH[kindOf(blk)]), hollows: [], doors: [], steps: [], ribs: [] }; out.set(blk, v); }
+    return v;
+  };
+  const cut = (blk: number, box: [V3, V3]) => { const v = get(blk); v.hollows.push({ min: box[0], max: box[1], finish: v.finish }); ctx.hollows.push({ min: box[0], max: box[1] }); };
+  interface Profile { w: number; h: number; ribs: number }
+  const profiles = new Map<string, Profile>();
+  /**
+   * The section of the tunnel through block `blk` along `axis` at row or column
+   * `fixed`: its width and height (from a crawl-low passage to a tall slot),
+   * and how far apart its steel ribs stand (0 = none).
+   */
+  const profile = (blk: number, axis: number, fixed: number): Profile => {
+    const k = `${blk}:${axis}:${fixed}`;
+    let p = profiles.get(k);
+    if (!p) {
+      const r = root.fork(`tunnel${k}`);
+      const [w, h] = r.weighted([[[96, 120], 2], [[96, 160], 2], [[104, 136], 3], [[112, 128], 3], [[128, 128], 2], [[128, 200], 2], [[96, 232], 1.5], [[160, 112], 1.5], [[144, 144], 1]] as const);
+      p = { w, h, ribs: r.weighted([[0, 5], [256, 3], [384, 2]] as const) };
+      profiles.set(k, p);
+    }
+    return p;
+  };
+  /** A doorway in a mass's face is never wider or taller than this, whatever the corridor behind it. */
+  const DOOR_W = 128, DOOR_H = 168, NECK = 96;
+  const dirs: Dir[] = [0, 1, 2, 3];
+
+  // ---- corridors and stair halls, walk by walk
+  for (const w of lay.walks) {
+    const s = lay.segments[w.segment];
+    if (!s.tunnel) continue;
+    const up = w.lb >= w.la;
+    const seq = up ? s.tiles : [...s.tiles].reverse();
+    const d = (up ? s.dir : opposite(s.dir)) as Dir;
+    const lo = Math.min(w.la, w.lb), hi = Math.max(w.la, w.lb);
+    const i0 = lo === hi ? seq.length : Math.floor((seq.length - 4) / 2);
+    const ends = [lay.junctions[up ? s.a : s.b], lay.junctions[up ? s.b : s.a]];
+    const endLevel = [up ? w.la : w.lb, up ? w.lb : w.la];
+    const where = (i: number) => (i < 0 ? blockOf(ends[0].x, ends[0].y) : i >= seq.length ? blockOf(ends[1].x, ends[1].y) : blockOf(seq[i][0], seq[i][1]));
+    const onStairs = (i: number) => i >= i0 && i < i0 + 4;
+    const levelAt = (i: number) => (i < i0 ? lo : hi);
+    const fixed = d % 2 === 0 ? seq[0][1] : seq[0][0];
+    for (let i = 0; i < seq.length;) {
+      const blk = where(i);
+      if (blk < 0 || onStairs(i)) { i++; continue; }
+      let e = i;
+      while (e + 1 < seq.length && where(e + 1) === blk && !onStairs(e + 1)) e++;
+      const p = profile(blk, d % 2, fixed);
+      const c: V3 = [seq[i][0] * TILE + TILE / 2, seq[i][1] * TILE + TILE / 2, 0];
+      const z = zOf(levelAt(i));
+      // Where the run comes out to a street: a doorway (a neck through the face, no bigger than a door), with the
+      // catwalk beyond it resting on beams from the wall.
+      const at = d % 2 === 0 ? c[1] : c[0];
+      const dw = Math.min(p.w, DOOR_W), dh = Math.min(p.h, DOOR_H);
+      let u0 = -TILE / 2, u1 = (e - i) * TILE + TILE / 2;
+      if (where(i - 1) < 0) {
+        cut(blk, along(c, d, u0, u0 + NECK, dw, z, z + dh));
+        get(blk).doors.push({ side: opposite(d), at, z, w: dw, h: dh, stub: i, balcony: lay.nodes.get(`${ends[0].id}:${endLevel[0]}`) === (1 << d) });
+        u0 += NECK;
+      }
+      if (where(e + 1) < 0) {
+        cut(blk, along(c, d, u1 - NECK, u1, dw, z, z + dh));
+        get(blk).doors.push({ side: d, at, z, w: dw, h: dh, stub: seq.length - 1 - e, balcony: lay.nodes.get(`${ends[1].id}:${endLevel[1]}`) === (1 << opposite(d)) });
+        u1 -= NECK;
+      }
+      cut(blk, along(c, d, u0, u1, p.w, z, z + p.h));
+      // Steel ribs along it: two posts and a head, standing a little proud of the walls.
+      if (p.ribs) for (let u = u0 + p.ribs / 2; u < u1 - 32; u += p.ribs) {
+        get(blk).ribs.push(slab(c, d, u - 3, u + 3, -p.w / 2, -p.w / 2 + 4, z, z + p.h), slab(c, d, u - 3, u + 3, p.w / 2 - 4, p.w / 2, z, z + p.h), slab(c, d, u - 3, u + 3, -p.w / 2 + 4, p.w / 2 - 4, z + p.h - 5, z + p.h));
+      }
+      i = e + 1;
+    }
+    if (lo !== hi && where(i0) >= 0) {
+      // A stair hall: the floor climbs in steps, the ceiling stays level, so the low end is very tall.
+      const blk = where(i0);
+      const p = profile(blk, d % 2, fixed);
+      const c: V3 = [seq[i0][0] * TILE + TILE / 2, seq[i0][1] * TILE + TILE / 2, 0];
+      const z = zOf(lo);
+      cut(blk, along(c, d, -TILE / 2, 3 * TILE + TILE / 2, p.w, z, zOf(hi) + p.h));
+      ctx.notes.push({ kind: 'stairhall', at: [c[0] - DX[d] * 100, c[1] - DY[d] * 100, z], yaw: d * 90 });
+      const RUN = 32, RISE = 16;   // 16 steps: one level over four tiles
+      for (let k = 0; k < LEVEL / RISE; k++) {
+        const b = along(c, d, -TILE / 2 + k * RUN, -TILE / 2 + (k + 1) * RUN, p.w, z, z + (k + 1) * RISE);
+        get(blk).steps.push({ min: b[0], max: b[1], riser: opposite(d) });
+      }
+    }
+  }
+
+  // ---- junctions inside a mass: a plain corner, or a room
+  for (const [k, mask] of lay.nodes) {
+    const [j, l] = k.split(':').map(Number);
+    const J = lay.junctions[j];
+    const blk = blockOf(J.x, J.y);
+    if (blk < 0) continue;
+    const z = zOf(l), c: V3 = [J.x * TILE + TILE / 2, J.y * TILE + TILE / 2, z];
+    const open = dirs.filter((dd) => mask & (1 << dd));
+    const profs = open.map((dd) => profile(blk, dd % 2, dd % 2 === 0 ? J.y : J.x));
+    open.forEach((dd, n) => cut(blk, along(c, dd, 0, TILE / 2, profs[n].w, z, z + profs[n].h)));
+    const W = Math.max(...profs.map((p) => p.w)), H = Math.max(...profs.map((p) => p.h));
+    const r = root.fork(`node${k}`);
+    const straight = open.length === 2 && opposite(open[0]) === open[1];
+    const roomy = open.length === 1 ? 1 : open.length >= 3 ? 0.75 : straight ? 0.25 : 0.45;
+    if (!r.chance(roomy)) { cut(blk, [[c[0] - W / 2, c[1] - W / 2, z], [c[0] + W / 2, c[1] + W / 2, z + H]]); continue; }
+
+    // A room: how far it reaches each way from the junction's middle. Never more than 160, so it keeps a wall to whatever passes two tiles away.
+    const R = lay.blocks[blk].rect;
+    const face = [R.x1 * TILE - MARGIN, R.y1 * TILE - MARGIN, R.x0 * TILE + MARGIN, R.y0 * TILE + MARGIN];   // the mass's face on each side
+    const shape = r.weighted([['square', 3], ['long', 2], ['wide', 2], ['odd', 2]] as const);
+    const big = r.pick([120, 136, 152]), small = r.pick([72, 88, 104]);
+    const ext = dirs.map((v) => {
+      const alongEntry = open.some((o) => o % 2 === v % 2);
+      if (shape === 'square') return big;
+      if (shape === 'long') return alongEntry ? 152 : small;
+      if (shape === 'wide') return alongEntry ? small : 152;
+      return r.pick([72, 104, 136, 152]);
+    });
+    let slit: Dir | null = null;
+    for (const v of dirs) {
+      const dist = v < 2 ? face[v] - c[v % 2] : c[v % 2] - face[v];
+      // One tile from a face that looks onto a street: a thin wall with a slit to look out through.
+      const bx = J.x + 2 * DX[v], by = J.y + 2 * DY[v];
+      const street = bx >= 0 && by >= 0 && bx < N && by < N && blockOf(bx, by) < 0;
+      if (open.length === 1 && dist <= 136 && street && slit === null && !open.includes(v)) { ext[v] = dist - 16; slit = v; }
+      else ext[v] = Math.max(W / 2, Math.min(ext[v], dist - 48));
+    }
+    for (const v of open) ext[v] = Math.max(ext[v], profs[open.indexOf(v)].w / 2);
+    // Height: most rooms a little taller than their corridors; with nothing on the level above, some go up through it.
+    let hgt = Math.min(244, Math.max(H + 16, r.pick([160, 176, 200, 224, 240])));
+    if (!lay.nodes.has(`${j}:${l + 1}`) && r.chance(0.3)) hgt = r.pick([336, 400, 464]);
+    const lo: V3 = [c[0] - ext[2], c[1] - ext[3], z], hi: V3 = [c[0] + ext[0], c[1] + ext[1], z + hgt];
+    cut(blk, [lo, hi]);
+    const entry = open[0];
+    ctx.notes.push({ kind: slit !== null ? 'lookout' : hgt > 300 ? 'tallroom' : open.length === 1 ? 'endroom' : 'room', at: [c[0] + DX[entry] * 30, c[1] + DY[entry] * 30, z], yaw: opposite(entry) * 90 });
+    if (slit !== null) {
+      const sw = Math.min(192, 2 * Math.min(ext[(slit + 1) % 4], ext[(slit + 3) % 4]) - 32);
+      cut(blk, along(c, slit, ext[slit] - 1, ext[slit] + 17, sw, z + 46, z + 78));
+      get(blk).doors.push({ side: slit, at: slit % 2 === 0 ? c[1] : c[0], z: z + 46, w: sw, h: 32, slit: true, stub: 0, balcony: false });
+    }
+  }
+  return out;
+}
+
+/**
+ * What is added to a cut mass after the cutting: the steps of its stair
+ * halls, the ribs of its corridors, a porch at each doorway, and the beams
+ * and rods that carry the catwalk from the porch to the street's lane.
+ */
+function fitOut(ctx: Ctx, p: { x0: number; y0: number; x1: number; y1: number; D: District }, cut: Inner): void {
+  const { m, steel } = ctx;
+  const side = ['x+', 'y+', 'x-', 'y-'] as const;
+  for (const s of cut.steps) {
+    m.box(s.min, s.max, { tex: { 'z+': cut.finish.floor, [side[s.riser]]: cut.finish.floor }, scale: cut.finish.scale, lightmapscale: cut.finish.lightmapscale });
+  }
+  for (const [lo, hi] of cut.ribs) steel(lo, hi, p.D.steel);
+  const face = [p.x1, p.y1, p.x0, p.y0];
+  for (const d of cut.doors) {
+    if (d.slit) continue;
+    const f = face[d.side], sgn = d.side < 2 ? 1 : -1, alongX = d.side % 2 === 0;
+    // u runs out from the face, v along it.
+    const box = (u0: number, u1: number, v0: number, v1: number, z0: number, z1: number, tex: string, group?: string) => {
+      const a0 = f + sgn * u0, a1 = f + sgn * u1;
+      const lo: V3 = alongX ? [Math.min(a0, a1), v0, z0] : [v0, Math.min(a0, a1), z0], hi: V3 = alongX ? [Math.max(a0, a1), v1, z1] : [v1, Math.max(a0, a1), z1];
+      return m.box(lo, hi, { tex, group, lightmapscale: 32, scale: 0.25 });
+    };
+    const { at, z, w, h } = d;
+    // The porch: a steel box through the margin, from the face to the block's edge.
+    box(0, MARGIN, at - w / 2 - 8, at + w / 2 + 8, z - 12, z, p.D.steel);
+    box(0, MARGIN, at - w / 2 - 8, at - w / 2, z, z + h, p.D.steel);
+    box(0, MARGIN, at + w / 2, at + w / 2 + 8, z, z + h, p.D.steel);
+    box(0, MARGIN, at - w / 2 - 8, at + w / 2 + 8, z + h, z + h + 8, p.D.steel);
+    // The catwalk from the porch to the lane rests on two beams out of the wall, one each side of the porch, with
+    // bars across under the deck; a rod from the wall above the doorway holds the far end of each beam.
+    const len = MARGIN + d.stub * TILE + (d.balcony ? 100 : 0);
+    if (d.stub === 0 && !d.balcony) continue;
+    const off = w / 2 + 14;
+    for (const o of [-off, off]) {
+      box(-24, len, at + o - 4, at + o + 4, z - 28, z - 14, p.D.steel, 'func_detail');
+      const a: V3 = alongX ? [f - sgn * 8, at + o, z + 214] : [at + o, f - sgn * 8, z + 214];
+      const b: V3 = alongX ? [f + sgn * (len - 12), at + o, z - 20] : [at + o, f + sgn * (len - 12), z - 20];
+      m.bar(a, b, 3, 3, T.steel, { group: 'func_detail', lightmapscale: 64, scale: 0.25 });
+    }
+    for (let u = MARGIN + TILE / 2; u < len; u += TILE) box(u - 4, u + 4, at - off - 4, at + off + 4, z - 14, z - 4, p.D.steel, 'func_detail');
+    box(len - 8, len, at - off - 4, at + off + 4, z - 14, z - 4, p.D.steel, 'func_detail');
+  }
+}
+
+/** Can a column (16 across) stand at p, from far below up to zTop, without passing through a doorway or a room? */
+function columnClear(ctx: Ctx, p: V3, zTop: number): boolean {
+  return !ctx.hollows.some((h) => p[0] > h.min[0] - 14 && p[0] < h.max[0] + 14 && p[1] > h.min[1] - 14 && p[1] < h.max[1] + 14 && h.min[2] < zTop + 8);
+}
+
+/** Is p (with `radius` to spare) in anything cut into a mass, or in a doorway's porch? */
+function inHollow(ctx: Ctx, p: V3, radius: number): boolean {
+  for (const h of ctx.hollows) {
+    if (p[0] > h.min[0] - radius && p[0] < h.max[0] + radius && p[1] > h.min[1] - radius && p[1] < h.max[1] + radius && p[2] > h.min[2] - radius && p[2] < h.max[2] + radius) return true;
+  }
+  return false;
 }
 
 // ---------------------------------------------------------------- masses
 
+/** Doors on one face of a mass, as [middle along the face, half-width] pairs. */
+const doorsOn = (doors: Door[], side: Dir) => doors.filter((d) => d.side === side);
+
 /**
  * Columns and ring beams standing off a box's four sides (inside the mass's
  * own margin). The columns always go down out of sight: a mass that begins
- * part-way up stands on them.
+ * part-way up stands on them. No column stands in front of a doorway.
  */
-function skeleton(ctx: Ctx, r: Rng, x0: number, y0: number, x1: number, y1: number, z0: number, z1: number, bay: number, tex: string): void {
+function skeleton(ctx: Ctx, r: Rng, x0: number, y0: number, x1: number, y1: number, z0: number, z1: number, bay: number, tex: string, doors: Door[] = []): void {
   const { steel } = ctx;
   const C = 24, OUT = 28;   // column size, how far its centre stands off the face
   const cols = (a0: number, a1: number) => { const n = Math.max(1, Math.round((a1 - a0) / bay)); return Array.from({ length: n + 1 }, (_, i) => a0 + ((a1 - a0) * i) / n); };
-  for (const x of cols(x0, x1)) for (const y of [y0 - OUT, y1 + OUT]) steel([x - C / 2, y - C / 2, ctx.deep], [x + C / 2, y + C / 2, z1], tex);
-  for (const y of cols(y0, y1).slice(1, -1)) for (const x of [x0 - OUT, x1 + OUT]) steel([x - C / 2, y - C / 2, ctx.deep], [x + C / 2, y + C / 2, z1], tex);
+  const clear = (side: Dir, a: number) => doorsOn(doors, side).every((d) => Math.abs(d.at - a) > d.w / 2 + 30);
+  for (const x of cols(x0, x1)) for (const [y, side] of [[y0 - OUT, 3], [y1 + OUT, 1]] as [number, Dir][]) if (clear(side, x)) steel([x - C / 2, y - C / 2, ctx.deep], [x + C / 2, y + C / 2, z1], tex);
+  for (const y of cols(y0, y1).slice(1, -1)) for (const [x, side] of [[x0 - OUT, 2], [x1 + OUT, 0]] as [number, Dir][]) if (clear(side, y)) steel([x - C / 2, y - C / 2, ctx.deep], [x + C / 2, y + C / 2, z1], tex);
   // Ring beams up the height (closer together near the catwalks, where they are seen; under a raised mass they tie its legs).
+  // Their heights (208 above a multiple of 512) fall between the doorways of any level.
   const step = bay * r.pick([1, 1, 2]);
   for (let z = Math.ceil((ctx.bottom - 2600) / step) * step + 208; z < z1; z += step) {
     steel([x0 - OUT - 8, y0 - OUT - 8, z - 12], [x1 + OUT + 8, y0 - OUT + 8, z + 12], tex);
@@ -232,17 +528,19 @@ function frameTower(ctx: Ctx, r: Rng, x0: number, y0: number, x1: number, y1: nu
   }
 }
 
-/** Ducts and pipes fixed to a mass's walls. Pipes run from out of sight below to a collar near the top. */
-function wallRuns(ctx: Ctx, r: Rng, x0: number, y0: number, x1: number, y1: number, z0: number, z1: number, density: number): void {
+/** Ducts and pipes fixed to a mass's walls. Pipes run from out of sight below to a collar near the top. None crosses a doorway. */
+function wallRuns(ctx: Ctx, r: Rng, x0: number, y0: number, x1: number, y1: number, z0: number, z1: number, density: number, doors: Door[] = []): void {
   const { m } = ctx;
   const sides: { o: V3; along: Dir; out: Dir; len: number }[] = [
     { o: [x0, y0, 0], along: 0, out: 3, len: x1 - x0 }, { o: [x1, y0, 0], along: 1, out: 0, len: y1 - y0 },
     { o: [x1, y1, 0], along: 2, out: 1, len: x1 - x0 }, { o: [x0, y1, 0], along: 3, out: 2, len: y1 - y0 }];
-  for (const { o, along, out, len } of sides) {
+  for (const { o, along: al, out, len } of sides) {
+    const here = doorsOn(doors, out);
     // Vertical pipes (pipe_64_256: 67 across, 256 tall, centred on its origin), touching the wall.
     for (let a = 256; a < len - 256; a += 256) {
       if (!r.chance(0.1 * density)) continue;
-      const px = o[0] + DX[along] * a + DX[out] * 34, py = o[1] + DY[along] * a + DY[out] * 34;
+      const px = o[0] + DX[al] * a + DX[out] * 34, py = o[1] + DY[al] * a + DY[out] * 34;
+      if (here.some((d) => Math.abs(d.at - (al % 2 === 0 ? px : py)) < d.w / 2 + 52)) continue;
       let zt = z0;
       for (let z = Math.ceil(z0 / 256) * 256 + 128; z < z1 - 128; z += 256) { m.prop('props_bts/pipe_64_256', [px, py, z], [0, 0, 0], { solid: false, hollow: true }); zt = z + 128; }
       if (zt > z0) m.prop('props_bts/pipe_64_rim', [px, py, zt], [0, 0, 0], { solid: false });
@@ -250,10 +548,11 @@ function wallRuns(ctx: Ctx, r: Rng, x0: number, y0: number, x1: number, y1: numb
     // Horizontal ducts (duct_512b: 512 long on its own x, 70 wide, 38 tall), flat against the wall, the full width of it.
     for (let z = Math.ceil((ctx.bottom - 2600) / 384) * 384; z < z1 - 100; z += 384) {
       if (z < z0 + 100 || !r.chance(0.1 * density)) continue;
+      if (here.some((d) => z + 80 > d.z - 30 && z < d.z + d.h + 30)) continue;
       const n = Math.ceil(len / 512);
       for (let i = 0; i < n; i++) {
         const a = Math.min(len - 256, 256 + i * 512);   // the last piece overlaps the one before, so the run ends at the wall's corner
-        m.prop('props_bts/duct_512b', [o[0] + DX[along] * a + DX[out] * 19, o[1] + DY[along] * a + DY[out] * 19, z + 40], [0, along * 90, 90], { solid: false, hollow: true });
+        m.prop('props_bts/duct_512b', [o[0] + DX[al] * a + DX[out] * 19, o[1] + DY[al] * a + DY[out] * 19, z + 40], [0, al * 90, 90], { solid: false, hollow: true });
       }
     }
   }
@@ -267,13 +566,13 @@ const SOLID: MassKind[] = ['machine', 'pier', 'bridge', 'chambers'];
 
 /**
  * A street's own structure: pairs of columns at its two edges (they stand
- * out of sight below), a beam across at each catwalk level with two rods
- * down to a bar under the deck, ties from frame to frame. Tube lines rest on
- * brackets from the same columns and turn into the walls at both ends. A few
- * cables run beam to beam. Here and there a box of machinery bridges the
+ * out of sight below), a beam across over each catwalk and each flight of
+ * stairs, with two rods down to it; ties from frame to frame. Tube lines rest
+ * on brackets from the same columns and turn into the walls at both ends. A
+ * few cables run beam to beam. Here and there a box of machinery bridges the
  * street from wall to wall.
  */
-function street(ctx: Ctx, r: Rng, s: Street, walkAt: Set<string>): void {
+function street(ctx: Ctx, r: Rng, s: Street): void {
   const { m, lay, zOf, steel, L } = ctx;
   const N = lay.params.size;
   const across: Dir = s.axis === 0 ? 1 : 0;
@@ -299,14 +598,25 @@ function street(ctx: Ctx, r: Rng, s: Street, walkAt: Set<string>): void {
   const half = (s.width * TILE) / 2;
   let tube: { off: number; z: number; from: number; to: number; side: number } | null = null;
   if (s.width >= 3 && r.chance(Math.min(0.9, 0.4 * D.tubes))) {
-    const side = r.pick([-1, 1]);
-    const off = laneC + side * (half - 64);
-    const z = zOf(r.int(0, L - 1)) + r.pick([128, 128, 144, -112]);
-    const wallAt = (i: number) => inMass(ctx, pt(i * TILE + TILE / 2, laneC + side * (half + MARGIN + 60), z), SOLID);
-    let from = a0, to = a1 - 1;
-    while (from < to && !wallAt(from)) from++;
-    while (to > from && !wallAt(to)) to--;
-    if (to - from >= 4) {
+    for (let attempt = 0; attempt < 6 && !tube; attempt++) {
+      const side = r.pick([-1, 1]);
+      const off = laneC + side * (half - 64);
+      const z = zOf(r.int(0, L - 1)) + r.pick([128, 128, 144, -112]);
+      // An end may turn into the wall at tile i if the wall is solid there and nothing is cut into it or walks in front of it.
+      const wallAt = (i: number) => {
+        const u = i * TILE + TILE / 2;
+        if (!inMass(ctx, pt(u, laneC + side * (half + MARGIN + 60), z), SOLID)) return false;
+        for (let v = 0; v <= 512; v += 64) { const p = pt(u, off + side * v, z); if (inHollow(ctx, p, 60) || hitsWalk(ctx, p, 54)) return false; }
+        return true;
+      };
+      let from = a0, to = a1 - 1;
+      while (from < to && !wallAt(from)) from++;
+      while (to > from && !wallAt(to)) to--;
+      if (to - from < 4) continue;
+      // Nothing may cross its line: a catwalk from a doorway out to the lane would.
+      let free = true;
+      for (let i = from; i <= to && free; i++) free = !hitsWalk(ctx, pt(i * TILE + TILE / 2, off, z), 52);
+      if (!free) continue;
       tube = { off, z, from, to, side };
       const uA = from * TILE + TILE / 2, uB = to * TILE + TILE / 2, into = off + side * 512;
       tubePath(m, [pt(uA, into, z), pt(uA, off, z), pt(uB, off, z), pt(uB, into, z)]);
@@ -315,27 +625,30 @@ function street(ctx: Ctx, r: Rng, s: Street, walkAt: Set<string>): void {
 
   // ---- frames
   const bay = r.pick([3, 4, 4, 6]);
-  const last: (number | null)[] = Array.from({ length: L }, () => null);   // per level: the last frame's position along the street
+  const last = new Map<number, number>();   // per deck height: where the last frame that carried it stands
   let next = a0;
   for (let i = a0; i < a1; i++) {
     if (i < next || !blockBeside(i, 0) || !blockBeside(i, 1)) continue;
-    const [tx, ty] = tile(i);
-    const levels = Array.from({ length: L }, (_, l) => l).filter((l) => walkAt.has(`${tx},${ty},${l}`));
+    const decks = ctx.decks.get(tile(i).join(',')) ?? [];
     const carriesTube = tube !== null && i > tube.from && i < tube.to;
-    if (!levels.length && !carriesTube) { last.fill(null); continue; }
-    next = i + bay;
+    if (!decks.length && !carriesTube) { last.clear(); continue; }
     const u = i * TILE + TILE / 2;
-    const zTop = Math.max(...levels.map((l) => zOf(l) + 236), carriesTube ? tube!.z + 40 : -1e9);
+    const zTop = Math.max(...decks.map((k) => k.z + 236), carriesTube ? tube!.z + 40 : -1e9);
+    // Its columns must not stand in a doorway (one tile on, they will not).
+    if (![v0, v1].every((v) => columnClear(ctx, pt(u, v, 0), zTop))) continue;
+    next = i + bay;
     for (const v of [v0, v1]) { const p = pt(u, v, 0); steel([p[0] - 8, p[1] - 8, ctx.deep], [p[0] + 8, p[1] + 8, zTop + 8], D.steel); }
-    for (let l = 0; l < L; l++) {
-      if (!levels.includes(l)) { last[l] = null; continue; }
-      const z = zOf(l);
-      // The beam across, the two rods down, the bar under the deck.
+    const seen = new Set<number>();
+    for (const { z, flat } of decks) {
+      // The beam across, the two rods down, the bar under the deck (under a stair, lower: below its stringers).
       box(u - 8, u + 8, v0, v1, z + 216, z + 236, D.steel);
-      for (const side of [-1, 1]) { const p = pt(u, laneC + side * 47, z); steel([p[0] - 1.5, p[1] - 1.5, z - 10], [p[0] + 1.5, p[1] + 1.5, z + 216]); }
-      m.prop('props_bts/hanging_walkway_hanger_a', pt(u, laneC, z), [0, across * 90, 0], { solid: false });
-      const prev = last[l];
-      if (prev !== null && u - prev <= 8 * TILE) {
+      const under = flat ? 0 : -30;
+      for (const side of [-1, 1]) { const p = pt(u, laneC + side * 47, z); steel([p[0] - 1.5, p[1] - 1.5, z - 10 + under], [p[0] + 1.5, p[1] + 1.5, z + 216]); }
+      m.prop('props_bts/hanging_walkway_hanger_a', pt(u, laneC, z + under), [0, across * 90, 0], { solid: false });
+      if (!flat) continue;
+      seen.add(z);
+      const prev = last.get(z);
+      if (prev !== undefined && u - prev <= 8 * TILE) {
         // Ties along both column lines, and now and then a pair of cables slung beam to beam beside the walk.
         for (const v of [v0, v1]) box(prev + 8, u - 8, v - 5, v + 5, z + 220, z + 232, D.steel);
         if (r.chance(0.3 * D.cables)) {
@@ -345,8 +658,9 @@ function street(ctx: Ctx, r: Rng, s: Street, walkAt: Set<string>): void {
           if (r.chance(0.5)) m.rope(pt(prev, off + 6, z + 217), pt(u, off + 6, z + 217), sag + r.range(2, 6), 2);
         }
       }
-      last[l] = u;
+      last.set(z, u);
     }
+    for (const z of [...last.keys()]) if (!seen.has(z)) last.delete(z);
     if (carriesTube) {
       // A bracket from the nearer column, under the tube (the tube is 104 across), with a ring round the tube above it.
       const v = tube!.side > 0 ? v1 : v0;
@@ -360,13 +674,19 @@ function street(ctx: Ctx, r: Rng, s: Street, walkAt: Set<string>): void {
   if (len >= 8 * TILE && r.chance(0.3)) {
     const n = r.int(2, 6), i = r.int(a0 + 1, a1 - n - 1);
     let z = -1e9;
-    for (let t = i; t < i + n; t++) for (const wz of ctx.walkZ.get(tile(t).join(',')) ?? []) z = Math.max(z, wz + 248);
+    for (let t = i; t < i + n; t++) for (let e = e0; e < e1; e++) {
+      const [x, y] = s.axis === 0 ? [t, e] : [e, t];
+      for (const wz of ctx.walkZ.get(`${x},${y}`) ?? []) z = Math.max(z, wz + 248);
+    }
     if (z < -1e8) z = zOf(r.int(0, L - 1)) + 248;
     const h = r.pick([256, 384, 512, 1024, 2048]);
     const w0 = e0 * TILE - MARGIN, w1 = e1 * TILE + MARGIN;   // the two masses' faces
-    // It needs a wall to sit in at both ends, along its whole length, at this height.
+    // It needs a wall to sit in at both ends, along its whole length, at this height; and no doorway or slit behind it.
     let held = true;
-    for (let t = i; t < i + n && held; t++) for (const zz of [z + 8, z + h - 8]) held &&= inMass(ctx, pt(t * TILE + 64, w0 - 40, zz)) && inMass(ctx, pt(t * TILE + 64, w1 + 40, zz));
+    for (let t = i; t < i + n && held; t++) {
+      for (const zz of [z + 8, z + h - 8]) held &&= inMass(ctx, pt(t * TILE + 64, w0 - 40, zz)) && inMass(ctx, pt(t * TILE + 64, w1 + 40, zz));
+      for (let zz = z + 8; zz < z + h && held; zz += 64) held &&= !inHollow(ctx, pt(t * TILE + 64, w0 + 16, zz), 70) && !inHollow(ctx, pt(t * TILE + 64, w1 - 16, zz), 70);
+    }
     if (held) {
       const p = pt(i * TILE, w0, z), q = pt((i + n) * TILE, w1, z + h);
       const lo: V3 = [Math.min(p[0], q[0]), Math.min(p[1], q[1]), z], hi: V3 = [Math.max(p[0], q[0]), Math.max(p[1], q[1]), z + h];
@@ -378,7 +698,7 @@ function street(ctx: Ctx, r: Rng, s: Street, walkAt: Set<string>): void {
 
 // ---------------------------------------------------------------- tubes
 
-/** Would something `radius` thick, centred on p, cut through a catwalk or the space a walker needs on it? */
+/** Would something `radius` thick, centred on p, cut through a catwalk or a corridor, or the space a walker needs in it? */
 function hitsWalk(ctx: Ctx, p: V3, radius: number): boolean {
   const tx = Math.floor(p[0] / TILE), ty = Math.floor(p[1] / TILE);
   const reach = Math.ceil(radius / TILE);
@@ -409,13 +729,17 @@ function nearestWall(ctx: Ctx, p: V3): { dist: number; dir: [number, number] } |
  * Transport tubes that leave a solid wall, turn a few times (up, down, along,
  * across) and enter another solid wall. One that finds no wall to end in, or
  * runs too far from any wall to be held, is not built. Each is held by struts
- * to the nearest wall along its way.
+ * to the nearest wall along its way. None passes through a corridor or a
+ * room, in the open or inside a wall.
  */
 function wanderingTubes(ctx: Ctx, r: Rng): void {
   const { m, steel } = ctx;
   const AX: V3[] = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
   const snap = (v: number) => Math.round(v / 128) * 128;
   const REACH = 460;   // the longest strut
+  const blocked = (q: V3) => hitsWalk(ctx, q, 70) || inHollow(ctx, q, 64);
+  /** Is the straight run from p for `len` along d free of walks and of anything cut into the masses? */
+  const freeRun = (p: V3, d: V3, len: number) => { for (let u = 0; u <= len; u += 64) if (blocked([p[0] + d[0] * u, p[1] + d[1] * u, p[2] + d[2] * u])) return false; return true; };
   for (const b of [...ctx.masses]) {
     if (b.kind !== 'machine' && b.kind !== 'pier' && b.kind !== 'chambers') continue;
     const D = ctx.districtAt((b.x0 + b.x1) / 2, (b.y0 + b.y1) / 2);
@@ -427,15 +751,19 @@ function wanderingTubes(ctx: Ctx, r: Rng): void {
       const z = snap(r.range(Math.max(b.z0 + 200, ctx.bottom - 700), Math.min(b.z1 - 200, ctx.top + 900)));
       const p0: V3 = side < 2 ? [snap(side === 0 ? b.x1 : b.x0), snap(r.range(b.y0 + 128, b.y1 - 128)), z] : [snap(r.range(b.x0 + 128, b.x1 - 128)), snap(side === 2 ? b.y1 : b.y0), z];
       const pts: V3[] = [[p0[0] - d[0] * 384, p0[1] - d[1] * 384, p0[2] - d[2] * 384]];   // begins well inside the wall
+      if (!freeRun(pts[0], d, 384)) continue;
       let cur = p0, arrived = false;
       for (let leg = 0; leg < r.int(2, 6) && !arrived; leg++) {
         const want = 128 * r.int(2, leg === 0 ? 4 : 16);
         let run = 0;
         for (let u = 64; u <= want; u += 64) {
           const q: V3 = [cur[0] + d[0] * u, cur[1] + d[1] * u, cur[2] + d[2] * u];
-          if (hitsWalk(ctx, q, 70) || q[0] < 0 || q[1] < 0 || q[0] > ctx.size || q[1] > ctx.size) break;
+          if (blocked(q) || q[0] < 0 || q[1] < 0 || q[0] > ctx.size || q[1] > ctx.size) break;
           if (u % 128 === 0) run = u;
-          if (leg > 0 && u % 128 === 0 && inMass(ctx, q, SOLID)) { arrived = true; run = u + 384; break; }
+          if (leg > 0 && u % 128 === 0 && inMass(ctx, q, SOLID)) {
+            if (!freeRun(q, d, 384)) break;   // something is cut into the wall behind here: no way in
+            arrived = true; run = u + 384; break;
+          }
         }
         if (run < 256) break;
         cur = [cur[0] + d[0] * run, cur[1] + d[1] * run, cur[2] + d[2] * run];
@@ -455,8 +783,10 @@ function wanderingTubes(ctx: Ctx, r: Rng): void {
           const p: V3 = [a[0] + dir[0] * u, a[1] + dir[1] * u, a[2] + dir[2] * u];
           if (inMass(ctx, p)) continue;
           const w = nearestWall(ctx, p);
-          // A strut must run square to the tube, not along it.
-          if (w && w.dist <= REACH && Math.abs(w.dir[0] * dir[0] + w.dir[1] * dir[1]) < 0.5) struts.push({ p, w });
+          // A strut must run square to the tube, not along it, and must not end in a doorway or a room.
+          const sound = w && w.dist <= REACH && Math.abs(w.dir[0] * dir[0] + w.dir[1] * dir[1]) < 0.5
+            && [w.dist - 40, w.dist + 20, w.dist + 80, w.dist + 136].every((v) => !inHollow(ctx, [p[0] + w.dir[0] * v, p[1] + w.dir[1] * v, p[2]], 16));
+          if (sound) struts.push({ p, w: w! });
           else if (len > 1024) held = false;
         }
       }
@@ -518,6 +848,7 @@ export const GEOMETRY_SETTINGS = {
   camera: { model: 'source', sourceHdr: false },
   light: { enabled: false },
   render: { internalHeight: 0, textureFilter: 'linear', faceShade: 0.75 },
+  surface: { reflections: 0 },
   fog: { enabled: true, source: true, color: '#8f979f', near: 400, far: 9000, maxDensity: 1 },
   // The Portal 2 kit is made for Source's player: 32 wide, 72 tall, eyes at 64.
   hull: { hullWidth: 32, standHeight: 72, duckHeight: 36, eyeHeight: 64, duckEyeHeight: 28, voidZ: -2600 },

@@ -188,14 +188,30 @@ other worlds; worlds made by a seeded generator, at random in the end.
 
 ## 9. The industrial world: what this changes
 
-Now: one topology everywhere (masses, canyon streets, catwalks on five
-levels, a few halls), 7 districts that change steel colour and amounts, one
-fault with chaos around it, spurs, shelters, glitch repeats.
+Now (`src/world/industrial/`): masses and canyon streets with catwalks on
+five levels and a few halls; 7 districts that differ in what their masses
+are and how much pipe and tube they carry. Tunnels cut through about half
+the masses (straight, bent, dog-leg, dead end), each with its own section
+(from a low wide passage to a tall slot), with rooms at their junctions
+(some tall, some with a look-out slit), stair halls, and doorways with
+porches. Nothing floats. No chaos, no damage (the user's call, for now).
+
+The world is made from a seed, in the page too (map path
+`world:industrial:<seed>`; N and B change the seed in the private build).
+
+Checks:
+- `npm run world:walk -- <seed>`: the player's own movement code walks every
+  catwalk, stair, corridor and stair hall both ways over the real collision
+  and lists anything that blocks, drops or stops short. Must pass.
+- `npm run world:plan -- <seed> out.ppm`: the plan as a picture, and counts.
+- `npx vite-node tools/world/spots.ts -- <seed> <n>`: camera poses (feet
+  position) at doors, corridors, stair halls and rooms, for studio views.
+- `tests/carve.test.ts`, `tests/world-layout.test.ts`.
 
 Next, in this order:
 
-1. **Checks**: a walk test over the real collision (every catwalk reachable,
-   no trap), and a metrics report per seed.
+1. **Checks**: a walk test over the real collision (done, see above), and a
+   metrics report per seed (to do).
 2. **District types with their own topology**, replacing "more of the same":
    canyon streets (as now), a **shaft** (ledges round a core machine, grated
    floors, a landmark at the bottom), a **nave** (one huge machine, a spine

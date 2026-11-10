@@ -8,7 +8,15 @@ import { DebugPanel } from './ui/debugPanel';
 import { Hud } from './ui/hud';
 
 // The private atrium build (npm run build:atrium) opens the Portal 2 reference map.
-const DEFAULT_MAP = import.meta.env.MODE === 'atrium' ? 'maps/p2/shipyard_atrium.json' : import.meta.env.MODE === 'catalogue' ? 'maps/p2lib/room0.json' : import.meta.env.MODE === 'industrial' ? 'maps/iw/industrial.json' : 'maps/blank.json';
+const DEFAULT_MAP = import.meta.env.MODE === 'atrium' ? 'maps/p2/shipyard_atrium.json' : import.meta.env.MODE === 'catalogue' ? 'maps/p2lib/room0.json' : import.meta.env.MODE === 'industrial' ? `world:industrial:${storedSeed()}` : 'maps/blank.json';
+
+/** The seed of the generated world: from the address (?seed=7), else the one last used here, else 1. */
+function storedSeed(): number {
+  const q = Number(new URLSearchParams(location.search).get('seed'));
+  if (Number.isInteger(q) && q > 0) return q;
+  try { const s = Number(localStorage.getItem('liminal:seed')); if (Number.isInteger(s) && s > 0) return s; } catch { /* storage blocked */ }
+  return 1;
+}
 
 /** Milliseconds since boot start at each step (window.liminal.bootTimes). */
 const bootTimes: Record<string, number> = {};
@@ -79,7 +87,17 @@ async function boot(): Promise<void> {
   };
   window.addEventListener('keydown', (e) => {
     if (e.code === 'Tab') { e.preventDefault(); toast('The editor arrives in Milestone 2: Tab will switch between edit and play.'); }
+    // In a generated world, N and B make the next and the previous world (seed + 1, seed − 1).
+    const world = /^world:([a-z]+):(\d+)$/.exec(game.mapPath);
+    if (world && (e.code === 'KeyN' || e.code === 'KeyB') && !e.repeat && !panel.open) {
+      const seed = Math.max(1, Number(world[2]) + (e.code === 'KeyN' ? 1 : -1));
+      toast(`Making world ${seed}…`);
+      try { localStorage.setItem('liminal:seed', String(seed)); } catch { /* storage blocked */ }
+      // Let the message show before the page is busy.
+      setTimeout(() => void game.loadMapPath(`world:${world[1]}:${seed}`).then(() => toast(`World ${seed}  ·  N next, B back`)).catch((err) => showError((err as Error).message)), 50);
+    }
   });
+  if (game.mapPath.startsWith('world:')) toast(`World ${game.mapPath.split(':')[2]}  ·  N next, B back`);
 
   window.addEventListener('dragover', (e) => e.preventDefault());
   window.addEventListener('drop', (e) => {

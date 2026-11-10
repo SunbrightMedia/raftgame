@@ -10,3 +10,5 @@ export const catalogue = {
   models: Object.values(import.meta.glob('../../catalogue/models.json', { eager: true, import: 'default' }))[0] as unknown,
   packs: import.meta.glob('../../catalogue/packs/*.png', { eager: true, query: '?url', import: 'default' }) as Record<string, string>,
 };
+/** Worlds made in the page from a seed: none in this build. */
+export const worlds: Record<string, (seed: number) => unknown> = {};

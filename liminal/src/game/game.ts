@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import * as assets from '@globs';
 import type { Storage } from '../data/storage';
 import type { ConfigStore } from '../data/config';
 import { type Settings, DEFAULT_SETTINGS, cloneSettings } from '../data/settings';
@@ -228,6 +229,15 @@ export class Game {
   }
 
   async loadMapPath(path: string): Promise<void> {
+    // "world:<name>:<seed>": made here by that world's generator, not read from a file.
+    const world = /^world:([a-z]+):(\d+)$/.exec(path);
+    if (world) {
+      const make = assets.worlds[world[1]];
+      if (!make) throw new Error(`no such world in this build: ${world[1]}`);
+      this.mapPath = path;
+      await this.setMap(parseMap(make(Number(world[2]))), path);
+      return;
+    }
     const text = await this.storage.read(path);
     if (text === null) throw new Error(`map not found: ${path}`);
     this.mapPath = path;

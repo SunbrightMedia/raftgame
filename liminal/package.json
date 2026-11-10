@@ -20,6 +20,9 @@
     "gen:blank": "vite-node tools/gen-blank.ts",
     "studio": "node tools/studio/cli.mjs",
     "check": "vite-node tools/check/check.ts --",
+    "world": "vite-node tools/world/gen.ts --",
+    "world:walk": "vite-node tools/world/walk.ts --",
+    "world:plan": "vite-node tools/world/plan.ts --",
     "fetch:textures": "python3 tools/fetch_textures.py"
   },
   "dependencies": {
