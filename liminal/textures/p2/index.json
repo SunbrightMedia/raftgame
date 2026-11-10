@@ -186,6 +186,14 @@
    "source": {
     "shader": "lightmappedgeneric",
     "basetexture": "concrete/concrete_bts_modular_wall001a",
+    "normal": "p2/concrete/concrete_bts_modular_wall001a_n.png",
+    "ssbump": true,
+    "detail": {
+     "file": "p2/detail/detail_concrete_01.png",
+     "scale": 4.25,
+     "factor": 0.35,
+     "mode": 0
+    },
     "reflectivity": [
      0.3461,
      0.3558,
@@ -207,6 +215,14 @@
    "source": {
     "shader": "lightmappedgeneric",
     "basetexture": "concrete/concrete_bts_modular_wall001c",
+    "normal": "p2/concrete/concrete_bts_modular_wall001c_n.png",
+    "ssbump": true,
+    "detail": {
+     "file": "p2/detail/detail_concrete_01.png",
+     "scale": 4.25,
+     "factor": 0.35,
+     "mode": 0
+    },
     "reflectivity": [
      0.3225,
      0.2976,
@@ -228,6 +244,7 @@
    "source": {
     "shader": "lightmappedgeneric",
     "basetexture": "concrete/concrete_modular_ceiling001a",
+    "normal": "p2/concrete/concrete_modular_ceiling001a_n.png",
     "reflectivity": [
      0.3568,
      0.3561,
@@ -336,6 +353,14 @@
    "source": {
     "shader": "lightmappedgeneric",
     "basetexture": "concrete/concrete_modular_wall001_gradient05",
+    "normal": "p2/concrete/concrete_modular_wall001_gradient05_n.png",
+    "ssbump": true,
+    "detail": {
+     "file": "p2/detail/detail_concrete_01.png",
+     "scale": 4.25,
+     "factor": 0.35,
+     "mode": 0
+    },
     "reflectivity": [
      0.1656,
      0.1725,
@@ -357,6 +382,14 @@
    "source": {
     "shader": "lightmappedgeneric",
     "basetexture": "concrete/concrete_modular_wall001b",
+    "normal": "p2/concrete/concrete_modular_wall001b_n.png",
+    "ssbump": true,
+    "detail": {
+     "file": "p2/detail/detail_concrete_01.png",
+     "scale": 4.25,
+     "factor": 0.35,
+     "mode": 0
+    },
     "reflectivity": [
      0.3022,
      0.3103,
@@ -401,6 +434,7 @@
     "shader": "lightmappedgeneric",
     "basetexture": "concrete/factory_concrete_wall001a",
     "normal": "p2/concrete/factory_concrete_wall001a_n.png",
+    "ssbump": true,
     "reflectivity": [
      0.7724,
      0.7718,
@@ -444,6 +478,7 @@
     "shader": "lightmappedgeneric",
     "basetexture": "concrete/underground_concrete_ceiling002",
     "normal": "p2/concrete/underground_concrete_ceiling002_n.png",
+    "ssbump": true,
     "reflectivity": [
      0.0797,
      0.072,
@@ -755,11 +790,17 @@
     "shader": "lightmappedgeneric",
     "basetexture": "metal/black_wall_metal_002f",
     "normal": "p2/metal/black_wall_metal_002f_n.png",
+    "detail": {
+     "file": "p2/detail/detail_fractal04c.png",
+     "scale": 1.25,
+     "factor": 1.0,
+     "mode": 0
+    },
     "envmap": true,
     "reflectivity": [
-     0.0148,
-     0.0148,
-     0.0148
+     0.6,
+     0.6,
+     0.6
     ]
    }
   },
@@ -778,17 +819,23 @@
     "shader": "lightmappedgeneric",
     "basetexture": "metal\\black_wall_metal_004d",
     "normal": "p2/metal/black_wall_metal_004d_n.png",
+    "detail": {
+     "file": "p2/detail/detail_fractal04c.png",
+     "scale": 1.25,
+     "factor": 1.0,
+     "mode": 0
+    },
     "envmap": true,
     "reflectivity": [
-     0.0132,
-     0.0132,
-     0.0132
+     0.6,
+     0.6,
+     0.6
     ]
    }
   },
   {
    "name": "p2/metal/black_wall_metal_006b",
-   "file": "p2/metal/black_wall_metal_006b.jpg",
+   "file": "p2/metal/black_wall_metal_006b.png",
    "size": [
     1024,
     1024
@@ -801,11 +848,18 @@
     "shader": "lightmappedgeneric",
     "basetexture": "metal/black_wall_metal_006b",
     "normal": "p2/metal/black_wall_metal_006b_n.png",
+    "ssbump": true,
+    "detail": {
+     "file": "p2/detail/detail_tile.png",
+     "scale": 9.0,
+     "factor": 1.0,
+     "mode": 7
+    },
     "envmap": true,
     "reflectivity": [
-     0.0473,
-     0.0473,
-     0.0473
+     0.6,
+     0.6,
+     0.6
     ]
    }
   },
@@ -824,6 +878,7 @@
     "shader": "lightmappedgeneric",
     "basetexture": "metal/factory_metal_floor001a",
     "normal": "p2/metal/factory_metal_floor001a_n.png",
+    "ssbump": true,
     "envmap": true,
     "reflectivity": [
      0.0449,
@@ -847,6 +902,7 @@
     "shader": "lightmappedgeneric",
     "basetexture": "metal/factory_metal_floor001b",
     "normal": "p2/metal/factory_metal_floor001b_n.png",
+    "ssbump": true,
     "envmap": true,
     "reflectivity": [
      0.0767,
@@ -870,6 +926,7 @@
     "shader": "lightmappedgeneric",
     "basetexture": "metal/factory_metal_floor001c",
     "normal": "p2/metal/factory_metal_floor001c_n.png",
+    "ssbump": true,
     "envmap": true,
     "reflectivity": [
      0.1432,
@@ -893,11 +950,12 @@
     "shader": "lightmappedgeneric",
     "basetexture": "metal/metal_modular_floor002",
     "normal": "p2/metal/metal_modular_floor002_n.png",
+    "ssbump": true,
     "envmap": true,
     "reflectivity": [
-     0.017,
-     0.0134,
-     0.0108
+     0.35,
+     0.3,
+     0.27
     ]
    }
   },
@@ -937,6 +995,8 @@
    "source": {
     "shader": "lightmappedgeneric",
     "basetexture": "metal/metalwall_bts_003a",
+    "normal": "p2/metal/metalwall_bts_003a_n.png",
+    "ssbump": true,
     "envmap": true,
     "reflectivity": [
      0.0581,
@@ -960,11 +1020,12 @@
     "shader": "lightmappedgeneric",
     "basetexture": "metal/metalwall_bts_006a",
     "normal": "p2/metal/metalwall_bts_006a_n.png",
+    "ssbump": true,
     "envmap": true,
     "reflectivity": [
-     0.0544,
-     0.0375,
-     0.0303
+     0.3,
+     0.3,
+     0.3
     ]
    }
   },
@@ -983,9 +1044,9 @@
     "shader": "lightmappedgeneric",
     "basetexture": "metal/metalwall_bts_006a",
     "reflectivity": [
-     0.0544,
-     0.0375,
-     0.0303
+     0.3,
+     0.3,
+     0.3
     ]
    }
   },
@@ -1092,6 +1153,7 @@
     "shader": "lightmappedgeneric",
     "basetexture": "metal/underground_wall_metal004c_bottom",
     "normal": "p2/metal/underground_wall_metal004c_bottom_n.png",
+    "ssbump": true,
     "envmap": true,
     "reflectivity": [
      0.1149,
@@ -2700,6 +2762,12 @@
    "source": {
     "shader": "vertexlitgeneric",
     "basetexture": "models\\props_trainstation\\wrecked_boxcar_gate",
+    "detail": {
+     "file": "p2/detail/metal_detail_01.png",
+     "scale": 14.3974,
+     "factor": 0.8,
+     "mode": 0
+    },
     "reflectivity": [
      0.0327,
      0.0263,
@@ -3175,6 +3243,9 @@
    "source": {
     "shader": "worldvertextransition",
     "basetexture": "nature/rockwall_cave02a",
+    "normal": "p2/nature/blendrockdirt_tunnel03a_n.png",
+    "ssbump": true,
+    "envmap": true,
     "reflectivity": [
      0.1288,
      0.1255,
@@ -3344,6 +3415,7 @@
    "source": {
     "shader": "lightmappedgeneric",
     "basetexture": "plastic/plasticwall001b",
+    "normal": "p2/plastic/plasticwall001b_n.png",
     "envmap": true,
     "reflectivity": [
      0.1333,
@@ -3430,6 +3502,7 @@
     "shader": "lightmappedgeneric",
     "basetexture": "props/plasticwall002a",
     "normal": "p2/props/plasticwall002a_n.png",
+    "ssbump": true,
     "reflectivity": [
      0.4521,
      0.3968,
@@ -3516,6 +3589,12 @@
    "source": {
     "shader": "lightmappedgeneric",
     "basetexture": "tile/1970_tile_floor_01",
+    "detail": {
+     "file": "p2/detail/detail_concrete001a.png",
+     "scale": 4.25,
+     "factor": 0.25,
+     "mode": 0
+    },
     "reflectivity": [
      0.2594,
      0.1631,
@@ -3537,6 +3616,12 @@
    "source": {
     "shader": "lightmappedgeneric",
     "basetexture": "tile/1970_tile_floor_02",
+    "detail": {
+     "file": "p2/detail/detail_concrete001a.png",
+     "scale": 4.25,
+     "factor": 0.25,
+     "mode": 0
+    },
     "reflectivity": [
      0.4527,
      0.4819,
@@ -3580,6 +3665,13 @@
     "shader": "lightmappedgeneric",
     "basetexture": "tile/ceiling_tile002b",
     "normal": "p2/tile/ceiling_tile002b_n.png",
+    "ssbump": true,
+    "detail": {
+     "file": "p2/detail/white_floor_detail_height-ssbump.png",
+     "scale": 160.0,
+     "factor": 1.0,
+     "mode": 10
+    },
     "reflectivity": [
      0.6529,
      0.6513,
@@ -3602,6 +3694,7 @@
     "shader": "lightmappedgeneric",
     "basetexture": "tile/lobby_tilefloor_1940_001b",
     "normal": "p2/tile/lobby_tilefloor_1940_001b_n.png",
+    "ssbump": true,
     "envmap": true,
     "reflectivity": [
      0.1465,
@@ -3646,6 +3739,8 @@
     "shader": "lightmappedgeneric",
     "basetexture": "tile/observation_tilefloor001a",
     "normal": "p2/tile/observation_tilefloor001a_n.png",
+    "ssbump": true,
+    "envmap": true,
     "reflectivity": [
      0.1065,
      0.1099,
@@ -3710,6 +3805,7 @@
     "shader": "lightmappedgeneric",
     "basetexture": "tile/tile_ceiling_001a",
     "normal": "p2/tile/tile_ceiling_001a_n.png",
+    "ssbump": true,
     "reflectivity": [
      0.569,
      0.5799,
@@ -3732,6 +3828,7 @@
     "shader": "lightmappedgeneric",
     "basetexture": "tile/underground_black_tile_002c",
     "normal": "p2/tile/underground_black_tile_002c_n.png",
+    "ssbump": true,
     "envmap": true,
     "reflectivity": [
      0.0513,
@@ -3776,6 +3873,7 @@
     "shader": "lightmappedgeneric",
     "basetexture": "tile/underground_white_tile_001a",
     "normal": "p2/tile/underground_white_tile_001a_n.png",
+    "ssbump": true,
     "envmap": true,
     "reflectivity": [
      0.6396,
@@ -3799,6 +3897,7 @@
     "shader": "lightmappedgeneric",
     "basetexture": "tile/underground_white_tile_001b",
     "normal": "p2/tile/underground_white_tile_001b_n.png",
+    "ssbump": true,
     "envmap": true,
     "reflectivity": [
      0.3901,
@@ -3821,6 +3920,12 @@
    "source": {
     "shader": "lightmappedgeneric",
     "basetexture": "tile/white_ceiling_tile001a",
+    "detail": {
+     "file": "p2/detail/detail_concrete001a.png",
+     "scale": 4.25,
+     "factor": 0.25,
+     "mode": 0
+    },
     "reflectivity": [
      0.6515,
      0.6981,
@@ -3842,6 +3947,12 @@
    "source": {
     "shader": "lightmappedgeneric",
     "basetexture": "tile/white_floor_tile001a",
+    "detail": {
+     "file": "p2/detail/detail_concrete001a.png",
+     "scale": 4.25,
+     "factor": 0.25,
+     "mode": 0
+    },
     "reflectivity": [
      0.4401,
      0.4762,
@@ -3863,6 +3974,12 @@
    "source": {
     "shader": "lightmappedgeneric",
     "basetexture": "tile/white_floor_tile001b",
+    "detail": {
+     "file": "p2/detail/detail_concrete001a.png",
+     "scale": 4.25,
+     "factor": 0.25,
+     "mode": 0
+    },
     "reflectivity": [
      0.3756,
      0.4064,
@@ -3885,10 +4002,16 @@
     "shader": "lightmappedgeneric",
     "basetexture": "tile/white_floor_tile004c",
     "normal": "p2/tile/white_floor_tile004c_n.png",
+    "detail": {
+     "file": "p2/detail/detail_dirt02a.png",
+     "scale": 0.4,
+     "factor": 0.45,
+     "mode": 0
+    },
     "reflectivity": [
-     0.5255,
-     0.5224,
-     0.4854
+     0.75,
+     0.75,
+     0.75
     ]
    }
   },
@@ -3996,6 +4119,7 @@
     "shader": "lightmappedgeneric",
     "basetexture": "wood/underground_plywood_01a_bottom",
     "normal": "p2/wood/underground_plywood_01a_bottom_n.png",
+    "ssbump": true,
     "reflectivity": [
      0.3062,
      0.2623,

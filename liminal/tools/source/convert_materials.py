@@ -40,21 +40,55 @@ def read(path: str) -> bytes | None:
     return None
 
 
+def resolve(shader: str, params: list) -> dict:
+    """
+    A material's effective parameters on Portal 2's PC path (DX9, HDR on), as
+    the material system resolves them: the top level, then conditional blocks
+    that hold ("hdr", ">=dx90", "gpu>=1"...), then the shader's fallback block
+    for this hardware (<shader>_hdr_dx9, else <shader>_dx9), whose keys win.
+    """
+    def cond(name: str) -> bool:
+        n = name.replace(' ', '')
+        if n in ('hdr', '>=dx90', '>dx90', 'gpu>=1', 'gpu>=2', 'srgb'):
+            return True
+        return False   # ldr, <dx90, <dx90_20b, gpu<1, ...
+    def merge(dst: dict, block: list):
+        for k, v in block:
+            if not isinstance(v, list):
+                dst[k] = v
+        for k, v in block:
+            if isinstance(v, list) and cond(k):
+                merge(dst, v)
+    out: dict = {}
+    merge(out, params)
+    blocks = {k: v for k, v in params if isinstance(v, list)}
+    for fb in (f'{shader}_hdr_dx9', f'{shader}_dx9'):
+        if fb in blocks:
+            merge(out, blocks[fb])
+            break
+    return out
+
+
 def vmt(name: str, depth=0) -> tuple[str, dict]:
     data = read(f'materials/{name}.vmt')
     if data is None:
         return '', {}
     shader, params = kv.first_block(kv.parse(data.decode('latin-1')))
-    out = {k: v for k, v in params if not isinstance(v, list)}
     if shader == 'patch' and depth < 4:
-        inc = out.get('include', '').lower().replace('\\', '/')
+        top = {k: v for k, v in params if not isinstance(v, list)}
+        inc = top.get('include', '').lower().replace('\\', '/')
         inc = re.sub(r'^materials/', '', inc).removesuffix('.vmt')
         shader, base = vmt(inc, depth + 1)
         for k, v in params:
             if k in ('insert', 'replace') and isinstance(v, list):
                 base.update({kk: vv for kk, vv in v if not isinstance(vv, list)})
-        out = base
-    return shader, out
+        return shader, base
+    return shader, resolve(shader, params)
+
+
+def vec3(s: str):
+    v = [float(x) for x in re.findall(r'-?\d*\.?\d+(?:[eE][-+]?\d+)?', s or '')]
+    return v[:3] if len(v) >= 3 else (v * 3)[:3] if v else None
 
 
 def flag(p: dict, k: str) -> bool:
@@ -140,7 +174,8 @@ def main():
             mask = decode_tex(p['$selfillummask'])
             if mask is not None:
                 im = im.convert('RGBA'); im.putalpha(mask.convert('L').resize(im.size))
-        uses_alpha = translucent or alphatest or selfillum
+        # Detail mode 7 picks between two detail patterns by the base texture's alpha.
+        uses_alpha = translucent or alphatest or selfillum or (p.get('$detail') and p.get('$detailblendmode', '0').strip() == '7')
         rel = m
         os.makedirs(os.path.dirname(os.path.join(OUT, rel)), exist_ok=True)
         if uses_alpha:
@@ -153,6 +188,17 @@ def main():
             if max(nm.size) > 1024:
                 nm.thumbnail((1024, 1024), Image.LANCZOS)
             src['normal'] = f'p2/{rel}_n.png'; nm.convert('RGB').save(os.path.join(ROOT, 'textures', src['normal']), optimize=True)
+            # Self-shadowing bump: the texture holds the three basis weights directly (not a normal).
+            if flag(p, '$ssbump'):
+                src['ssbump'] = True
+        det = (p.get('$detail') or '').lower().replace('\\', '/')
+        if det:
+            dim = decode_tex(det)
+            if dim is not None:
+                dfile = f'p2/{det}.png'
+                os.makedirs(os.path.dirname(os.path.join(ROOT, 'textures', dfile)), exist_ok=True)
+                dim.convert('RGBA').save(os.path.join(ROOT, 'textures', dfile), optimize=True)   # alpha: a second pattern (mode 7)
+                src['detail'] = {'file': dfile, 'scale': float(p.get('$detailscale', '4') or 4), 'factor': float(p.get('$detailblendfactor', '1') or 1), 'mode': int(float(p.get('$detailblendmode', '0') or 0))}
         for k, key in [('translucent', '$translucent'), ('alphatest', '$alphatest'), ('additive', '$additive'), ('selfillum', '$selfillum'), ('nocull', '$nocull')]:
             if flag(p, key):
                 src[k] = True
@@ -163,7 +209,9 @@ def main():
                 v = [float(x) for x in re.findall(r'-?\d*\.?\d+', p[key])]
                 if v:
                     src[k] = v if len(v) > 1 else v[0]
-        src['reflectivity'] = [round(x, 4) for x in info['reflectivity']]
+        # VBSP bounces with $reflectivity when the material sets it, else the base texture's (VTF header).
+        rv = vec3(p.get('$reflectivity', ''))
+        src['reflectivity'] = [round(x, 4) for x in (rv or info['reflectivity'])]
         r = rad.get(m)
         if r:
             src['rad'] = r

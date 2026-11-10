@@ -222,7 +222,8 @@ def main():
         entities.insert(0, {'id': 1, 'class': 'player_start', 'origin': c, 'angles': [0, 0, 0]})
     name = a.name or os.path.splitext(os.path.basename(a.out))[0]
     # Seen through Source's camera; an env_tonemap_controller's exposure range and bloom carry over.
-    settings = {'camera': {'model': 'source'}}
+    # Drawn as the game draws it: full resolution, filtered textures.
+    settings = {'camera': {'model': 'source'}, 'render': {'internalHeight': 0, 'textureFilter': 'linear'}}
     for e in kv.children(blocks, 'entity'):
         if kv.get(e, 'classname') == 'env_tonemap_controller':
             for key, field in (('minexposure', 'sourceExposureMin'), ('maxexposure', 'sourceExposureMax'), ('bloomscale', 'sourceBloom')):

@@ -108,6 +108,10 @@ export interface SourceMaterial {
   envmap?: boolean;
   reflectivity?: [number, number, number];
   rad?: [number, number, number, number];
+  /** The bump texture is a self-shadowing bump (three basis weights), not a normal map. */
+  ssbump?: boolean;
+  /** $detail: a second texture combined with the base (TextureCombine modes), at `scale` repeats per base repeat. */
+  detail?: { file: string; scale: number; factor: number; mode: number };
   selfillumtint?: number[] | number;
   alpha?: number;
   alphatestreference?: number;
@@ -225,7 +229,10 @@ export class TextureRegistry {
     if (v) return { ...v, from: this.identity(v.from) };
     const s = this.sources.get(name);
     if (!s) return name;
-    return [s.name, s.worldW, s.worldH, s.material, s.emissive ?? null, s.raw, s.pixelart];
+    const id: unknown[] = [s.name, s.worldW, s.worldH, s.material, s.emissive ?? null, s.raw, s.pixelart];
+    // Imported Source materials: what the Source baker reads (bounce colour, bumped lightmaps).
+    if (s.source) id.push(s.source.reflectivity ?? null, !!s.source.normal);
+    return id;
   }
 
   /** The height field for a texture (relief radius in inches from its material). */
@@ -269,8 +276,9 @@ export class TextureRegistry {
   extrasOf(names: Iterable<string>): string[] {
     const out: string[] = [];
     for (const n of names) {
-      const nm = this.sources.get(n)?.source?.normal;
-      if (nm) out.push(nm.replace(/\.\w+$/, ''));
+      const src = this.sources.get(n)?.source;
+      if (src?.normal) out.push(src.normal.replace(/\.\w+$/, ''));
+      if (src?.detail) out.push(src.detail.file.replace(/\.\w+$/, ''));
     }
     return out;
   }

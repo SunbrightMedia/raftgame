@@ -92,7 +92,10 @@ export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout
     let mat: THREE.Material;
     // Source sky faces: the skybox shows there (this map's is plain black).
     if (layout?.source && /(^|\/)skybox\//.test(tex)) mat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-    else if (layout?.source) mat = makeSourceWorldMaterial(entry, entry.source?.normal ? textures.rawTexture(entry.source.normal.replace(/\.\w+$/, '')) : null);
+    else if (layout?.source) {
+      const raw = (file?: string) => (file ? textures.rawTexture(file.replace(/\.\w+$/, '')) : null);
+      mat = makeSourceWorldMaterial(entry, raw(entry.source?.normal), raw(entry.source?.detail?.file));
+    }
     else {
       mat = makeWorldMaterial(entry.texture, surf, entry.emissive ? { luminance: entry.emissive.luminance, color: emitterColor(entry.emissive), anim: entry.emissive.anim } : undefined, height, entry.source);
       applySourceBlend(mat, entry.source);

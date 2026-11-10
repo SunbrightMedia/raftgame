@@ -13,7 +13,8 @@ import { applySourceBlend, sourceUniforms } from './sourceMaterial';
  * Lightmap values are Source's linear light (1 = full); `sourceUnit` turns
  * that into this renderer's radiance, and the camera pass exposes it.
  */
-export function makeSourceWorldMaterial(tex: TexEntry, normal: THREE.Texture | null): THREE.ShaderMaterial {
+export function makeSourceWorldMaterial(tex: TexEntry, normal: THREE.Texture | null, detail: THREE.Texture | null = null): THREE.ShaderMaterial {
+  const d = tex.source?.detail;
   const mat = new THREE.ShaderMaterial({
     uniforms: {
       lightmap: worldUniforms.lightmap,
@@ -30,6 +31,12 @@ export function makeSourceWorldMaterial(tex: TexEntry, normal: THREE.Texture | n
       map: { value: tex.texture },
       normalMap: { value: normal ?? tex.texture },
       hasNormal: { value: normal ? 1 : 0 },
+      ssbump: { value: tex.source?.ssbump ? 1 : 0 },
+      detailMap: { value: detail ?? tex.texture },
+      detailOn: { value: detail && d ? 1 : 0 },
+      detailScale: { value: d?.scale ?? 1 },
+      detailFactor: { value: d?.factor ?? 1 },
+      detailMode: { value: d?.mode ?? 0 },
       ...sourceUniforms(tex.source),
     },
     vertexShader: /* glsl */ `
@@ -54,6 +61,12 @@ export function makeSourceWorldMaterial(tex: TexEntry, normal: THREE.Texture | n
       uniform sampler2D map;
       uniform sampler2D normalMap;
       uniform float hasNormal;
+      uniform float ssbump;
+      uniform sampler2D detailMap;
+      uniform float detailOn;
+      uniform float detailScale;
+      uniform float detailFactor;
+      uniform int detailMode;
       uniform sampler2D lightmap;
       uniform float lightmapOn;
       uniform float faceShade;
@@ -81,19 +94,39 @@ export function makeSourceWorldMaterial(tex: TexEntry, normal: THREE.Texture | n
       const vec3 B2 = vec3(-0.40824822, -0.70710677, 0.57735026);
       void main() {
         vec4 tx = texture2D(map, vUv);
+        // Read here, outside any branch: inside a per-pixel branch texture reads lose their mip
+        // selection and the bump map's fine grout aliases into speckles at a distance.
+        vec3 bumpTexel = texture2D(normalMap, vUv).xyz;
         if (alphaMode == 1 && tx.a < alphaRef) discard;
         vec3 albedo = toLinear(tx.rgb);
+        // $detail (common_ps_fxc.h TextureCombine), on the linear base colour.
+        vec4 dc = texture2D(detailMap, vUv * detailScale);
+        if (detailOn > 0.5) {
+          if (detailMode == 0) albedo *= mix(vec3(1.0), 2.0 * dc.rgb, detailFactor);
+          else if (detailMode == 7) albedo *= mix(vec3(1.0), vec3(2.0 * mix(dc.r, dc.a, tx.a)), detailFactor);
+          else if (detailMode == 1) albedo += detailFactor * dc.rgb;
+          else if (detailMode == 2) albedo = mix(albedo, dc.rgb, detailFactor * dc.a);
+          else if (detailMode == 3) albedo = mix(albedo, dc.rgb, detailFactor);
+          else if (detailMode == 4) albedo = mix(albedo, dc.rgb, detailFactor * (1.0 - tx.a));
+          else if (detailMode == 8) albedo = mix(albedo, albedo * dc.rgb, detailFactor);
+        }
         vec3 light;
         if (lightmapOn < 0.5) {
           light = vec3(mix(1.0, vShade, faceShade));
         } else if (vLmOff > 0.0) {
-          vec3 n = hasNormal > 0.5 ? normalize(texture2D(normalMap, vUv).xyz * 2.0 - 1.0) : vec3(0.0, 0.0, 1.0);
-          vec3 dp = vec3(clamp(dot(n, B0), 0.0, 1.0), clamp(dot(n, B1), 0.0, 1.0), clamp(dot(n, B2), 0.0, 1.0));
-          dp *= dp;
           vec3 l1 = texture2D(lightmap, vLm + vec2(vLmOff, 0.0)).rgb;
           vec3 l2 = texture2D(lightmap, vLm + vec2(2.0 * vLmOff, 0.0)).rgb;
           vec3 l3 = texture2D(lightmap, vLm + vec2(3.0 * vLmOff, 0.0)).rgb;
-          light = (dp.x * l1 + dp.y * l2 + dp.z * l3) / max(dp.x + dp.y + dp.z, 1e-4);
+          if (ssbump > 0.5 && hasNormal > 0.5) {
+            // Self-shadowing bump: the texture stores the three weights directly.
+            vec3 w = bumpTexel;
+            light = w.x * l1 + w.y * l2 + w.z * l3;
+          } else {
+            vec3 n = hasNormal > 0.5 ? normalize(bumpTexel * 2.0 - 1.0) : vec3(0.0, 0.0, 1.0);
+            vec3 dp = vec3(clamp(dot(n, B0), 0.0, 1.0), clamp(dot(n, B1), 0.0, 1.0), clamp(dot(n, B2), 0.0, 1.0));
+            dp *= dp;
+            light = (dp.x * l1 + dp.y * l2 + dp.z * l3) / max(dp.x + dp.y + dp.z, 1e-4);
+          }
         } else {
           light = texture2D(lightmap, vLm).rgb;
         }
