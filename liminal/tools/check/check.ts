@@ -14,7 +14,7 @@ import { parseMap } from '../../src/data/map';
 import { solidPlanes, buildFaces, facePoint, inFace } from '../../src/engine/light/faces';
 import { CollisionWorld } from '../../src/engine/collision/trace';
 import { convexBrush } from '../../src/engine/collision/brush';
-import { propSolids } from '../../src/engine/collision/props';
+import { propSolids, type PropShape } from '../../src/engine/collision/props';
 import { v3, type Vec3 } from '../../src/engine/vec3';
 import { DEFAULT_MOVE, hullMins, hullMaxs } from '../../src/engine/movement/pmove';
 
@@ -27,12 +27,12 @@ const map = parseMap(JSON.parse(readFileSync(path, 'utf8')));
 const hullOver = ((map.settings as Record<string, unknown> | undefined)?.hull ?? {}) as Partial<typeof DEFAULT_MOVE>;
 const P = { ...DEFAULT_MOVE, ...hullOver };
 // Prop hulls from the converted models' headers (models/**/*.json, keyed by the name maps use).
-const hulls = new Map<string, [[number, number, number], [number, number, number]]>();
+const hulls = new Map<string, PropShape>();
 if (existsSync('models')) {
   for (const f of readdirSync('models', { recursive: true }) as string[]) {
     if (!f.endsWith('.json')) continue;
     const h = JSON.parse(readFileSync(`models/${f}`, 'utf8'));
-    if (h.format === 'liminal-mesh') hulls.set(String(h.source).toLowerCase(), h.hull);
+    if (h.format === 'liminal-mesh') hulls.set(String(h.source).toLowerCase(), { hull: h.hull, collision: h.collision });
   }
 }
 const hullOf = (m: string) => hulls.get(m.toLowerCase());

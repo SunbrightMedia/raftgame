@@ -15,7 +15,7 @@
    "license": "reference-only",
    "source": {
     "shader": "lightmappedgeneric",
-    "basetexture": "anim_wp\\framework\\squarebeams_main",
+    "basetexture": "anim_wp/framework/squarebeams_main",
     "reflectivity": [
      0.1219,
      0.1219,
@@ -36,11 +36,33 @@
    "license": "reference-only",
    "source": {
     "shader": "lightmappedgeneric",
-    "basetexture": "models\\anim_wp\\framework\\squarebeams_skin2",
+    "basetexture": "models/anim_wp/framework/squarebeams_skin2",
     "reflectivity": [
      0.5693,
      0.526,
      0.5233
+    ]
+   }
+  },
+  {
+   "name": "p2/br_debris/deb_broken_radio",
+   "file": "p2/br_debris/deb_broken_radio.png",
+   "size": [
+    512,
+    512
+   ],
+   "material": "default",
+   "raw": true,
+   "credit": "Portal 2 (Valve): reference only, never published",
+   "license": "reference-only",
+   "source": {
+    "shader": "vertexlitgeneric",
+    "basetexture": "br_debris/deb_broken_radio_c",
+    "selfillum": true,
+    "reflectivity": [
+     0.0474,
+     0.0326,
+     0.0285
     ]
    }
   },
@@ -99,7 +121,7 @@
    "license": "reference-only",
    "source": {
     "shader": "lightmappedgeneric",
-    "basetexture": "concrete\\concrete_bts_floor002a",
+    "basetexture": "concrete/concrete_bts_floor002a",
     "reflectivity": [
      0.1103,
      0.1022,
@@ -120,7 +142,7 @@
    "license": "reference-only",
    "source": {
     "shader": "lightmappedgeneric",
-    "basetexture": "concrete\\concrete_bts_floor002a",
+    "basetexture": "concrete/concrete_bts_floor002a",
     "normal": "p2/concrete/concrete_bts_floor002a_noportal_n.png",
     "reflectivity": [
      0.1103,
@@ -731,6 +753,28 @@
    }
   },
   {
+   "name": "p2/liquids/water_swamp_m2",
+   "file": "p2/liquids/water_swamp_m2.jpg",
+   "size": [
+    512,
+    512
+   ],
+   "material": "default",
+   "raw": true,
+   "credit": "Portal 2 (Valve): reference only, never published",
+   "license": "reference-only",
+   "source": {
+    "shader": "water",
+    "basetexture": "",
+    "normal": "p2/liquids/water_swamp_m2_n.png",
+    "reflectivity": [
+     0.1011,
+     0.0582,
+     0.0037
+    ]
+   }
+  },
+  {
    "name": "p2/liquids/water_underground_cave",
    "file": "p2/liquids/water_underground_cave.jpg",
    "size": [
@@ -817,7 +861,7 @@
    "license": "reference-only",
    "source": {
     "shader": "lightmappedgeneric",
-    "basetexture": "metal\\black_wall_metal_004d",
+    "basetexture": "metal/black_wall_metal_004d",
     "normal": "p2/metal/black_wall_metal_004d_n.png",
     "detail": {
      "file": "p2/detail/detail_fractal04c.png",
@@ -1282,7 +1326,7 @@
    "license": "reference-only",
    "source": {
     "shader": "vertexlitgeneric",
-    "basetexture": "models\\props\\de_train/ladderaluminium",
+    "basetexture": "models/props/de_train/ladderaluminium",
     "envmap": true,
     "reflectivity": [
      0.1581,
@@ -1369,7 +1413,7 @@
    "license": "reference-only",
    "source": {
     "shader": "vertexlitgeneric",
-    "basetexture": "models\\props\\terror/hamradio01",
+    "basetexture": "models/props/terror/hamradio01",
     "envmap": true,
     "reflectivity": [
      0.0483,
@@ -1598,50 +1642,6 @@
    }
   },
   {
-   "name": "p2/models/props_bts/push_button_stand",
-   "file": "p2/models/props_bts/push_button_stand.png",
-   "size": [
-    512,
-    512
-   ],
-   "material": "default",
-   "raw": true,
-   "credit": "Portal 2 (Valve): reference only, never published",
-   "license": "reference-only",
-   "source": {
-    "shader": "vertexlitgeneric",
-    "basetexture": "models/props_bts/push_button_stand",
-    "selfillum": true,
-    "reflectivity": [
-     0.1197,
-     0.0875,
-     0.0762
-    ]
-   }
-  },
-  {
-   "name": "p2/models/props_bts/push_button_stand_active",
-   "file": "p2/models/props_bts/push_button_stand_active.png",
-   "size": [
-    512,
-    512
-   ],
-   "material": "default",
-   "raw": true,
-   "credit": "Portal 2 (Valve): reference only, never published",
-   "license": "reference-only",
-   "source": {
-    "shader": "vertexlitgeneric",
-    "basetexture": "models/props_bts/push_button_stand_active",
-    "selfillum": true,
-    "reflectivity": [
-     0.089,
-     0.1138,
-     0.0786
-    ]
-   }
-  },
-  {
    "name": "p2/models/props_bts/railing_bts",
    "file": "p2/models/props_bts/railing_bts.png",
    "size": [
@@ -1678,7 +1678,7 @@
    "license": "reference-only",
    "source": {
     "shader": "vertexlitgeneric",
-    "basetexture": "models\\props_bts\\track_metal",
+    "basetexture": "models/props_bts/track_metal",
     "reflectivity": [
      0.1,
      0.1053,
@@ -1776,27 +1776,6 @@
    }
   },
   {
-   "name": "p2/models/props_destruction/wall_dest_002",
-   "file": "p2/models/props_destruction/wall_dest_002.jpg",
-   "size": [
-    2048,
-    2048
-   ],
-   "material": "default",
-   "raw": true,
-   "credit": "Portal 2 (Valve): reference only, never published",
-   "license": "reference-only",
-   "source": {
-    "shader": "vertexlitgeneric",
-    "basetexture": "models/props_destruction/wall_dest_002",
-    "reflectivity": [
-     0.3465,
-     0.3158,
-     0.2865
-    ]
-   }
-  },
-  {
    "name": "p2/models/props_factory/turret_factory_closed",
    "file": "p2/models/props_factory/turret_factory_closed.jpg",
    "size": [
@@ -1809,7 +1788,7 @@
    "license": "reference-only",
    "source": {
     "shader": "vertexlitgeneric",
-    "basetexture": "models\\props_factory\\turret_factory_closed",
+    "basetexture": "models/props_factory/turret_factory_closed",
     "normal": "p2/models/props_factory/turret_factory_closed_n.png",
     "reflectivity": [
      0.1336,
@@ -1831,7 +1810,7 @@
    "license": "reference-only",
    "source": {
     "shader": "vertexlitgeneric",
-    "basetexture": "models\\props_foliage\\leaves",
+    "basetexture": "models/props_foliage/leaves",
     "alphatest": true,
     "nocull": true,
     "alphatestreference": 0.5,
@@ -1855,7 +1834,7 @@
    "license": "reference-only",
    "source": {
     "shader": "vertexlitgeneric",
-    "basetexture": "models\\props_foliage\\leaves",
+    "basetexture": "models/props_foliage/leaves",
     "alphatest": true,
     "nocull": true,
     "envmap": true,
@@ -2017,50 +1996,6 @@
      0.1153,
      0.1508,
      0.1619
-    ]
-   }
-  },
-  {
-   "name": "p2/models/props_lights/under_neonlamp",
-   "file": "p2/models/props_lights/under_neonlamp.png",
-   "size": [
-    512,
-    512
-   ],
-   "material": "metal",
-   "raw": true,
-   "credit": "Portal 2 (Valve): reference only, never published",
-   "license": "reference-only",
-   "source": {
-    "shader": "vertexlitgeneric",
-    "basetexture": "models/props_lights/under_neonlamp",
-    "selfillum": true,
-    "reflectivity": [
-     0.3463,
-     0.34,
-     0.3096
-    ]
-   }
-  },
-  {
-   "name": "p2/models/props_lights/under_neonlamp_orange",
-   "file": "p2/models/props_lights/under_neonlamp_orange.png",
-   "size": [
-    512,
-    512
-   ],
-   "material": "metal",
-   "raw": true,
-   "credit": "Portal 2 (Valve): reference only, never published",
-   "license": "reference-only",
-   "source": {
-    "shader": "vertexlitgeneric",
-    "basetexture": "models/props_lights/under_neonlamp_orange",
-    "selfillum": true,
-    "reflectivity": [
-     0.3322,
-     0.2061,
-     0.167
     ]
    }
   },
@@ -2374,7 +2309,7 @@
    "license": "reference-only",
    "source": {
     "shader": "vertexlitgeneric",
-    "basetexture": "models\\props_office\\control_desk_1980",
+    "basetexture": "models/props_office/control_desk_1980",
     "reflectivity": [
      0.3122,
      0.3122,
@@ -2458,7 +2393,7 @@
    "license": "reference-only",
    "source": {
     "shader": "vertexlitgeneric",
-    "basetexture": "models\\props_office\\keyboard_and_phone",
+    "basetexture": "models/props_office/keyboard_and_phone",
     "reflectivity": [
      0.1366,
      0.1345,
@@ -2749,117 +2684,6 @@
    }
   },
   {
-   "name": "p2/models/props_trainstation/wrecked_boxcar_gate",
-   "file": "p2/models/props_trainstation/wrecked_boxcar_gate.jpg",
-   "size": [
-    2048,
-    2048
-   ],
-   "material": "default",
-   "raw": true,
-   "credit": "Portal 2 (Valve): reference only, never published",
-   "license": "reference-only",
-   "source": {
-    "shader": "vertexlitgeneric",
-    "basetexture": "models\\props_trainstation\\wrecked_boxcar_gate",
-    "detail": {
-     "file": "p2/detail/metal_detail_01.png",
-     "scale": 14.3974,
-     "factor": 0.8,
-     "mode": 0
-    },
-    "reflectivity": [
-     0.0327,
-     0.0263,
-     0.0257
-    ]
-   }
-  },
-  {
-   "name": "p2/models/props_underground/cavejohnson_portrait01",
-   "file": "p2/models/props_underground/cavejohnson_portrait01.jpg",
-   "size": [
-    1024,
-    1024
-   ],
-   "material": "default",
-   "raw": true,
-   "credit": "Portal 2 (Valve): reference only, never published",
-   "license": "reference-only",
-   "source": {
-    "shader": "vertexlitgeneric",
-    "basetexture": "models/props_underground/cavejohnson_portrait01",
-    "reflectivity": [
-     0.0634,
-     0.0427,
-     0.0251
-    ]
-   }
-  },
-  {
-   "name": "p2/models/props_underground/cavejohnson_portrait02",
-   "file": "p2/models/props_underground/cavejohnson_portrait02.jpg",
-   "size": [
-    1024,
-    1024
-   ],
-   "material": "default",
-   "raw": true,
-   "credit": "Portal 2 (Valve): reference only, never published",
-   "license": "reference-only",
-   "source": {
-    "shader": "vertexlitgeneric",
-    "basetexture": "models/props_underground/cavejohnson_portrait02",
-    "reflectivity": [
-     0.0546,
-     0.0317,
-     0.0145
-    ]
-   }
-  },
-  {
-   "name": "p2/models/props_underground/cavejohnson_portrait03",
-   "file": "p2/models/props_underground/cavejohnson_portrait03.jpg",
-   "size": [
-    1024,
-    1024
-   ],
-   "material": "default",
-   "raw": true,
-   "credit": "Portal 2 (Valve): reference only, never published",
-   "license": "reference-only",
-   "source": {
-    "shader": "vertexlitgeneric",
-    "basetexture": "models/props_underground/cavejohnson_portrait03",
-    "reflectivity": [
-     0.0728,
-     0.0417,
-     0.0158
-    ]
-   }
-  },
-  {
-   "name": "p2/models/props_underground/cavejohnson_portrait04",
-   "file": "p2/models/props_underground/cavejohnson_portrait04.jpg",
-   "size": [
-    1024,
-    1024
-   ],
-   "material": "default",
-   "raw": true,
-   "credit": "Portal 2 (Valve): reference only, never published",
-   "license": "reference-only",
-   "source": {
-    "shader": "vertexlitgeneric",
-    "basetexture": "models/props_underground/cavejohnson_portrait04",
-    "reflectivity": [
-     0.0711,
-     0.0453,
-     0.0237
-    ]
-   }
-  },
-  {
    "name": "p2/models/props_underground/chair_lobby",
    "file": "p2/models/props_underground/chair_lobby.jpg",
    "size": [
@@ -2893,34 +2717,13 @@
    "license": "reference-only",
    "source": {
     "shader": "vertexlitgeneric",
-    "basetexture": "models\\props_underground\\chair_office_padded_1980",
+    "basetexture": "models/props_underground/chair_office_padded_1980",
     "normal": "p2/models/props_underground/chair_office_padded_1980_n.png",
     "envmap": true,
     "reflectivity": [
      0.2349,
      0.2004,
      0.1502
-    ]
-   }
-  },
-  {
-   "name": "p2/models/props_underground/construction_crane01",
-   "file": "p2/models/props_underground/construction_crane01.jpg",
-   "size": [
-    512,
-    512
-   ],
-   "material": "default",
-   "raw": true,
-   "credit": "Portal 2 (Valve): reference only, never published",
-   "license": "reference-only",
-   "source": {
-    "shader": "vertexlitgeneric",
-    "basetexture": "models/props_underground/construction_crane01",
-    "reflectivity": [
-     0.1113,
-     0.0423,
-     0.033
     ]
    }
   },
@@ -3001,7 +2804,7 @@
    "license": "reference-only",
    "source": {
     "shader": "vertexlitgeneric",
-    "basetexture": "models\\props_underground\\interactive_console",
+    "basetexture": "models/props_underground/interactive_console",
     "reflectivity": [
      0.2396,
      0.2431,
@@ -3027,51 +2830,6 @@
      0.1472,
      0.1488,
      0.1385
-    ]
-   }
-  },
-  {
-   "name": "p2/models/props_underground/moving_platform_motor",
-   "file": "p2/models/props_underground/moving_platform_motor.jpg",
-   "size": [
-    512,
-    512
-   ],
-   "material": "default",
-   "raw": true,
-   "credit": "Portal 2 (Valve): reference only, never published",
-   "license": "reference-only",
-   "source": {
-    "shader": "vertexlitgeneric",
-    "basetexture": "models/props_underground/moving_platform_motor",
-    "normal": "p2/models/props_underground/moving_platform_motor_n.png",
-    "reflectivity": [
-     0.0518,
-     0.1027,
-     0.1221
-    ]
-   }
-  },
-  {
-   "name": "p2/models/props_underground/paint_distillery_tank",
-   "file": "p2/models/props_underground/paint_distillery_tank.jpg",
-   "size": [
-    1024,
-    1024
-   ],
-   "material": "default",
-   "raw": true,
-   "credit": "Portal 2 (Valve): reference only, never published",
-   "license": "reference-only",
-   "source": {
-    "shader": "vertexlitgeneric",
-    "basetexture": "models/props_underground/paint_distillery_tank",
-    "normal": "p2/models/props_underground/paint_distillery_tank_n.png",
-    "envmap": true,
-    "reflectivity": [
-     0.1263,
-     0.1109,
-     0.0818
     ]
    }
   },
@@ -3143,27 +2901,6 @@
    }
   },
   {
-   "name": "p2/models/props_underground/tank_small_1",
-   "file": "p2/models/props_underground/tank_small_1.jpg",
-   "size": [
-    1024,
-    1024
-   ],
-   "material": "metal",
-   "raw": true,
-   "credit": "Portal 2 (Valve): reference only, never published",
-   "license": "reference-only",
-   "source": {
-    "shader": "vertexlitgeneric",
-    "basetexture": "models/props_underground/tank_small_1",
-    "reflectivity": [
-     0.0977,
-     0.097,
-     0.0964
-    ]
-   }
-  },
-  {
    "name": "p2/models/props_underground/tube_paint_under",
    "file": "p2/models/props_underground/tube_paint_under.jpg",
    "size": [
@@ -3208,8 +2945,8 @@
    }
   },
   {
-   "name": "p2/models/props_underground/underground_door_dynamic",
-   "file": "p2/models/props_underground/underground_door_dynamic.jpg",
+   "name": "p2/models/props_underground/underground_testchamber_button",
+   "file": "p2/models/props_underground/underground_testchamber_button.jpg",
    "size": [
     1024,
     1024
@@ -3220,12 +2957,11 @@
    "license": "reference-only",
    "source": {
     "shader": "vertexlitgeneric",
-    "basetexture": "models/props_underground/underground_door_dynamic",
-    "envmap": true,
+    "basetexture": "models/props_underground/underground_testchamber_button",
     "reflectivity": [
-     0.0968,
-     0.1144,
-     0.1113
+     0.0666,
+     0.066,
+     0.0669
     ]
    }
   },
@@ -3551,6 +3287,69 @@
      0.2144,
      0.2082,
      0.114
+    ]
+   }
+  },
+  {
+   "name": "p2/skybox/sky_black_nofogbk",
+   "file": "p2/skybox/sky_black_nofogbk.jpg",
+   "size": [
+    64,
+    64
+   ],
+   "material": "default",
+   "raw": true,
+   "credit": "Portal 2 (Valve): reference only, never published",
+   "license": "reference-only",
+   "source": {
+    "shader": "unlitgeneric",
+    "basetexture": "skybox/sky_blackbk",
+    "reflectivity": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  {
+   "name": "p2/skybox/sky_black_nofogdn",
+   "file": "p2/skybox/sky_black_nofogdn.jpg",
+   "size": [
+    64,
+    64
+   ],
+   "material": "default",
+   "raw": true,
+   "credit": "Portal 2 (Valve): reference only, never published",
+   "license": "reference-only",
+   "source": {
+    "shader": "unlitgeneric",
+    "basetexture": "skybox/sky_blackdn",
+    "reflectivity": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  {
+   "name": "p2/skybox/sky_blackup",
+   "file": "p2/skybox/sky_blackup.jpg",
+   "size": [
+    64,
+    64
+   ],
+   "material": "default",
+   "raw": true,
+   "credit": "Portal 2 (Valve): reference only, never published",
+   "license": "reference-only",
+   "source": {
+    "shader": "unlitgeneric",
+    "basetexture": "skybox/sky_blackup",
+    "reflectivity": [
+     0.0,
+     0.0,
+     0.0
     ]
    }
   },
@@ -4061,29 +3860,6 @@
    }
   },
   {
-   "name": "p2/traincars/undercarriage",
-   "file": "p2/traincars/undercarriage.jpg",
-   "size": [
-    1024,
-    1024
-   ],
-   "material": "default",
-   "raw": true,
-   "credit": "Portal 2 (Valve): reference only, never published",
-   "license": "reference-only",
-   "source": {
-    "shader": "vertexlitgeneric",
-    "basetexture": "traincars/undercarriage_2k_c",
-    "normal": "p2/traincars/undercarriage_n.png",
-    "envmap": true,
-    "reflectivity": [
-     0.0391,
-     0.0345,
-     0.0356
-    ]
-   }
-  },
-  {
    "name": "p2/wood/milflr002",
    "file": "p2/wood/milflr002.jpg",
    "size": [
@@ -4096,7 +3872,7 @@
    "license": "reference-only",
    "source": {
     "shader": "lightmappedgeneric",
-    "basetexture": "wood\\milflr002",
+    "basetexture": "wood/milflr002",
     "reflectivity": [
      0.1036,
      0.0804,

@@ -19,8 +19,10 @@ from array import array
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, '../..'))
-REF = os.path.join(ROOT, 'reference/portal2/files')
-OUT = os.path.join(ROOT, 'models/p2')
+# P2_FILES: loose game files (default reference/portal2/files); P2_PREFIX: material prefix and output folder.
+REF = os.environ.get('P2_FILES') or os.path.join(ROOT, 'reference/portal2/files')
+PREFIX = os.environ.get('P2_PREFIX') or 'p2'
+OUT = os.path.join(ROOT, 'models', PREFIX)
 sys.path.insert(0, HERE)
 import vpk  # noqa: E402
 
@@ -42,9 +44,9 @@ def read_mdl(b):
         found = None
         for cd in cds:
             k = (cd + n).lower().replace('\\', '/').replace('//', '/')
-            if f'materials/{k}.vmt' in E:
+            if f'materials/{k}.vmt' in E or os.path.exists(os.path.join(REF, f'materials/{k}.vmt')):
                 found = k; break
-        mats.append('p2/' + (found or (cds[0] + n if cds else n).lower().replace('\\', '/')))
+        mats.append(PREFIX + '/' + (found or (cds[0] + n if cds else n).lower().replace('\\', '/')))
     skins = [list(struct.unpack_from(f'<{nskinref}h', b, skini + f * nskinref * 2)) for f in range(nskinfam)]
     bodyparts = []
     for p in range(nbp):
@@ -174,6 +176,25 @@ def convert(model: str):
                 shadow = np.concatenate(parts).reshape(-1)
         except ImportError:
             pass
+    # Player collision, as Source's vphysics: each convex piece of the .phy as planes (n·p ≤ d) and its points.
+    # No .phy: the model isn't solid (Source props without a collision model aren't).
+    collision = None
+    if os.path.exists(base + '.phy'):
+        try:
+            import numpy as np
+            from scipy.spatial import ConvexHull
+            from phy import phy_convexes
+            collision = []
+            for pts in phy_convexes(open(base + '.phy', 'rb').read()):
+                try:
+                    h = ConvexHull(pts)
+                except Exception:
+                    continue
+                planes = {tuple(round(float(x), 4) for x in eq[:3]) + (round(float(-eq[3]), 3),) for eq in h.equations}
+                v = pts[h.vertices]
+                collision.append({'planes': [list(p) for p in planes], 'points': [[round(float(x), 2) for x in q] for q in v]})
+        except ImportError:
+            collision = None
     xs, ys, zs = pos[0::3], pos[1::3], pos[2::3]
     out = os.path.join(OUT, model[len('models/'):-4])
     os.makedirs(os.path.dirname(out), exist_ok=True)
@@ -184,13 +205,17 @@ def convert(model: str):
                'vertexCount': len(pos) // 3, 'indexCount': len(ind),
                'materials': mdl['materials'], 'skins': mdl['skins'],
                'bounds': [[min(xs), min(ys), min(zs)], [max(xs), max(ys), max(zs)]], 'hull': [list(h[:3]), list(h[3:])],
-               'meshes': meshes, **({'shadow': [round(float(x), 2) for x in shadow]} if shadow is not None else {})}, open(out + '.json', 'w'))
+               'meshes': meshes, **({'shadow': [round(float(x), 2) for x in shadow]} if shadow is not None else {}),
+               **({'collision': collision} if collision is not None else {})}, open(out + '.json', 'w'))
     return True, f'{len(pos) // 3} verts, {len(ind) // 3} tris'
 
 
 def main():
     models = set()
-    for mp in sys.argv[1:]:
+    if '--all' in sys.argv:
+        import glob
+        models = {'models/' + os.path.relpath(f, os.path.join(REF, 'models')).replace(os.sep, '/').lower() for f in glob.glob(os.path.join(REF, 'models/**/*.mdl'), recursive=True)}
+    for mp in [a for a in sys.argv[1:] if not a.startswith('--')]:
         for e in json.load(open(mp))['entities']:
             if e['class'] == 'prop' and e['props'].get('model'):
                 models.add(e['props']['model'])

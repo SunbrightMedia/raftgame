@@ -21,6 +21,8 @@ export interface ModelHeader {
   meshes: { slot: number; vertexOffset: number; vertexCount: number; indexOffset: number; indexCount: number }[];
   /** Lightmap shadow shape (model space, 9 floats per triangle): collision model or per-mesh hulls. */
   shadow?: number[];
+  /** Player collision: convex pieces of the Source collision model (planes [nx, ny, nz, d], corner points). */
+  collision?: { planes: number[][]; points: number[][] }[];
 }
 
 export interface Model {

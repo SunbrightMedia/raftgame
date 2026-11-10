@@ -23,7 +23,12 @@ sys.path.insert(0, HERE)
 import vpk, vtf, kv  # noqa: E402
 
 REF = os.path.join(ROOT, 'reference/portal2')
-OUT = os.path.join(ROOT, 'textures/p2')
+# P2_FILES: a folder of loose game files (default reference/portal2/files; the full export
+# made by reference/portal2/export_all.ps1 has every material). P2_PREFIX: texture name prefix and
+# output folder (default p2).
+FILES = os.environ.get('P2_FILES') or os.path.join(REF, 'files')
+PREFIX = os.environ.get('P2_PREFIX') or 'p2'
+OUT = os.path.join(ROOT, 'textures', PREFIX)
 E, _ = vpk.read_dir(os.path.join(REF, 'pak01_dir.vpk'))
 
 TOOL = re.compile(r'^tools/')
@@ -31,7 +36,7 @@ TOOL = re.compile(r'^tools/')
 
 def read(path: str) -> bytes | None:
     """A file from the reference files folder, or a VMT/preloaded file from the index."""
-    p = os.path.join(REF, 'files', path)
+    p = os.path.join(FILES, path)
     if os.path.exists(p):
         return open(p, 'rb').read()
     e = E.get(path)
@@ -126,48 +131,94 @@ def materials_of_vmf(path: str) -> set[str]:
 
 
 def materials_of_models() -> set[str]:
+    """Materials of the models already converted for this prefix (models/<prefix>/**/*.json)."""
     out = set()
-    for f in glob.glob(os.path.join(REF, 'files/models/**/*.mdl'), recursive=True):
-        b = open(f, 'rb').read()
-        ntex, texi, ncd, cdi = struct.unpack_from('<iiii', b, 204)
-        cstr = lambda o: b[o:b.index(b'\0', o)].decode('latin-1')
-        names = [cstr(texi + i * 64 + struct.unpack_from('<i', b, texi + i * 64)[0]) for i in range(ntex)]
-        cds = [cstr(struct.unpack_from('<i', b, cdi + i * 4)[0]) for i in range(ncd)]
-        for n in names:
-            for cd in cds:
-                k = (cd.replace('\\', '/') + n).lower().replace('//', '/')
-                if f'materials/{k}.vmt' in E:
-                    out.add(k)
-                    break
+    for f in glob.glob(os.path.join(ROOT, 'models', PREFIX, '**/*.json'), recursive=True):
+        h = json.load(open(f))
+        if h.get('format') == 'liminal-mesh':
+            out |= {m.split('/', 1)[1] for m in h.get('materials', []) if '/' in m}
     return out
+
+
+_trimmed: dict | None = None
+
+
+def vtf_size(name: str) -> tuple[int, int]:
+    """The texture's full size in texels (it sets the size in the world), also for textures the export
+    trimmed to their 1024 mip (export_all.ps1 notes "trimmed WxH -> wxh" in manifest.tsv)."""
+    global _trimmed
+    path = f'materials/{tex_path(name)}.vtf'
+    if _trimmed is None:
+        _trimmed = {}
+        mf = os.path.join(FILES, 'manifest.tsv')
+        if os.path.exists(mf):
+            for line in open(mf, encoding='utf-8'):
+                m = re.match(r'([^\t]+)\t[^\t]*\t\d+\ttrimmed (\d+)x(\d+) ->', line)
+                if m:
+                    _trimmed[m.group(1)] = (int(m.group(2)), int(m.group(3)))
+    if path in _trimmed:
+        return _trimmed[path]
+    i = vtf.info(read(path))
+    return i['w'], i['h']
+
+
+def tex_path(name: str) -> str:
+    n = name.lower().replace(chr(92), "/")
+    return n[:-4] if n.endswith('.vtf') else n
 
 
 def decode_tex(name: str) -> Image.Image | None:
     if not name:
         return None
+    name = tex_path(name)
     d = read(f'materials/{name.lower().replace(chr(92), "/")}.vtf')
     return vtf.decode(d) if d else None
 
 
+def all_materials() -> list[str]:
+    root = os.path.join(FILES, 'materials')
+    return sorted(os.path.relpath(f, root)[:-4].replace(os.sep, '/').lower() for f in glob.glob(os.path.join(root, '**/*.vmt'), recursive=True))
+
+
 def main():
+    # --all: every material in P2_FILES (catalogue); --max N: base textures at most N px; --flat: base texture only, JPG.
+    args = sys.argv[1:]
+    every = '--all' in args
+    flat = '--flat' in args
+    maxpx = int(args[args.index('--max') + 1]) if '--max' in args else 0
+    vmfs = [a for i, a in enumerate(args) if not a.startswith('--') and not (i and args[i - 1] == '--max')]
     mats = set()
-    for vmf in sys.argv[1:]:
+    for vmf in vmfs:
         mats |= materials_of_vmf(vmf)
-    mats |= materials_of_models()
+    mats |= set(all_materials()) if every else materials_of_models()
     rad = lights_rad()
     os.makedirs(OUT, exist_ok=True)
     index, missing = [], []
     for m in sorted(mats):
-        if TOOL.match(m):
+        if TOOL.match(m) and not every:
             continue
         shader, p = vmt(m)
         if not shader:
             missing.append(m); continue
-        base = p.get('$basetexture', '')
-        im = decode_tex(base)
+        base = tex_path(p.get('$basetexture', ''))
+        try:
+            im = decode_tex(base)
+        except Exception:
+            im = None
+        water = None
+        if im is None and shader.lower() == 'water':
+            # Water has no base texture: Source shows its fog colour (and its normal map's ripples).
+            fc = [int(float(x)) for x in re.findall(r'-?\d*\.?\d+', p.get('$fogcolor', '{ 64 64 64 }'))[:3]] or [64, 64, 64]
+            im = Image.new('RGB', (64, 64), tuple(fc)); water = fc
         if im is None:
             missing.append(m); continue
-        info = vtf.info(read(f'materials/{base.lower().replace(chr(92), "/")}.vtf'))
+        if maxpx and max(im.size) > maxpx:
+            im.thumbnail((maxpx, maxpx), Image.LANCZOS)
+        if water:
+            info = {'w': 512, 'h': 512, 'reflectivity': [((c / 255) ** 2.2) for c in water]}
+        else:
+            info = vtf.info(read(f'materials/{base}.vtf'))
+            info = {**info, 'w': vtf_size(base)[0], 'h': vtf_size(base)[1]}
         translucent, alphatest, selfillum = flag(p, '$translucent'), flag(p, '$alphatest'), flag(p, '$selfillum')
         # Self-illumination is masked by the base texture's alpha, or by a separate mask texture.
         if selfillum and p.get('$selfillummask'):
@@ -178,27 +229,30 @@ def main():
         uses_alpha = translucent or alphatest or selfillum or (p.get('$detail') and p.get('$detailblendmode', '0').strip() == '7')
         rel = m
         os.makedirs(os.path.dirname(os.path.join(OUT, rel)), exist_ok=True)
-        if uses_alpha:
-            file = f'p2/{rel}.png'; im.save(os.path.join(ROOT, 'textures', file), optimize=True)
+        if uses_alpha and not flat:
+            file = f'{PREFIX}/{rel}.png'; im.save(os.path.join(ROOT, 'textures', file), optimize=True)
         else:
-            file = f'p2/{rel}.jpg'; im.convert('RGB').save(os.path.join(ROOT, 'textures', file), quality=90)
+            file = f'{PREFIX}/{rel}.jpg'; im.convert('RGB').save(os.path.join(ROOT, 'textures', file), quality=88)
         src = {'shader': shader.lower(), 'basetexture': base.lower()}
-        nm = decode_tex(p.get('$bumpmap') or p.get('$normalmap', ''))
+        try:
+            nm = None if flat else decode_tex(p.get('$bumpmap') or p.get('$normalmap', ''))
+        except Exception:
+            nm = None
         if nm is not None:
             if max(nm.size) > 1024:
                 nm.thumbnail((1024, 1024), Image.LANCZOS)
-            src['normal'] = f'p2/{rel}_n.png'; nm.convert('RGB').save(os.path.join(ROOT, 'textures', src['normal']), optimize=True)
+            src['normal'] = f'{PREFIX}/{rel}_n.png'; nm.convert('RGB').save(os.path.join(ROOT, 'textures', src['normal']), optimize=True)
             # Self-shadowing bump: the texture holds the three basis weights directly (not a normal).
             if flag(p, '$ssbump'):
                 src['ssbump'] = True
-        det = (p.get('$detail') or '').lower().replace('\\', '/')
+        det = '' if flat else (p.get('$detail') or '').lower().replace('\\', '/')
         if det:
             dim = decode_tex(det)
             if dim is not None:
-                dfile = f'p2/{det}.png'
+                dfile = f'{PREFIX}/{det}.png'
                 os.makedirs(os.path.dirname(os.path.join(ROOT, 'textures', dfile)), exist_ok=True)
                 dim.convert('RGBA').save(os.path.join(ROOT, 'textures', dfile), optimize=True)   # alpha: a second pattern (mode 7)
-                src['detail'] = {'file': dfile, 'scale': float(p.get('$detailscale', '4') or 4), 'factor': float(p.get('$detailblendfactor', '1') or 1), 'mode': int(float(p.get('$detailblendmode', '0') or 0))}
+                src['detail'] = {'file': dfile, 'scale': (vec3(p.get('$detailscale', '4')) or [4])[0], 'factor': float(p.get('$detailblendfactor', '1') or 1), 'mode': int(float(p.get('$detailblendmode', '0') or 0))}
         for k, key in [('translucent', '$translucent'), ('alphatest', '$alphatest'), ('additive', '$additive'), ('selfillum', '$selfillum'), ('nocull', '$nocull')]:
             if flag(p, key):
                 src[k] = True
@@ -215,7 +269,7 @@ def main():
         r = rad.get(m)
         if r:
             src['rad'] = r
-        index.append({'name': f'p2/{m}', 'file': file, 'size': [im.width, im.height], 'material': category(p.get('$surfaceprop', '')), 'raw': True,
+        index.append({'name': f'{PREFIX}/{m}', 'file': file, 'size': [info['w'], info['h']], 'material': category(p.get('$surfaceprop', '')), 'raw': True,
                       'credit': 'Portal 2 (Valve): reference only, never published', 'license': 'reference-only', 'source': src})
     json.dump({'format': 'liminal-textures', 'version': 1, 'textures': index}, open(os.path.join(OUT, 'index.json'), 'w'), indent=1)
     print(f'{len(index)} materials converted, {len(missing)} missing: {missing[:12]}')

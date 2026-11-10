@@ -77,7 +77,7 @@ export class Level {
           const shift = (v: number[]) => v3(v[0] + o[0], v[1] + o[1], v[2] + o[2]);
           return convexBrush(b.id, sp.planes.map((p) => ({ n: v3(...p.n), d: p.d + p.n[0] * o[0] + p.n[1] * o[1] + p.n[2] * o[2] })), shift(b.min), shift(b.max), b.material ?? 'default');
         }),
-      ...propSolids(map.entities.map((e) => { const o = this.propOffset(e); return o ? { ...e, origin: [e.origin[0] + o[0], e.origin[1] + o[1], e.origin[2] + o[2]] as [number, number, number] } : e; }), (m) => this.models.header(m)?.hull),
+      ...propSolids(map.entities.map((e) => { const o = this.propOffset(e); return o ? { ...e, origin: [e.origin[0] + o[0], e.origin[1] + o[1], e.origin[2] + o[2]] as [number, number, number] } : e; }), (m) => this.models.header(m)),
     ]);
   }
 
