@@ -12,6 +12,12 @@ npm run typecheck && npm test && npm run build
 Tests cover movement/collision only. A green run says nothing about whether
 it *feels* right; that's the user's call.
 
+## Talking to the user
+
+- **"STE" = Simplified Technical English.** When the user says STE, the last
+  reply had too many words or hard words. Say it again: short sentences,
+  simple words, only what they need. Keep replies like that by default.
+
 ## Rules that matter
 
 - **Z is up, 1 unit = 1 inch** everywhere: map files, physics, rendering
