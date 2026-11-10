@@ -1,4 +1,4 @@
-import { MapOut, type V3 } from '../mapOut';
+import { MapOut, NODRAW, type V3 } from '../mapOut';
 import { Rng } from '../rng';
 import { carve, type Finish, type Hollow } from '../carve';
 import { walkTile, stairs, tubePath, TILE, STEP, DX, DY, opposite, type Dir } from '../kit/aperture';
@@ -81,7 +81,11 @@ interface Door {
   stub: number; balcony: boolean;
 }
 /** What is cut into one mass. */
-interface Inner { finish: Finish; hollows: Hollow[]; doors: Door[]; steps: { min: V3; max: V3; riser: Dir }[]; ribs: [V3, V3][] }
+interface Inner {
+  finish: Finish; hollows: Hollow[]; doors: Door[]; steps: { min: V3; max: V3; riser: Dir }[]; ribs: [V3, V3][];
+  /** Stair flights: the middle of the low end's first stair tile, the way up, the width, the low floor's height. */
+  ramps: { c: V3; d: Dir; w: number; z: number }[];
+}
 
 interface Ctx {
   m: MapOut; lay: Layout; root: Rng; L: number;
@@ -295,7 +299,7 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
   const out = new Map<number, Inner>();
   const get = (blk: number): Inner => {
     let v = out.get(blk);
-    if (!v) { v = { finish: root.fork(`finish${blk}`).pick(FINISH[kindOf(blk)]), hollows: [], doors: [], steps: [], ribs: [] }; out.set(blk, v); }
+    if (!v) { v = { finish: root.fork(`finish${blk}`).pick(FINISH[kindOf(blk)]), hollows: [], doors: [], steps: [], ribs: [], ramps: [] }; out.set(blk, v); }
     return v;
   };
   const cut = (blk: number, box: [V3, V3]) => { const v = get(blk); v.hollows.push({ min: box[0], max: box[1], finish: v.finish }); ctx.hollows.push({ min: box[0], max: box[1] }); };
@@ -481,6 +485,7 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
         const b = along(c, d, -TILE / 2 + k * RUN, -TILE / 2 + (k + 1) * RUN, p.w, z, z + (k + 1) * RISE);
         get(blk).steps.push({ min: b[0], max: b[1], riser: opposite(d) });
       }
+      get(blk).ramps.push({ c, d, w: p.w, z });
     }
   }
 
@@ -554,8 +559,24 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
 function fitOut(ctx: Ctx, p: { x0: number; y0: number; x1: number; y1: number; D: District }, cut: Inner): void {
   const { m, steel } = ctx;
   const side = ['x+', 'y+', 'x-', 'y-'] as const;
+  // The steps are for the eye. The feet go up an unseen ramp laid over them, from the step noses' line (as Valve's
+  // own stairs do), so the view climbs smoothly and does not jolt at every step.
   for (const s of cut.steps) {
-    m.box(s.min, s.max, { tex: { 'z+': cut.finish.floor, [side[s.riser]]: cut.finish.floor }, scale: cut.finish.scale, lightmapscale: cut.finish.lightmapscale });
+    m.box(s.min, s.max, { tex: { 'z+': cut.finish.floor, [side[s.riser]]: cut.finish.floor }, scale: cut.finish.scale, lightmapscale: cut.finish.lightmapscale, solid: false });
+  }
+  for (const { c, d, w, z } of cut.ramps) {
+    const dx = DX[d], dy = DY[d], lx = -DY[d], ly = DX[d];
+    const at = (u: number, l: number): V3 => [c[0] + dx * u + lx * l, c[1] + dy * u + ly * l, 0];
+    const dot2 = (n: number[], q: V3) => n[0] * q[0] + n[1] * q[1];
+    const k = 1 / Math.hypot(0.5, 1);
+    const slope = [-0.5 * dx * k, -0.5 * dy * k, k];                      // up and back: the plane through the step noses
+    const foot = at(-TILE / 2 - 32, 0);                                    // where that plane meets the low floor
+    m.convex([
+      [slope[0], slope[1], slope[2], slope[0] * foot[0] + slope[1] * foot[1] + slope[2] * z],
+      [0, 0, 1, z + LEVEL], [0, 0, -1, -z],
+      [dx, dy, 0, dot2([dx, dy], at(3 * TILE + TILE / 2, 0))],
+      [lx, ly, 0, dot2([lx, ly], at(0, w / 2))], [-lx, -ly, 0, -dot2([lx, ly], at(0, -w / 2))],
+    ], NODRAW);
   }
   for (const [lo, hi] of cut.ribs) steel(lo, hi, p.D.steel);
   const face = [p.x1, p.y1, p.x0, p.y0];
@@ -1103,7 +1124,8 @@ const INSIDE_FOG = {
 export const GEOMETRY_SETTINGS = {
   camera: { model: 'source', sourceHdr: true, autoExposure: true, sourceBloom: 0.7, sourceExposureMin: 0.7, sourceExposureMax: 1.8 },
   light: { enabled: false, lampAmbient: 14, lampAmbientColor: '#9db0c4', lampAmbientUp: 0.35, lampScale: 1 },
-  render: { internalHeight: 0, textureFilter: 'linear', faceShade: 0.75 },
+  // Small things are not drawn past 70 times their own size: by then the fog has all but hidden them.
+  render: { internalHeight: 0, textureFilter: 'linear', faceShade: 0.75, detailDistance: 70 },
   surface: { reflections: 0 },
   fog: {
     enabled: true, source: true, color: '#8f979f', near: 300, far: 9000, maxDensity: 1,

@@ -422,7 +422,7 @@ export class Game {
     const moving = this.fogMix !== want;
     if (moving) this.fogMix += Math.sign(want - this.fogMix) * Math.min(Math.abs(want - this.fogMix), dt > 0 ? dt / 0.4 : 1);
     if (moving || (s.fog.source && s.fog.blend)) this.updateFog(s, forward);
-    this.level?.cull(cam.position, fogReach(), s.render.detailDistance);
+    this.level?.cull(cam.position, fogReach(0.985), s.render.detailDistance);
     worldUniforms.time.value = performance.now() / 1000;
     this.renderer.render(this.scene);
     this.onFrame?.(dt);

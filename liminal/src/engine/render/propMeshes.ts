@@ -18,7 +18,7 @@ export function propMaterials(entities: EntityDef[], models: ModelRegistry): str
 }
 
 /** Props are batched per region of this size, so the renderer can skip whole regions (out of view, or lost in fog). */
-export const PROP_REGION = 4096;
+export const PROP_REGION = 2048;
 
 /**
  * Props drawn instanced: one InstancedMesh per (model, skin, region of the
