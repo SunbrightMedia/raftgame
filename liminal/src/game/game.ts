@@ -7,8 +7,10 @@ import { LowResRenderer } from '../engine/render/renderer';
 import { TextureRegistry } from '../engine/render/textures';
 import { ModelRegistry } from '../engine/render/models';
 import { propMaterials } from '../engine/render/propMeshes';
+import { glowTextures } from '../engine/render/glows';
 import { propModel } from '../engine/collision/props';
 import { worldUniforms, MAX_RECTS } from '../engine/render/worldMaterial';
+import { fogUniforms, fogAt } from '../engine/render/fog';
 import { kelvinToLinear, emitterColor } from '../engine/light/units';
 import { angleVectors } from '../engine/vec3';
 import { Input } from './input';
@@ -174,19 +176,13 @@ export class Game {
     this.lighting.reencode(C.model === 'source' && !hdr);
     this.renderer.sourceUnit = worldUniforms.sourceUnit.value;
     this.renderer.setSourceFov(s.view.fov);
-    this.renderer.setClearColor(s.fog.enabled ? s.fog.color : s.render.clearColor);
     const recrushed = this.textures.setCrush(s.textures, s.render.textureFilter as 'nearest' | 'linear');
     if (recrushed && this.level) this.level.rebuild();
     if (this.level) this.lighting.request(this.level, s, this.textures);
     this.updateLightUniforms(s);
     worldUniforms.faceShade.value = s.render.faceShade;
     worldUniforms.brightness.value = s.render.brightness;
-    worldUniforms.fogOn.value = s.fog.enabled ? 1 : 0;
-    worldUniforms.fogColor.value.set(s.fog.color);
-    worldUniforms.fogNear.value = s.fog.near;
-    worldUniforms.fogFar.value = s.fog.far;
-    worldUniforms.fogLuminance.value = s.fog.luminance;
-    worldUniforms.fogHaze.value = s.fog.haze ? 1 : 0;
+    this.updateFog(s);
     worldUniforms.tileBreakup.value = s.render.tileBreakup;
     worldUniforms.specScale.value = s.surface.reflections;
     this.updateSky(s);
@@ -198,6 +194,37 @@ export class Game {
     worldUniforms.sheenScale.value = s.surface.sheen;
     worldUniforms.detailScale.value = s.surface.detail;
     this.input.rawInput = s.view.rawInput;
+  }
+
+  /**
+   * Fog uniforms from the settings, and the void behind everything drawn as the
+   * fog at its densest. Source fog with two colours depends on where the camera
+   * looks (c_baseplayer.cpp GetFogColor), so this also runs every frame.
+   */
+  private updateFog(s: Settings, forward?: { x: number; y: number; z: number }): void {
+    const F = s.fog, u = fogUniforms;
+    u.fogOn.value = F.enabled ? 1 : 0;
+    u.fogNear.value = F.near;
+    u.fogFar.value = F.far;
+    u.fogMaxDensity.value = F.maxDensity;
+    u.fogHaze.value = F.haze && !F.source ? 1 : 0;
+    u.fogSquare.value = F.source ? 1 : 0;
+    const c = new THREE.Color(F.color);
+    if (F.source && F.blend && forward) {
+      // Blended as Source does, on the colours as typed (not linear light).
+      const p = (F.dirPitch * Math.PI) / 180, y = (F.dirYaw * Math.PI) / 180;
+      const k = 0.5 * (forward.x * Math.cos(p) * Math.cos(y) + forward.y * Math.cos(p) * Math.sin(y) - forward.z * Math.sin(p)) + 0.5;
+      const c2 = new THREE.Color(F.color2);
+      c.setRGB(c.r * k + c2.r * (1 - k), c.g * k + c2.g * (1 - k), c.b * k + c2.b * (1 - k));
+    }
+    const gamma22 = F.source || worldUniforms.gamma22.value > 0.5;
+    const lin = (v: number) => (gamma22 ? Math.pow(v, 2.2) : v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+    const lum = F.source ? worldUniforms.sourceUnit.value * F.hdrScale : F.luminance;
+    u.fogRadiance.value.set(lin(c.r) * lum, lin(c.g) * lum, lin(c.b) * lum);
+    if (F.enabled) {
+      const f = fogAt(1e9), r = u.fogRadiance.value;
+      this.renderer.setClearRadiance(r.x * f, r.y * f, r.z * f);
+    } else this.renderer.setClearColor(s.render.clearColor);
   }
 
   async loadMapPath(path: string): Promise<void> {
@@ -213,6 +240,7 @@ export class Game {
     const texNames = [
       ...map.brushes.flatMap((b) => [b.tex ?? 'dev/gray', ...Object.values(b.faces ?? {}).map((f) => f?.tex ?? '')]).filter(Boolean),
       ...propMaterials(map.entities, this.models),
+      ...glowTextures(map.entities),
     ];
     await this.textures.prepare([...texNames, ...this.textures.extrasOf(texNames)]);
     const t1 = performance.now();
@@ -314,6 +342,7 @@ export class Game {
     worldUniforms.flashBeamN.value = C.flashBeam >= 90 ? 0 : Math.log(0.5) / Math.log(Math.cos(half));
     worldUniforms.flashColor.value.set(...kelvinToLinear(C.flashKelvin));
 
+    if (s.fog.source && s.fog.blend) this.updateFog(s, forward);
     worldUniforms.time.value = performance.now() / 1000;
     this.renderer.render(this.scene);
     this.onFrame?.(dt);

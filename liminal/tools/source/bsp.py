@@ -33,6 +33,11 @@ class Bsp:
             out.append(d)
         return out
 
+    def entity_pairs(self):
+        """Every entity as its list of (key, value) pairs, repeats kept (outputs repeat their key)."""
+        txt = self.lump(L_ENTITIES).decode('latin-1')
+        return [re.findall(r'"([^"]*)"\s+"([^"]*)"', blk) for blk in re.findall(r'\{([^{}]*)\}', txt)]
+
     def planes(self):
         d = self.lump(L_PLANES)
         return [struct.unpack_from('<4f', d, i * 20) for i in range(len(d) // 20)]

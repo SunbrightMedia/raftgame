@@ -23,7 +23,7 @@ from bsp import Bsp, clean_material, SURF_SKY, SURF_NODRAW, SURF_TRIGGER, SURF_H
 from import_vmf import DROP_TOOLS, INVISIBLE_SOLID, LIGHT_ENTS, MODEL_ENTS, PROP_ENTS, NONSOLID_ENTS, vec  # noqa: E402
 
 KEEP_ENTS = ('env_cubemap', 'env_tonemap_controller', 'color_correction', 'env_fog_controller', 'light_environment', 'info_lighting',
-             'env_sprite', 'env_sprite_clientside', 'env_lightglow', 'beam_spotlight', 'point_spotlight', 'env_projectedtexture', 'move_rope', 'keyframe_rope',
+             'env_lightglow', 'env_projectedtexture', 'move_rope', 'keyframe_rope',
              'env_soundscape', 'ambient_generic', 'func_instance_io_proxy', 'info_particle_system', 'env_smokestack', 'env_steam', 'postprocess_controller')
 CONTENTS_SOLID, CONTENTS_WINDOW, CONTENTS_GRATE, CONTENTS_WATER = 0x1, 0x2, 0x8, 0x20
 CONTENTS_PLAYERCLIP, CONTENTS_MONSTERCLIP, CONTENTS_AREAPORTAL, CONTENTS_ORIGIN, CONTENTS_LADDER = 0x10000, 0x20000, 0x8000, 0x1000000, 0x20000000
@@ -32,6 +32,62 @@ CONTENTS_PLAYERCLIP, CONTENTS_MONSTERCLIP, CONTENTS_AREAPORTAL, CONTENTS_ORIGIN,
 def norm(v):
     l = math.sqrt(sum(c * c for c in v)) or 1
     return [c / l for c in v], l
+
+
+def start_fog(pairs):
+    """
+    The fog controller a map starts with: follow what fires at map spawn
+    (logic_auto OnMapSpawn, through relays and instance proxies) to a
+    SetFogController, else the controller flagged as master.
+    """
+    by_name = {}
+    for e in pairs:
+        d = dict(e)
+        if d.get('targetname'):
+            by_name.setdefault(d['targetname'].lower(), []).append(e)
+    seen, queue = set(), []
+    for e in pairs:
+        if dict(e).get('classname') == 'logic_auto':
+            queue += [(v, 0) for k, v in e if k.lower() == 'onmapspawn']
+    while queue:
+        out, depth = queue.pop(0)
+        f = out.replace('\x1b', ',').split(',')
+        if len(f) < 2 or depth > 6:
+            continue
+        target, inp, param = f[0].lower(), f[1].lower(), f[2] if len(f) > 2 else ''
+        if inp == 'setfogcontroller':
+            return param.lower()
+        for t in by_name.get(target, []):
+            # An instance proxy relays "OnProxyRelayN"; a relay fires OnTrigger; a script or branch is not followed.
+            keys = [inp] if inp.startswith('onproxyrelay') else ['ontrigger', 'onspawn'] if inp == 'trigger' else []
+            for k, v in t:
+                if k.lower() in keys and (id(t), v) not in seen:
+                    seen.add((id(t), v)); queue.append((v, depth + 1))
+    for e in pairs:
+        d = dict(e)
+        if d.get('classname') == 'env_fog_controller' and int(d.get('spawnflags', '0') or 0) & 1:
+            return d.get('targetname', '').lower()
+    return None
+
+
+def fog_settings(keys):
+    hexc = lambda s: '#' + ''.join(f'{max(0, min(255, int(float(c)))):02x}' for c in (s.split() + ['0', '0', '0'])[:3])
+    ang = vec(keys.get('angles', '0 0 0'))
+    return {'enabled': keys.get('fogenable', '1') != '0', 'source': True, 'color': hexc(keys.get('fogcolor', '255 255 255')), 'near': float(keys.get('fogstart', 0)), 'far': float(keys.get('fogend', 5000)),
+            'maxDensity': float(keys.get('fogmaxdensity', 1)), 'hdrScale': float(keys.get('HDRColorScale', 1)), 'blend': keys.get('fogblend', '0') == '1',
+            'color2': hexc(keys.get('fogcolor2', '255 255 255')), 'dirPitch': ang[0], 'dirYaw': ang[1]}
+
+
+def sprite_size(tex: str) -> float:
+    """A sprite's width in units: its texture's width in texels (textures/<set>/index.json)."""
+    global _SPRITES
+    if '_SPRITES' not in globals():
+        _SPRITES = {}
+        for f in ('textures/p2/index.json', 'textures/p2lib/index.json'):
+            f = os.path.join(HERE, '../..', f)
+            if os.path.exists(f):
+                _SPRITES.update({t['name']: t['size'][0] for t in json.load(open(f))['textures'] if '/sprites/' in t['name']})
+    return _SPRITES.get(tex, 64)
 
 
 def main():
@@ -143,6 +199,21 @@ def main():
             if keys.get('targetname'):
                 props['name'] = keys['targetname'].lower()
             entities.append({'id': 1000 + eid, 'class': 'prop', 'origin': o, 'angles': ang, 'props': props})
+        elif cls in ('env_sprite', 'env_sprite_clientside') and keys.get('model', '').endswith('.vmt'):
+            # The glow on a lamp: an additive sprite facing the view (render modes 3/5/9; others are rare).
+            tex = a.tex_prefix + keys['model'].lower().replace('\\', '/')[:-4].removeprefix('materials/')
+            px = sprite_size(tex)
+            entities.append({'id': 1000 + eid, 'class': 'glow', 'origin': o, 'props': {
+                'tex': tex, 'size': round(px * float(keys.get('scale', 1) or 1), 2), 'color': vec(keys.get('rendercolor', '255 255 255')),
+                'brightness': round(float(keys.get('renderamt', 255) or 255) / 255 * float(keys.get('HDRColorScale', 1) or 1), 4), 'source': keys}})
+        elif cls in ('beam_spotlight', 'point_spotlight'):
+            # A spotlight's visible shaft and halo. Angles: pitch down is positive (Source).
+            p, y = math.radians(ang[0]), math.radians(ang[1])
+            d = [math.cos(p) * math.cos(y), math.cos(p) * math.sin(y), -math.sin(p)]
+            entities.append({'id': 1000 + eid, 'class': 'beam', 'origin': o, 'props': {
+                'dir': [round(c, 5) for c in d], 'length': float(keys.get('spotlightlength', 500) or 500), 'width': float(keys.get('spotlightwidth', 50) or 50),
+                'color': vec(keys.get('rendercolor', '255 255 255')), 'brightness': round(float(keys.get('renderamt', 255) or 255) / 255 * float(keys.get('HDRColorScale', 1) or 1), 4),
+                'tex': a.tex_prefix + 'sprites/glow_test02', 'halo': a.tex_prefix + 'sprites/light_glow03', 'source': keys}})
         elif cls in KEEP_ENTS:
             entities.append({'id': 1000 + eid, 'class': 'source_' + cls, 'origin': o, 'angles': ang, 'props': {'source': keys}})
         eid += 1
@@ -151,6 +222,10 @@ def main():
 
     name = a.name or os.path.splitext(os.path.basename(a.out))[0]
     settings = {'camera': {'model': 'source'}, 'render': {'internalHeight': 0, 'textureFilter': 'linear'}, 'fog': {'enabled': False}}
+    fog = start_fog(bsp.entity_pairs())
+    for e in ents:
+        if e.get('classname') == 'env_fog_controller' and e.get('targetname', '').lower() == fog:
+            settings['fog'] = fog_settings(e)
     for e in ents:
         if e.get('classname') == 'env_tonemap_controller':
             for key, field in (('minexposure', 'sourceExposureMin'), ('maxexposure', 'sourceExposureMax'), ('bloomscale', 'sourceBloom')):
@@ -166,7 +241,7 @@ def main():
     kinds = {}
     for e in entities:
         kinds[e['class']] = kinds.get(e['class'], 0) + 1
-    print(f'{a.out}: {len(brushes)} brushes, entities {kinds}; dropped {dropped}')
+    print(f'{a.out}: {len(brushes)} brushes, entities {kinds}; dropped {dropped}; fog {fog} {settings["fog"]}')
 
 
 if __name__ == '__main__':

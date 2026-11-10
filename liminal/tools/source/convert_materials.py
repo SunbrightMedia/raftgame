@@ -253,7 +253,7 @@ def main():
                 os.makedirs(os.path.dirname(os.path.join(ROOT, 'textures', dfile)), exist_ok=True)
                 dim.convert('RGBA').save(os.path.join(ROOT, 'textures', dfile), optimize=True)   # alpha: a second pattern (mode 7)
                 src['detail'] = {'file': dfile, 'scale': (vec3(p.get('$detailscale', '4')) or [4])[0], 'factor': float(p.get('$detailblendfactor', '1') or 1), 'mode': int(float(p.get('$detailblendmode', '0') or 0))}
-        for k, key in [('translucent', '$translucent'), ('alphatest', '$alphatest'), ('additive', '$additive'), ('selfillum', '$selfillum'), ('nocull', '$nocull')]:
+        for k, key in [('translucent', '$translucent'), ('alphatest', '$alphatest'), ('additive', '$additive'), ('selfillum', '$selfillum'), ('nocull', '$nocull'), ('nosrgb', '$nosrgb')]:
             if flag(p, key):
                 src[k] = True
         if p.get('$envmap'):

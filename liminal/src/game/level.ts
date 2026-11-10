@@ -7,6 +7,7 @@ import type { TextureRegistry } from '../engine/render/textures';
 import type { ModelRegistry } from '../engine/render/models';
 import { buildPropMeshes, disposeProps, setPropLight } from '../engine/render/propMeshes';
 import { buildLabels } from '../engine/render/labels';
+import { buildGlows, disposeGlows } from '../engine/render/glows';
 import { propSolids } from '../engine/collision/props';
 import { buildFaces, solidPlanes, type Face, type LightmapLayout } from '../engine/light/faces';
 import { type Vec3, v3 } from '../engine/vec3';
@@ -25,6 +26,7 @@ export class Level {
   /** Where the player starts (and R respawns). */
   spawn: { origin: Vec3; yaw: number; pitch: number };
   private meshes: THREE.Group | null = null;
+  private glows: THREE.Group | null = null;
   private props: THREE.Group | null = null;
   layout: LightmapLayout | null = null;
   /** For Source-lit maps (lights imported from a VMF): what the Source baker needs. */
@@ -53,6 +55,8 @@ export class Level {
     }
     const labels = buildLabels(map.entities);
     if (labels) this.root.add(labels);
+    this.glows = buildGlows(map.entities, textures);
+    if (this.glows) this.root.add(this.glows);
     const start = map.entities.find((e) => e.class === 'player_start');
     this.spawn = start
       ? { origin: v3(...start.origin), pitch: start.angles?.[0] ?? 0, yaw: start.angles?.[1] ?? 0 }
@@ -136,6 +140,7 @@ export class Level {
   dispose(): void {
     if (this.meshes) disposeGroup(this.meshes);
     if (this.props) disposeProps(this.props);
+    if (this.glows) disposeGlows(this.glows);
     this.lightmap?.dispose();
   }
 }

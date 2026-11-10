@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { TexEntry } from './textures';
 import { worldUniforms } from './worldMaterial';
+import { fogUniforms, FOG_PARS } from './fog';
 import { applySourceBlend, sourceUniforms } from './sourceMaterial';
 
 /**
@@ -21,12 +22,7 @@ export function makePropMaterial(tex: TexEntry): THREE.ShaderMaterial {
     uniforms: {
       faceShade: worldUniforms.faceShade,
       brightness: worldUniforms.brightness,
-      fogColor: worldUniforms.fogColor,
-      fogLuminance: worldUniforms.fogLuminance,
-      fogNear: worldUniforms.fogNear,
-      fogFar: worldUniforms.fogFar,
-      fogOn: worldUniforms.fogOn,
-      fogHaze: worldUniforms.fogHaze,
+      ...fogUniforms,
       sourceUnit: worldUniforms.sourceUnit,
       gamma22: worldUniforms.gamma22,
       lightmapOn: worldUniforms.lightmapOn,
@@ -72,12 +68,7 @@ export function makePropMaterial(tex: TexEntry): THREE.ShaderMaterial {
       uniform sampler2D map;
       uniform float faceShade;
       uniform float brightness;
-      uniform vec3 fogColor;
-      uniform float fogLuminance;
-      uniform float fogNear;
-      uniform float fogFar;
-      uniform float fogOn;
-      uniform float fogHaze;
+      ${FOG_PARS}
       uniform float sourceUnit;
       uniform int alphaMode;
       uniform float alphaRef;
@@ -110,10 +101,9 @@ export function makePropMaterial(tex: TexEntry): THREE.ShaderMaterial {
           L = lightmapOn > 0.5 && vLight.r >= 0.0 ? rho * vLight * sourceUnit * brightness : rho * sourceUnit * mix(1.0, shade, faceShade) * brightness;
           if (selfIllum > 0.5) L = mix(L, rho * selfIllumTint * sourceUnit, tx.a);
         }
-        float fd = max(0.0, vDepth - fogNear) / max(1.0, fogFar - fogNear);
-        float f = fogOn * (fogHaze > 0.5 ? 1.0 - exp(-3.0 * fd) : clamp(fd, 0.0, 1.0));
+        float f = fogFactor(vDepth);
         float a = alphaMode == 2 ? tx.a * alphaMul : alphaMode == 3 ? alphaMul : 0.0;
-        gl_FragColor = vec4(mix(L, toLinear(fogColor) * fogLuminance, f), a);
+        gl_FragColor = vec4(mix(L, fogRadiance, f), a);
       }`,
   });
   applySourceBlend(mat, tex.source);

@@ -3,6 +3,7 @@ import { RectAreaLightTexturesLib } from 'three/examples/jsm/lights/RectAreaLigh
 import type { Surface } from './surfaces';
 import type { SourceMaterial } from './textures';
 import { sourceUniforms } from './sourceMaterial';
+import { fogUniforms, FOG_PARS } from './fog';
 
 /** Most light-emitting rectangles (troffers) whose reflections are drawn at once. */
 export const MAX_RECTS = 64;
@@ -16,12 +17,7 @@ RectAreaLightTexturesLib.init();
 export const worldUniforms = {
   faceShade: { value: 0.6 },
   brightness: { value: 1 },
-  fogColor: { value: new THREE.Color('#16181c') },
-  fogLuminance: { value: 2 },
-  fogNear: { value: 400 },
-  fogFar: { value: 5000 },
-  fogOn: { value: 1 },
-  fogHaze: { value: 0 },
+  ...fogUniforms,
   tileBreakup: { value: 0 },
   lightmap: { value: null as THREE.Texture | null },
   /** Where the baked light comes from (lighting.ts / bake.ts dirPixels): xyz·0.5+0.5, directionality. */
@@ -152,12 +148,7 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
       uniform float lightmapOn;
       uniform float faceShade;
       uniform float brightness;
-      uniform vec3 fogColor;
-      uniform float fogLuminance;
-      uniform float fogNear;
-      uniform float fogFar;
-      uniform float fogOn;
-      uniform float fogHaze;
+      ${FOG_PARS}
       uniform float tileBreakup;
       uniform float flashOn;
       uniform vec3 flashPos;
@@ -418,14 +409,12 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
           L = (Lbaked + Edyn / PI * diffuseColor * (1.0 - env) + spec * gloss * occl) * brightness;
           if (selfIllum > 0.5) L = mix(L, rho * selfIllumTint * sourceUnit, tx.a);
         }
-        // Linear fog, or haze: exponential like real aerial perspective (95% by fogFar).
-        float fd = max(0.0, vDepth - fogNear) / max(1.0, fogFar - fogNear);
-        float f = fogOn * (fogHaze > 0.5 ? 1.0 - exp(-3.0 * fd) : clamp(fd, 0.0, 1.0));
+        float f = fogFactor(vDepth);
         // Alpha marks light sources (lamp lenses, panels) for the camera pass:
         // only they get the lamp-edge line and fringe, not overexposed surfaces.
         // (Translucent surfaces blend with their own alpha and keep the frame's: see applySourceBlend.)
         float a = alphaMode == 2 ? tx.a * alphaMul : alphaMode == 3 ? alphaMul : isSource * (1.0 - isStatic); // screens aren't lamps
-        gl_FragColor = vec4(mix(L, toLinear(fogColor) * fogLuminance, f), a);
+        gl_FragColor = vec4(mix(L, fogRadiance, f), a);
       }`,
   });
 }

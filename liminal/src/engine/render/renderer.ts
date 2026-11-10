@@ -55,6 +55,11 @@ export class LowResRenderer {
     this.gl.setClearColor(new THREE.Color(hex), 0); // alpha 0: not a light source (see digicam)
   }
 
+  /** The void behind everything as linear radiance (the fog at its densest). */
+  setClearRadiance(r: number, g: number, b: number): void {
+    this.gl.setClearColor(new THREE.Color(r, g, b), 0);
+  }
+
   /**
    * Match another camera's picture exactly (tools comparing against a screenshot): vertical
    * field of view in degrees and the image centre's offset in output pixels. Null = normal.

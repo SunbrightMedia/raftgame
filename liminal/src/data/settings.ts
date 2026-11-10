@@ -201,6 +201,13 @@ export const SETTINGS = {
       far: num('Fog end', 6000, 1, 200000, 10, 'Linear fog: fully fogged here. Haze: 95% hazed here.', 'u'),
       haze: bool('Haze (aerial perspective)', false, 'Exponential haze, like real air: distant things fade gradually toward the haze colour instead of hitting a wall.'),
       luminance: num('Fog brightness', 2, 0, 50000, 0.1, 'How bright the haze itself is.', 'cd/m²'),
+      maxDensity: num('Fog max density', 1, 0, 1, 0.01, 'The most the fog ever hides (Source: fogmaxdensity). Below 1, far things never fade out completely.'),
+      source: bool('Source fog', false, 'Fog as Source draws it (env_fog_controller): linear from start to end, capped at the max density, blended by the factor squared; the colour is a plain Source colour (brightness = Source\'s "1.0" of light × the HDR scale below, not cd/m²). Source-lit maps set this.'),
+      hdrScale: num('Source fog: HDR colour scale', 1, 0, 8, 0.01, 'Multiplies the Source fog colour (HDRColorScale).'),
+      blend: bool('Source fog: two colours by view direction', false, 'Fog colour changes with where you look (fogblend): the first colour looking along the direction below, the second looking the opposite way.'),
+      color2: color('Source fog: second colour', '#ffffff'),
+      dirYaw: num('Source fog: direction yaw', 0, -180, 360, 1, undefined, '°'),
+      dirPitch: num('Source fog: direction pitch', 0, -90, 90, 1, 'Source pitch: −90 = up, 90 = down.', '°'),
     },
   },
   hud: {
