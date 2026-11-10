@@ -26,7 +26,7 @@ export interface Junction { id: number; x: number; y: number }
 /** A run of lane tiles between two junctions (a's and b's tiles not included). */
 export interface Segment { id: number; a: number; b: number; /** Direction from a to b. */ dir: Dir; tiles: [number, number][] }
 /** A catwalk on a segment: level `la` at a to level `lb` at b (equal = flat, else one level of stairs). */
-export interface Walk { segment: number; la: number; lb: number }
+export interface Walk { segment: number; la: number; lb: number; /** A spare connection: the maze stays in one piece without it. */ loop: boolean }
 
 export interface LayoutParams {
   /** Plan size in tiles. */
@@ -162,9 +162,10 @@ export function makeLayout(seed: number, params: Partial<LayoutParams> = {}): La
   const walks: Walk[] = [];
   const key = (j: number, l: number) => `${j}:${l}`;
   const free = (s: Segment, la: number, lb: number) => !used.has(`${s.id}:${la}`) && !used.has(`${s.id}:${lb}`);
+  let looping = false;
   const take = (s: Segment, la: number, lb: number) => {
     used.add(`${s.id}:${la}`); used.add(`${s.id}:${lb}`);
-    walks.push({ segment: s.id, la, lb });
+    walks.push({ segment: s.id, la, lb, loop: looping });
     const ka = key(s.a, la), kb = key(s.b, lb);
     nodes.set(ka, (nodes.get(ka) ?? 0) | (1 << s.dir));
     nodes.set(kb, (nodes.get(kb) ?? 0) | (1 << ((s.dir + 2) % 4)));
@@ -203,6 +204,7 @@ export function makeLayout(seed: number, params: Partial<LayoutParams> = {}): La
     active.push([far, l2]);
   }
   // Loops: spare connections between spots the maze already reaches.
+  looping = true;
   for (const k of [...visited]) {
     const [j, l] = k.split(':').map(Number);
     for (const [s, , l2, far] of options(j, l)) {
