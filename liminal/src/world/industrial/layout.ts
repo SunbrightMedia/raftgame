@@ -96,7 +96,7 @@ export interface LayoutParams {
 
 export const DEFAULT_LAYOUT: LayoutParams = {
   size: 160, districts: 3,
-  levels: 5, fill: 0.5, loops: 0.12, stairs: 0.3, stairTiles: 6,
+  levels: 5, fill: 0.5, loops: 0.5, stairs: 0.3, stairTiles: 6,
   tunnelBias: 2.5, bridges: 0.8,
 };
 

@@ -223,12 +223,17 @@ Checks:
 - `npm run world:plan -- <seed> out.ppm`: the plan as a picture, and counts.
 - `npx vite-node tools/world/spots.ts -- <seed> <n>`: camera poses (feet
   position) at doors, corridors, stair halls and rooms, for studio views.
+- `npx vite-node tools/world/tour.ts -- <seed> <n> <pick>`: random poses
+  along the walks, for a visual check of a whole world.
 - `tests/carve.test.ts`, `tests/world-layout.test.ts`.
 
 Next, in this order:
 
-1. **Checks**: a walk test over the real collision (done, see above), and a
-   metrics report per seed (to do).
+1. **Checks**: a walk test over the real collision, and the maze's numbers
+   per seed (both done: `npm run world:walk`, `npm run world:plan`). Now:
+   dead ends 10-13% of nodes, loops 13-16% of walks, runs between choices
+   about 35% short / 50% middling / 13% long, a third of the walks inside
+   the masses. Seeds are not yet rejected by these numbers.
 2. **District types with their own topology** (begun: the five kinds above
    differ in grain, and shafts open inside the masses; still to do: the nave,
    the tank yard, the ring):
