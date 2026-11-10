@@ -3,10 +3,11 @@ import { type Face, type LightmapLayout, facePoint } from '../light/faces';
 import type { TextureRegistry } from './textures';
 import { makeWorldMaterial } from './worldMaterial';
 import { applySourceBlend } from './sourceMaterial';
+import { makeSourceWorldMaterial } from './sourceWorldMaterial';
 import { emitterColor } from '../light/units';
 import { surfaceFor } from './surfaces';
 
-interface Batch { pos: number[]; nrm: number[]; uv: number[]; lm: number[]; shade: number[]; gu: number[]; gv: number[]; idx: number[] }
+interface Batch { pos: number[]; nrm: number[]; uv: number[]; lm: number[]; lmoff: number[]; shade: number[]; gu: number[]; gv: number[]; idx: number[] }
 
 /**
  * Build render meshes for all faces, batched into one mesh per texture.
@@ -17,7 +18,7 @@ export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout
   const batches = new Map<string, Batch>();
   for (const f of faces) {
     let bt = batches.get(f.tex);
-    if (!bt) { bt = { pos: [], nrm: [], uv: [], lm: [], shade: [], gu: [], gv: [], idx: [] }; batches.set(f.tex, bt); }
+    if (!bt) { bt = { pos: [], nrm: [], uv: [], lm: [], lmoff: [], shade: [], gu: [], gv: [], idx: [] }; batches.set(f.tex, bt); }
     const tex = textures.get(f.tex);
     const rect = layout?.rects.get(f.id);
     const base = bt.pos.length / 3;
@@ -48,10 +49,17 @@ export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout
         const ru = wu * cr - wv * sr, rv = wu * sr + wv * cr;
         bt.uv.push((ru / sx + f.offset[0]) / tex.worldW, (rv / sy + f.offset[1]) / tex.worldH);
       }
-      if (rect && layout) {
+      if (rect?.src && layout) {
+        // Source's luxel grid: integer luxel coordinates are texel centres.
+        const g = rect.src;
+        const ls = p[0] * g.lmS[0] + p[1] * g.lmS[1] + p[2] * g.lmS[2] - g.minS, lt = p[0] * g.lmT[0] + p[1] * g.lmT[1] + p[2] * g.lmT[2] - g.minT;
+        bt.lm.push((rect.x + 0.5 + ls) / layout.width, (rect.y + 0.5 + lt) / layout.height);
+        bt.lmoff.push(g.slots > 1 ? rect.w / layout.width : 0);
+      } else if (rect && layout) {
         const fs = f.width > 0 ? s / f.width : 0, ft = f.height > 0 ? t / f.height : 0;
         bt.lm.push((rect.x + 0.5 + fs * (rect.w - 1)) / layout.width, (rect.y + 0.5 + ft * (rect.h - 1)) / layout.height);
-      } else bt.lm.push(0, 0);
+        bt.lmoff.push(0);
+      } else { bt.lm.push(0, 0); bt.lmoff.push(0); }
       bt.shade.push(f.shade);
       bt.gu.push(gu[0], gu[1], gu[2]);
       bt.gv.push(gv[0], gv[1], gv[2]);
@@ -69,6 +77,7 @@ export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout
     geo.setAttribute('normal', new THREE.Float32BufferAttribute(bt.nrm, 3));
     geo.setAttribute('uv', new THREE.Float32BufferAttribute(bt.uv, 2));
     geo.setAttribute('lmuv', new THREE.Float32BufferAttribute(bt.lm, 2));
+    geo.setAttribute('lmoff', new THREE.Float32BufferAttribute(bt.lmoff, 1));
     geo.setAttribute('shade', new THREE.Float32BufferAttribute(bt.shade, 1));
     geo.setAttribute('gu', new THREE.Float32BufferAttribute(bt.gu, 3));
     geo.setAttribute('gv', new THREE.Float32BufferAttribute(bt.gv, 3));
@@ -77,8 +86,12 @@ export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout
     const entry = textures.get(tex);
     const surf = surfaceFor(tex, entry.material);
     const height = !entry.emissive && surf.bump > 0 ? textures.heightOf(tex, surf.relief) : undefined;
-    const mat = makeWorldMaterial(entry.texture, surf, entry.emissive ? { luminance: entry.emissive.luminance, color: emitterColor(entry.emissive), anim: entry.emissive.anim } : undefined, height, entry.source);
-    applySourceBlend(mat, entry.source);
+    let mat: THREE.ShaderMaterial;
+    if (layout?.source) mat = makeSourceWorldMaterial(entry, entry.source?.normal ? textures.rawTexture(entry.source.normal.replace(/\.\w+$/, '')) : null);
+    else {
+      mat = makeWorldMaterial(entry.texture, surf, entry.emissive ? { luminance: entry.emissive.luminance, color: emitterColor(entry.emissive), anim: entry.emissive.anim } : undefined, height, entry.source);
+      applySourceBlend(mat, entry.source);
+    }
     // Overlapping coplanar faces (common with hand-drawn brushes) would
     // z-fight and flicker. A small, distinct depth bias per texture batch
     // makes one surface win consistently instead.

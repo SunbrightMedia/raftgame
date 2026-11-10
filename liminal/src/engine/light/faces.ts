@@ -317,8 +317,15 @@ function isBuried(f: Face, others: SolidPlanes[]): boolean {
 // ---------------------------------------------------------------------------
 // Lightmap layout
 
-export interface LightmapRect { x: number; y: number; w: number; h: number }
-export interface LightmapLayout { width: number; height: number; luxel: number; rects: Map<number, LightmapRect> }
+export interface LightmapRect {
+  x: number; y: number; w: number; h: number;
+  /**
+   * Source layout (engine/light/vrad.ts): luxel coordinate = p·lmS − minS (and t
+   * likewise); `slots` lightmaps side by side (4 on bump-mapped faces).
+   */
+  src?: { lmS: Axis; lmT: Axis; minS: number; minT: number; slots: number };
+}
+export interface LightmapLayout { width: number; height: number; luxel: number; rects: Map<number, LightmapRect>; /** Source-lit (vrad.ts) */ source?: boolean }
 
 /**
  * Give each face a block of luxels (lightmap pixels), one every `luxel` units

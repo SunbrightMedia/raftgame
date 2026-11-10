@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import BakeWorker from '../engine/light/bake.worker?worker&inline';
 import type { BakeInput, BakeLight, BakeOutput } from '../engine/light/bake';
+import { SOURCE_LM_WIDTH, type SourceBakeInput, type SourceBakeOutput } from '../engine/light/vrad';
 import { BR30_65W, cosNPeak, kelvinToLinear, emitterColor, INCH, srgbToLinear } from '../engine/light/units';
 import { layoutLightmap, solidPlanes, type LightmapLayout } from '../engine/light/faces';
 import type { TextureRegistry } from '../engine/render/textures';
@@ -8,6 +9,9 @@ import type { Settings } from '../data/settings';
 import type { Level } from './level';
 import type { Storage } from '../data/storage';
 
+
+/** VRAD's defaults: 100 bounces (stops early once a bounce adds < 1), patches of 4 luxels, supersampled edges. */
+const SOURCE_BAKE = { bounces: 100, patchRays: 256, chop: 4, supersample: true };
 
 /** Bump when the baker's output changes meaning, so old caches are ignored. */
 const BAKE_VERSION = 8;
@@ -155,9 +159,73 @@ export class Lighting {
     this.timer = window.setTimeout(() => void this.start(level, s, textures, key, firstForMap), firstForMap ? 0 : 200);
   }
 
-  private cachePath(level: Level): string { return `maps/${level.map.name}.lightmap.json`; }
+  /** Next to the map file (maps/p2/x.json → maps/p2/x.lightmap.json), so dev-only maps keep dev-only caches. */
+  private cachePath(level: Level): string { return level.path?.endsWith('.json') ? level.path.replace(/\.json$/, '.lightmap.json') : `maps/${level.map.name}.lightmap.json`; }
+
+  /**
+   * Source-lit maps: Source's own light model (engine/light/vrad.ts). The
+   * layout is the level's (fixed by the map); a quick bake (one bounce, few
+   * rays, no supersampling) shows first, then VRAD's full settings.
+   */
+  private async startSource(level: Level, s: Settings, key: string, tryCache: boolean): Promise<void> {
+    const gen = ++this.seq;
+    const layout = level.layout!, src = level.source!;
+    const none = new Uint8Array(layout.width * layout.height * 4).fill(255);
+    if (tryCache) {
+      try {
+        const text = await this.storage.read(this.cachePath(level));
+        const c = text ? (JSON.parse(text) as LightmapCache) : null;
+        if (gen !== this.seq) return;
+        if (c && c.key === key && c.encoding === 'rgbe-deflate' && c.width === layout.width && c.height === layout.height) {
+          const t0 = performance.now();
+          const half = decodeRGBEToHalf(await pipe(fromBase64(c.data), new DecompressionStream('deflate-raw')));
+          if (gen !== this.seq) return;
+          this.apply(layout, half, s.light.filter, none, none);
+          this.status = `lighting loaded from cache (${Math.round(performance.now() - t0)} ms)`;
+          this.shownAt = performance.now();
+          return;
+        }
+      } catch { /* no cache: bake */ }
+    }
+    this.worker?.terminate();
+    this.worker = new BakeWorker();
+    const input = (quick: boolean): SourceBakeInput => ({
+      faces: level.faces, info: src.info, occluders: src.occluders, lights: src.lights,
+      params: quick ? { bounces: 1, patchRays: 16, chop: 8, supersample: false, maxWidth: SOURCE_LM_WIDTH } : { ...SOURCE_BAKE, maxWidth: SOURCE_LM_WIDTH },
+    });
+    this.status = 'baking (Source)…';
+    let fullDone = false;
+    this.worker.onmessage = (e: MessageEvent<{ id: number; out?: SourceBakeOutput; progress?: string }>) => {
+      if (gen !== this.seq) return;
+      if (e.data.progress) { if (e.data.id === 1) this.status = `Source bake: ${e.data.progress}`; return; }
+      const out = e.data.out!;
+      const half = new Uint16Array(out.pixels.length);
+      for (let i = 0; i < half.length; i++) half[i] = THREE.DataUtils.toHalfFloat(Math.min(65000, out.pixels[i]));
+      if (e.data.id === 0) {
+        if (fullDone) return;
+        this.apply(layout, half, s.light.filter, none, none);
+        this.status = `preview lighting (${out.ms} ms), full bake running…`;
+        this.shownAt ||= performance.now();
+        return;
+      }
+      fullDone = true;
+      this.apply(layout, half, s.light.filter, none, none);
+      this.status = `baked (Source) ${out.luxels.toLocaleString()} luxels, ${out.patches.toLocaleString()} patches, ${out.bounces} bounces in ${out.ms} ms`;
+      this.shownAt ||= performance.now();
+      this.worker?.terminate();
+      this.worker = null;
+      void pipe(encodeRGBE(out.pixels), new CompressionStream('deflate-raw')).then((z) => {
+        const cache: LightmapCache = { format: 'liminal-lightmap', version: BAKE_VERSION, encoding: 'rgbe-deflate', key, width: out.width, height: out.height, luxel: 16, data: toBase64(z) };
+        return this.storage.write(this.cachePath(level), JSON.stringify(cache));
+      }).then(() => { if (gen === this.seq) this.status += ' · cached'; }, (err) => console.warn('lightmap cache not saved', err));
+    };
+    this.worker.onerror = (e) => { this.status = `bake failed: ${e.message}`; };
+    this.worker.postMessage({ id: 0, source: input(true) });
+    this.worker.postMessage({ id: 1, source: input(false) });
+  }
 
   private async start(level: Level, s: Settings, textures: TextureRegistry, key: string, tryCache: boolean): Promise<void> {
+    if (level.source) return this.startSource(level, s, key, tryCache);
     const gen = ++this.seq;
     const L = s.light;
     const layout = layoutLightmap(level.faces, Math.max(2, L.luxelSize), 2048, L.thinSamples);

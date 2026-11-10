@@ -199,12 +199,13 @@ export class Game {
   async setMap(map: MapFile, label: string): Promise<void> {
     const t0 = performance.now();
     await this.models.prepare(map.entities.map(propModel).filter((m): m is string => !!m));
-    await this.textures.prepare([
+    const texNames = [
       ...map.brushes.flatMap((b) => [b.tex ?? 'dev/gray', ...Object.values(b.faces ?? {}).map((f) => f?.tex ?? '')]).filter(Boolean),
       ...propMaterials(map.entities, this.models),
-    ]);
+    ];
+    await this.textures.prepare([...texNames, ...this.textures.extrasOf(texNames)]);
     const t1 = performance.now();
-    const level = new Level(map, this.textures, this.models);
+    const level = new Level(map, this.textures, this.models, label.endsWith('.json') ? label : undefined);
     this.loadTimes = { texturesMs: Math.round(t1 - t0), levelMs: Math.round(performance.now() - t1) };
     if (this.level) {
       this.scene.remove(this.level.root);

@@ -243,6 +243,38 @@ export class TextureRegistry {
     return e.height;
   }
 
+  private raws = new Map<string, THREE.Texture>();
+
+  /**
+   * An image exactly as stored, never crushed or graded: normal maps. Linear
+   * data, trilinear filtered. Null if it isn't loaded (see prepare).
+   */
+  rawTexture(name: string): THREE.Texture | null {
+    let t = this.raws.get(name);
+    if (t) return t;
+    const src = this.sources.get(name);
+    if (!src?.image) return null;
+    t = new THREE.Texture(src.image as HTMLImageElement);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.colorSpace = THREE.NoColorSpace;
+    t.anisotropy = 16;
+    t.magFilter = THREE.LinearFilter;
+    t.minFilter = THREE.LinearMipmapLinearFilter;
+    t.needsUpdate = true;
+    this.raws.set(name, t);
+    return t;
+  }
+
+  /** Names of the extra images (normal maps) the given textures draw with. */
+  extrasOf(names: Iterable<string>): string[] {
+    const out: string[] = [];
+    for (const n of names) {
+      const nm = this.sources.get(n)?.source?.normal;
+      if (nm) out.push(nm.replace(/\.\w+$/, ''));
+    }
+    return out;
+  }
+
   /** Re-crush every texture with new parameters. Returns true if anything changed. */
   setCrush(p: CrushParams, filter: 'nearest' | 'linear'): boolean {
     const same = this.params && JSON.stringify(this.params) === JSON.stringify(p) && filter === this.filter;
