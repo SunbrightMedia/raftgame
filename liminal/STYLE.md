@@ -317,7 +317,41 @@ Map: `laquinta`. Plan in `tools/gen-laquinta.ts`'s header.
 
 ---
 
-## World: industrial (reference: a tower under construction, looking straight up)
+## World: industrial v2 (modern Aperture back-of-house; `src/world/industrial/`)
+
+Standing rules from the user's feedback on the generated world. They hold
+for every pass of this world, and the first two for every world.
+
+- **Nothing floats. Everything must be possible in real life.** (user, very
+  firm) Every catwalk, stair, tube, pipe, beam and mass is held by something
+  you can see: columns that run down out of sight, beams that end on
+  columns or walls, rods, brackets. A long run with too little support is
+  the only excuse, and a rare one. Before adding any element, decide what
+  carries it.
+- **A cable is attached at both ends** to a real thing (a beam, a wall, a
+  lamp, a machine). Never an end in the air. Few cables, tidy, small sag.
+- **Short kit list only**: walkways, stairs, railings, beams and trusses,
+  wall panels, transport tubes, pipes, ducts, lamps, cables. The user will
+  model these later and does not want to model big unique pieces. Anything
+  large (what fills a hall, a machine) is built from the list. No white or
+  bright models (fans, tanks, pods, beds).
+- **Steel is grey; a little yellow is fine.** No blue or orange beams.
+- **A clean, working, empty plant for now.** No glitches, no damage, no
+  "errors": the user found them weird and out of place. "Something is
+  breaking" comes later, once the base geometry is right. Diagonal catwalks:
+  maybe later.
+- **Shelters stay, very subtle**: a few, small, made from kit parts, easy to
+  miss.
+- **A maze with large open areas, and closed parts** (corridors, rooms,
+  tunnels inside the masses): not everything is open catwalk.
+- **No two spaces alike purely by layout** (see `docs/WORLD_DESIGN.md`).
+- Wandering tubes are good **if they end up somewhere**. Big boxes of
+  machinery across streets are fine.
+- Player: Source size (32 × 72, eyes at 64): the kit is made for it.
+- Judge geometry in flat light with no bake; keep passes short and send the
+  link each time. Lighting and atmosphere come after the geometry is right.
+
+## World: industrial v1 (old; reference: a tower under construction, looking straight up)
 
 Map: `industrial` (`tools/gen-industrial.ts`, seeded). An endless steel
 maze in grey fog, inspired by the reference photo and by the feel of an
