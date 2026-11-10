@@ -61,7 +61,8 @@ const render = (n, dt = 1 / 60) => page.evaluate(([n, dt]) => {
 }, [n, dt]);
 
 async function pose(p) {
-  const [x, y, z, yaw, pitch] = p.split(',').map((s) => (s === '' ? NaN : Number(s)));
+  const [x, y, z, yaw, pitch, roll] = p.split(',').map((s) => (s === '' ? NaN : Number(s)));
+  await page.evaluate((r) => { window.liminal.game.viewRoll = r; }, Number.isNaN(roll) || roll === undefined ? 0 : roll);
   await page.evaluate(([x, y, z, yaw, pitch]) => {
     const pl = window.liminal.game.player;
     if (!Number.isNaN(x)) pl.state.origin.x = x;
@@ -105,7 +106,7 @@ const commands = {
       return { map: g.mapPath, lighting: g.lighting.status, pos: [Math.round(o.x), Math.round(o.y), Math.round(o.z)], yaw: Math.round(g.player.yaw), pitch: Math.round(g.player.pitch) };
     });
   },
-  /** Screenshots from poses "x,y,z,yaw,pitch" (blank z = walk on the floor). One PNG per view plus a contact sheet. */
+  /** Screenshots from poses "x,y,z,yaw,pitch[,roll]" (blank z = walk on the floor). One PNG per view plus a contact sheet. */
   async views({ poses = [''], out = 'studio_views', settle = 2 }) {
     mkdirSync(dirname(resolve(out)), { recursive: true });
     const files = [];

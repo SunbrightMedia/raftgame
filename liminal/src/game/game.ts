@@ -171,6 +171,7 @@ export class Game {
       rate: C.adaptSpeed, percentBright: 2, percentTarget: 60, minAvgLum: 3, gamma22: !hdr,
     } : null;
     worldUniforms.gamma22.value = C.model === 'source' && !hdr ? 1 : 0;
+    this.lighting.reencode(C.model === 'source' && !hdr);
     this.renderer.sourceUnit = worldUniforms.sourceUnit.value;
     this.renderer.setSourceFov(s.view.fov);
     this.renderer.setClearColor(s.fog.enabled ? s.fog.color : s.render.clearColor);
@@ -242,6 +243,8 @@ export class Game {
    * would queue frames behind every screenshot).
    */
   paused = false;
+  /** Extra camera roll in degrees (tools matching a screenshot taken with a tilted view). */
+  viewRoll = 0;
 
   /** Move a brush entity (elevator, door...) and what's parented to it; see Level.setMover. */
   setMover(name: string, offset: [number, number, number]): void {
@@ -299,7 +302,7 @@ export class Game {
     cam.up.set(0, 0, 1);
     cam.lookAt(eye.x + forward.x, eye.y + forward.y, eye.z + forward.z);
     this.sky.follow(cam);
-    cam.rotateZ((this.player.roll(s) * Math.PI) / 180);
+    cam.rotateZ(((this.player.roll(s) + this.viewRoll) * Math.PI) / 180);
     const C = s.camera;
     worldUniforms.flashOn.value = C.flash ? 1 : 0;
     worldUniforms.flashPos.value.set(eye.x, eye.y, eye.z + C.flashHeight);

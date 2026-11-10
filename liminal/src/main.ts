@@ -1,4 +1,5 @@
 import './style.css';
+import * as THREE from 'three';
 import { openStorage } from './data/storage';
 import { ConfigStore } from './data/config';
 import { parseMap } from './data/map';
@@ -78,7 +79,8 @@ async function boot(): Promise<void> {
   requestAnimationFrame(() => requestAnimationFrame(() => mark('first frames drawn')));
 
   // For poking at things from the browser console.
-  (window as unknown as { liminal: unknown }).liminal = { game, config, panel, bootTimes };
+  // THREE too, for dev tools driving the page (tools/studio).
+  (window as unknown as { liminal: unknown }).liminal = { game, config, panel, bootTimes, THREE };
 }
 
 function showError(msg: string): void {

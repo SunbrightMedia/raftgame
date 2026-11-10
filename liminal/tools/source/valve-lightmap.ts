@@ -134,6 +134,8 @@ writeFileSync(out, JSON.stringify({ format: 'liminal-lightmap', version: 0, enco
 console.log(`wrote ${out}`);
 
 // ---- ours vs Valve's, by material (flat slot, luxels both have)
+const probeArg = process.argv.indexOf('--probe');
+const probe = probeArg > 0 ? process.argv[probeArg + 1].split(',').map(Number) : null;   // x,y,z,nx,ny,nz
 if (oursPath) {
   const c = JSON.parse(readFileSync(oursPath, 'utf8'));
   if (c.width !== W || c.height !== H) throw new Error('our cache has a different layout');
@@ -166,7 +168,44 @@ if (oursPath) {
       bn.n++; bn.v += v; bn.o += o;
     }
   }
+  // Faces in the atrium that differ most (area-weighted), to chase down one by one.
+  const worst: { id: number; tex: string; n: number; v: number; o: number; c: number[]; nrm: number[] }[] = [];
+  for (const f of faces as Face[]) {
+    const r = layout.rects.get(f.id);
+    if (!r) continue;
+    let n = 0, v = 0, o = 0;
+    for (let j = 0; j < r.grid.h; j++) for (let i = 0; i < r.grid.w; i++) {
+      const px = (r.y + j) * W + r.x + i;
+      if (!got[px]) continue;
+      n++; v += (pixels[px * 4] + pixels[px * 4 + 1] + pixels[px * 4 + 2]) / 3; o += (ours(px, 0) + ours(px, 1) + ours(px, 2)) / 3;
+    }
+    const c = facePoint(f, f.width / 2, f.height / 2);
+    if (n < 4 || !inBox(c)) continue;
+    worst.push({ id: f.id, tex: f.tex, n, v: v / n, o: o / n, c: c.map(Math.round), nrm: f.n.map((x) => +x.toFixed(2)) });
+  }
+  worst.sort((a, b) => b.n * Math.abs(Math.log((b.o + 0.01) / (b.v + 0.01))) - a.n * Math.abs(Math.log((a.o + 0.01) / (a.v + 0.01))));
+  console.log('atrium faces that differ most (luxels, valve, ours, centre, normal):');
+  for (const w of worst.slice(0, 20)) console.log(`  ${w.id} ${w.tex.padEnd(44)} ${String(w.n).padStart(5)}  ${w.v.toFixed(3)}  ${w.o.toFixed(3)}  ${JSON.stringify(w.c)} ${JSON.stringify(w.nrm)}`);
   console.log('by Valve brightness: ' + bins.map((x) => `<${x.hi}: ${x.n ? (x.o / x.v).toFixed(2) : '-'} (${x.n})`).join('  '));
+  if (probe) {
+    // The 5×5 luxels around a point on a face with that normal: Valve's / ours (flat slot, mean of RGB).
+    for (const f of faces as Face[]) {
+      const r = layout.rects.get(f.id);
+      if (!r || dot(f.n, probe.slice(3)) < 0.99 || Math.abs(dot(f.n, probe.slice(0, 3)) - dot(f.n, f.origin)) > 1) continue;
+      const g = r.grid, si = Math.round(dot(g.lmS, probe) - g.minS), ti = Math.round(dot(g.lmT, probe) - g.minT);
+      if (si < 0 || ti < 0 || si >= g.w || ti >= g.h) continue;
+      console.log(`probe face ${f.id} ${f.tex} at luxel ${si},${ti} of ${g.w}x${g.h}:`);
+      for (let j = ti - 2; j <= ti + 2; j++) {
+        const row: string[] = [];
+        for (let i = si - 2; i <= si + 2; i++) {
+          if (i < 0 || j < 0 || i >= g.w || j >= g.h) { row.push('     -     '); continue; }
+          const px = (r.y + j) * W + r.x + i;
+          row.push(`${got[px] ? ((pixels[px * 4] + pixels[px * 4 + 1] + pixels[px * 4 + 2]) / 3).toFixed(3) : '  -  '}/${((ours(px, 0) + ours(px, 1) + ours(px, 2)) / 3).toFixed(3)}`);
+        }
+        console.log('   ' + row.join(' '));
+      }
+    }
+  }
   console.log(`all: ours/valve mean light ${(all.o / all.v).toFixed(3)}, blue ${(all.ob / all.vb).toFixed(3)} over ${all.n} luxels`);
   for (const [t, e] of [...per].sort((a, b) => b[1].n - a[1].n).slice(0, 25)) {
     console.log(`${t.padEnd(52)} n ${String(e.n).padStart(7)}  valve ${(e.v / e.n).toFixed(3)}  ours ${(e.o / e.n).toFixed(3)}  ratio ${(e.o / e.v).toFixed(2)}  blue ratio ${(e.ob / e.vb).toFixed(2)}`);

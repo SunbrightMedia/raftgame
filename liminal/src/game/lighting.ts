@@ -201,9 +201,9 @@ export class Lighting {
       if (gen !== this.seq) return;
       if (c && c.width === layout.width && c.height === layout.height) {
         this.apply(layout, decodeRGBEToHalf(await pipe(fromBase64(c.data), new DecompressionStream('deflate-raw'))), s.light.filter, none, none);
-        // The BSP's prop lighting isn't copied yet: props keep ours (from our cache), if any.
-        const ours = await this.storage.read(this.cachePath(level)).catch(() => null);
-        const oc = ours ? (JSON.parse(ours) as LightmapCache) : null;
+        // Props: Valve's per-vertex light from the BSP (tools/source/valve_proplight.py), else ours from our cache.
+        const ours = c.props ? null : await this.storage.read(this.cachePath(level)).catch(() => null);
+        const oc = c.props ? c : ours ? (JSON.parse(ours) as LightmapCache) : null;
         if (oc?.props) {
           const px = decodeRGBEToFloat(await pipe(fromBase64(oc.props), new DecompressionStream('deflate-raw')));
           const offsets = propOffsets(src.props);
@@ -351,9 +351,32 @@ export class Lighting {
     this.worker.postMessage({ id: 1, input: full });
   }
 
+  /** Source's non-HDR path: lightmaps as 8-bit 0.5·light^(1/2.2) per channel (mathlib LinearToLightmap), filtered as such. */
+  ldrLightmaps = false;
+  private last: { layout: LightmapLayout; half: Uint16Array; filter: string; dir: Uint8Array; mask: Uint8Array } | null = null;
+
+  /** Re-upload the current lightmap after a change of encoding (non-HDR on/off). */
+  reencode(ldr: boolean): void {
+    if (ldr === this.ldrLightmaps) return;
+    this.ldrLightmaps = ldr;
+    if (this.last) this.apply(this.last.layout, this.last.half, this.last.filter, this.last.dir, this.last.mask);
+  }
+
   private apply(layout: LightmapLayout, half: Uint16Array, filter: string, dir: Uint8Array, mask: Uint8Array): void {
+    this.last = { layout, half, filter, dir, mask };
     // Irradiance in lux, linear: half-float keeps the range and filters on every WebGL2 GPU.
-    const tex = new THREE.DataTexture(half, layout.width, layout.height, THREE.RGBAFormat, THREE.HalfFloatType);
+    let tex: THREE.DataTexture;
+    if (this.ldrLightmaps && layout.source) {
+      const bytes = new Uint8Array(half.length);
+      const lut = new Uint8Array(4096);
+      for (let i = 0; i < 4096; i++) lut[i] = Math.min(255, Math.max(0, Math.round(Math.pow(i / 1024, 1 / 2.2) * 255 * 0.5)));
+      for (let i = 0; i < half.length; i++) {
+        if ((i & 3) === 3) { bytes[i] = 255; continue; }
+        const v = THREE.DataUtils.fromHalfFloat(half[i]);
+        bytes[i] = lut[Math.min(4095, Math.max(0, Math.round(v * 1024)))];
+      }
+      tex = new THREE.DataTexture(bytes, layout.width, layout.height, THREE.RGBAFormat, THREE.UnsignedByteType);
+    } else tex = new THREE.DataTexture(half, layout.width, layout.height, THREE.RGBAFormat, THREE.HalfFloatType);
     tex.colorSpace = THREE.NoColorSpace;
     tex.magFilter = tex.minFilter = filter === 'nearest' ? THREE.NearestFilter : THREE.LinearFilter;
     tex.generateMipmaps = false;

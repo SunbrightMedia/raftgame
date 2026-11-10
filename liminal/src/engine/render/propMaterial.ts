@@ -36,6 +36,7 @@ export function makePropMaterial(tex: TexEntry): THREE.ShaderMaterial {
     },
     vertexShader: /* glsl */ `
       attribute float lightOffset;
+      uniform float gamma22;
       uniform sampler2D propLight;
       uniform float propLightOn;
       varying vec2 vUv;
@@ -47,6 +48,14 @@ export function makePropMaterial(tex: TexEntry): THREE.ShaderMaterial {
         if (propLightOn > 0.5) {
           int i = int(lightOffset) + gl_VertexID;
           vLight = texelFetch(propLight, ivec2(i % 2048, i / 2048), 0).rgb;
+          if (gamma22 > 0.5) {
+            // Non-HDR: Source's vertex colours are bytes of 0.5·light^(1/2.2) (hue kept when clipped),
+            // blended across the triangle as they are and doubled in the shader.
+            vec3 v = 0.5 * pow(max(vLight, 0.0), vec3(1.0 / 2.2));
+            float m = max(v.r, max(v.g, v.b));
+            if (m > 1.0) v /= m;
+            vLight = floor(v * 255.0 + 0.5) / 255.0 * 2.0;
+          }
         }
         mat4 m = modelMatrix;
         #ifdef USE_INSTANCING
@@ -91,8 +100,16 @@ export function makePropMaterial(tex: TexEntry): THREE.ShaderMaterial {
         vec3 n2 = n * n;
         float shade = n2.x * (n.x > 0.0 ? 0.82 : 0.74) + n2.y * (n.y > 0.0 ? 0.9 : 0.66) + n2.z * (n.z > 0.0 ? 1.0 : 0.58);
         // Baked per-vertex light (Source linear) once the bake has it; until then an even light with direction shading.
-        vec3 L = lightmapOn > 0.5 && vLight.r >= 0.0 ? rho * vLight * sourceUnit * brightness : rho * sourceUnit * mix(1.0, shade, faceShade) * brightness;
-        if (selfIllum > 0.5) L = mix(L, rho * selfIllumTint * sourceUnit, tx.a);
+        vec3 L;
+        if (gamma22 > 0.5 && lightmapOn > 0.5 && vLight.r >= 0.0) {
+          // Non-HDR: gamma-space albedo × vertex light (see the vertex shader), clamped like the frame buffer.
+          vec3 g = tx.rgb * vLight;
+          if (selfIllum > 0.5) g = mix(g, tx.rgb * selfIllumTint, tx.a);
+          L = pow(clamp(g, 0.0, 1.0), vec3(2.2)) * sourceUnit;
+        } else {
+          L = lightmapOn > 0.5 && vLight.r >= 0.0 ? rho * vLight * sourceUnit * brightness : rho * sourceUnit * mix(1.0, shade, faceShade) * brightness;
+          if (selfIllum > 0.5) L = mix(L, rho * selfIllumTint * sourceUnit, tx.a);
+        }
         float fd = max(0.0, vDepth - fogNear) / max(1.0, fogFar - fogNear);
         float f = fogOn * (fogHaze > 0.5 ? 1.0 - exp(-3.0 * fd) : clamp(fd, 0.0, 1.0));
         float a = alphaMode == 2 ? tx.a * alphaMul : alphaMode == 3 ? alphaMul : 0.0;

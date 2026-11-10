@@ -100,7 +100,10 @@ export function makeSourceWorldMaterial(tex: TexEntry, normal: THREE.Texture | n
         // selection and the bump map's fine grout aliases into speckles at a distance.
         vec3 bumpTexel = texture2D(normalMap, vUv).xyz;
         if (alphaMode == 1 && tx.a < alphaRef) discard;
-        vec3 albedo = toLinear(tx.rgb);
+        // Non-HDR path (gamma22): Source does all of this in gamma space on 8-bit values:
+        // albedo as stored, lightmaps stored as 0.5·light^(1/2.2) and doubled.
+        bool ldr = gamma22 > 0.5;
+        vec3 albedo = ldr ? tx.rgb : toLinear(tx.rgb);
         // $detail (common_ps_fxc.h TextureCombine), on the linear base colour.
         vec4 dc = texture2D(detailMap, vUv * detailScale);
         if (detailOn > 0.5) {
@@ -113,12 +116,13 @@ export function makeSourceWorldMaterial(tex: TexEntry, normal: THREE.Texture | n
           else if (detailMode == 8) albedo = mix(albedo, albedo * dc.rgb, detailFactor);
         }
         vec3 light;
+        float lmScale = ldr ? 2.0 : 1.0;
         if (lightmapOn < 0.5) {
           light = vec3(mix(1.0, vShade, faceShade));
         } else if (vLmOff > 0.0) {
-          vec3 l1 = texture2D(lightmap, vLm + vec2(vLmOff, 0.0)).rgb;
-          vec3 l2 = texture2D(lightmap, vLm + vec2(2.0 * vLmOff, 0.0)).rgb;
-          vec3 l3 = texture2D(lightmap, vLm + vec2(3.0 * vLmOff, 0.0)).rgb;
+          vec3 l1 = texture2D(lightmap, vLm + vec2(vLmOff, 0.0)).rgb * lmScale;
+          vec3 l2 = texture2D(lightmap, vLm + vec2(2.0 * vLmOff, 0.0)).rgb * lmScale;
+          vec3 l3 = texture2D(lightmap, vLm + vec2(3.0 * vLmOff, 0.0)).rgb * lmScale;
           if (ssbump > 0.5 && hasNormal > 0.5) {
             // Self-shadowing bump: the texture stores the three weights directly.
             vec3 w = bumpTexel;
@@ -130,10 +134,18 @@ export function makeSourceWorldMaterial(tex: TexEntry, normal: THREE.Texture | n
             light = (dp.x * l1 + dp.y * l2 + dp.z * l3) / max(dp.x + dp.y + dp.z, 1e-4);
           }
         } else {
-          light = texture2D(lightmap, vLm).rgb;
+          light = texture2D(lightmap, vLm).rgb * lmScale;
         }
-        vec3 L = albedo * light * sourceUnit * brightness;
-        if (selfIllum > 0.5) L = mix(L, albedo * selfIllumTint * sourceUnit, tx.a);
+        vec3 L;
+        if (ldr) {
+          // Gamma-space result, clamped like the 8-bit frame buffer; handed on as linear for the camera pass to re-encode.
+          vec3 g = albedo * light;
+          if (selfIllum > 0.5) g = mix(g, albedo * selfIllumTint, tx.a);
+          L = pow(clamp(g, 0.0, 1.0), vec3(2.2)) * sourceUnit;
+        } else {
+          L = albedo * light * sourceUnit * brightness;
+          if (selfIllum > 0.5) L = mix(L, albedo * selfIllumTint * sourceUnit, tx.a);
+        }
         float fd = max(0.0, vDepth - fogNear) / max(1.0, fogFar - fogNear);
         float f = fogOn * (fogHaze > 0.5 ? 1.0 - exp(-3.0 * fd) : clamp(fd, 0.0, 1.0));
         float a = alphaMode == 2 ? tx.a * alphaMul : alphaMode == 3 ? alphaMul : 0.0;

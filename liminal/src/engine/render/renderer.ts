@@ -55,14 +55,31 @@ export class LowResRenderer {
     this.gl.setClearColor(new THREE.Color(hex), 0); // alpha 0: not a light source (see digicam)
   }
 
+  /**
+   * Match another camera's picture exactly (tools comparing against a screenshot): vertical
+   * field of view in degrees and the image centre's offset in output pixels. Null = normal.
+   */
+  viewMatch: { fovY: number; dx: number; dy: number } | null = null;
+
   render(scene: THREE.Scene): void {
     const w = this.canvas.clientWidth || window.innerWidth;
     const h = this.canvas.clientHeight || window.innerHeight;
     if (this.canvas.width !== w || this.canvas.height !== h) this.gl.setSize(w, h, false);
     const aspect = w / h;
-    if (Math.abs(this.camera.aspect - aspect) > 1e-4) {
-      this.camera.aspect = aspect;
+    if (this.viewMatch) {
+      // A window onto a larger image whose centre is the match's image centre.
+      const m = this.viewMatch, fullW = w + 2 * Math.abs(m.dx), fullH = h + 2 * Math.abs(m.dy);
+      const f = (h / 2) / Math.tan((m.fovY * Math.PI) / 360);
+      this.camera.fov = (2 * Math.atan(fullH / 2 / f) * 180) / Math.PI;
+      this.camera.aspect = fullW / fullH;
+      this.camera.setViewOffset(fullW, fullH, Math.abs(m.dx) - m.dx, Math.abs(m.dy) - m.dy, w, h);
       this.camera.updateProjectionMatrix();
+    } else {
+      if (this.camera.view) { this.camera.clearViewOffset(); }
+      if (Math.abs(this.camera.aspect - aspect) > 1e-4) {
+        this.camera.aspect = aspect;
+        this.camera.updateProjectionMatrix();
+      }
     }
 
     // Always render through the offscreen target, even at native size, so
