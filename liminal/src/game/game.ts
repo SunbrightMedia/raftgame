@@ -12,6 +12,7 @@ import { glowTextures } from '../engine/render/glows';
 import { propModel } from '../engine/collision/props';
 import { worldUniforms, MAX_RECTS } from '../engine/render/worldMaterial';
 import { fogUniforms, fogAt, fogReach, fogThickness, FogBackdrop } from '../engine/render/fog';
+import { lightGridUniforms, setLightGrid, type GridLamp } from '../engine/render/lightGrid';
 import { kelvinToLinear, emitterColor } from '../engine/light/units';
 import { angleVectors } from '../engine/vec3';
 import { Input } from './input';
@@ -48,6 +49,8 @@ export class Game {
   /** The fog of the volume the camera was last in, and how far the fog has gone over to it (0..1). */
   private fogInside: Record<string, unknown> | null = null;
   private fogMix = 0;
+  /** The lamp grid of the map loaded (lamps, cells with lamps, cells with more lamps than they can hold). */
+  lampStats = { lamps: 0, cells: 0, full: 0 };
   readonly sky = new Sky();
   readonly fogBackdrop = new FogBackdrop();
   private precompiled = false;
@@ -190,6 +193,11 @@ export class Game {
     this.updateLightUniforms(s);
     worldUniforms.faceShade.value = s.render.faceShade;
     worldUniforms.brightness.value = s.render.brightness;
+    // Lamps without a bake: the light from everywhere, in the lamps' units (300 = fully lit; colour as typed, gamma 2.2).
+    const amb = new THREE.Color(s.light.lampAmbientColor);
+    lightGridUniforms.lgAmbient.value.set(Math.pow(amb.r, 2.2), Math.pow(amb.g, 2.2), Math.pow(amb.b, 2.2)).multiplyScalar(s.light.lampAmbient);
+    lightGridUniforms.lgAmbientUp.value = s.light.lampAmbientUp;
+    lightGridUniforms.lgScale.value = s.light.lampScale;
     this.updateFog(s);
     worldUniforms.tileBreakup.value = s.render.tileBreakup;
     worldUniforms.specScale.value = s.surface.reflections;
@@ -310,6 +318,14 @@ export class Game {
     this.applySettings();
     this.uploadDynamicLights();
     this.collectRects();
+    // Lamps worked out per pixel, with no bake (lightGrid.ts): for worlds made in the page.
+    const lin22 = (v: number) => Math.pow(v / 255, 2.2);
+    const lamps = map.entities.filter((e) => e.class === 'lamp').map((e): GridLamp => {
+      const p = (e.props ?? {}) as { color: number[]; brightness: number; size: number; reach: number; dir?: number[]; inner?: number; cone?: number; box?: { min: number[]; max: number[] }; open?: boolean };
+      const k = 300 * p.brightness;
+      return { pos: e.origin, color: [lin22(p.color[0]) * k, lin22(p.color[1]) * k, lin22(p.color[2]) * k], size: p.size, reach: p.reach, dir: p.dir as GridLamp['dir'], inner: p.inner, cone: p.cone, box: p.box, open: p.open };
+    });
+    this.lampStats = setLightGrid(lamps, map.entities.filter((e) => e.class === 'lamp_shade').map((e) => ({ min: e.props?.min as number[], max: e.props?.max as number[] })));
     this.fogVolumes = map.entities.filter((e) => e.class === 'fog_volume').map((e) => ({ min: e.props?.min as number[], max: e.props?.max as number[], fog: (e.props?.fog ?? {}) as Record<string, unknown> }));
     this.fogInside = null;
     this.fogMix = 0;

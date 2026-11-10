@@ -88,6 +88,10 @@ export const SETTINGS = {
     help: 'Baked lightmaps in physical units: lights in lumens/kelvin, irradiance in lux, inverse-square falloff, linear albedo for bounce. Changes re-bake in the background.',
     defs: {
       enabled: bool('Baked lighting', true, 'Off = fullbright with fake face shading (Hammer-style), handy while building.'),
+      lampAmbient: num('Lamps (no bake): light from everywhere', 14, 0, 300, 0.5, 'In maps lit by lamps without a bake (worlds made in the page): how much light falls on everything, lamp or no lamp. 300 = fully lit.'),
+      lampAmbientColor: color('Lamps (no bake): its colour', '#9db0c4'),
+      lampAmbientUp: num('Lamps (no bake): more from above', 0.35, 0, 1, 0.01, 'How much more of that light comes from above than from below.'),
+      lampScale: num('Lamps (no bake): lamp brightness ×', 1, 0, 8, 0.05),
       thinSamples: num('Samples across thin faces', 3, 1, 6, 1, 'Thin faces (trim, rails, girder flanges) get at least this many luxel steps across, so they light evenly. Maps made of thousands of thin members use 1 to keep the lightmap small.'),
       luxelSize: num('Luxel size', 16, 2, 512, 1, 'World units per lightmap pixel. Source default is 16. Lower = sharper shadows and scallops, slower bake.', 'u'),
       sourceBaker: select('Source maps: lighting from', 'ours', ['ours', 'valve'] as const, 'ours = our Source light compiler (engine/light/vrad.ts). valve = the lightmaps Valve\'s own compiler baked into the map\'s BSP (maps/p2/<map>.valve.lightmap.json, made by npm run valve:lightmap), for checking ours against.'),

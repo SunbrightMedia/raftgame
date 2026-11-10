@@ -164,6 +164,27 @@ export class MapOut {
     return this.ent('rope', a, undefined, { to: b.map(r3), sag: r3(sag), width });
   }
 
+  /**
+   * A lamp worked out per pixel with no bake (engine/render/lightGrid.ts).
+   * color 0..255; brightness 1 = a surface right at it is fully lit; size:
+   * the distance where that has halved; reach: it gives nothing past here.
+   * dir/inner/cone: a spot (degrees from its axis). box: it lights only what
+   * is inside. open: it hangs in the open air (it does not light the inside
+   * of lampShade boxes).
+   */
+  lamp(origin: V3, color: V3, brightness: number, size: number, reach: number, o: { dir?: V3; inner?: number; cone?: number; box?: { min: V3; max: V3 }; open?: boolean } = {}): number {
+    const props: Record<string, unknown> = { color, brightness, size, reach };
+    if (o.dir) { props.dir = o.dir; props.cone = o.cone ?? 45; props.inner = o.inner ?? (o.cone ?? 45) / 2; }
+    if (o.box) props.box = { min: o.box.min.map(r3), max: o.box.max.map(r3) };
+    if (o.open) props.open = true;
+    return this.ent('lamp', origin, undefined, props);
+  }
+
+  /** A box whose inside lamps in the open do not light (a mass with rooms in it). */
+  lampShade(min: V3, max: V3): number {
+    return this.ent('lamp_shade', [(min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2], undefined, { min: min.map(r3), max: max.map(r3) });
+  }
+
   /** A box with fog of its own (any of the map's fog settings): the fog goes over to it while the camera is inside (game.ts). */
   fogVolume(min: V3, max: V3, fog: Record<string, unknown>): number {
     return this.ent('fog_volume', [(min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2], undefined, { min: min.map(r3), max: max.map(r3), fog });

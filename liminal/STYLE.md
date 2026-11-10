@@ -348,8 +348,9 @@ for every pass of this world, and the first two for every world.
 - Wandering tubes are good **if they end up somewhere**. Big boxes of
   machinery across streets are fine.
 - Player: Source size (32 × 72, eyes at 64): the kit is made for it.
-- Judge geometry in flat light with no bake; keep passes short and send the
-  link each time. Lighting and atmosphere come after the geometry is right.
+- Keep passes short and send the link each time. (Geometry was judged in
+  flat light first; to see it flat again, set Lamps brightness × to 0 and
+  raise "light from everywhere" to 300 in the tweak panel under Lighting.)
 - **Closed parts** (pass 3b): what is cut into a mass is finished in that
   mass's own material (concrete in a pier, dark plate in a machine). A
   doorway is never bigger than a door (128 × 168), whatever the corridor
@@ -357,6 +358,16 @@ for every pass of this world, and the first two for every world.
   beams out of the wall and hangs by a rod from the wall above. No white
   pipes in rooms (they read as bright models).
 - Every change to the generator must still pass `npm run world:walk`.
+- **Light without a bake.** The world is made in the page, so nothing can be
+  baked. Lamps are worked out per pixel (`engine/render/lightGrid.ts`): no
+  shadows, so each lamp inside a mass is shut in the box of the corridor,
+  room or shaft it hangs in, and lamps in the open do not reach the insides
+  of masses. A little cool light falls on everything; unlit steel reads as a
+  dark shape against the fog, each lamp makes a warm pool. Fixtures: bell
+  lamps under the catwalk beams, in rooms and shafts; caged tube lights on
+  corridor ceilings, stair hall walls and over every doorway (doors show
+  from far off); small amber lamps on posts along the bridges. About one
+  tunnel in eight is dark; a look-out room is always dark.
 - **Fog** (the user asked for layers, more intense further back, and blur):
   three layers by distance, each with its own density and colour (thin and
   dark near, thick and pale far); the depths under the lowest catwalks go

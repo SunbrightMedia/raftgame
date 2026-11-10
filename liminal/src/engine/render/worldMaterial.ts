@@ -4,6 +4,7 @@ import type { Surface } from './surfaces';
 import type { SourceMaterial } from './textures';
 import { sourceUniforms } from './sourceMaterial';
 import { fogUniforms, FOG_PARS } from './fog';
+import { lightGridUniforms, LIGHT_GRID_PARS } from './lightGrid';
 
 /** Most light-emitting rectangles (troffers) whose reflections are drawn at once. */
 export const MAX_RECTS = 64;
@@ -18,6 +19,7 @@ export const worldUniforms = {
   faceShade: { value: 0.6 },
   brightness: { value: 1 },
   ...fogUniforms,
+  ...lightGridUniforms,
   tileBreakup: { value: 0 },
   lightmap: { value: null as THREE.Texture | null },
   /** Where the baked light comes from (lighting.ts / bake.ts dirPixels): xyz·0.5+0.5, directionality. */
@@ -151,6 +153,7 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
       uniform float faceShade;
       uniform float brightness;
       ${FOG_PARS}
+      ${LIGHT_GRID_PARS}
       uniform float tileBreakup;
       uniform float flashOn;
       uniform vec3 flashPos;
@@ -334,7 +337,8 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
           diffuseColor *= occl * sheenK;
 
           vec4 lm = texture2D(lightmap, vLm);
-          vec3 E = lightmapOn > 0.5 ? lm.rgb : vec3(300.0 * mix(1.0, vShade, faceShade));
+          // No bake: the map's lamps worked out here (lightGrid.ts), or, with none, an even light with direction shading.
+          vec3 E = lightmapOn > 0.5 ? lm.rgb : lgOn > 0.5 ? gridLight(vWorld, N) : vec3(300.0 * mix(1.0, vShade, faceShade));
           // The baked light shaded with this pixel's bumped normal: Lambert's ratio
           // for the directional part (towards where the light comes from), the
           // even part unchanged. So relief shows under baked lamps and panels too.

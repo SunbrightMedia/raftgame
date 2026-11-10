@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import type { TexEntry } from './textures';
 import { worldUniforms } from './worldMaterial';
 import { fogUniforms, FOG_PARS } from './fog';
+import { lightGridUniforms, LIGHT_GRID_PARS } from './lightGrid';
 import { applySourceBlend, sourceUniforms } from './sourceMaterial';
 
 /**
@@ -23,6 +24,7 @@ export function makePropMaterial(tex: TexEntry): THREE.ShaderMaterial {
       faceShade: worldUniforms.faceShade,
       brightness: worldUniforms.brightness,
       ...fogUniforms,
+      ...lightGridUniforms,
       sourceUnit: worldUniforms.sourceUnit,
       gamma22: worldUniforms.gamma22,
       lightmapOn: worldUniforms.lightmapOn,
@@ -71,6 +73,7 @@ export function makePropMaterial(tex: TexEntry): THREE.ShaderMaterial {
       uniform float faceShade;
       uniform float brightness;
       ${FOG_PARS}
+      ${LIGHT_GRID_PARS}
       uniform float sourceUnit;
       uniform int alphaMode;
       uniform float alphaRef;
@@ -102,7 +105,10 @@ export function makePropMaterial(tex: TexEntry): THREE.ShaderMaterial {
           if (selfIllum > 0.5) g = mix(g, tx.rgb * selfIllumTint, tx.a);
           L = pow(clamp(g, 0.0, 1.0), vec3(2.2)) * sourceUnit;
         } else {
-          L = lightmapOn > 0.5 && vLight.r >= 0.0 ? rho * vLight * sourceUnit * brightness : rho * sourceUnit * mix(1.0, shade, faceShade) * brightness;
+          if (lightmapOn > 0.5 && vLight.r >= 0.0) L = rho * vLight * sourceUnit * brightness;
+          // No bake: the map's lamps worked out here (lightGrid.ts), or, with none, an even light with direction shading.
+          else if (lgOn > 0.5) L = rho * gridLight(cameraPosition + vViewPos * mat3(viewMatrix), n) * (brightness / 3.14159265);
+          else L = rho * sourceUnit * mix(1.0, shade, faceShade) * brightness;
           if (selfIllum > 0.5) L = mix(L, rho * selfIllumTint * sourceUnit, tx.a);
         }
         float a = alphaMode == 2 ? tx.a * alphaMul : alphaMode == 3 ? alphaMul : 0.0;

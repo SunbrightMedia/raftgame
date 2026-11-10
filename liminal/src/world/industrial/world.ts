@@ -163,7 +163,7 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
       const doors = cut?.doors ?? [];
       if (kind === 'machine') skeleton(ctx, r, x0, y0, x1, y1, z0, z1, 512, D.steel, doors);
       wallRuns(ctx, r, x0, y0, x1, y1, z0, z1, (kind === 'machine' ? 0.5 : 0.25) * D.pipes, doors);
-      if (cut) { fitOut(ctx, p, cut); m.fogVolume([x0, y0, bottom - 64], [x1, y1, z1], INSIDE_FOG); }
+      if (cut) { fitOut(ctx, p, cut); m.fogVolume([x0, y0, bottom - 64], [x1, y1, z1], INSIDE_FOG); m.lampShade([x0, y0, z0], [x1, y1, z1]); }
     }
   }
 
@@ -232,6 +232,38 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
   return { map: m, layout: lay, notes: ctx.notes };
 }
 
+// ---------------------------------------------------------------- lamps
+
+// Lamp colours Valve types into Portal 2 (docs/P2_STUDY.md), and an amber for marker lamps.
+const LAMP = { warm: [250, 230, 170] as V3, white: [255, 245, 215] as V3, cool: [183, 204, 218] as V3, amber: [255, 150, 60] as V3 };
+type LampBox = { min: V3; max: V3 };
+
+/**
+ * A bell lamp hanging from `top` (the underside of a beam or a ceiling): the
+ * fixture, its light, and the glow seen on it. In the open unless `box` shuts
+ * it in the room it hangs in.
+ */
+function bellLamp(m: MapOut, top: V3, color: V3, brightness: number, reach: number, box?: LampBox): void {
+  m.prop('props_bts/light_hanging_1a', top, [0, 0, 0], { solid: false });
+  const at: V3 = [top[0], top[1], top[2] - 76];
+  m.lamp(at, color, brightness, 120, reach, box ? { box } : { open: true });
+  m.glow([at[0], at[1], at[2] - 8], color, 70, 1.5);
+}
+
+/**
+ * A caged tube light with its back on a wall that faces `mount`, or on a
+ * ceiling (mount 'down'); the tube lies along `run`. `at` is the point of the
+ * wall or ceiling it is fixed to.
+ */
+function tubeLamp(m: MapOut, at: V3, mount: Dir | 'down', run: Dir, color: V3, brightness: number, reach: number, box?: LampBox): void {
+  const out: V3 = mount === 'down' ? [0, 0, -1] : [DX[mount], DY[mount], 0];
+  // light_cage001a: 128 long on its own y, its back 6 behind its origin on its own x.
+  m.prop('props_bts/light_cage001a', [at[0] + out[0] * 6, at[1] + out[1] * 6, at[2] + out[2] * 6], mount === 'down' ? [90, run * 90 - 90, 0] : [0, mount * 90, 0], { solid: false });
+  const p: V3 = [at[0] + out[0] * 16, at[1] + out[1] * 16, at[2] + out[2] * 16];
+  m.lamp(p, color, brightness, 80, reach, box ? { box } : { open: true });
+  m.glow([at[0] + out[0] * 12, at[1] + out[1] * 12, at[2] + out[2] * 12], color, 48, 1.2);
+}
+
 // ---------------------------------------------------------------- inside the masses
 
 /** A box that runs from `from` to `to` along direction d (measured from c), from l0 to l1 across (left of d is positive), between two heights. */
@@ -267,7 +299,7 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
     return v;
   };
   const cut = (blk: number, box: [V3, V3]) => { const v = get(blk); v.hollows.push({ min: box[0], max: box[1], finish: v.finish }); ctx.hollows.push({ min: box[0], max: box[1] }); };
-  interface Profile { w: number; h: number; ribs: number }
+  interface Profile { w: number; h: number; ribs: number; /** How far apart its lamps hang (0 = it is dark), and their colour. */ lamps: number; lamp: V3 }
   const profiles = new Map<string, Profile>();
   /**
    * The section of the tunnel through block `blk` along `axis` at row or column
@@ -280,7 +312,7 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
     if (!p) {
       const r = root.fork(`tunnel${k}`);
       const [w, h] = r.weighted([[[96, 120], 2], [[96, 160], 2], [[104, 136], 3], [[112, 128], 3], [[128, 128], 2], [[128, 200], 2], [[96, 232], 1.5], [[160, 112], 1.5], [[144, 144], 1]] as const);
-      p = { w, h, ribs: r.weighted([[0, 5], [256, 3], [384, 2]] as const) };
+      p = { w, h, ribs: r.weighted([[0, 5], [256, 3], [384, 2]] as const), lamps: r.weighted([[384, 5], [640, 3], [0, 1.2]] as const), lamp: r.pick([LAMP.warm, LAMP.warm, LAMP.white, LAMP.cool]) };
       profiles.set(k, p);
     }
     return p;
@@ -345,6 +377,7 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
         steelIn.push([[c[0] + o - 6, y0, z + 216], [c[0] + o + 6, y1, z + 236]]);
         for (const q of [-47, 47]) steelIn.push([[c[0] + o - 1.5, c[1] + q - 1.5, z - 10], [c[0] + o + 1.5, c[1] + q + 1.5, z + 216]]);
       }
+      bellLamp(m, [c[0] + 47, c[1], z + 216], LAMP.warm, 2, 720, { min: box.min, max: box.max });
       // Over each run of deck, at every other tile and at the last: a beam across, square to the run, and two rods.
       for (const dd of open) for (let k = 1; k <= reach[dd]; k++) {
         if (k % 2 !== 0 && k !== reach[dd]) continue;
@@ -362,6 +395,14 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
     // A narrow ledge round the walls just under each level's floor line, on down out of sight: it gives the depth its scale.
     for (let z = zOf(0) - 6 * LEVEL; z < zTop - 64; z += LEVEL) {
       steelIn.push([[x0, y0, z - 16], [x1, y0 + 8, z - 4]], [[x0, y1 - 8, z - 16], [x1, y1, z - 4]], [[x0, y0 + 8, z - 16], [x0 + 8, y1 - 8, z - 4]], [[x1 - 8, y0 + 8, z - 16], [x1, y1 - 8, z - 4]]);
+    }
+    // Some shafts have a lamp in the roof that shines straight down the middle: a shaft of light in the air.
+    if (r.chance(0.5)) {
+      const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+      m.prop('props_bts/light_hanging_1a', [cx, cy, zTop], [0, 0, 0], { solid: false });
+      m.lamp([cx, cy, zTop - 80], LAMP.white, 5, 420, zTop - zOf(0) + 1400, { dir: [0, 0, -1], cone: 32, inner: 12, box: { min: box.min, max: box.max } });
+      m.glow([cx, cy, zTop - 84], LAMP.white, 90, 2);
+      m.beam([cx, cy, zTop - 86], [0, 0, -1], 1100, 260, LAMP.white, 0.35);
     }
     const way = dirs.find((dd) => lay.nodes.get(`${J.id}:${lv[0]}`)! & (1 << dd))!;
     ctx.notes.push({ kind: 'shaft', at: [J.x * TILE + TILE / 2 + DX[way] * (reach[way] + 1.2) * TILE, J.y * TILE + TILE / 2 + DY[way] * (reach[way] + 1.2) * TILE, zOf(lv[0])], yaw: opposite(way) * 90 });
@@ -407,6 +448,12 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
         u1 -= NECK;
       }
       cut(blk, along(c, d, u0, u1, p.w, z, z + p.h));
+      // Caged tube lights along the ceiling, shut in this run of corridor (so they light no other level through the floor).
+      const whole = along(c, d, -TILE / 2, (e - i) * TILE + TILE / 2, p.w, z, z + p.h);
+      if (p.lamps) for (let u = u0 + Math.min(p.lamps, u1 - u0) / 2; u < u1 - 40; u += p.lamps) {
+        const q: V3 = [c[0] + DX[d] * u, c[1] + DY[d] * u, z + p.h];
+        if (!inShaft(blk, q[0], q[1])) tubeLamp(m, q, 'down', d, p.lamp, 1.3, 330, { min: whole[0], max: whole[1] });
+      }
       // Steel ribs along it: two posts and a head, standing a little proud of the walls.
       if (p.ribs) for (let u = u0 + p.ribs / 2; u < u1 - 32; u += p.ribs) {
         if (inShaft(blk, c[0] + DX[d] * u, c[1] + DY[d] * u)) continue;   // no walls to stand against in a shaft
@@ -421,6 +468,13 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
       const c: V3 = [seq[i0][0] * TILE + TILE / 2, seq[i0][1] * TILE + TILE / 2, 0];
       const z = zOf(lo);
       cut(blk, along(c, d, -TILE / 2, 3 * TILE + TILE / 2, p.w, z, zOf(hi) + p.h));
+      const hallBox = along(c, d, -TILE / 2, 3 * TILE + TILE / 2, p.w, z, zOf(hi) + p.h);
+      // Its lamps are on the side walls, a little above head height, one low on the flight and one high, on opposite sides.
+      if (p.lamps) [96, 352].forEach((u, n) => {
+        const side = ((d + (n ? 1 : 3)) % 4) as Dir;   // the wall this lamp is on
+        const at: V3 = [c[0] + DX[d] * u + DX[side] * (p.w / 2), c[1] + DY[d] * u + DY[side] * (p.w / 2), z + (u + TILE / 2) / 2 + 118];
+        tubeLamp(m, at, opposite(side), d, p.lamp, 1.6, 420, { min: hallBox[0], max: hallBox[1] });
+      });
       ctx.notes.push({ kind: 'stairhall', at: [c[0] - DX[d] * 100, c[1] - DY[d] * 100, z], yaw: d * 90 });
       const RUN = 32, RISE = 16;   // 16 steps: one level over four tiles
       for (let k = 0; k < LEVEL / RISE; k++) {
@@ -475,6 +529,13 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
     const lo: V3 = [c[0] - ext[2], c[1] - ext[3], z], hi: V3 = [c[0] + ext[0], c[1] + ext[1], z + hgt];
     cut(blk, [lo, hi]);
     const entry = open[0];
+    // A room's lamp: a bell lamp where the ceiling is high enough to hang one, else a tube light. A look-out stays dark.
+    if (slit === null) {
+      const mid: V3 = [(lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2, hi[2]];
+      const tone = r.pick([LAMP.warm, LAMP.warm, LAMP.white]);
+      if (hgt >= 200) bellLamp(m, mid, tone, hgt > 300 ? 2.2 : 1.6, hgt > 300 ? 620 : 440, { min: lo, max: hi });
+      else tubeLamp(m, mid, 'down', entry, tone, 1.5, 400, { min: lo, max: hi });
+    }
     ctx.notes.push({ kind: slit !== null ? 'lookout' : hgt > 300 ? 'tallroom' : open.length === 1 ? 'endroom' : 'room', at: [c[0] + DX[entry] * 30, c[1] + DY[entry] * 30, z], yaw: opposite(entry) * 90 });
     if (slit !== null) {
       const sw = Math.min(192, 2 * Math.min(ext[(slit + 1) % 4], ext[(slit + 3) % 4]) - 32);
@@ -513,6 +574,8 @@ function fitOut(ctx: Ctx, p: { x0: number; y0: number; x1: number; y1: number; D
     box(0, MARGIN, at - w / 2 - 8, at - w / 2, z, z + h, p.D.steel);
     box(0, MARGIN, at + w / 2, at + w / 2 + 8, z, z + h, p.D.steel);
     box(0, MARGIN, at - w / 2 - 8, at + w / 2 + 8, z + h, z + h + 8, p.D.steel);
+    // A tube light on the wall over the doorway: doors show from far off in the fog.
+    tubeLamp(m, alongX ? [f, at, z + h + 34] : [at, f, z + h + 34], d.side, ((d.side + 1) % 4) as Dir, LAMP.cool, 1.3, 400);
     // The catwalk from the porch to the lane rests on two beams out of the wall, one each side of the porch, with
     // bars across under the deck; a rod from the wall above the doorway holds the far end of each beam.
     const len = MARGIN + d.stub * TILE + (d.balcony ? 100 : 0);
@@ -734,6 +797,8 @@ function street(ctx: Ctx, r: Rng, s: Street): void {
       const under = flat ? 0 : -30;
       for (const side of [-1, 1]) { const p = pt(u, laneC + side * 47, z); steel([p[0] - 1.5, p[1] - 1.5, z - 10 + under], [p[0] + 1.5, p[1] + 1.5, z + 216]); }
       m.prop('props_bts/hanging_walkway_hanger_a', pt(u, laneC, z + under), [0, across * 90, 0], { solid: false });
+      // Over the level decks, a bell lamp under every second beam or so.
+      if (flat && r.chance(0.55)) bellLamp(m, pt(u, laneC, z + 216), LAMP.warm, 1.6, 560);
       if (!flat) continue;
       seen.add(z);
       const prev = last.get(z);
@@ -924,6 +989,15 @@ function trestles(ctx: Ctx): void {
       for (const o of [-60, 60]) { const b = slab(c, s.dir, u - 8, u + 8, o - 8, o + 8, ctx.deep, zTop - 20); steel(b[0], b[1], D.steel); }
       for (const z of zs) { const b = slab(c, s.dir, u - 6, u + 6, -68, 68, z - 36, z - 20); steel(b[0], b[1], D.steel); }
       ctx.trestle.set(`${s.tiles[i][0]},${s.tiles[i][1]}`, zTop);
+      // On every other bent one column goes on up as a post, with a small amber lamp on it: a line of them across the hall.
+      if (((i - first) / 3) % 2 === 0) {
+        const post = slab(c, s.dir, u - 3, u + 3, 57, 63, zTop - 20, zTop + 104);
+        steel(post[0], post[1], D.steel);
+        const top: V3 = [(post[0][0] + post[1][0]) / 2, (post[0][1] + post[1][1]) / 2, zTop + 104];
+        ctx.m.prop('props_bts/cage_light', [top[0], top[1], top[2] + 10], [0, 0, 0], { solid: false });
+        ctx.m.lamp([top[0], top[1], top[2] + 10], LAMP.amber, 1, 80, 480, { open: true });
+        ctx.m.glow([top[0], top[1], top[2] + 10], LAMP.amber, 44, 1.6);
+      }
     }
     ctx.notes.push({ kind: 'bridge', at: [c[0] + DX[s.dir] * first * TILE, c[1] + DY[s.dir] * first * TILE, zs[0]], yaw: s.dir * 90 });
   }
@@ -993,26 +1067,29 @@ function shelter(ctx: Ctx, r: Rng, c: V3, open: Dir): void {
  * be in a corridor or a room.)
  */
 const INSIDE_FOG = {
-  near: 150, d1: 1500, a1: 0.05, c1: '#3d4043', d2: 4500, a2: 0.3, c2: '#45484b', d3: 12000, a3: 0.9, c3: '#4c4f52',
+  near: 150, d1: 1500, a1: 0.06, c1: '#15181b', d2: 4500, a2: 0.35, c2: '#1a1e22', d3: 12000, a3: 0.9, c3: '#20252a',
   lowThicken: 0, lowTint: 0, highThicken: 0, highTint: 0, blur: 2,
 };
 
 /**
- * Flat light, no bake: for judging geometry. The fog is in three layers
- * (thin and dark near, thick and pale far), goes dark in the depths under the
+ * The world's look. No bake: its lamps are worked out per pixel
+ * (engine/render/lightGrid.ts) over a little cool light from everywhere, so
+ * unlit steel is a dark shape against the fog and each lamp makes a warm pool.
+ * Source's camera (auto exposure, bloom). The fog is in three layers (thin
+ * and dark near, thick and pale far), goes dark in the depths under the
  * lowest catwalks and pale in the heights, and far things are a little soft.
  * It hides what runs out of sight.
  */
 export const GEOMETRY_SETTINGS = {
-  camera: { model: 'source', sourceHdr: false },
-  light: { enabled: false },
+  camera: { model: 'source', sourceHdr: true, autoExposure: true, sourceBloom: 0.7, sourceExposureMin: 0.7, sourceExposureMax: 1.8 },
+  light: { enabled: false, lampAmbient: 14, lampAmbientColor: '#9db0c4', lampAmbientUp: 0.35, lampScale: 1 },
   render: { internalHeight: 0, textureFilter: 'linear', faceShade: 0.75 },
   surface: { reflections: 0 },
   fog: {
     enabled: true, source: true, color: '#8f979f', near: 300, far: 9000, maxDensity: 1,
-    layers: true, d1: 1600, a1: 0.18, c1: '#7c858d', d2: 4200, a2: 0.62, c2: '#8d959c', d3: 8500, a3: 1, c3: '#a2a9ae',
-    lowOn: true, lowTop: -600, lowDepth: 3600, lowThicken: 0.8, lowTint: 0.9, lowColor: '#3b4249',
-    highOn: true, highBase: 900, highRise: 3000, highThicken: 0.5, highTint: 0.7, highColor: '#c3c8cb',
+    layers: true, d1: 1600, a1: 0.18, c1: '#65717d', d2: 4200, a2: 0.62, c2: '#788693', d3: 8500, a3: 1, c3: '#8d9aa6',
+    lowOn: true, lowTop: -600, lowDepth: 3600, lowThicken: 0.8, lowTint: 0.9, lowColor: '#1f262e',
+    highOn: true, highBase: 900, highRise: 3000, highThicken: 0.5, highTint: 0.7, highColor: '#aab5bf',
     blur: 4, blurStart: 1200, blurEnd: 6500,
   },
   // The Portal 2 kit is made for Source's player: 32 wide, 72 tall, eyes at 64.

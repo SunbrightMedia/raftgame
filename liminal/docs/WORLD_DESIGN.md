@@ -210,6 +210,9 @@ shaft (a hollow from far below to above every level, crossed by catwalks
 one over the other, hung from beams that span it). Nothing floats. No
 chaos, no damage (the user's call, for now).
 
+It is lit by lamps with no bake (STYLE.md, "Light without a bake"), in
+layered fog.
+
 The world is made from a seed, in the page too (map path
 `world:industrial:<seed>`; N and B change the seed in the private build).
 
