@@ -118,6 +118,8 @@ export interface MapFile {
   settings?: Record<string, unknown>;
   brushes: BrushDef[];
   entities: EntityDef[];
+  /** Maps the number keys 0-9 open (paths under maps/, no extension), e.g. the catalogue rooms. */
+  links?: Record<string, string>;
 }
 
 export class MapError extends Error {}
@@ -181,6 +183,7 @@ export function parseMap(json: unknown): MapFile {
     settings: (m.settings && typeof m.settings === 'object' ? m.settings : undefined) as Record<string, unknown> | undefined,
     brushes,
     entities,
+    links: m.links && typeof m.links === 'object' ? Object.fromEntries(Object.entries(m.links as Record<string, unknown>).filter(([k, v]) => /^[0-9]$/.test(k) && typeof v === 'string')) as Record<string, string> : undefined,
   };
 }
 

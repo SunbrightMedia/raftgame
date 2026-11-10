@@ -73,9 +73,11 @@ function fileApi(): Plugin {
 // `--mode page` builds one self-contained HTML file (no server, no install)
 // for publishing as a playable link. See tools/make-page.mjs.
 export default defineConfig(({ mode }) => ({
+  // Each build mode has its own list of asset files (src/assets/globs.<mode>.ts).
+  resolve: { alias: { '@globs': fileURLToPath(new URL(`./src/assets/globs.${['page', 'atrium', 'catalogue'].includes(mode) ? mode : 'dev'}.ts`, import.meta.url)) } },
   plugins: mode === 'page' ? [fileApi(), viteSingleFile()] : [fileApi()],
-  base: mode === 'atrium' ? './' : '/',
-  build: mode === 'page' ? { outDir: 'dist-page', chunkSizeWarningLimit: 4000 } : mode === 'atrium' ? { outDir: 'dist-atrium', chunkSizeWarningLimit: 16000, assetsInlineLimit: (file: string, content: Buffer) => file.endsWith('.bin') || content.length < 10 * 1024 } : {},
+  base: mode === 'atrium' || mode === 'catalogue' ? './' : '/',
+  build: mode === 'page' ? { outDir: 'dist-page', chunkSizeWarningLimit: 4000 } : mode === 'catalogue' ? { outDir: 'dist-catalogue', chunkSizeWarningLimit: 16000, assetsInlineLimit: 4096 } : mode === 'atrium' ? { outDir: 'dist-atrium', chunkSizeWarningLimit: 16000, assetsInlineLimit: (file: string, content: Buffer) => file.endsWith('.bin') || content.length < 10 * 1024 } : {},
   server: {
     port: 5173,
     // Saving config/maps from the game must not trigger a page reload.

@@ -201,7 +201,8 @@ def convert(model: str):
     with open(out + '.bin', 'wb') as f:
         pos.tofile(f); nrm.tofile(f); uv.tofile(f); ind.tofile(f)
     h = mdl['hull']
-    json.dump({'format': 'liminal-mesh', 'version': 1, 'source': model, 'bin': os.path.basename(out) + '.bin',
+    # Other prefixes (the catalogue's p2lib) name their models apart from the atrium's.
+    json.dump({'format': 'liminal-mesh', 'version': 1, 'source': model if PREFIX == 'p2' else f'{PREFIX}/{model}', 'bin': os.path.basename(out) + '.bin',
                'vertexCount': len(pos) // 3, 'indexCount': len(ind),
                'materials': mdl['materials'], 'skins': mdl['skins'],
                'bounds': [[min(xs), min(ys), min(zs)], [max(xs), max(ys), max(zs)]], 'hull': [list(h[:3]), list(h[3:])],

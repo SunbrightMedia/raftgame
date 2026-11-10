@@ -5,3 +5,8 @@ dist-atrium/
 .venv-look/
 .studio.log
 .look.log
+# Catalogue data made from the Portal 2 export (tools/source/make_catalogue.py): regenerated, not committed.
+textures/p2lib/
+models/p2lib/
+catalogue/
+dist-catalogue/

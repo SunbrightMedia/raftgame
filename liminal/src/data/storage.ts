@@ -1,3 +1,5 @@
+import * as assets from '@globs';
+
 /**
  * Where config and maps live. The game only touches files through this, so
  * the same code runs against the Vite dev server (real files on disk),
@@ -39,7 +41,7 @@ class BrowserStorage implements Storage {
     const raw = import.meta.glob(['../../maps/*.json', '../../config/*.json'], { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
     this.bundled = {};
     for (const [k, v] of Object.entries(raw)) this.bundled[k.replace(/^(\.\.\/)+/, '')] = v;
-    const urls = (import.meta.env.MODE === 'atrium' ? import.meta.glob('../../maps/p2/*.json', { query: '?url', import: 'default', eager: true }) : {}) as Record<string, string>;
+    const urls = assets.mapUrls;
     this.fetched = {};
     for (const [k, v] of Object.entries(urls)) this.fetched[k.replace(/^(\.\.\/)+/, '')] = v;
   }

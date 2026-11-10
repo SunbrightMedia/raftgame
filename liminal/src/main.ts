@@ -8,7 +8,7 @@ import { DebugPanel } from './ui/debugPanel';
 import { Hud } from './ui/hud';
 
 // The private atrium build (npm run build:atrium) opens the Portal 2 reference map.
-const DEFAULT_MAP = import.meta.env.MODE === 'atrium' ? 'maps/p2/shipyard_atrium.json' : 'maps/blank.json';
+const DEFAULT_MAP = import.meta.env.MODE === 'atrium' ? 'maps/p2/shipyard_atrium.json' : import.meta.env.MODE === 'catalogue' ? 'maps/p2lib/room0.json' : 'maps/blank.json';
 
 /** Milliseconds since boot start at each step (window.liminal.bootTimes). */
 const bootTimes: Record<string, number> = {};
@@ -43,6 +43,13 @@ async function boot(): Promise<void> {
     showError(`Could not load ${mapPath}: ${(e as Error).message}`);
     return;
   }
+
+  // Number keys open the maps the current one links to (the catalogue rooms).
+  addEventListener('keydown', (e: KeyboardEvent) => {
+    const d = /^(?:Digit|Numpad)([0-9])$/.exec(e.code)?.[1];
+    const link = d !== undefined ? game.level?.map.links?.[d] : undefined;
+    if (link && `maps/${link}.json` !== game.mapPath) void game.loadMapPath(`maps/${link}.json`).catch((err) => showError((err as Error).message));
+  });
 
   const hud = new Hud();
   const panel = new DebugPanel(config, {

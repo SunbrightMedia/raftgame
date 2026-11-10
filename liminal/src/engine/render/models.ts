@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import * as assets from '@globs';
 
 /**
  * Meshes converted from other formats (tools/source/convert_models.py): a JSON
@@ -25,6 +26,9 @@ export interface ModelHeader {
   collision?: { planes: number[][]; points: number[][] }[];
 }
 
+/** Catalogue build: where a model's compacted data is (tools/source/pack_catalogue.py). */
+interface PackRef { n: number; offset: number; length: number; pos: [number[], number[]]; uv: [number[], number[]]; wide: boolean }
+
 export interface Model {
   header: ModelHeader;
   /** One geometry, one group per mesh (materialIndex = material slot). */
@@ -32,22 +36,34 @@ export interface Model {
 }
 
 export class ModelRegistry {
-  private headers = new Map<string, { header: ModelHeader; url: string }>();
+  private headers = new Map<string, { header: ModelHeader; url: string; pack?: PackRef }>();
+  private packs = new Map<number, Promise<Uint8Array>>();
+  private packUrls: Record<string, string> = {};
   private models = new Map<string, Model>();
 
   constructor() {
     // Reference models (models/p2: Valve's, for calibration) are dev-only, never published.
-    const heads = (import.meta.env.MODE === 'page'
-      ? import.meta.glob(['../../../models/**/*.json', '!../../../models/p2/**'], { eager: true, import: 'default' })
-      : import.meta.glob('../../../models/**/*.json', { eager: true, import: 'default' })) as Record<string, ModelHeader>;
-    const bins = (import.meta.env.MODE === 'page'
-      ? import.meta.glob(['../../../models/**/*.bin', '!../../../models/p2/**'], { eager: true, query: '?url', import: 'default' })
-      : import.meta.glob('../../../models/**/*.bin', { eager: true, query: '?url', import: 'default' })) as Record<string, string>;
+    const heads = assets.modelHeads as Record<string, ModelHeader>;
+    const bins = assets.modelBins;
+    if (assets.catalogue.models) {
+      this.packUrls = assets.catalogue.packs;
+      for (const h of Object.values(assets.catalogue.models as Record<string, ModelHeader & { pack: PackRef }>)) this.headers.set(h.source.toLowerCase(), { header: h, url: '', pack: h.pack });
+    }
     for (const [path, h] of Object.entries(heads)) {
       if (h?.format !== 'liminal-mesh') continue;
       const url = bins[path.replace(/[^/]*$/, h.bin)];
       if (url) this.headers.set(h.source.toLowerCase(), { header: h, url });
     }
+  }
+
+  private pack(n: number): Promise<Uint8Array> {
+    let p = this.packs.get(n);
+    if (!p) {
+      const url = Object.entries(this.packUrls).find(([k]) => k.endsWith(`pack_${String(n).padStart(3, '0')}.png`))?.[1];
+      p = url ? unpackPng(url) : Promise.reject(new Error(`no pack ${n}`));
+      this.packs.set(n, p);
+    }
+    return p;
   }
 
   header(name: string): ModelHeader | undefined {
@@ -64,6 +80,11 @@ export class ModelRegistry {
       const e = this.headers.get(n);
       if (!e || this.models.has(n)) return;
       try {
+        if (e.pack) {
+          const bytes = await this.pack(e.pack.n);
+          this.models.set(n, { header: e.header, geometry: buildPackedGeometry(e.header, e.pack, bytes) });
+          return;
+        }
         // Builds that inline model data (npm run build:atrium) hand a data: URL; decode it without fetch.
         const buf = e.url.startsWith('data:') ? dataUrlBytes(e.url) : await (await fetch(e.url)).arrayBuffer();
         this.models.set(n, { header: e.header, geometry: buildGeometry(e.header, buf) });
@@ -72,6 +93,47 @@ export class ModelRegistry {
       }
     }));
   }
+}
+
+/** A pack's bytes: a grey PNG (rows of 4096 bytes, filter 0) holding raw data; inflated here, so nothing alters it. */
+async function unpackPng(url: string): Promise<Uint8Array> {
+  const b = new Uint8Array(await (await fetch(url)).arrayBuffer());
+  const dv = new DataView(b.buffer);
+  let o = 8, width = 0, height = 0;
+  const idat: Uint8Array[] = [];
+  while (o < b.length) {
+    const len = dv.getUint32(o), type = String.fromCharCode(b[o + 4], b[o + 5], b[o + 6], b[o + 7]);
+    if (type === 'IHDR') { width = dv.getUint32(o + 8); height = dv.getUint32(o + 12); }
+    if (type === 'IDAT') idat.push(b.subarray(o + 8, o + 8 + len));
+    o += 12 + len;
+  }
+  const z = new Blob(idat as BlobPart[]).stream().pipeThrough(new DecompressionStream('deflate'));
+  const raw = new Uint8Array(await new Response(z).arrayBuffer());
+  const out = new Uint8Array(width * height);
+  for (let r = 0; r < height; r++) out.set(raw.subarray(r * (width + 1) + 1, (r + 1) * (width + 1)), r * width);
+  return out;
+}
+
+function buildPackedGeometry(h: ModelHeader, p: PackRef, all: Uint8Array): THREE.BufferGeometry {
+  const n = h.vertexCount, ni = h.indexCount;
+  const b = all.slice(p.offset, p.offset + p.length).buffer;
+  const al = (x: number) => (x + 3) & ~3;
+  let o = 0;
+  const qp = new Int16Array(b, o, n * 3); o += al(n * 6);
+  const qu = new Int16Array(b, o, n * 2); o += al(n * 4);
+  const qn = new Int8Array(b, o, n * 3); o += al(n * 3);
+  const qi = p.wide ? new Uint32Array(b, o, ni) : new Uint16Array(b, o, ni);
+  const pos = new Float32Array(n * 3), nrm = new Float32Array(n * 3), uv = new Float32Array(n * 2);
+  for (let i = 0; i < n * 3; i++) { const k = i % 3; pos[i] = p.pos[0][k] + ((qp[i] + 32768) / 65535) * p.pos[1][k]; nrm[i] = qn[i] / 127; }
+  for (let i = 0; i < n * 2; i++) { const k = i % 2; uv[i] = p.uv[0][k] + ((qu[i] + 32768) / 65535) * p.uv[1][k]; }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('normal', new THREE.BufferAttribute(nrm, 3));
+  g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+  g.setIndex(new THREE.BufferAttribute(Uint32Array.from(qi), 1));
+  for (const m of h.meshes) g.addGroup(m.indexOffset, m.indexCount, m.slot);
+  g.computeBoundingSphere();
+  return g;
 }
 
 function dataUrlBytes(url: string): ArrayBuffer {

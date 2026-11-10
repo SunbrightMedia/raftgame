@@ -6,6 +6,7 @@ import { buildFaceMeshes, disposeGroup } from '../engine/render/brushMesh';
 import type { TextureRegistry } from '../engine/render/textures';
 import type { ModelRegistry } from '../engine/render/models';
 import { buildPropMeshes, disposeProps, setPropLight } from '../engine/render/propMeshes';
+import { buildLabels } from '../engine/render/labels';
 import { propSolids } from '../engine/collision/props';
 import { buildFaces, solidPlanes, type Face, type LightmapLayout } from '../engine/light/faces';
 import { type Vec3, v3 } from '../engine/vec3';
@@ -50,6 +51,8 @@ export class Level {
         rects: new Map([...L.rects].map(([id, r]) => [id, { x: r.x, y: r.y, w: r.w, h: r.h, src: { lmS: r.grid.lmS, lmT: r.grid.lmT, minS: r.grid.minS, minT: r.grid.minT, slots: r.slots } }])),
       };
     }
+    const labels = buildLabels(map.entities);
+    if (labels) this.root.add(labels);
     const start = map.entities.find((e) => e.class === 'player_start');
     this.spawn = start
       ? { origin: v3(...start.origin), pitch: start.angles?.[0] ?? 0, yaw: start.angles?.[1] ?? 0 }

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import * as assets from '@globs';
 import { makeDevTexture, devTextureNames, type TexImage } from './devTextures';
 import { type CrushParams, grade, sharpen, medianCut, applyPalette, averageLinear, type Palette } from './crusher';
 
@@ -89,6 +90,16 @@ interface Source {
   pixelart: boolean;
   source?: SourceMaterial;
   credit?: string;
+  /** Catalogue build: the texture is a rectangle of a packed sheet (tools/source/pack_catalogue.py). */
+  sheet?: { url: string; x: number; y: number; w: number; h: number };
+}
+
+// Catalogue build: textures packed into sheets, loaded per room (each sheet once).
+const sheetLoads = new Map<string, Promise<HTMLImageElement>>();
+function loadSheet(url: string): Promise<HTMLImageElement> {
+  let p = sheetLoads.get(url);
+  if (!p) { p = (async () => { const img = new Image(); img.src = url; await img.decode(); return img; })(); sheetLoads.set(url, p); }
+  return p;
 }
 
 interface Variant { name: string; from: string; color: string; contrast?: number }
@@ -141,15 +152,8 @@ export class TextureRegistry {
     this.loaded = true;
     // The published page (one HTML file, 16 MB cap) leaves out the Freedoom set except what maps use;
     // the dev server and the normal build have all of it.
-    const urls = (import.meta.env.MODE === 'page'
-      // (two globs: a negative pattern would also drop the files listed after it)
-      // Reference material (textures/p2: Valve's, for calibration) is dev-only, never published.
-      ? { ...import.meta.glob(['../../../textures/**/*.{png,jpg,jpeg}', '!../../../textures/freedoom/**', '!../../../textures/p2/**'], { eager: true, query: '?url', import: 'default' }),
-        ...import.meta.glob(['../../../textures/freedoom/walls/{BROWN1,COMPSTA1}.png', '../../../textures/freedoom/flats/CEIL5_1.png'], { eager: true, query: '?url', import: 'default' }) }
-      : import.meta.glob('../../../textures/**/*.{png,jpg,jpeg}', { eager: true, query: '?url', import: 'default' })) as Record<string, string>;
-    const manifests = (import.meta.env.MODE === 'page'
-      ? import.meta.glob('../../../textures/index.json', { eager: true, import: 'default' })
-      : import.meta.glob(['../../../textures/index.json', '../../../textures/p2/index.json'], { eager: true, import: 'default' })) as Record<string, { textures: ManifestEntry[] }>;
+    const urls = assets.textureUrls;
+    const manifests = assets.textureManifests as Record<string, { textures: ManifestEntry[] }>;
     const manifest = Object.values(manifests).flatMap((m) => m.textures ?? []);
     const variantFiles = import.meta.glob('../../../textures/variants.json', { eager: true, import: 'default' }) as Record<string, { variants: Variant[] }>;
     for (const v of Object.values(variantFiles)[0]?.variants ?? []) this.variants.set(v.name, v);
@@ -161,6 +165,21 @@ export class TextureRegistry {
         name: n, image: t.canvas, imgW: t.canvas.width, imgH: t.canvas.height,
         worldW: t.worldW, worldH: t.worldH, material: t.material, emissive: t.emissive, raw: !!t.raw, pixelart: false,
       });
+    }
+
+    if (assets.catalogue.textures) {
+      const packed = assets.catalogue.textures as { textures: Record<string, [number, number, number, number, number]> } | undefined;
+      const sheets = assets.catalogue.sheets;
+      const sheetUrl = (n: number) => Object.entries(sheets).find(([k]) => k.endsWith(`sheet_${String(n).padStart(3, '0')}.jpg`))?.[1];
+      const byName = new Map(manifest.map((m) => [m.name, m]));
+      for (const [name, [n, x, y, w, h]] of Object.entries(packed?.textures ?? {})) {
+        const m = byName.get(name), url = sheetUrl(n);
+        if (!url) continue;
+        this.sources.set(name, {
+          name, image: null, imgW: 0, imgH: 0, worldW: m?.size[0] ?? w, worldH: m?.size[1] ?? h,
+          material: m?.material ?? 'default', raw: true, pixelart: false, source: m?.source, sheet: { url, x, y, w, h },
+        });
+      }
     }
 
     for (const [path, url] of Object.entries(urls)) {
@@ -181,6 +200,17 @@ export class TextureRegistry {
     for (const n of names) { all.add(n); const v = this.variants.get(n); if (v) all.add(v.from); }
     await Promise.all([...all].map(async (n) => {
       const src = this.sources.get(n);
+      if (src?.sheet && !src.image) {
+        try {
+          const sh = src.sheet, img = await loadSheet(sh.url);
+          const c = document.createElement('canvas'); c.width = sh.w; c.height = sh.h;
+          c.getContext('2d')!.drawImage(img, sh.x, sh.y, sh.w, sh.h, 0, 0, sh.w, sh.h);
+          src.image = c; src.imgW = sh.w; src.imgH = sh.h;
+          this.entries.get(n)?.texture.dispose();
+          this.entries.delete(n);
+        } catch (e) { console.warn(`texture ${n} failed to load`, e); }
+        return;
+      }
       if (!src || src.image || !src.url) return;
       try {
         const img = new Image();

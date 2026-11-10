@@ -1,0 +1,29 @@
+{
+  "format": "liminal-map",
+  "version": 1,
+  "name": "p2lib/room0",
+  "settings": {"camera": {"model": "source", "sourceHdr": false, "sourceScale": 1}, "light": {"enabled": false}, "fog": {"enabled": false}, "render": {"internalHeight": 0, "textureFilter": "linear"}},
+  "links": {"0": "p2lib/room0", "1": "p2lib/room1", "2": "p2lib/room2", "3": "p2lib/room3", "4": "p2lib/room4", "5": "p2lib/room5", "6": "p2lib/room6", "7": "p2lib/room7", "8": "p2lib/room8", "9": "p2lib/room9"},
+  "brushes": [
+    {"id": 1, "type": "convex", "planes": [[1, 0, 0, 1664], [-1, 0, 0, 64], [0, 1, 0, 1264], [0, -1, 0, 64], [0, 0, 1, 0], [0, 0, -1, 16]], "faces": {"0": {"tex": "p2lib/tools/toolsblack"}, "1": {"tex": "p2lib/tools/toolsblack"}, "2": {"tex": "p2lib/tools/toolsblack"}, "3": {"tex": "p2lib/tools/toolsblack"}, "4": {"tex": "p2lib/dev/dev_measuregeneric01b", "uaxis": [1, 0, 0, 0], "vaxis": [0, -1, 0, 0], "scale": [0.25, 0.25]}, "5": {"tex": "p2lib/tools/toolsblack"}}},
+    {"id": 2, "type": "convex", "planes": [[1, 0, 0, 1664], [-1, 0, 0, 64], [0, 1, 0, -64], [0, -1, 0, 80], [0, 0, 1, 384], [0, 0, -1, 0]], "faces": {"0": {"tex": "p2lib/dev/dev_measurewall01a"}, "1": {"tex": "p2lib/dev/dev_measurewall01a"}, "2": {"tex": "p2lib/dev/dev_measurewall01a"}, "3": {"tex": "p2lib/dev/dev_measurewall01a"}, "4": {"tex": "p2lib/dev/dev_measurewall01a"}, "5": {"tex": "p2lib/dev/dev_measurewall01a"}}},
+    {"id": 3, "type": "convex", "planes": [[1, 0, 0, 1664], [-1, 0, 0, 64], [0, 1, 0, 1280], [0, -1, 0, -1264], [0, 0, 1, 384], [0, 0, -1, 0]], "faces": {"0": {"tex": "p2lib/dev/dev_measurewall01a"}, "1": {"tex": "p2lib/dev/dev_measurewall01a"}, "2": {"tex": "p2lib/dev/dev_measurewall01a"}, "3": {"tex": "p2lib/dev/dev_measurewall01a"}, "4": {"tex": "p2lib/dev/dev_measurewall01a"}, "5": {"tex": "p2lib/dev/dev_measurewall01a"}}},
+    {"id": 4, "type": "convex", "planes": [[1, 0, 0, -64], [-1, 0, 0, 80], [0, 1, 0, 1264], [0, -1, 0, 64], [0, 0, 1, 384], [0, 0, -1, 0]], "faces": {"0": {"tex": "p2lib/dev/dev_measurewall01a"}, "1": {"tex": "p2lib/dev/dev_measurewall01a"}, "2": {"tex": "p2lib/dev/dev_measurewall01a"}, "3": {"tex": "p2lib/dev/dev_measurewall01a"}, "4": {"tex": "p2lib/dev/dev_measurewall01a"}, "5": {"tex": "p2lib/dev/dev_measurewall01a"}}},
+    {"id": 5, "type": "convex", "planes": [[1, 0, 0, 1680], [-1, 0, 0, -1664], [0, 1, 0, 1264], [0, -1, 0, 64], [0, 0, 1, 384], [0, 0, -1, 0]], "faces": {"0": {"tex": "p2lib/dev/dev_measurewall01a"}, "1": {"tex": "p2lib/dev/dev_measurewall01a"}, "2": {"tex": "p2lib/dev/dev_measurewall01a"}, "3": {"tex": "p2lib/dev/dev_measurewall01a"}, "4": {"tex": "p2lib/dev/dev_measurewall01a"}, "5": {"tex": "p2lib/dev/dev_measurewall01a"}}}
+  ],
+  "entities": [
+    {"id": 100000, "class": "player_start", "origin": [24, -40, 0], "angles": [0, 60, 0]},
+    {"id": 100001, "class": "label", "origin": [200, -63, 200], "angles": [0, 90, 0], "props": {"text": "Portal 2 catalogue", "size": 28, "plane": "wall"}},
+    {"id": 100002, "class": "label", "origin": [200, -63, 140], "angles": [0, 90, 0], "props": {"text": "keys 0-9: rooms   0: list of rooms", "size": 10, "plane": "wall"}},
+    {"id": 100003, "class": "label", "origin": [170, 1263, 290], "angles": [0, 270, 0], "props": {"text": "1\nWorld surfaces\n586 textures", "size": 40, "plane": "wall"}},
+    {"id": 100004, "class": "label", "origin": [480, 1263, 290], "angles": [0, 270, 0], "props": {"text": "2\nSigns, decals,\noverlays\n557 textures", "size": 40, "plane": "wall"}},
+    {"id": 100005, "class": "label", "origin": [790, 1263, 290], "angles": [0, 270, 0], "props": {"text": "3\nEffects, sky,\ndev, tools\n556 textures", "size": 40, "plane": "wall"}},
+    {"id": 100006, "class": "label", "origin": [1100, 1263, 290], "angles": [0, 270, 0], "props": {"text": "4\nScreens and UI\n570 textures", "size": 40, "plane": "wall"}},
+    {"id": 100007, "class": "label", "origin": [1410, 1263, 290], "angles": [0, 270, 0], "props": {"text": "5\nModel skins\n1099 textures", "size": 40, "plane": "wall"}},
+    {"id": 100008, "class": "label", "origin": [170, 1263, 100], "angles": [0, 270, 0], "props": {"text": "6\nOffice and\nunderground\nprops\n555 models", "size": 40, "plane": "wall"}},
+    {"id": 100009, "class": "label", "origin": [480, 1263, 100], "angles": [0, 270, 0], "props": {"text": "7\nBehind the\nscenes\n485 models", "size": 40, "plane": "wall"}},
+    {"id": 100010, "class": "label", "origin": [790, 1263, 100], "angles": [0, 270, 0], "props": {"text": "8\nTest chambers\n501 models", "size": 40, "plane": "wall"}},
+    {"id": 100011, "class": "label", "origin": [1100, 1263, 100], "angles": [0, 270, 0], "props": {"text": "9\nDestruction,\ncharacters,\nplants, the rest\n636 models", "size": 40, "plane": "wall"}},
+    {"id": 100012, "class": "label", "origin": [420, 260, 0.2], "angles": [0, 0, 0], "props": {"text": "HOW TO USE\nNumber keys 0-9: go to a room.\nEach item has a cell name on the floor (A1, B7...).\nTell Claude the room and cell, e.g. \"6 C12\".\nV: fly. Shift: run.", "size": 24, "plane": "floor"}}
+  ]
+}
