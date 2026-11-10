@@ -340,6 +340,18 @@ function clipPoly(poly: Axis[], n: Axis, d: number): Axis[] {
   return out;
 }
 
+/** Is p (on the polygon's plane) inside the convex polygon, either winding? */
+function insidePoly(poly: Axis[], p: Axis, n: Axis): boolean {
+  let pos = true, neg = true;
+  for (let k = 0; k < poly.length; k++) {
+    const a = poly[k], b = poly[(k + 1) % poly.length];
+    const v = dot3(cross([b[0] - a[0], b[1] - a[1], b[2] - a[2]], [p[0] - a[0], p[1] - a[1], p[2] - a[2]]), n);
+    if (v < -1e-6) pos = false;
+    if (v > 1e-6) neg = false;
+  }
+  return pos || neg;
+}
+
 /** Area and centroid of a planar polygon. */
 function areaCentroid(poly: Axis[], n: Axis): { area: number; c: Axis } {
   let area = 0;
@@ -400,7 +412,7 @@ export interface SourceBakeInput {
   params: {
     /** VRAD -bounce (default 100). */
     bounces: number;
-    /** Rays each patch uses to find what it sees (the transfers). */
+    /** Unused: transfers are VRAD's own (one visibility ray per patch pair), not sampled. */
     patchRays: number;
     /** VRAD -chop: patch size in luxels (default 4). */
     chop: number;
@@ -452,14 +464,24 @@ interface Lux {
   pos: Float64Array;
   area: Float32Array;
   valid: Uint8Array;
-  /** Direct light per normal (slots × w × h × 3). */
+  /** Direct light per normal (slots × w × h × 3), per sample (cell). */
   direct: Float32Array;
+  /** Per sample: centroid (s, t) and bounds (s0, t0, s1, t1) in luxel coordinates relative to the grid's min (BuildFacesamples). */
+  coord: Float32Array;
+  bounds: Float32Array;
+  /** Direct light per luxel after VRAD's radial blend of samples (BuildLuxelRadial), slots × w × h × 3. */
+  luxDirect: Float32Array;
+  /** Faces VRAD blends across (PairEdges: sharing a vertex, normals within 45°). */
+  neighbors: number[];
 }
 
 interface Patch {
   face: number; // index into lux
+  /** VRAD face (a piece of ours cut at 32 luxels): patches don't see their own. */
+  piece: number;
   origin: Axis;
   normal: Axis;
+  planeDist: number;
   area: number;
   min: Axis;
   max: Axis;
@@ -467,9 +489,12 @@ interface Patch {
   /** Direct light (samples ≥ 1 only, area-weighted, as AddSampleToPatch). */
   sampleArea: number;
   sampleLight: RGB;
-  /** Hit list (patch indices, -1 = nothing) and, for bumped patches, the weight per bump normal. */
-  hits: Int32Array;
-  bumpW?: Float32Array;
+  winding: Axis[];
+  parent: number;
+  child1: number;
+  child2: number;
+  /** False for buried leaves (and nodes with no living leaf). */
+  alive: boolean;
 }
 
 /** Shelf-pack rects (tallest first). */
@@ -508,13 +533,6 @@ export function sourceLayout(faces: Face[], info: SourceBakeFace[], maxWidth: nu
   return { width: p.width, height: p.height, rects };
 }
 
-/** Halton radical inverse (mathlib halton.cpp: the generator's seed is already advanced). */
-function halton(seed: number, base: number): number {
-  let r = 0, f = 1 / base, s = seed;
-  while (s) { r += (s % base) * f; f /= base; s = Math.floor(s / base); }
-  return r;
-}
-
 export function bakeSource(input: SourceBakeInput): SourceBakeOutput {
   const t0 = Date.now();
   const P = input.params;
@@ -527,6 +545,7 @@ export function bakeSource(input: SourceBakeInput): SourceBakeOutput {
 
   // ---- luxels and their sample points (BuildFacesamples / CalcPoints)
   const lux: Lux[] = [];
+  const cellPoly = new Map<Lux, Map<number, Axis[]>>();
   const luxByFace = new Map<number, number>();
   let luxels = 0;
   for (const f of input.faces) {
@@ -544,19 +563,26 @@ export function bakeSource(input: SourceBakeInput): SourceBakeOutput {
       f, info, grid: g, rect, toWorld, normals: s ? [f.n, ...s.normals] : [f.n],
       pos: new Float64Array(n * 3), area: new Float32Array(n), valid: new Uint8Array(n),
       direct: new Float32Array(n * 3 * rect.slots),
+      coord: new Float32Array(n * 2), bounds: new Float32Array(n * 4), luxDirect: new Float32Array(n * 3 * rect.slots), neighbors: [],
     };
-    // Luxel (i, j) covers luxel coordinates [min+i-0.5, min+i+0.5]: clip the face to it.
+    // Sample (i, j) is the face clipped to luxel coordinates [min+i, min+i+1) × [min+j, min+j+1)
+    // (BuildFacesamples, no -centersamples); the luxel itself sits at the corner min+i, min+j.
     const sN = normalize(g.lmS), tN = normalize(g.lmT);
     const sL = Math.hypot(...g.lmS), tL = Math.hypot(...g.lmT);
     for (let j = 0; j < g.h; j++) {
       for (let i = 0; i < g.w; i++) {
         const cs = g.minS + i, ct = g.minT + j;
-        let pp = clipPoly(poly, sN, (cs + 0.5) / sL);
-        pp = clipPoly(pp, [-sN[0], -sN[1], -sN[2]], -(cs - 0.5) / sL);
-        pp = clipPoly(pp, tN, (ct + 0.5) / tL);
-        pp = clipPoly(pp, [-tN[0], -tN[1], -tN[2]], -(ct - 0.5) / tL);
+        let pp = clipPoly(poly, sN, (cs + 1) / sL);
+        pp = clipPoly(pp, [-sN[0], -sN[1], -sN[2]], -cs / sL);
+        pp = clipPoly(pp, tN, (ct + 1) / tL);
+        pp = clipPoly(pp, [-tN[0], -tN[1], -tN[2]], -ct / tL);
         const k = j * g.w + i;
-        const ac = pp.length >= 3 ? areaCentroid(pp, f.n) : { area: 0, c: toWorld(cs, ct) };
+        const ac = pp.length >= 3 ? areaCentroid(pp, f.n) : { area: 0, c: toWorld(cs + 0.5, ct + 0.5) };
+        L.coord[k * 2] = dot3(ac.c, g.lmS) - g.minS; L.coord[k * 2 + 1] = dot3(ac.c, g.lmT) - g.minT;
+        let b0 = Infinity, b1 = Infinity, b2 = -Infinity, b3 = -Infinity;
+        for (const q of pp) { const a = dot3(q, g.lmS) - g.minS, b = dot3(q, g.lmT) - g.minT; b0 = Math.min(b0, a); b1 = Math.min(b1, b); b2 = Math.max(b2, a); b3 = Math.max(b3, b); }
+        L.bounds.set(pp.length ? [b0, b1, b2, b3] : [i, j, i + 1, j + 1], k * 4);
+        if (pp.length >= 3) { let m = cellPoly.get(L); if (!m) cellPoly.set(L, m = new Map()); m.set(k, pp); }
         const q: Axis = [ac.c[0] + f.n[0], ac.c[1] + f.n[1], ac.c[2] + f.n[2]];
         L.pos[k * 3] = q[0]; L.pos[k * 3 + 1] = q[1]; L.pos[k * 3 + 2] = q[2];
         L.area[k] = ac.area;
@@ -568,19 +594,62 @@ export function bakeSource(input: SourceBakeInput): SourceBakeOutput {
   }
 
   log(`luxels: ${luxels}`);
-  // ---- patches (MakePatchForFace + SubdividePatch): chopped along the widest world axis at the middle
+  // ---- face neighbours (PairEdges): faces touching at a vertex (or a T-junction, which VBSP splits into one), normals within 45°
+  {
+    const SMOOTH = 0.7071067;
+    const polys = lux.map((L) => facePolygon(L.f));
+    const boxes = polys.map((pp) => { const lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity]; for (const q of pp) for (let k = 0; k < 3; k++) { lo[k] = Math.min(lo[k], q[k] - 0.1); hi[k] = Math.max(hi[k], q[k] + 0.1); } return [lo, hi]; });
+    const onEdge = (q: Axis, pp: Axis[]) => {
+      for (let k = 0; k < pp.length; k++) {
+        const a = pp[k], b = pp[(k + 1) % pp.length];
+        const ab: Axis = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], aq: Axis = [q[0] - a[0], q[1] - a[1], q[2] - a[2]];
+        const t = Math.max(0, Math.min(1, dot3(aq, ab) / Math.max(1e-9, dot3(ab, ab))));
+        if (Math.hypot(aq[0] - ab[0] * t, aq[1] - ab[1] * t, aq[2] - ab[2] * t) < 0.1) return true;
+      }
+      return false;
+    };
+    const CELLN = 256, cellMap = new Map<string, number[]>();
+    boxes.forEach(([lo, hi], i) => {
+      for (let x = Math.floor(lo[0] / CELLN); x <= Math.floor(hi[0] / CELLN); x++) for (let y = Math.floor(lo[1] / CELLN); y <= Math.floor(hi[1] / CELLN); y++) for (let z = Math.floor(lo[2] / CELLN); z <= Math.floor(hi[2] / CELLN); z++) {
+        const key = `${x},${y},${z}`; const l = cellMap.get(key); if (l) l.push(i); else cellMap.set(key, [i]);
+      }
+    });
+    const seen = new Set<number>();
+    for (const list of cellMap.values()) for (let a = 0; a < list.length; a++) for (let b = a + 1; b < list.length; b++) {
+      const i = list[a], j = list[b], key = i * lux.length + j;
+      if (seen.has(key)) continue; seen.add(key);
+      if (lux[i].info.sky || lux[j].info.sky || dot3(lux[i].f.n, lux[j].f.n) < SMOOTH) continue;
+      const [l1, h1] = boxes[i], [l2, h2] = boxes[j];
+      if (l1[0] > h2[0] || l2[0] > h1[0] || l1[1] > h2[1] || l2[1] > h1[1] || l1[2] > h2[2] || l2[2] > h1[2]) continue;
+      if (polys[i].some((q) => onEdge(q, polys[j])) || polys[j].some((q) => onEdge(q, polys[i]))) { lux[i].neighbors.push(j); lux[j].neighbors.push(i); }
+    }
+  }
+  // ---- patches (MakePatchForFace + SubdividePatch), as VRAD's tree. Each face is first cut wherever its
+  // lightmap would pass 32 luxels (VBSP SubdivideFace); each piece is a root patch, chopped along the widest
+  // world axis at the middle. Leaves receive light; any node can be seen (TestPatchToPatch picks the level).
   const patches: Patch[] = [];
-  const facePatches: number[][] = lux.map(() => []);
+  const facePatches: number[][] = lux.map(() => []); // leaves
+  const faceRoots: number[][] = lux.map(() => []);
   const chop = Math.max(1, P.chop);
+  let pieces = 0;
   for (let fi = 0; fi < lux.length; fi++) {
     const L = lux[fi];
     if (L.info.sky || L.info.receiveOnly) continue;
     const luxscale = 1 / L.info.lightmapscale;
     const refl = L.info.reflectivity.map((r) => Math.min(0.99, r)) as RGB;
-    const split = (w: Axis[], chopNow: number) => {
+    const planeDist = dot3(L.f.n, L.f.origin);
+    const node = (w: Axis[], parent: number, piece: number): number => {
       const min: Axis = [Infinity, Infinity, Infinity], max: Axis = [-Infinity, -Infinity, -Infinity];
       for (const p of w) for (let i = 0; i < 3; i++) { min[i] = Math.min(min[i], p[i]); max[i] = Math.max(max[i], p[i]); }
-      const total = [0, 1, 2].map((i) => (max[i] - min[i]) * luxscale);
+      const ac = areaCentroid(w, L.f.n);
+      // A face's root patch sits at its vertices' mean (WindingCenter); children at their balance points.
+      const origin: Axis = parent < 0 ? [0, 1, 2].map((k) => w.reduce((t, q) => t + q[k], 0) / w.length) as Axis : ac.c;
+      patches.push({ face: fi, piece, origin, normal: L.f.n, planeDist, area: ac.area, min, max, reflectivity: refl, sampleArea: 0, sampleLight: [0, 0, 0], winding: w, parent, child1: -1, child2: -1, alive: true });
+      return patches.length - 1;
+    };
+    const subdivide = (idx: number, chopNow: number) => {
+      const p = patches[idx];
+      const total = [0, 1, 2].map((i) => (p.max[i] - p.min[i]) * luxscale);
       let widest = 0, sub = false;
       for (let i = 0; i < 3; i++) {
         if (total[i] > total[widest]) widest = i;
@@ -591,27 +660,57 @@ export function bakeSource(input: SourceBakeInput): SourceBakeOutput {
       }
       if (sub) {
         const axis: Axis = [0, 0, 0]; axis[widest] = 1;
-        const mid = (min[widest] + max[widest]) / 2;
-        const a = clipPoly(w, axis, mid), b = clipPoly(w, [-axis[0], -axis[1], -axis[2]], -mid);
+        const mid = (p.min[widest] + p.max[widest]) / 2;
+        const a = clipPoly(p.winding, axis, mid), b = clipPoly(p.winding, [-axis[0], -axis[1], -axis[2]], -mid);
         if (a.length >= 3 && b.length >= 3 && areaCentroid(a, L.f.n).area > 0 && areaCentroid(b, L.f.n).area > 0) {
-          split(a, chopNow); split(b, chopNow);
+          const c1 = node(a, idx, p.piece), c2 = node(b, idx, p.piece);
+          p.child1 = c1; p.child2 = c2;
+          subdivide(c1, chopNow); subdivide(c2, chopNow);
           return;
         }
       }
-      const ac = areaCentroid(w, L.f.n);
-      if (ac.area <= 0) return;
       // Buried under another brush (VBSP's CSG would have cut it away): nobody sees it.
-      if (grid.inside([ac.c[0] + L.f.n[0] * 0.5, ac.c[1] + L.f.n[1] * 0.5, ac.c[2] + L.f.n[2] * 0.5])) return;
-      facePatches[fi].push(patches.length);
-      patches.push({ face: fi, origin: ac.c, normal: L.f.n, area: ac.area, min, max, reflectivity: refl, sampleArea: 0, sampleLight: [0, 0, 0], hits: new Int32Array(0) });
+      if (grid.inside([p.origin[0] + L.f.n[0] * 0.5, p.origin[1] + L.f.n[1] * 0.5, p.origin[2] + L.f.n[2] * 0.5])) { p.alive = false; return; }
+      facePatches[fi].push(idx);
     };
-    split(facePolygon(L.f), chop);
+    const vbsp = (w: Axis[]): Axis[][] => {
+      for (const ax of [L.grid.lmS, L.grid.lmT]) {
+        let lo = Infinity, hi = -Infinity;
+        for (const q of w) { const v = dot3(q, ax); lo = Math.min(lo, v); hi = Math.max(hi, v); }
+        if (hi - lo <= 32) continue;
+        const len = Math.hypot(ax[0], ax[1], ax[2]), nrm: Axis = [ax[0] / len, ax[1] / len, ax[2] / len], dist = (lo + 31) / len;
+        const back = clipPoly(w, nrm, dist), front = clipPoly(w, [-nrm[0], -nrm[1], -nrm[2]], -dist);
+        if (back.length < 3 || front.length < 3) continue;
+        return [...vbsp(front), ...vbsp(back)];
+      }
+      return [w];
+    };
+    for (const w of vbsp(facePolygon(L.f))) {
+      if (!(areaCentroid(w, L.f.n).area > 0)) continue;
+      const r = node(w, -1, pieces++);
+      faceRoots[fi].push(r);
+      subdivide(r, chop);
+    }
   }
-
-  log(`patches: ${patches.length}`);
+  // An inner node is alive if a child is (children always come after their parent). VBSP's CSG cuts buried
+  // parts off a face, so a node's area and centre are those of its living leaves.
+  for (let i = patches.length - 1; i >= 0; i--) {
+    const p = patches[i];
+    if (p.child1 < 0) continue;
+    const a = patches[p.child1], b = patches[p.child2];
+    p.alive = a.alive || b.alive;
+    const wa = a.alive ? a.area : 0, wb = b.alive ? b.area : 0;
+    if (wa + wb > 0 && (wa === 0 || wb === 0 || wa + wb < p.area * 0.999)) {
+      p.origin = [0, 1, 2].map((k) => (wa * a.origin[k] + wb * b.origin[k]) / (wa + wb)) as Axis;
+      p.area = wa + wb;
+    }
+  }
+  const leaves = facePatches.flat();
+  log(`patches: ${leaves.length} leaves of ${patches.length} nodes, ${pieces} faces`);
   // ---- texture lights (CreateDirectLights, emit_surface): one direct light per patch of a lights.rad texture
   const lights = [...input.lights];
-  for (const p of patches) {
+  for (const pi of leaves) {
+    const p = patches[pi];
     const info = lux[p.face].info;
     if (!info.texlight || !info.texScale || !info.texSize) continue;
     const avg = (info.texlight[0] + info.texlight[1] + info.texlight[2]) / 3;
@@ -667,87 +766,101 @@ export function bakeSource(input: SourceBakeInput): SourceBakeOutput {
       for (let b = 0; b < S; b++) for (let c = 0; c < 3; c++) L.direct[(b * n + k) * 3 + c] = one[b * 3 + c];
     }
     if (!P.supersample) continue;
-    // Luxels whose light differs a lot from a neighbour's straddle a shadow or fade edge: average 4×4 points over the luxel.
-    const lum = (k: number) => L.direct[k * 3] + L.direct[k * 3 + 1] + L.direct[k * 3 + 2];
-    const redo: number[] = [];
-    for (let j = 0; j < g.h; j++) for (let i = 0; i < g.w; i++) {
-      const k = j * g.w + i;
-      if (!L.valid[k]) continue;
-      const a = lum(k);
-      for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-        const ii = i + di, jj = j + dj;
-        if (ii < 0 || jj < 0 || ii >= g.w || jj >= g.h || !L.valid[jj * g.w + ii]) continue;
-        const b = lum(jj * g.w + ii);
-        if (Math.abs(a - b) > 3 && Math.abs(a - b) > 0.1 * Math.max(a, b)) { redo.push(k); break; }
+    // BuildSupersampleFaceLights (do_extra, 4 passes): a sample whose intensity, as (Σrgb / 256)^(1/2.2) in any
+    // slot, differs by ≥ 1/16 from any of its 8 neighbours is re-lit as the mean of a 4×4 grid, ¼ luxel apart,
+    // centred on it (points outside a partial sample's piece of the face are dropped).
+    const inten = new Float64Array(n * S);
+    const setI = (k: number) => { for (let b = 0; b < S; b++) { const o = (b * n + k) * 3; inten[b * n + k] = Math.pow(Math.max(0, L.direct[o] + L.direct[o + 1] + L.direct[o + 2]) / 256, 1 / 2.2); } };
+    for (let k = 0; k < n; k++) if (L.area[k] > 0) setI(k);
+    const done = new Uint8Array(n);
+    const full = 1 / (Math.hypot(...g.lmS) * Math.hypot(...g.lmT));
+    for (let pass = 1; pass <= 4; pass++) {
+      const redo: number[] = [];
+      for (let j = 0; j < g.h; j++) for (let i = 0; i < g.w; i++) {
+        const k = j * g.w + i;
+        if (done[k] || !(L.area[k] > 0)) continue;
+        let grad = 0;
+        for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
+          if (!di && !dj) continue;
+          const ii = i + di, jj = j + dj;
+          if (ii < 0 || jj < 0 || ii >= g.w || jj >= g.h) continue;
+          for (let b = 0; b < S; b++) grad = Math.max(grad, Math.abs(inten[b * n + k] - inten[b * n + jj * g.w + ii]));
+        }
+        if (grad >= 0.0625) redo.push(k);
       }
-    }
-    for (const k of redo) {
-      acc.fill(0);
-      let m = 0;
-      const i = k % g.w, j = Math.floor(k / g.w);
-      for (let sj = 0; sj < 4; sj++) for (let si = 0; si < 4; si++) {
-        const p = L.toWorld(g.minS + i - 0.375 + si * 0.25, g.minT + j - 0.375 + sj * 0.25);
-        const x = p[0] + L.f.n[0], y = p[1] + L.f.n[1], z = p[2] + L.f.n[2];
-        if (grid.inside([x, y, z])) continue;
-        sampleAt(L, cand, x, y, z, one);
-        for (let c = 0; c < S * 3; c++) acc[c] += one[c];
-        m++;
+      if (!redo.length) break;
+      for (const k of redo) {
+        done[k] = 1;
+        const partial = L.area[k] < full - EQUAL_EPSILON ? cellPoly.get(L)?.get(k) : undefined;
+        acc.fill(0);
+        let m = 0;
+        for (let si = 0; si < 4; si++) for (let sj = 0; sj < 4; sj++) {
+          const p = L.toWorld(g.minS + L.coord[k * 2] - 0.375 + si * 0.25, g.minT + L.coord[k * 2 + 1] - 0.375 + sj * 0.25);
+          if (partial && !insidePoly(partial, p, L.f.n)) continue;
+          const x = p[0] + L.f.n[0], y = p[1] + L.f.n[1], z = p[2] + L.f.n[2];
+          if (grid.inside([x, y, z])) continue;
+          sampleAt(L, cand, x, y, z, one);
+          for (let c = 0; c < S * 3; c++) acc[c] += one[c];
+          m++;
+        }
+        if (!m) continue;
+        for (let b = 0; b < S; b++) for (let c = 0; c < 3; c++) L.direct[(b * n + k) * 3 + c] = acc[b * 3 + c] / m;
+        setI(k);
       }
-      if (!m) continue;
-      for (let b = 0; b < S; b++) for (let c = 0; c < 3; c++) L.direct[(b * n + k) * 3 + c] = acc[b * 3 + c] / m;
     }
   }
-
   log('direct light');
-  // ---- transfers: what each patch sees, by cosine-distributed rays (stands in for VRAD's form factors)
-  // Each face's patches indexed on a grid in the face's own (right, up) frame, for ray hits and the final blend.
-  const CELL = 32;
-  const index = facePatches.map((list, fi) => {
-    if (list.length <= 8) return null;
-    const f = lux[fi].f;
-    const st = (x: number, y: number, z: number): [number, number] => {
-      const dx = x - f.origin[0], dy = y - f.origin[1], dz = z - f.origin[2];
-      return [dx * f.r[0] + dy * f.r[1] + dz * f.r[2], dx * f.u[0] + dy * f.u[1] + dz * f.u[2]];
-    };
-    const nx = Math.max(1, Math.ceil(f.width / CELL) + 1), ny = Math.max(1, Math.ceil(f.height / CELL) + 1);
-    const cells: number[][] = Array.from({ length: nx * ny }, () => []);
-    const ci = (v: number, n: number) => Math.min(n - 1, Math.max(0, Math.floor(v / CELL)));
-    for (const pi of list) {
-      const p = patches[pi];
-      let s0 = Infinity, s1 = -Infinity, t0 = Infinity, t1 = -Infinity;
-      for (let c = 0; c < 8; c++) {
-        const [a, b] = st(c & 1 ? p.max[0] : p.min[0], c & 2 ? p.max[1] : p.min[1], c & 4 ? p.max[2] : p.min[2]);
-        s0 = Math.min(s0, a); s1 = Math.max(s1, a); t0 = Math.min(t0, b); t1 = Math.max(t1, b);
+  // ---- luxel direct light (BuildLuxelRadial / AddDirectToRadial / SampleRadial): each luxel (at a cell corner)
+  // blends the samples around it, its own face's and its neighbours', weighted by overlap ÷ distance.
+  const WEIGHT_EPS = 1e-5;
+  const luxOk: Uint8Array[] = [];
+  for (const L of lux) {
+    const g = L.grid, S = L.rect.slots, n = g.w * g.h;
+    const acc = new Float64Array(n * 3 * S), wt = new Float64Array(n);
+    const add = (cs: number, ct: number, b0: number, b1: number, b2: number, b3: number, light: (slot: number, c: number) => number) => {
+      const s0 = Math.max(0, Math.trunc(b0)), t0 = Math.max(0, Math.trunc(b1));
+      const s1 = Math.min(g.w, Math.trunc(b2 + 0.9999) + 1), t1 = Math.min(g.h, Math.trunc(b3 + 0.9999) + 1);
+      for (let si = s0; si < s1; si++) for (let ti = t0; ti < t1; ti++) {
+        const a0 = Math.max(b0 - si, -1), c0 = Math.max(b1 - ti, -1), a1 = Math.min(b2 - si, 1), c1 = Math.min(b3 - ti, 1);
+        const area = (a1 - a0) * (c1 - c0);
+        if (!(area > EQUAL_EPSILON)) continue;
+        const d = Math.max(Math.abs(cs - si), Math.abs(ct - ti));
+        const r = d < 0.1 ? area / 0.1 : area / d;
+        const k = si + ti * g.w;
+        for (let sl = 0; sl < S; sl++) for (let c = 0; c < 3; c++) acc[(sl * n + k) * 3 + c] += r * light(sl, c);
+        wt[k] += r;
       }
-      for (let y = ci(t0 - 1, ny); y <= ci(t1 + 1, ny); y++) for (let x = ci(s0 - 1, nx); x <= ci(s1 + 1, nx); x++) cells[y * nx + x].push(pi);
+    };
+    for (let k = 0; k < n; k++) {
+      if (!L.valid[k]) continue;
+      add(L.coord[k * 2], L.coord[k * 2 + 1], L.bounds[k * 4], L.bounds[k * 4 + 1], L.bounds[k * 4 + 2], L.bounds[k * 4 + 3], (sl, c) => L.direct[(sl * n + k) * 3 + c]);
     }
-    return { st, nx, ny, cells, ci };
-  });
-  /** The face's patches near a point (within `r` along the face). */
-  const nearPatches = (fi: number, x: number, y: number, z: number, r: number): number[] => {
-    const ix = index[fi];
-    if (!ix) return facePatches[fi];
-    const [a, b] = ix.st(x, y, z);
-    if (r <= 0) return ix.cells[ix.ci(b, ix.ny) * ix.nx + ix.ci(a, ix.nx)];
-    const out = new Set<number>();
-    for (let yy = ix.ci(b - r, ix.ny); yy <= ix.ci(b + r, ix.ny); yy++) for (let xx = ix.ci(a - r, ix.nx); xx <= ix.ci(a + r, ix.nx); xx++) for (const pi of ix.cells[yy * ix.nx + xx]) out.add(pi);
-    return [...out];
-  };
-  const patchAt = (fi: number, x: number, y: number, z: number): number => {
-    let list = nearPatches(fi, x, y, z, 0);
-    if (!list.length) list = facePatches[fi];
-    let best = -1, bd = Infinity;
-    for (const pi of list) {
-      const p = patches[pi];
-      const dx = x < p.min[0] ? p.min[0] - x : x > p.max[0] ? x - p.max[0] : 0;
-      const dy = y < p.min[1] ? p.min[1] - y : y > p.max[1] ? y - p.max[1] : 0;
-      const dz = z < p.min[2] ? p.min[2] - z : z > p.max[2] ? z - p.max[2] : 0;
-      const d = dx * dx + dy * dy + dz * dz;
-      if (d < bd) { bd = d; best = pi; if (d === 0) break; }
+    const toL = (q: Axis): [number, number] => [dot3(q, g.lmS) - g.minS, dot3(q, g.lmT) - g.minT];
+    for (const ni of L.neighbors) {
+      const M = lux[ni], gm = M.grid, nm = gm.w * gm.h, Sm = M.rect.slots;
+      for (let k = 0; k < nm; k++) {
+        if (!M.valid[k]) continue;
+        const [a0, a1] = toL(M.toWorld(gm.minS + M.bounds[k * 4], gm.minT + M.bounds[k * 4 + 1]));
+        const [b0, b1] = toL(M.toWorld(gm.minS + M.bounds[k * 4 + 2], gm.minT + M.bounds[k * 4 + 3]));
+        if (Math.max(a0, b0) < -1 || Math.min(a0, b0) > g.w || Math.max(a1, b1) < -1 || Math.min(a1, b1) > g.h) continue;
+        const [c0, c1] = toL(M.toWorld(gm.minS + M.coord[k * 2], gm.minT + M.coord[k * 2 + 1]));
+        // A bumped face takes a flat neighbour's light in every bump slot × 1/√3.
+        add(c0, c1, a0, a1, b0, b1, (sl, c) => (sl === 0 || Sm === 4 ? M.direct[(sl * nm + k) * 3 + c] : M.direct[k * 3 + c] * OO_SQRT_3));
+      }
     }
-    return best;
-  };
-  // ---- patch direct light (AddSampleToPatch / BuildPatchLights): samples averaging ≥ 1, area-weighted
+    const ok = new Uint8Array(n);
+    for (let k = 0; k < n; k++) {
+      if (!(wt[k] > WEIGHT_EPS)) continue;
+      ok[k] = 1;
+      for (let sl = 0; sl < S; sl++) for (let c = 0; c < 3; c++) L.luxDirect[(sl * n + k) * 3 + c] = acc[(sl * n + k) * 3 + c] / wt[k];
+    }
+    luxOk.push(ok);
+  }
+  log('luxel radial');
+  // ---- patch direct light (AddSampleToPatch / BuildPatchLights): samples averaging ≥ 1 go to the leaves whose
+  // bounds they touch (area-weighted); inner nodes sum their children's samples, then take their children's light.
+  const N = patches.length;
+  const emit = new Float32Array(N * 3);
   for (let fi = 0; fi < lux.length; fi++) {
     const L = lux[fi], list = facePatches[fi];
     if (!list.length) continue;
@@ -758,7 +871,7 @@ export function bakeSource(input: SourceBakeInput): SourceBakeOutput {
       if ((r + gg + b) / 3 < 1) continue;
       const x = L.pos[k * 3] - L.f.n[0], y = L.pos[k * 3 + 1] - L.f.n[1], z = L.pos[k * 3 + 2] - L.f.n[2];
       const rad = Math.sqrt(L.area[k]) / 2;
-      for (const pi of nearPatches(fi, x, y, z, rad)) {
+      for (const pi of list) {
         const p = patches[pi];
         if (p.min[0] > x + rad || p.max[0] < x - rad || p.min[1] > y + rad || p.max[1] < y - rad || p.min[2] > z + rad || p.max[2] < z - rad) continue;
         p.sampleArea += L.area[k];
@@ -766,136 +879,188 @@ export function bakeSource(input: SourceBakeInput): SourceBakeOutput {
       }
     }
   }
-
-  const K = Math.max(8, Math.round(P.patchRays));
-  // Stratified cosine-weighted directions (local frame), the same set for every patch, rotated per patch.
-  const side = Math.ceil(Math.sqrt(K));
-  const local: Axis[] = [];
-  for (let a = 0; a < side; a++) for (let b = 0; b < side; b++) {
-    if (local.length >= K) break;
-    const u1 = (a + halton(local.length + 1, 2)) / side, u2 = (b + halton(local.length + 1, 3)) / side;
-    const r = Math.sqrt(u1), phi = 2 * Math.PI * u2;
-    local.push([r * Math.cos(phi), r * Math.sin(phi), Math.sqrt(Math.max(0, 1 - u1))]);
+  for (let i = N - 1; i >= 0; i--) {
+    const p = patches[i];
+    if (p.parent >= 0) { const q = patches[p.parent]; q.sampleArea += p.sampleArea; for (let c = 0; c < 3; c++) q.sampleLight[c] += p.sampleLight[c]; }
   }
-  const FAR = 65536;
-  const bounceGrid = input.reflectors?.length ? new SolidGrid([...input.occluders, ...input.reflectors]) : grid;
-  let escaped = 0;
-  for (let pi = 0; pi < patches.length; pi++) {
-    const p = patches[pi];
-    const L = lux[p.face];
-    const n = p.normal;
-    const t1 = normalize(Math.abs(n[2]) < 0.9 ? cross([0, 0, 1], n) : cross([1, 0, 0], n));
-    const t2 = cross(n, t1);
-    const ox = p.origin[0] + n[0] * 0.5, oy = p.origin[1] + n[1] * 0.5, oz = p.origin[2] + n[2] * 0.5;
-    const hits = new Int32Array(local.length).fill(-1);
-    const bumped = L.info.bump;
-    const bw = bumped ? new Float32Array(local.length * 3) : undefined;
-    const rot = halton(pi + 1, 5) * 2 * Math.PI, cr = Math.cos(rot), sr = Math.sin(rot);
-    for (let k = 0; k < local.length; k++) {
-      const [lx0, ly0, lz] = local[k];
-      const lx = lx0 * cr - ly0 * sr, ly = lx0 * sr + ly0 * cr;
-      const dx = t1[0] * lx + t2[0] * ly + n[0] * lz, dy = t1[1] * lx + t2[1] * ly + n[1] * lz, dz = t1[2] * lx + t2[2] * ly + n[2] * lz;
-      if (bw) {
-        // GatherLight (bumped): the share of this direction for each bump normal, ÷ cos to the flat normal.
-        for (let b = 0; b < 3; b++) {
-          const bn = L.normals[b + 1];
-          bw[k * 3 + b] = Math.max(0, dx * bn[0] + dy * bn[1] + dz * bn[2]) / Math.max(1e-4, lz);
-        }
-      }
-      const hit = bounceGrid.cast(ox, oy, oz, dx * FAR, dy * FAR, dz * FAR);
-      const tp = tris ? tris.cast(ox, oy, oz, dx * FAR, dy * FAR, dz * FAR) : -1;
-      if (tp > 0 && (!hit || tp < hit.t)) continue; // a prop is in the way: its light is lost (no patches on props)
-      if (!hit) { escaped++; continue; }
-      const li = luxByFace.get(hit.faceId);
-      if (li === undefined || lux[li].info.sky) continue;
-      const t = hit.t * FAR;
-      hits[k] = patchAt(li, ox + dx * t, oy + dy * t, oz + dz * t);
-    }
-    p.hits = hits;
-    p.bumpW = bw;
-  }
-
-  log(`transfers (${(100 * escaped / Math.max(1, patches.length * local.length)).toFixed(1)}% of rays see nothing)`);
-  // ---- bounce (BounceLight / GatherLight / CollectLight)
-  const N = patches.length;
-  const emit = new Float32Array(N * 3);
-  const total = new Float32Array(N * 3);    // bounced light received (flat)
-  const totalB = new Float32Array(N * 9);   // bounced light per bump normal
-  for (let i = 0; i < N; i++) {
+  const liveArea = (i: number) => (patches[i].alive ? patches[i].area : 0);
+  for (let i = N - 1; i >= 0; i--) {
     const p = patches[i];
     if (p.sampleArea > 0) for (let c = 0; c < 3; c++) emit[i * 3 + c] = p.sampleLight[c] / p.sampleArea;
   }
-  const add = new Float32Array(N * 3), addB = new Float32Array(N * 9);
+  for (let i = N - 1; i >= 0; i--) {
+    const p = patches[i];
+    if (p.child1 < 0) continue;
+    const a1 = liveArea(p.child1), a2 = liveArea(p.child2);
+    if (a1 + a2 <= 0) continue;
+    for (let c = 0; c < 3; c++) emit[i * 3 + c] = (a1 * emit[p.child1 * 3 + c] + a2 * emit[p.child2 * 3 + c]) / (a1 + a2);
+  }
+
+  // ---- transfers (BuildVisLeafs / TestPatchToFace / TestPatchToPatch / MakeTransfer / MakeScales): from each leaf,
+  // every face in front; descend a face's tree while the node is near (d² / 16 < its area); one ray between the
+  // two centres (each pushed 1 unit off its face) decides visibility; form factor point-to-point, or polygon-to-point
+  // when the node is big for its distance; the total is scaled to 1/π (or 1/total past π).
+  const PLANE_EPS = 0.01, TRANSFER_EPSILON = 0.0000001;
+  const ox = new Float64Array(N * 3), on = new Float64Array(N * 3), od = new Float64Array(N), oa = new Float64Array(N);
+  const c1 = new Int32Array(N), c2 = new Int32Array(N), piece = new Int32Array(N), alive = new Uint8Array(N);
+  for (let i = 0; i < N; i++) {
+    const p = patches[i];
+    ox.set(p.origin, i * 3); on.set(p.normal, i * 3); od[i] = p.planeDist; oa[i] = p.area;
+    c1[i] = p.child1; c2[i] = p.child2; piece[i] = p.piece; alive[i] = p.alive ? 1 : 0;
+  }
+  const roots = faceRoots.flat().filter((r) => alive[r]);
+  let tIdx = new Int32Array(1 << 22), tW = new Float32Array(1 << 22), tN = 0;
+  const tStart = new Int32Array(N).fill(-1), tEnd = new Int32Array(N);
+  const tmpI: number[] = [], tmpW: number[] = [];
+  let rays = 0;
+  const polyFF = (j: number, x: number, y: number, z: number, nx: number, ny: number, nz: number) => {
+    const w = patches[j].winding;
+    let ff = 0;
+    for (let k = 0; k < w.length; k++) {
+      const a = w[k], b = w[(k + 1) % w.length];
+      let v1x = a[0] - x, v1y = a[1] - y, v1z = a[2] - z, v2x = b[0] - x, v2y = b[1] - y, v2z = b[2] - z;
+      let l = Math.hypot(v1x, v1y, v1z) || 1; v1x /= l; v1y /= l; v1z /= l;
+      l = Math.hypot(v2x, v2y, v2z) || 1; v2x /= l; v2y /= l; v2z /= l;
+      let gx = v1y * v2z - v1z * v2y, gy = v1z * v2x - v1x * v2z, gz = v1x * v2y - v1y * v2x;
+      const sa = Math.hypot(gx, gy, gz);
+      if (sa > 0) { gx /= sa; gy /= sa; gz /= sa; }
+      if (sa < -1 || sa > 1) return 0;
+      const ang = Math.asin(sa);
+      ff += ang * (gx * nx + gy * ny + gz * nz);
+    }
+    // VRAD's windings face the other way round from ours: the magnitude is what counts.
+    return Math.abs(ff) * (0.5 / patches[j].area);
+  };
+  let pIdx = 0;
+  for (const i of leaves) {
+    if (!alive[i] || lux[patches[i].face].info.sky) continue;
+    const x = ox[i * 3], y = ox[i * 3 + 1], z = ox[i * 3 + 2], nx = on[i * 3], ny = on[i * 3 + 1], nz = on[i * 3 + 2], d1 = od[i];
+    const sx = x + nx, sy = y + ny, sz = z + nz;
+    tmpI.length = 0; tmpW.length = 0;
+    let total = 0;
+    const visit = (j: number) => {
+      if (!alive[j]) return;
+      const dx = x - ox[j * 3], dy = y - ox[j * 3 + 1], dz = z - ox[j * 3 + 2], dd = dx * dx + dy * dy + dz * dz;
+      if (c1[j] >= 0 && dd * 0.0625 < oa[j]) { visit(c1[j]); visit(c2[j]); return; }
+      const jx = ox[j * 3], jy = ox[j * 3 + 1], jz = ox[j * 3 + 2];
+      if (!(jx * nx + jy * ny + jz * nz > d1 + PLANE_EPS)) return;
+      const ex = jx + on[j * 3], ey = jy + on[j * 3 + 1], ez = jz + on[j * 3 + 2];
+      rays++;
+      if (occ.occluded(sx, sy, sz, ex, ey, ez)) return;
+      // MakeTransfer: FormFactorDiffToDiff(node, leaf)
+      const len = Math.sqrt(dd) || 1, ux = -dx / len, uy = -dy / len, uz = -dz / len; // node − leaf
+      let ff = -(ux * on[j * 3] + uy * on[j * 3 + 1] + uz * on[j * 3 + 2]) * (ux * nx + uy * ny + uz * nz) / (len * len);
+      if (!(ff > 0)) return;
+      if (Math.PI * 0.04 * dd < oa[j]) { ff = polyFF(j, x, y, z, nx, ny, nz); if (!(ff > 0)) return; }
+      const t = oa[j] * ff;
+      if (t <= TRANSFER_EPSILON) return;
+      tmpI.push(j); tmpW.push(t); total += t;
+    };
+    for (const r of roots) {
+      if (piece[r] === piece[i]) continue;
+      if (x * on[r * 3] + y * on[r * 3 + 1] + z * on[r * 3 + 2] > od[r] + PLANE_EPS) visit(r);
+    }
+    const scale = total > Math.PI ? 1 / total : 1 / Math.PI;
+    if (tN + tmpI.length > tIdx.length) {
+      const cap = Math.max(tIdx.length * 2, tN + tmpI.length);
+      const a = new Int32Array(cap); a.set(tIdx.subarray(0, tN)); tIdx = a;
+      const b = new Float32Array(cap); b.set(tW.subarray(0, tN)); tW = b;
+    }
+    tStart[i] = tN;
+    for (let k = 0; k < tmpI.length; k++) { tIdx[tN] = tmpI[k]; tW[tN] = tmpW[k] * scale; tN++; }
+    tEnd[i] = tN;
+    if (++pIdx % 20000 === 0) log(`transfers: ${pIdx}/${leaves.length} leaves, ${tN} transfers, ${rays} rays`);
+  }
+  log(`transfers: ${tN} (${(tN / Math.max(1, leaves.length)).toFixed(0)} per leaf), ${rays} rays`);
+
+  // ---- bounce (BounceLight / GatherLight / CollectLight)
+  const total = new Float32Array(N * 12); // bounced light received, 4 slots (flat + bump basis) × rgb
+  const add = new Float32Array(N * 12);
   let bounces = 0;
   for (let it = 0; it < P.bounces; it++) {
-    add.fill(0); addB.fill(0);
-    for (let i = 0; i < N; i++) {
-      const p = patches[i], hits = p.hits, m = hits.length;
+    add.fill(0);
+    for (const i of leaves) {
+      const s0 = tStart[i];
+      if (s0 < 0) continue;
+      const L = lux[patches[i].face];
+      const nx = on[i * 3], ny = on[i * 3 + 1], nz = on[i * 3 + 2];
       let r = 0, g = 0, b = 0;
-      for (let k = 0; k < m; k++) {
-        const j = hits[k];
-        if (j < 0) continue;
-        const q = patches[j];
-        const er = emit[j * 3] * q.reflectivity[0], eg = emit[j * 3 + 1] * q.reflectivity[1], eb = emit[j * 3 + 2] * q.reflectivity[2];
-        r += er; g += eg; b += eb;
-        if (p.bumpW) for (let s = 0; s < 3; s++) {
-          const w = p.bumpW[k * 3 + s];
-          addB[i * 9 + s * 3] += er * w; addB[i * 9 + s * 3 + 1] += eg * w; addB[i * 9 + s * 3 + 2] += eb * w;
+      const bumped = L.info.bump && L.normals.length === 4;
+      for (let t = s0; t < tEnd[i]; t++) {
+        const j = tIdx[t], w = tW[t], rf = patches[j].reflectivity;
+        const er = emit[j * 3] * rf[0] * w, eg = emit[j * 3 + 1] * rf[1] * w, eb = emit[j * 3 + 2] * rf[2] * w;
+        if (!bumped) { r += er; g += eg; b += eb; continue; }
+        let dx = ox[j * 3] - ox[i * 3], dy = ox[j * 3 + 1] - ox[i * 3 + 1], dz = ox[j * 3 + 2] - ox[i * 3 + 2];
+        const l = Math.hypot(dx, dy, dz) || 1; dx /= l; dy /= l; dz /= l;
+        const sc = 1 / (dx * nx + dy * ny + dz * nz);
+        for (let s = 0; s < 4; s++) {
+          const bn = s === 0 ? patches[i].normal : L.normals[s];
+          const dt = dx * bn[0] + dy * bn[1] + dz * bn[2];
+          if (dt <= 0) continue;
+          add[i * 12 + s * 3] += er * sc * dt; add[i * 12 + s * 3 + 1] += eg * sc * dt; add[i * 12 + s * 3 + 2] += eb * sc * dt;
         }
       }
-      add[i * 3] = r / m; add[i * 3 + 1] = g / m; add[i * 3 + 2] = b / m;
-      if (p.bumpW) for (let s = 0; s < 9; s++) addB[i * 9 + s] /= m;
+      if (!bumped) { add[i * 12] = r; add[i * 12 + 1] = g; add[i * 12 + 2] = b; }
     }
+    // CollectLight: leaves keep what they received and emit it next; inner nodes average their children.
     let ar = 0, ag = 0, ab = 0;
-    for (let i = 0; i < N; i++) {
-      for (let c = 0; c < 3; c++) total[i * 3 + c] += add[i * 3 + c];
-      for (let s = 0; s < 9; s++) totalB[i * 9 + s] += addB[i * 9 + s];
-      emit[i * 3] = add[i * 3]; emit[i * 3 + 1] = add[i * 3 + 1]; emit[i * 3 + 2] = add[i * 3 + 2];
-      ar += add[i * 3]; ag += add[i * 3 + 1]; ab += add[i * 3 + 2];
+    for (let i = N - 1; i >= 0; i--) {
+      const p = patches[i];
+      if (p.child1 < 0) {
+        if (!p.alive) continue;
+        for (let s = 0; s < 12; s++) total[i * 12 + s] += add[i * 12 + s];
+        emit[i * 3] = add[i * 12]; emit[i * 3 + 1] = add[i * 12 + 1]; emit[i * 3 + 2] = add[i * 12 + 2];
+        ar += emit[i * 3]; ag += emit[i * 3 + 1]; ab += emit[i * 3 + 2];
+      } else {
+        const a1 = liveArea(p.child1), a2 = liveArea(p.child2);
+        if (a1 + a2 <= 0) continue;
+        const s1 = a1 / (a1 + a2), s2 = a2 / (a1 + a2);
+        for (let s = 0; s < 12; s++) total[i * 12 + s] = s1 * total[p.child1 * 12 + s] + s2 * total[p.child2 * 12 + s];
+        for (let c = 0; c < 3; c++) emit[i * 3 + c] = s1 * emit[p.child1 * 3 + c] + s2 * emit[p.child2 * 3 + c];
+      }
     }
     bounces = it + 1;
     if (ar < 1 && ag < 1 && ab < 1) break;
   }
 
   log(`bounced ×${bounces}`);
-  // ---- final luxels (FinalLightFace): direct + bounce interpolated from the face's patches (radial blend)
+  // ---- final luxels (FinalLightFace): radial direct + bounce from the leaf patches of the face and its neighbours
+  // (BuildPatchRadial / AddBouncedToRadial: weight 2 − (Δs/patch width)² − (Δt/patch height)², in luxels).
   const W = layout.width, H = layout.height;
   const pixels = new Float32Array(W * H * 4);
   const faceAverage: [number, RGB][] = [];
   for (let fi = 0; fi < lux.length; fi++) {
     const L = lux[fi];
     const g = L.grid, S = L.rect.slots, n = g.w * g.h;
-    const list = facePatches[fi];
-    const rad2 = list.length ? Math.max(...list.map((pi) => { const p = patches[pi]; return (p.max[0] - p.min[0]) ** 2 + (p.max[1] - p.min[1]) ** 2 + (p.max[2] - p.min[2]) ** 2; })) : 0;
-    const out = new Float32Array(n * 3 * S);
-    for (let k = 0; k < n; k++) {
-      // Invalid luxels take a valid neighbour's light below; their bounce is still interpolated.
-      const x = L.pos[k * 3] - L.f.n[0], y = L.pos[k * 3 + 1] - L.f.n[1], z = L.pos[k * 3 + 2] - L.f.n[2];
-      const ind = new Float64Array(3 * S);
-      let wsum = 0;
-      for (const pi of nearPatches(fi, x, y, z, Math.sqrt(rad2))) {
+    const acc = new Float64Array(n * 3 * S), wt = new Float64Array(n);
+    const bumped = S === 4;
+    for (const ff of [fi, ...L.neighbors]) {
+      for (const pi of facePatches[ff]) {
         const p = patches[pi];
-        const d2 = (p.origin[0] - x) ** 2 + (p.origin[1] - y) ** 2 + (p.origin[2] - z) ** 2;
-        const w = 1 - d2 / rad2;
-        if (w <= 0) continue;
-        wsum += w;
-        for (let c = 0; c < 3; c++) ind[c] += w * total[pi * 3 + c];
-        if (S === 4) for (let s = 0; s < 9; s++) ind[3 + s] += w * totalB[pi * 9 + s];
-      }
-      if (wsum <= 0 && list.length) {
-        const pi = patchAt(fi, x, y, z);
-        for (let c = 0; c < 3; c++) ind[c] = total[pi * 3 + c];
-        if (S === 4) for (let s = 0; s < 9; s++) ind[3 + s] = totalB[pi * 9 + s];
-        wsum = 1;
-      }
-      for (let b = 0; b < S; b++) for (let c = 0; c < 3; c++) {
-        out[(b * n + k) * 3 + c] = L.direct[(b * n + k) * 3 + c] + (wsum > 0 ? ind[b * 3 + c] / wsum : 0);
+        let m0 = Infinity, m1 = Infinity, x0 = -Infinity, x1 = -Infinity;
+        for (const q of p.winding) { const a = dot3(q, g.lmS) - g.minS, b = dot3(q, g.lmT) - g.minT; m0 = Math.min(m0, a); m1 = Math.min(m1, b); x0 = Math.max(x0, a); x1 = Math.max(x1, b); }
+        const cs = dot3(p.origin, g.lmS) - g.minS, ct = dot3(p.origin, g.lmT) - g.minT;
+        const ds = Math.max(1, x0 - m0), dt = Math.max(1, x1 - m1);
+        const s0 = Math.max(0, Math.trunc(cs - ds * 1.42)), t0 = Math.max(0, Math.trunc(ct - dt * 1.42));
+        const s1 = Math.min(g.w, Math.trunc(cs + ds * 1.42 + 1)), t1 = Math.min(g.h, Math.trunc(ct + dt * 1.42 + 1));
+        for (let si = s0; si < s1; si++) for (let ti = t0; ti < t1; ti++) {
+          const a = (cs - si) / ds, b = (ct - ti) / dt, r = 2 - (a * a + b * b);
+          if (r <= 0) continue;
+          const k = si + ti * g.w;
+          // A bumped face reads every slot of its neighbours' patches (zero on flat ones: VRAD passes this face's flag).
+          for (let sl = 0; sl < (bumped ? 4 : 1); sl++) for (let c = 0; c < 3; c++) acc[(sl * n + k) * 3 + c] += r * total[pi * 12 + sl * 3 + c];
+          wt[k] += r;
+        }
       }
     }
+    const out = new Float32Array(n * 3 * S);
+    for (let k = 0; k < n; k++) for (let b = 0; b < S; b++) for (let c = 0; c < 3; c++) {
+      out[(b * n + k) * 3 + c] = L.luxDirect[(b * n + k) * 3 + c] + (wt[k] > WEIGHT_EPS ? acc[(b * n + k) * 3 + c] / wt[k] : 0);
+    }
     // Luxels outside the face or inside a solid: copy the nearest valid luxel's light (they're only seen at edges, filtered).
-    dilateSlots(out, g.w, g.h, S, L.valid);
+    dilateSlots(out, g.w, g.h, S, luxOk[fi]);
     let avg: RGB = [0, 0, 0], cnt = 0;
-    for (let k = 0; k < n; k++) if (L.valid[k]) { avg = [avg[0] + out[k * 3], avg[1] + out[k * 3 + 1], avg[2] + out[k * 3 + 2]]; cnt++; }
+    for (let k = 0; k < n; k++) if (luxOk[fi][k]) { avg = [avg[0] + out[k * 3], avg[1] + out[k * 3 + 1], avg[2] + out[k * 3 + 2]]; cnt++; }
     faceAverage.push([L.f.id, cnt ? [avg[0] / cnt / 255, avg[1] / cnt / 255, avg[2] / cnt / 255] : [0, 0, 0]]);
     for (let b = 0; b < S; b++) for (let j = 0; j < g.h; j++) for (let i = 0; i < g.w; i++) {
       const k = j * g.w + i, o = ((L.rect.y + j) * W + L.rect.x + b * g.w + i) * 4;
@@ -925,7 +1090,7 @@ export function bakeSource(input: SourceBakeInput): SourceBakeOutput {
   }
 
   return {
-    width: W, height: H, pixels, rects: [...layout.rects], ms: Date.now() - t0, luxels, patches: patches.length, bounces, faceAverage,
+    width: W, height: H, pixels, rects: [...layout.rects], ms: Date.now() - t0, luxels, patches: leaves.length, bounces, faceAverage,
     propColors: props?.colors, propOffsets: props?.offsets,
   };
 }

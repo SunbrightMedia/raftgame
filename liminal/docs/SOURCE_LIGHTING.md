@@ -32,6 +32,21 @@ exposure, bloom, grading LUTs) live in each map's entities.
   0.99). Rooms are evenly filled and carry their materials' colour.
 - Patches are chopped to at most 4 luxels; lightmaps default to 16 units per
   luxel.
+- Our baker (engine/light/vrad.ts) follows VRAD's own steps, not a stand-in:
+  - faces cut at 32 luxels (VBSP SubdivideFace), each piece a patch tree;
+  - transfers from every leaf to each face in front of it, down the tree while
+    a node is near (d²/16 < area); one ray between centres (each 1 unit off its
+    face) for visibility; point or polygon form factor; total scaled to 1/π;
+  - parents emit the area average of their children (CollectLight);
+  - samples are cells [s, s+1); a luxel (cell corner) blends the cells around
+    it, its neighbour faces' too (BuildLuxelRadial); bounce reaches luxels
+    from nearby leaf patches the same way (BuildPatchRadial, weight 2 − d²);
+  - edge supersampling as BuildSupersampleFaceLights (4×4, gradient ≥ 1/16).
+- Checked on the Portal 2 shipyard atrium against VRAD's own BSP:
+  `npm run bench:vrad -- MAP --out X.json`, then compare per luxel. In the
+  screenshot view, ours vs VRAD's lightmaps differ by 3.6/255 on average.
+  The atrium is a cut-out of the full map, so light that bounces in from the
+  rest of the map is missing from ours (it reads a few % dark).
 
 ## 3. Bump-mapped lightmaps (common_ps_fxc.h)
 - Bumped surfaces store **three lightmaps** in a fixed tangent-space basis
