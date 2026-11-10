@@ -9,7 +9,7 @@ import { buildPropMeshes, disposeProps, setPropLight } from '../engine/render/pr
 import { propSolids } from '../engine/collision/props';
 import { buildFaces, solidPlanes, type Face, type LightmapLayout } from '../engine/light/faces';
 import { type Vec3, v3 } from '../engine/vec3';
-import { isSourceLit, propBakeData, sourceBakeInfo } from './sourceLighting';
+import { isSourceLit, propBakeData, propShadowTris, sourceBakeInfo } from './sourceLighting';
 import { propLightUniforms } from '../engine/render/propMaterial';
 import { sourceLayout, SOURCE_LM_WIDTH } from '../engine/light/vrad';
 
@@ -25,7 +25,7 @@ export class Level {
   private props: THREE.Group | null = null;
   layout: LightmapLayout | null = null;
   /** For Source-lit maps (lights imported from a VMF): what the Source baker needs. */
-  source: (ReturnType<typeof sourceBakeInfo> & { props: ReturnType<typeof propBakeData> }) | null = null;
+  source: (ReturnType<typeof sourceBakeInfo> & { props: ReturnType<typeof propBakeData>; propShadows: Float32Array }) | null = null;
   lightmap: THREE.DataTexture | null = null;
 
   constructor(readonly map: MapFile, private textures: TextureRegistry, private models: ModelRegistry, readonly path?: string) {
@@ -36,6 +36,7 @@ export class Level {
       // Source lighting: the lightmap layout is fixed by the map (luxel grid on the texture axes), so it's known before any bake.
       this.source = {
         ...sourceBakeInfo(map, this.faces, (tex) => { const e = textures.get(tex); return { size: [e.worldW, e.worldH], source: e.source }; }),
+        propShadows: propShadowTris(map, (name) => models.header(name)?.shadow),
         props: propBakeData(map, (name) => {
           const g = models.get(name)?.geometry;
           return g ? { positions: g.getAttribute('position').array as Float32Array, normals: g.getAttribute('normal').array as Float32Array } : undefined;

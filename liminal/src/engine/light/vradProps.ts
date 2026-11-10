@@ -15,7 +15,7 @@
  */
 import type { Axis } from './faces';
 import type { SolidGrid } from './bake';
-import { gatherSample, type SourceLight, type RGB } from './vrad';
+import { gatherSample, type SourceLight, type RGB, type Occluder } from './vrad';
 
 export interface PropModelData {
   /** Model-space positions and normals, xyz per vertex. */
@@ -47,7 +47,7 @@ export function directionalSamples(n: number): Axis[] {
 const NUM_SAMPLES = 162 / 4; // NUMVERTEXNORMALS / 4 (force_fast)
 const MAX_TRACE = 1.732050807569 * 32768;
 
-export function lightProps(models: PropModelData[], instances: PropInstance[], lights: SourceLight[], grid: SolidGrid, probe: LightmapProbe, onProgress?: (done: number) => void): { colors: Float32Array; offsets: Int32Array } {
+export function lightProps(models: PropModelData[], instances: PropInstance[], lights: SourceLight[], grid: SolidGrid, probe: LightmapProbe, onProgress?: (done: number) => void, shadows: Occluder = grid): { colors: Float32Array; offsets: Int32Array } {
   const dirs = directionalSamples(Math.floor(NUM_SAMPLES));
   const unstyled = lights.filter((l) => !l.style);
   const offsets = new Int32Array(instances.length + 1);
@@ -94,7 +94,7 @@ export function lightProps(models: PropModelData[], instances: PropInstance[], l
         cand.forEach((dl, li) => {
           const dx = dl.origin[0] - x, dy = dl.origin[1] - y, dz = dl.origin[2] - z, d = Math.hypot(dx, dy, dz) || 1;
           const px = x + dx / d * 4, py = y + dy / d * 4, pz = z + dz / d * 4;
-          lit[li] = grid.occluded(px, py, pz, dl.origin[0], dl.origin[1], dl.origin[2]) ? 0 : 1;
+          lit[li] = shadows.occluded(px, py, pz, dl.origin[0], dl.origin[1], dl.origin[2]) ? 0 : 1;   // props shadow props too (and themselves)
         });
         dirs.forEach((d, k) => {
           const hit = grid.cast(x, y, z, d[0] * MAX_TRACE, d[1] * MAX_TRACE, d[2] * MAX_TRACE);

@@ -66,7 +66,7 @@ for (let fo = faces.o; fo + 56 <= faces.o + faces.l; fo += 56) {
   const po = planes.o + planenum * 20;
   let n: [number, number, number] = [dv.getFloat32(po, true), dv.getFloat32(po + 4, true), dv.getFloat32(po + 8, true)];
   let d = dv.getFloat32(po + 12, true);
-  if (side) { n = [-n[0], -n[1], -n[2]]; d = -d; }
+  void side; // planenum is already the face's own plane
   const to = texinfo.o + ti * 72;
   const L = (r: number) => [0, 1, 2, 3].map((k) => dv.getFloat32(to + 32 + r * 16 + k * 4, true));
   const ls = L(0), lt = L(1);

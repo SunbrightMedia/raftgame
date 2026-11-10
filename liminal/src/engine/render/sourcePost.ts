@@ -25,6 +25,8 @@ export interface SourcePostParams {
   bloomScale: number;
   /** How fast the scale follows its goal (per second). ≥ 100 snaps (screenshots). */
   rate: number;
+  /** Non-HDR path: encode with plain 2.2 gamma (no sRGB curve). */
+  gamma22: boolean;
   percentBright: number;
   percentTarget: number;
   minAvgLum: number;
@@ -56,10 +58,14 @@ export class SourcePost {
   private meter = new THREE.WebGLRenderTarget(METER_W, METER_H, { depthBuffer: false, type: THREE.UnsignedByteType, colorSpace: THREE.NoColorSpace });
   private meterBuf = new Uint8Array(METER_W * METER_H * 4);
   private tonemap = pass(/* glsl */ `
-    uniform sampler2D src; uniform float k; varying vec2 vUv;
+    uniform sampler2D src; uniform float k; uniform float g22; varying vec2 vUv;
     ${SRGB}
-    void main() { vec4 c = texture2D(src, vUv); gl_FragColor = vec4(toGamma(clamp(c.rgb * k, 0.0, 1.0)), c.a); }`,
-  { src: { value: null }, k: { value: 1 } });
+    void main() {
+      vec4 c = texture2D(src, vUv);
+      vec3 v = clamp(c.rgb * k, 0.0, 1.0);
+      gl_FragColor = vec4(g22 > 0.5 ? pow(v, vec3(1.0 / 2.2)) : toGamma(v), c.a);
+    }`,
+  { src: { value: null }, k: { value: 1 }, g22: { value: 0 } });
   // Histogram input: the centre region's luminance (gamma space, as the lumcompare test sees the frame buffer).
   private meterPass = pass(/* glsl */ `
     uniform sampler2D src; varying vec2 vUv;
@@ -157,6 +163,7 @@ export class SourcePost {
     this.ensure(src.width, src.height);
     const tm = this.tonemap.mat.uniforms;
     tm.src.value = src.texture;
+    tm.g22.value = p.gamma22 ? 1 : 0;
     const draw = () => { tm.k.value = this.scale / sourceUnit; this.draw(gl, this.tonemap, this.ldr); };
     if (!p.autoExposure) { this.scale = this.goal = p.scale; draw(); }
     else if (p.rate >= 100) {

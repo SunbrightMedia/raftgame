@@ -28,6 +28,7 @@ export function makeSourceWorldMaterial(tex: TexEntry, normal: THREE.Texture | n
       fogOn: worldUniforms.fogOn,
       fogHaze: worldUniforms.fogHaze,
       sourceUnit: worldUniforms.sourceUnit,
+      gamma22: worldUniforms.gamma22,
       map: { value: tex.texture },
       normalMap: { value: normal ?? tex.texture },
       hasNormal: { value: normal ? 1 : 0 },
@@ -88,7 +89,8 @@ export function makeSourceWorldMaterial(tex: TexEntry, normal: THREE.Texture | n
       varying float vLmOff;
       varying float vShade;
       varying float vDepth;
-      vec3 toLinear(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }
+      uniform float gamma22;
+      vec3 toLinear(vec3 c) { return gamma22 > 0.5 ? pow(c, vec3(2.2)) : mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }
       const vec3 B0 = vec3(0.81649661, 0.0, 0.57735026);
       const vec3 B1 = vec3(-0.40824822, 0.70710677, 0.57735026);
       const vec3 B2 = vec3(-0.40824822, -0.70710677, 0.57735026);

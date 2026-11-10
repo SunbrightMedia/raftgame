@@ -209,6 +209,8 @@ def main():
                 props['scale'] = float(keys['modelscale'])
             if keys.get('solid', '6') == '0':
                 props['solid'] = False
+            if keys.get('disableshadows', '0') not in ('0', ''):
+                props['noshadow'] = True   # VRAD: this prop casts no lightmap shadow
             if keys.get('parentname'):
                 props['parent'] = keys['parentname'].lower()
             if keys.get('rendercolor') and keys['rendercolor'] != '255 255 255':

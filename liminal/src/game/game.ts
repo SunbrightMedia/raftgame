@@ -164,10 +164,13 @@ export class Game {
     this.renderer.msaa = s.render.msaa;
     this.renderer.camera_ = s.camera;
     const C = s.camera;
+    // Source's non-HDR path: fixed brightness (scale 1 unless set), no bloom, plain 2.2 gamma.
+    const hdr = C.sourceHdr;
     this.renderer.sourceCamera = C.model === 'source' ? {
-      autoExposure: C.autoExposure, scale: C.sourceScale, min: C.sourceExposureMin, max: C.sourceExposureMax, bloomScale: C.sourceBloom,
-      rate: C.adaptSpeed, percentBright: 2, percentTarget: 60, minAvgLum: 3,
+      autoExposure: hdr && C.autoExposure, scale: C.sourceScale, min: C.sourceExposureMin, max: C.sourceExposureMax, bloomScale: hdr ? C.sourceBloom : 0,
+      rate: C.adaptSpeed, percentBright: 2, percentTarget: 60, minAvgLum: 3, gamma22: !hdr,
     } : null;
+    worldUniforms.gamma22.value = C.model === 'source' && !hdr ? 1 : 0;
     this.renderer.sourceUnit = worldUniforms.sourceUnit.value;
     this.renderer.setSourceFov(s.view.fov);
     this.renderer.setClearColor(s.fog.enabled ? s.fog.color : s.render.clearColor);

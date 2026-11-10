@@ -16,7 +16,7 @@ const SOURCE_BAKE = { bounces: 100, patchRays: 256, chop: 4, supersample: true }
 /** Bump when the baker's output changes meaning, so old caches are ignored. */
 const BAKE_VERSION = 8;
 /** The same for the Source baker (vrad.ts, vradProps.ts). */
-const SOURCE_BAKE_VERSION = 3;
+const SOURCE_BAKE_VERSION = 4;
 
 /**
  * Cached lightmap: RGBE (Ward's shared-exponent format, as in Radiance .hdr)
@@ -194,6 +194,31 @@ export class Lighting {
     const gen = ++this.seq;
     const layout = level.layout!, src = level.source!;
     const none = new Uint8Array(layout.width * layout.height * 4).fill(255);
+    // Valve's own lightmaps for this map (copied from its compiled BSP): for checking ours against.
+    if (s.light.sourceBaker === 'valve' && level.path) {
+      const text = await this.storage.read(level.path.replace(/\.json$/, '.valve.lightmap.json'));
+      const c = text ? (JSON.parse(text) as LightmapCache) : null;
+      if (gen !== this.seq) return;
+      if (c && c.width === layout.width && c.height === layout.height) {
+        this.apply(layout, decodeRGBEToHalf(await pipe(fromBase64(c.data), new DecompressionStream('deflate-raw'))), s.light.filter, none, none);
+        // The BSP's prop lighting isn't copied yet: props keep ours (from our cache), if any.
+        const ours = await this.storage.read(this.cachePath(level)).catch(() => null);
+        const oc = ours ? (JSON.parse(ours) as LightmapCache) : null;
+        if (oc?.props) {
+          const px = decodeRGBEToFloat(await pipe(fromBase64(oc.props), new DecompressionStream('deflate-raw')));
+          const offsets = propOffsets(src.props);
+          if (px.length / 4 === offsets[offsets.length - 1]) {
+            const rgb = new Float32Array(px.length / 4 * 3);
+            for (let i = 0; i < px.length / 4; i++) { rgb[i * 3] = px[i * 4]; rgb[i * 3 + 1] = px[i * 4 + 1]; rgb[i * 3 + 2] = px[i * 4 + 2]; }
+            this.onPropLight?.(rgb, offsets);
+          }
+        }
+        this.status = 'lighting: Valve\'s lightmaps (from the BSP)';
+        this.shownAt = performance.now();
+        return;
+      }
+      this.status = 'no Valve lightmap for this map (npm run valve:lightmap)';
+    }
     if (tryCache) {
       try {
         const text = await this.storage.read(this.cachePath(level));
@@ -222,7 +247,7 @@ export class Lighting {
     this.worker?.terminate();
     this.worker = new BakeWorker();
     const input = (quick: boolean): SourceBakeInput => ({
-      faces: level.faces, info: src.info, occluders: src.occluders, reflectors: src.reflectors, lights: src.lights,
+      faces: level.faces, info: src.info, occluders: src.occluders, reflectors: src.reflectors, lights: src.lights, propShadows: quick ? undefined : src.propShadows,
       params: quick ? { bounces: 1, patchRays: 16, chop: 8, supersample: false, maxWidth: SOURCE_LM_WIDTH } : { ...SOURCE_BAKE, maxWidth: SOURCE_LM_WIDTH },
       props: quick ? undefined : src.props,
     });

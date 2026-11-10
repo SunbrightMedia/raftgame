@@ -28,6 +28,10 @@
  */
 import { type Axis, type Face, type SolidPlanes, facePoint } from './faces';
 import { SolidGrid } from './bake';
+import { TriGrid } from './trigrid';
+
+/** Anything rays can be blocked by. */
+export interface Occluder { occluded(ax: number, ay: number, az: number, bx: number, by: number, bz: number): boolean }
 import { lightProps, type LightmapProbe, type PropInstance, type PropModelData } from './vradProps';
 
 export type RGB = [number, number, number];
@@ -205,7 +209,7 @@ function setFalloff(L: SourceLight, keys: Keys): void {
  * fade) and the cosine to each of `normals` (normals[0] the surface normal;
  * zero when the light is behind it or blocked). Returns falloff 0 when unlit.
  */
-export function gatherSample(dl: SourceLight, px: number, py: number, pz: number, normals: Axis[], dots: number[], grid: SolidGrid | null): number {
+export function gatherSample(dl: SourceLight, px: number, py: number, pz: number, normals: Axis[], dots: number[], grid: Occluder | null): number {
   for (let i = 0; i < normals.length; i++) dots[i] = 0;
   let sx = dl.origin[0], sy = dl.origin[1], sz = dl.origin[2];
   let dx = sx - px, dy = sy - py, dz = sz - pz;
@@ -386,6 +390,12 @@ export interface SourceBakeInput {
    * catch and reflect bounced light.
    */
   reflectors?: SolidPlanes[];
+  /**
+   * Static props' shadow shapes, world-space triangles (9 floats each): their
+   * collision model or a hull per mesh, as VRAD uses. They block direct light
+   * and bounce (VRAD has no patches on props: light hitting them is lost).
+   */
+  propShadows?: Float32Array;
   lights: SourceLight[];
   params: {
     /** VRAD -bounce (default 100). */
@@ -509,6 +519,8 @@ export function bakeSource(input: SourceBakeInput): SourceBakeOutput {
   const t0 = Date.now();
   const P = input.params;
   const grid = new SolidGrid(input.occluders);
+  const tris = input.propShadows?.length ? new TriGrid(input.propShadows) : null;
+  const occ: Occluder = tris ? { occluded: (ax, ay, az, bx, by, bz) => grid.occluded(ax, ay, az, bx, by, bz) || tris.occluded(ax, ay, az, bx, by, bz) } : grid;
   const layout = sourceLayout(input.faces, input.info, P.maxWidth);
   const infoById = new Map(input.info.map((i) => [i.id, i]));
   const log = (m: string) => input.log?.(`${m} (${Date.now() - t0} ms)`);
@@ -634,7 +646,7 @@ export function bakeSource(input: SourceBakeInput): SourceBakeOutput {
   const sampleAt = (L: Lux, cand: SourceLight[], x: number, y: number, z: number, out: Float64Array) => {
     out.fill(0);
     for (const dl of cand) {
-      const fo = gatherSample(dl, x, y, z, L.normals, dots, grid);
+      const fo = gatherSample(dl, x, y, z, L.normals, dots, occ);
       if (fo <= 0) continue;
       for (let b = 0; b < L.normals.length; b++) {
         const w = fo * dots[b];
@@ -791,6 +803,8 @@ export function bakeSource(input: SourceBakeInput): SourceBakeOutput {
         }
       }
       const hit = bounceGrid.cast(ox, oy, oz, dx * FAR, dy * FAR, dz * FAR);
+      const tp = tris ? tris.cast(ox, oy, oz, dx * FAR, dy * FAR, dz * FAR) : -1;
+      if (tp > 0 && (!hit || tp < hit.t)) continue; // a prop is in the way: its light is lost (no patches on props)
       if (!hit) { escaped++; continue; }
       const li = luxByFace.get(hit.faceId);
       if (li === undefined || lux[li].info.sky) continue;
@@ -907,7 +921,7 @@ export function bakeSource(input: SourceBakeInput): SourceBakeOutput {
       const o = ((L.rect.y + t) * W + L.rect.x + s) * 4;
       return { light: [pixels[o], pixels[o + 1], pixels[o + 2]], reflectivity: L.info.reflectivity };
     };
-    props = lightProps(input.props.models, input.props.instances, lights, grid, probe);
+    props = lightProps(input.props.models, input.props.instances, lights, grid, probe, undefined, occ);
   }
 
   return {

@@ -89,6 +89,7 @@ export const SETTINGS = {
       enabled: bool('Baked lighting', true, 'Off = fullbright with fake face shading (Hammer-style), handy while building.'),
       thinSamples: num('Samples across thin faces', 3, 1, 6, 1, 'Thin faces (trim, rails, girder flanges) get at least this many luxel steps across, so they light evenly. Maps made of thousands of thin members use 1 to keep the lightmap small.'),
       luxelSize: num('Luxel size', 16, 2, 512, 1, 'World units per lightmap pixel. Source default is 16. Lower = sharper shadows and scallops, slower bake.', 'u'),
+      sourceBaker: select('Source maps: lighting from', 'ours', ['ours', 'valve'] as const, 'ours = our Source light compiler (engine/light/vrad.ts). valve = the lightmaps Valve\'s own compiler baked into the map\'s BSP (maps/p2/<map>.valve.lightmap.json, made by npm run valve:lightmap), for checking ours against.'),
       filter: select('Lightmap filter', 'linear', ['linear', 'nearest'] as const, 'linear = smooth (Source), nearest = blocky (Quake software renderer).'),
       lightScale: num('All lights ×', 1, 0, 8, 0.01, '1 = physical. An artist override, not a fix.'),
       bounces: num('Bounces', 2, 0, 2, 1, 'Passes of indirect light. 2 is more accurate in small rooms; slower.'),
@@ -140,6 +141,7 @@ export const SETTINGS = {
     help: 'A 2001–2006 consumer digicam: meters the scene and sets exposure itself, has its own white balance and a short dynamic range. The look comes from this, not from filters (STYLE.md, "The medium").',
     defs: {
       model: select('Camera model', 'digicam', ['digicam', 'source'] as const, 'digicam = the 2000s point-and-shoot look below. source = Source engine\'s own camera (Portal 2): exposure puts the brightest 2% of the picture at 60%, soft whole-frame bloom, clean clip. Source-lit maps set this.'),
+      sourceHdr: bool('Source: HDR', true, 'on = Source\'s HDR path: auto exposure, bloom, sRGB. off = its non-HDR path (maps compiled without HDR): fixed brightness, no bloom, colour maths in plain 2.2 gamma.'),
       sourceExposureMin: num('Source: exposure min', 0.5, 0.05, 4, 0.01, 'Lowest tonemap scale auto exposure may use (env_tonemap_controller; 0.5 by default).'),
       sourceExposureMax: num('Source: exposure max', 2, 0.1, 8, 0.01, 'Highest tonemap scale (2 by default).'),
       sourceScale: num('Source: manual exposure', 1, 0.05, 8, 0.01, 'Tonemap scale when auto exposure is off.'),

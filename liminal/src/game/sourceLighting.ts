@@ -103,3 +103,24 @@ export function propBakeData(map: MapFile, modelOf: (name: string) => PropModelD
   }
   return { models, instances };
 }
+
+/**
+ * World-space shadow triangles of the static props that cast lightmap shadows
+ * (VRAD: prop_static without disableshadows), from each model's shadow shape.
+ */
+export function propShadowTris(map: MapFile, shadowOf: (name: string) => number[] | undefined): Float32Array {
+  const out: number[] = [];
+  for (const e of map.entities) {
+    const name = propModel(e);
+    if (!name || e.props?.source_class !== 'prop_static' || e.props?.noshadow) continue;
+    const sh = shadowOf(name);
+    if (!sh?.length) continue;
+    const s = typeof e.props?.scale === 'number' ? e.props.scale : 1;
+    const [f, l, u] = sourceAxes(e.angles as [number, number, number] | undefined);
+    for (let i = 0; i < sh.length; i += 3) {
+      const x = sh[i] * s, y = sh[i + 1] * s, z = sh[i + 2] * s;
+      out.push(e.origin[0] + f[0] * x + l[0] * y + u[0] * z, e.origin[1] + f[1] * x + l[1] * y + u[1] * z, e.origin[2] + f[2] * x + l[2] * y + u[2] * z);
+    }
+  }
+  return new Float32Array(out);
+}

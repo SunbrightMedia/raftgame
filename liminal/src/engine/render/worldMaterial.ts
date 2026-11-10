@@ -67,6 +67,8 @@ export const worldUniforms = {
    * Calibrated with the Source lighting model (docs/SOURCE_LIGHTING.md).
    */
   sourceUnit: { value: 300 / Math.PI },
+  /** Source's non-HDR path: textures decode (and the camera encodes) with plain 2.2 gamma, not the sRGB curve. */
+  gamma22: { value: 0 },
 };
 
 /**

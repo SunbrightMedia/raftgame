@@ -28,6 +28,7 @@ export function makePropMaterial(tex: TexEntry): THREE.ShaderMaterial {
       fogOn: worldUniforms.fogOn,
       fogHaze: worldUniforms.fogHaze,
       sourceUnit: worldUniforms.sourceUnit,
+      gamma22: worldUniforms.gamma22,
       lightmapOn: worldUniforms.lightmapOn,
       ...propLightUniforms,
       map: { value: tex.texture },
@@ -79,7 +80,8 @@ export function makePropMaterial(tex: TexEntry): THREE.ShaderMaterial {
       varying vec3 vNormal;
       varying float vDepth;
       varying vec3 vLight;
-      vec3 toLinear(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }
+      uniform float gamma22;
+      vec3 toLinear(vec3 c) { return gamma22 > 0.5 ? pow(c, vec3(2.2)) : mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }
       void main() {
         vec4 tx = texture2D(map, vUv);
         if (alphaMode == 1 && tx.a < alphaRef) discard;

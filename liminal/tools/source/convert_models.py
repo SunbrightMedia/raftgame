@@ -148,6 +148,32 @@ def convert(model: str):
                 meshes.append({'slot': mesh['material'], 'vertexOffset': vo, 'vertexCount': len(pos) // 3 - vo, 'indexOffset': io, 'indexCount': len(ind) - io})
     if not meshes:
         return False, 'no geometry'
+    # Lightmap shadow shape, as VRAD uses it: the collision model's first solid (.phy), else a
+    # convex hull per mesh (vradstaticprops.cpp CreateCollisionModel / ComputeConvexHull).
+    shadow = None
+    if os.path.exists(base + '.phy'):
+        from phy import phy_triangles
+        t = phy_triangles(open(base + '.phy', 'rb').read())
+        if t is not None:
+            shadow = t.reshape(-1)
+    if shadow is None:
+        try:
+            import numpy as np
+            from scipy.spatial import ConvexHull
+            P = np.frombuffer(pos.tobytes(), dtype=np.float32).reshape(-1, 3)
+            parts = []
+            for m in meshes:
+                pts = P[m['vertexOffset']:m['vertexOffset'] + m['vertexCount']]
+                if len(pts) >= 4:
+                    try:
+                        h = ConvexHull(pts)
+                        parts.append(pts[h.simplices])
+                    except Exception:
+                        pass
+            if parts:
+                shadow = np.concatenate(parts).reshape(-1)
+        except ImportError:
+            pass
     xs, ys, zs = pos[0::3], pos[1::3], pos[2::3]
     out = os.path.join(OUT, model[len('models/'):-4])
     os.makedirs(os.path.dirname(out), exist_ok=True)
@@ -158,7 +184,7 @@ def convert(model: str):
                'vertexCount': len(pos) // 3, 'indexCount': len(ind),
                'materials': mdl['materials'], 'skins': mdl['skins'],
                'bounds': [[min(xs), min(ys), min(zs)], [max(xs), max(ys), max(zs)]], 'hull': [list(h[:3]), list(h[3:])],
-               'meshes': meshes}, open(out + '.json', 'w'))
+               'meshes': meshes, **({'shadow': [round(float(x), 2) for x in shadow]} if shadow is not None else {})}, open(out + '.json', 'w'))
     return True, f'{len(pos) // 3} verts, {len(ind) // 3} tris'
 
 

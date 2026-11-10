@@ -19,6 +19,8 @@ export interface ModelHeader {
   /** Collision box in model space (Source: the MDL's hull). */
   hull: [[number, number, number], [number, number, number]];
   meshes: { slot: number; vertexOffset: number; vertexCount: number; indexOffset: number; indexCount: number }[];
+  /** Lightmap shadow shape (model space, 9 floats per triangle): collision model or per-mesh hulls. */
+  shadow?: number[];
 }
 
 export interface Model {
