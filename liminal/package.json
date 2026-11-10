@@ -12,6 +12,7 @@
     "build:page": "vite build --mode page && node tools/make-page.mjs",
     "bench:bake": "vite-node tools/bench/bake-bench.ts",
     "bench:vrad": "vite-node tools/bench/vrad-bench.ts --",
+    "validate:vrad": "vite-node tools/bench/vrad-validate.ts --",
     "gen:blank": "vite-node tools/gen-blank.ts",
     "studio": "node tools/studio/cli.mjs",
     "check": "vite-node tools/check/check.ts --",

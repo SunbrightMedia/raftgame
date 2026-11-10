@@ -66,14 +66,27 @@ exposure, bloom, grading LUTs) live in each map's entities.
 ## 8. Fog
 - `env_fog_controller`: colour, linear start/end, max density.
 
-## Where our engine differs
-| Source | Ours |
-|---|---|
-| 100 bounces | 2 bounces + a geometric estimate |
-| Lights fade to zero at a set distance | Physical inverse-square, no end |
-| Exposure: brightest 2% at 60% | Centre-weighted average; lamps blow out by design (digicam) |
-| Linear clamp | Digicam shoulder, fringe, grain, chroma bleed |
-| Whole-frame bloom | Threshold glare, bloom default 0 |
-| Per-area LUT grading | White balance + tint |
-| Baked cubemap reflections | Irradiance-only sheen |
-| 3-direction bumped lightmaps | 1 dominant direction + directionality |
+## In our engine (Source-lit maps)
+Maps imported from a VMF (tools/source/import_vmf.py) are lit and shown
+with Source's model; our own physical model stays for our maps.
+
+| Source | Ours | Status |
+|---|---|---|
+| VRAD lights (LightForString, SetLightFalloffParams, spot cones, hard falloff) | `engine/light/vrad.ts`, line for line | same formulas |
+| Luxels on texture axes ÷ lightmapscale, sample at the luxel's clipped centre + 1 unit, supersampled edges | same grid; edges get a 4×4 supersample when a neighbour differs | supersample rule simplified |
+| Patch radiosity, exact form factors between visible patches, ≤100 bounces, stop when a bounce adds < 1 | same patches (chopped < 4 luxels), same stop rule; form factors estimated with 256 cosine rays per patch, cached across bounces | estimated, converges to the same |
+| Patch → luxel radial blend | tent weights over the face's patches | close |
+| Three HL2-basis bump lightmaps, LightmappedGeneric blend | same basis, same `saturate(n·b)²` blend | same |
+| World + func_detail cast shadows; brush entities, glass don't | same | same |
+| Static props cast lightmap shadows (collision hulls) | not yet | **missing** |
+| Static props: per-vertex light (.vhv): direct + 40 Halton rays into the lightmaps × reflectivity × 1/(1+(d/128)²) | `engine/light/vradProps.ts`, same | same |
+| Dynamic props: leaf ambient cube + local lights at runtime | lit like static props | **approximation** |
+| light_environment (sun, sky ambient) | not yet (the atrium has none) | missing |
+| lights.rad texture lights | implemented, untested (none in the atrium) | to validate |
+| Exposure: brightest 2% at 60%, median ≥ 3%, 0.5–2 | `engine/render/sourcePost.ts`, same histogram | same |
+| Bloom: luminance-weighted ¼ downsample, 13-tap Gaussian, added in gamma | same | same |
+| Colour correction LUTs, fog | not yet (the atrium has none) | missing |
+| Moving brush entities (elevators) keep their baked light | drawn where the map places them | missing |
+
+Validation still to do: our lightmaps against `sp_a3_speed_ramp.bsp`'s own
+(LIGHTING_HDR lump) once that map's geometry is imported from the BSP.
