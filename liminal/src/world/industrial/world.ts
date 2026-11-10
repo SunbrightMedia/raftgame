@@ -303,7 +303,7 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
     return v;
   };
   const cut = (blk: number, box: [V3, V3]) => { const v = get(blk); v.hollows.push({ min: box[0], max: box[1], finish: v.finish }); ctx.hollows.push({ min: box[0], max: box[1] }); };
-  interface Profile { w: number; h: number; ribs: number; /** How far apart its lamps hang (0 = it is dark), and their colour. */ lamps: number; lamp: V3 }
+  interface Profile { w: number; h: number; ribs: number; /** How far apart its lamps hang (a few tunnels have very few), and their colour. */ lamps: number; lamp: V3 }
   const profiles = new Map<string, Profile>();
   /**
    * The section of the tunnel through block `blk` along `axis` at row or column
@@ -316,7 +316,7 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
     if (!p) {
       const r = root.fork(`tunnel${k}`);
       const [w, h] = r.weighted([[[96, 120], 2], [[96, 160], 2], [[104, 136], 3], [[112, 128], 3], [[128, 128], 2], [[128, 200], 2], [[96, 232], 1.5], [[160, 112], 1.5], [[144, 144], 1]] as const);
-      p = { w, h, ribs: r.weighted([[0, 5], [256, 3], [384, 2]] as const), lamps: r.weighted([[384, 5], [640, 3], [0, 1.2]] as const), lamp: r.pick([LAMP.warm, LAMP.warm, LAMP.white, LAMP.cool]) };
+      p = { w, h, ribs: r.weighted([[0, 5], [256, 3], [384, 2]] as const), lamps: r.weighted([[384, 5], [640, 3], [1152, 1.2]] as const), lamp: r.pick([LAMP.warm, LAMP.warm, LAMP.white, LAMP.cool]) };
       profiles.set(k, p);
     }
     return p;
@@ -396,6 +396,21 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
         m.prop('props_bts/hanging_walkway_hanger_a', [px, py, z], [0, (dd % 2 === 0 ? 1 : 0) * 90, 0], { solid: false });
       }
     }
+    // Ducts cross the shaft from wall to wall between the levels, clear of every deck (their ends are in the walls).
+    for (let n = r.int(2, 5); n > 0; n--) {
+      const z = zOf(r.int(Math.min(...lv) - 1, Math.max(...lv))) + r.pick([120, 150, 180]);   // between two levels
+      const acrossX = r.chance(0.5);
+      // Not over a run of deck, where a walker's head is: keep it off the junction's own row and column.
+      const lane = acrossX ? J.y * TILE + TILE / 2 : J.x * TILE + TILE / 2;
+      const room = acrossX ? [y0 + 60, y1 - 60] : [x0 + 60, x1 - 60];
+      const at = r.range(room[0], room[1]);
+      if (Math.abs(at - lane) < 110) continue;
+      const len = acrossX ? x1 - x0 : y1 - y0;
+      for (let u = 0; u < len; u += 512) {
+        const a = Math.min(len - 256, 256 + u);
+        m.prop('props_bts/duct_512b', acrossX ? [x0 + a, at, z] : [at, y0 + a, z], [0, acrossX ? 0 : 90, 0], { solid: false, hollow: true });
+      }
+    }
     // A narrow ledge round the walls just under each level's floor line, on down out of sight: it gives the depth its scale.
     for (let z = zOf(0) - 6 * LEVEL; z < zTop - 64; z += LEVEL) {
       steelIn.push([[x0, y0, z - 16], [x1, y0 + 8, z - 4]], [[x0, y1 - 8, z - 16], [x1, y1, z - 4]], [[x0, y0 + 8, z - 16], [x0 + 8, y1 - 8, z - 4]], [[x1 - 8, y0 + 8, z - 16], [x1, y1 - 8, z - 4]]);
@@ -453,7 +468,8 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
       }
       cut(blk, along(c, d, u0, u1, p.w, z, z + p.h));
       // Caged tube lights along the ceiling, shut in this run of corridor (so they light no other level through the floor).
-      const whole = along(c, d, -TILE / 2, (e - i) * TILE + TILE / 2, p.w, z, z + p.h);
+      // (Where the run ends at a junction inside the mass, the box takes in the junction too: a plain corner has no lamp of its own.)
+      const whole = along(c, d, -TILE / 2 - (where(i - 1) >= 0 ? TILE + TILE / 2 : 0), (e - i) * TILE + TILE / 2 + (where(e + 1) >= 0 ? TILE + TILE / 2 : 0), p.w, z, z + p.h);
       if (p.lamps) for (let u = u0 + Math.min(p.lamps, u1 - u0) / 2; u < u1 - 40; u += p.lamps) {
         const q: V3 = [c[0] + DX[d] * u, c[1] + DY[d] * u, z + p.h];
         if (!inShaft(blk, q[0], q[1])) tubeLamp(m, q, 'down', d, p.lamp, 1.3, 330, { min: whole[0], max: whole[1] });
@@ -534,6 +550,14 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
     const lo: V3 = [c[0] - ext[2], c[1] - ext[3], z], hi: V3 = [c[0] + ext[0], c[1] + ext[1], z + hgt];
     cut(blk, [lo, hi]);
     const entry = open[0];
+    // Some rooms have a duct across them under the ceiling, from wall to wall (its ends are in the walls).
+    if (hgt >= 176 && r.chance(0.4)) {
+      const acrossX = r.chance(0.5);
+      const off = r.pick([-1, 1]) * r.pick([40, 56]);
+      // One piece, sized to the room: it goes 16 into each wall and no further (another corridor may pass close behind).
+      const k = ((acrossX ? hi[0] - lo[0] : hi[1] - lo[1]) + 32) / 512;
+      m.prop('props_bts/duct_512b', acrossX ? [(lo[0] + hi[0]) / 2, c[1] + off, hi[2] - 19 * k - 1] : [c[0] + off, (lo[1] + hi[1]) / 2, hi[2] - 19 * k - 1], [0, acrossX ? 0 : 90, 0], { solid: false, hollow: true, scale: k });
+    }
     // A room's lamp: a bell lamp where the ceiling is high enough to hang one, else a tube light. A look-out stays dark.
     if (slit === null) {
       const mid: V3 = [(lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2, hi[2]];
@@ -677,6 +701,7 @@ function skeleton(ctx: Ctx, r: Rng, x0: number, y0: number, x1: number, y1: numb
 function chamberStack(ctx: Ctx, r: Rng, x0: number, y0: number, x1: number, y1: number, z0: number, z1: number, steelTex: string): void {
   const { m } = ctx;
   const tex = r.pick(T.panels);
+  const lit = r.chance(0.6);
   let z = z0;
   while (z < z1 - 256) {
     const h = Math.min(z1 - z, r.pick([768, 1024, 1024, 1536, 2048]));
@@ -685,7 +710,17 @@ function chamberStack(ctx: Ctx, r: Rng, x0: number, y0: number, x1: number, y1: 
     m.box([x0 + ix, y0 + iy, z], [x1 - ix, y1 - iy, z + h], { tex, lightmapscale: 64, scale: 0.25 });
     z += h;
     const gap = r.pick([128, 192, 256, 256, 512]);
-    if (z < z1 - 256) m.box([x0 + 192, y0 + 192, z], [x1 - 192, y1 - 192, z + gap], { tex: T.black, lightmapscale: 128, scale: 0.5 });   // the core the chambers hang on
+    if (z < z1 - 256) {
+      m.box([x0 + 192, y0 + 192, z], [x1 - 192, y1 - 192, z + gap], { tex: T.black, lightmapscale: 128, scale: 0.5 });   // the core the chambers hang on
+      // In the gaps near the catwalk levels, on some stacks, a tube light on each face of the core: bands of light up the stack.
+      if (lit && z > ctx.bottom - 900 && z < ctx.top + 1300) {
+        const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, zm = z + gap / 2;
+        tubeLamp(m, [x1 - 192, cy, zm], 0, 1, LAMP.warm, 1.4, 520);
+        tubeLamp(m, [x0 + 192, cy, zm], 2, 1, LAMP.warm, 1.4, 520);
+        tubeLamp(m, [cx, y1 - 192, zm], 1, 0, LAMP.warm, 1.4, 520);
+        tubeLamp(m, [cx, y0 + 192, zm], 3, 0, LAMP.warm, 1.4, 520);
+      }
+    }
     z += gap;
   }
   skeleton(ctx, r, x0, y0, x1, y1, z0, z1, 512, steelTex);

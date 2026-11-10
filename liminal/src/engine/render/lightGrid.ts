@@ -11,7 +11,7 @@ import * as THREE from 'three';
  *
  * With no shadows a lamp would shine through walls and floors, so each lamp
  * can be shut in a box (the corridor, room or shaft it hangs in) and lights
- * nothing outside it; and a lamp out in the open does not reach cells that
+ * nothing outside it (its light fades out over the last few units); and a lamp out in the open does not reach cells that
  * lie wholly inside a "shade" box (a mass with rooms in it).
  *
  * Light here is irradiance in the renderer's flat-light units: 300 = a
@@ -34,6 +34,8 @@ export interface Box3 { min: number[]; max: number[] }
 
 const CELL = [128, 128, 256];
 const PER_CELL = 8;
+/** How far past its box a shut-in lamp's light fades out (the box is first grown by 3 to take in its own walls). */
+const EDGE = 24;
 
 export const lightGridUniforms = {
   lgOn: { value: 0 },
@@ -77,7 +79,15 @@ export const LIGHT_GRID_PARS = /* glsl */ `
         if (d2 >= r2) continue;
         vec4 lo = texelFetch(lgLamps, at + ivec2(3, 0), 0);  // box min, spot inner cosine
         vec4 hi = texelFetch(lgLamps, at + ivec2(4, 0), 0);  // box max, 1 = has a box
-        if (hi.w > 0.5 && (any(lessThan(wp, lo.xyz)) || any(greaterThan(wp, hi.xyz)))) continue;
+        // A lamp shut in a box lights nothing outside it; its light fades out over the last few units, so the
+        // edge of the box (at a doorway, say) is not a hard line on the floor.
+        float shut = 1.0;
+        if (hi.w > 0.5) {
+          vec3 past = max(max(lo.xyz - wp, wp - hi.xyz), 0.0);
+          float o = max(past.x, max(past.y, past.z));
+          if (o >= 20.0) continue;
+          shut = 1.0 - smoothstep(0.0, 20.0, o);
+        }
         vec4 b = texelFetch(lgLamps, at + ivec2(1, 0), 0);   // colour, size
         vec4 c = texelFetch(lgLamps, at + ivec2(2, 0), 0);   // spot axis, cone cosine (−2 = not a spot)
         vec3 l = to * inversesqrt(max(d2, 1.0e-4));
@@ -86,7 +96,7 @@ export const LIGHT_GRID_PARS = /* glsl */ `
         float win = 1.0 - d2 / r2;
         float att = win * win / (1.0 + d2 / (b.w * b.w));
         if (c.w > -1.5) att *= smoothstep(c.w, lo.w, dot(-l, c.xyz));
-        E += b.rgb * (att * lam);
+        E += b.rgb * (att * lam * shut);
       }
     }
     return E * lgScale;
@@ -107,8 +117,8 @@ export function setLightGrid(lamps: GridLamp[], shades: Box3[] = []): { lamps: n
 
   const lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity];
   for (const l of lamps) for (let k = 0; k < 3; k++) {
-    lo[k] = Math.min(lo[k], Math.max(l.pos[k] - l.reach, l.box ? l.box.min[k] : -Infinity));
-    hi[k] = Math.max(hi[k], Math.min(l.pos[k] + l.reach, l.box ? l.box.max[k] : Infinity));
+    lo[k] = Math.min(lo[k], Math.max(l.pos[k] - l.reach, l.box ? l.box.min[k] - EDGE : -Infinity));
+    hi[k] = Math.max(hi[k], Math.min(l.pos[k] + l.reach, l.box ? l.box.max[k] + EDGE : Infinity));
   }
   const origin = lo.map((v, k) => Math.floor(v / CELL[k]) * CELL[k]);
   const dims = hi.map((v, k) => Math.max(1, Math.min(k === 2 ? 64 : 512, Math.ceil((v - origin[k]) / CELL[k]))));
@@ -125,8 +135,8 @@ export function setLightGrid(lamps: GridLamp[], shades: Box3[] = []): { lamps: n
   // Each cell's lamps, with how much each gives at the cell's nearest point: the strongest eight stay.
   const picks = new Map<number, { i: number; score: number }[]>();
   lamps.forEach((l, i) => {
-    const a = [0, 1, 2].map((k) => Math.max(0, Math.floor((Math.max(l.pos[k] - l.reach, l.box ? l.box.min[k] : -Infinity) - origin[k]) / CELL[k])));
-    const b = [0, 1, 2].map((k) => Math.min(dims[k] - 1, Math.floor((Math.min(l.pos[k] + l.reach, l.box ? l.box.max[k] : Infinity) - origin[k]) / CELL[k])));
+    const a = [0, 1, 2].map((k) => Math.max(0, Math.floor((Math.max(l.pos[k] - l.reach, l.box ? l.box.min[k] - EDGE : -Infinity) - origin[k]) / CELL[k])));
+    const b = [0, 1, 2].map((k) => Math.min(dims[k] - 1, Math.floor((Math.min(l.pos[k] + l.reach, l.box ? l.box.max[k] + EDGE : Infinity) - origin[k]) / CELL[k])));
     const power = Math.max(l.color[0], l.color[1], l.color[2]);
     for (let z = a[2]; z <= b[2]; z++) for (let y = a[1]; y <= b[1]; y++) for (let x = a[0]; x <= b[0]; x++) {
       const c = at(x, y, z);
