@@ -1,6 +1,7 @@
-# Copies every Portal 2 map (.bsp) without its embedded file pack (cube maps etc., most of the size)
-# and uploads them to your private GitHub repo (branch "p2-maps"), so the liminal tools can study how
-# Valve built the levels: brushes, prop placements, lights, fog. It only READS your game files.
+# Copies every Portal 2 map (.bsp) without its embedded file pack (cube maps etc., most of the size),
+# plus the game's colour-grading tables (materials/correction/*.raw), and uploads them to your private
+# GitHub repo (branch "p2-maps"), so the liminal tools can study how Valve built the levels: brushes,
+# prop placements, lights, fog, colour. It only READS your game files.
 #
 #   powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\Downloads\export_maps.ps1"
 #
@@ -16,6 +17,70 @@ $ErrorActionPreference = "Stop"
 $StripSource = @'
 using System;
 using System.IO;
+
+public static class VpkGrab
+{
+    static string CStr(byte[] d, ref int pos)
+    {
+        int start = pos;
+        while (d[pos] != 0) pos++;
+        string s = System.Text.Encoding.GetEncoding(28591).GetString(d, start, pos - start);
+        pos++;
+        return s;
+    }
+
+    // Writes every file of the pack whose path starts with `prefix` and ends with `ext` into outDir. Returns how many.
+    public static int Extract(string dirFile, string prefix, string ext, string outDir)
+    {
+        byte[] d = File.ReadAllBytes(dirFile);
+        if (BitConverter.ToUInt32(d, 0) != 0x55AA1234) throw new Exception("not a VPK: " + dirFile);
+        uint ver = BitConverter.ToUInt32(d, 4), tree = BitConverter.ToUInt32(d, 8);
+        int header = ver == 2 ? 28 : 12, pos = header, count = 0;
+        long dataStart = header + tree;
+        while (true)
+        {
+            string e = CStr(d, ref pos);
+            if (e.Length == 0) break;
+            while (true)
+            {
+                string dir = CStr(d, ref pos);
+                if (dir.Length == 0) break;
+                while (true)
+                {
+                    string name = CStr(d, ref pos);
+                    if (name.Length == 0) break;
+                    pos += 4;
+                    int pre = BitConverter.ToUInt16(d, pos); pos += 2;
+                    int arch = BitConverter.ToUInt16(d, pos); pos += 2;
+                    uint off = BitConverter.ToUInt32(d, pos); pos += 4;
+                    uint len = BitConverter.ToUInt32(d, pos); pos += 4;
+                    pos += 2;
+                    int preAt = pos; pos += pre;
+                    string folder = dir.Trim();
+                    string path = (((folder.Length > 0) ? folder + "/" : "") + name + "." + e).ToLowerInvariant().Replace('\\', '/');
+                    if (!path.StartsWith(prefix) || !path.EndsWith(ext)) continue;
+                    byte[] data = new byte[pre + len];
+                    Array.Copy(d, preAt, data, 0, pre);
+                    if (len > 0)
+                    {
+                        string file = arch == 0x7FFF ? dirFile : Path.Combine(Path.GetDirectoryName(dirFile), Path.GetFileName(dirFile).Replace("_dir.vpk", "_" + arch.ToString("D3") + ".vpk"));
+                        using (var fs = File.OpenRead(file))
+                        {
+                            fs.Seek(arch == 0x7FFF ? dataStart + off : off, SeekOrigin.Begin);
+                            int n = 0;
+                            while (n < len) { int r = fs.Read(data, pre + n, (int)len - n); if (r <= 0) throw new Exception("short read"); n += r; }
+                        }
+                    }
+                    string dst = Path.Combine(outDir, path.Substring(prefix.Length).Replace('/', Path.DirectorySeparatorChar));
+                    Directory.CreateDirectory(Path.GetDirectoryName(dst));
+                    File.WriteAllBytes(dst, data);
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+}
 
 public static class BspStrip
 {
@@ -114,6 +179,22 @@ foreach ($game in "portal2", "portal2_dlc1", "portal2_dlc2") {
     }
   }
 }
+# Colour-grading tables (32x32x32 lookup tables the maps' color_correction entities name), later packs last.
+$corr = Join-Path $Out "correction"
+New-Item -ItemType Directory -Force $corr | Out-Null
+foreach ($game in "portal2", "portal2_dlc1", "portal2_dlc2", "update") {
+  $pak = Join-Path $Portal2 "$game\pak01_dir.vpk"
+  if (Test-Path $pak) {
+    try { $n = [VpkGrab]::Extract($pak, "materials/correction/", ".raw", $corr); if ($n -gt 0) { Write-Host "  $game`: $n colour tables" } }
+    catch { Write-Host "  colour tables from $game skipped: $($_.Exception.Message)" -ForegroundColor Yellow }
+  }
+}
+# Loose ones (not in a pack) too.
+foreach ($game in "portal2", "portal2_dlc1", "portal2_dlc2") {
+  $loose = Join-Path $Portal2 "$game\materials\correction"
+  if (Test-Path $loose) { Copy-Item (Join-Path $loose "*.raw") $corr -Force -ErrorAction SilentlyContinue }
+}
+
 $all = @(Get-ChildItem -File (Join-Path $Out "maps") -Filter "*.bsp")
 Write-Host ("{0} maps in {1} ({2:N0} MB)" -f $all.Count, $Out, (($all | Measure-Object Length -Sum).Sum / 1MB))
 
@@ -146,7 +227,7 @@ try {
   foreach ($g in $groups) {
     $i++
     $paths = @($g)
-    if ($i -eq 1) { $paths += ".gitattributes" }
+    if ($i -eq 1) { $paths += ".gitattributes"; if (@(Get-ChildItem $corr -Recurse -File).Count -gt 0) { $paths += "correction" } }
     git add -- $paths
     git diff --cached --quiet
     if ($LASTEXITCODE -ne 0) { git commit -q -m "Portal 2 maps, part $i of $($groups.Count)" }
