@@ -13,3 +13,5 @@ dist-catalogue/
 # Portal 2 maps imported for study (tools/source/import_bsp.py): regenerated, not committed.
 maps/p2ref/
 __pycache__/
+# Generated worlds (tools/world/gen.ts): made again from their seed, not committed while in progress.
+maps/iw/
