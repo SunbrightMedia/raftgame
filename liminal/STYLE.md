@@ -369,7 +369,9 @@ for every pass of this world, and the first two for every world.
   from far off); small amber lamps on posts along the bridges and up the
   corners of some masses; tube lights in the gaps of some chamber stacks.
   About one tunnel in eight has very few lamps; a look-out room is always
-  dark.
+  dark; every plain corner and crossing inside a mass has a lamp of its own
+  (a place where the way divides must be readable). With no bounced light,
+  a lamp shut in a room also gives a faint even fill through its reach.
 - **Fog** (the user asked for layers, more intense further back, and blur):
   three layers by distance, each with its own density and colour (thin and
   dark near, thick and pale far); the depths under the lowest catwalks go

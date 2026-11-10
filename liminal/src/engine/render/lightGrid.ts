@@ -91,12 +91,16 @@ export const LIGHT_GRID_PARS = /* glsl */ `
         vec4 b = texelFetch(lgLamps, at + ivec2(1, 0), 0);   // colour, size
         vec4 c = texelFetch(lgLamps, at + ivec2(2, 0), 0);   // spot axis, cone cosine (−2 = not a spot)
         vec3 l = to * inversesqrt(max(d2, 1.0e-4));
-        // A little wrap round the edge, standing in for the light a real room bounces back.
-        float lam = clamp((dot(n, l) + 0.25) / 1.25, 0.0, 1.0);
+        // There is no bounced light, so two things stand in for it. The light wraps a little round the edge of
+        // what it falls on (more indoors, where walls are close). And a lamp shut in a room gives a faint even
+        // fill all through its reach, whichever way a surface faces: the glow a lit room has in its corners.
+        float wrap = hi.w > 0.5 ? 0.5 : 0.25;
+        float lam = clamp((dot(n, l) + wrap) / (1.0 + wrap), 0.0, 1.0);
         float win = 1.0 - d2 / r2;
+        float cone = c.w > -1.5 ? smoothstep(c.w, lo.w, dot(-l, c.xyz)) : 1.0;
         float att = win * win / (1.0 + d2 / (b.w * b.w));
-        if (c.w > -1.5) att *= smoothstep(c.w, lo.w, dot(-l, c.xyz));
-        E += b.rgb * (att * lam * shut);
+        float fill = hi.w > 0.5 ? 0.08 * win * win : 0.0;
+        E += b.rgb * ((att * lam + fill) * cone * shut);
       }
     }
     return E * lgScale;

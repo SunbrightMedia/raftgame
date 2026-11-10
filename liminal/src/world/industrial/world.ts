@@ -259,12 +259,12 @@ function bellLamp(m: MapOut, top: V3, color: V3, brightness: number, reach: numb
  * ceiling (mount 'down'); the tube lies along `run`. `at` is the point of the
  * wall or ceiling it is fixed to.
  */
-function tubeLamp(m: MapOut, at: V3, mount: Dir | 'down', run: Dir, color: V3, brightness: number, reach: number, box?: LampBox): void {
+function tubeLamp(m: MapOut, at: V3, mount: Dir | 'down', run: Dir, color: V3, brightness: number, reach: number, box?: LampBox, size = 80): void {
   const out: V3 = mount === 'down' ? [0, 0, -1] : [DX[mount], DY[mount], 0];
   // light_cage001a: 128 long on its own y, its back 6 behind its origin on its own x.
   m.prop('props_bts/light_cage001a', [at[0] + out[0] * 6, at[1] + out[1] * 6, at[2] + out[2] * 6], mount === 'down' ? [90, run * 90 - 90, 0] : [0, mount * 90, 0], { solid: false });
   const p: V3 = [at[0] + out[0] * 16, at[1] + out[1] * 16, at[2] + out[2] * 16];
-  m.lamp(p, color, brightness, 80, reach, box ? { box } : { open: true });
+  m.lamp(p, color, brightness, size, reach, box ? { box } : { open: true });
   m.glow([at[0] + out[0] * 12, at[1] + out[1] * 12, at[2] + out[2] * 12], color, 48, 1.2);
 }
 
@@ -472,7 +472,7 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
       const whole = along(c, d, -TILE / 2 - (where(i - 1) >= 0 ? TILE + TILE / 2 : 0), (e - i) * TILE + TILE / 2 + (where(e + 1) >= 0 ? TILE + TILE / 2 : 0), p.w, z, z + p.h);
       if (p.lamps) for (let u = u0 + Math.min(p.lamps, u1 - u0) / 2; u < u1 - 40; u += p.lamps) {
         const q: V3 = [c[0] + DX[d] * u, c[1] + DY[d] * u, z + p.h];
-        if (!inShaft(blk, q[0], q[1])) tubeLamp(m, q, 'down', d, p.lamp, 1.3, 330, { min: whole[0], max: whole[1] });
+        if (!inShaft(blk, q[0], q[1])) tubeLamp(m, q, 'down', d, p.lamp, 1.3, 420, { min: whole[0], max: whole[1] }, 120);
       }
       // Steel ribs along it: two posts and a head, standing a little proud of the walls.
       if (p.ribs) for (let u = u0 + p.ribs / 2; u < u1 - 32; u += p.ribs) {
@@ -520,7 +520,12 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
     const r = root.fork(`node${k}`);
     const straight = open.length === 2 && opposite(open[0]) === open[1];
     const roomy = open.length === 1 ? 1 : open.length >= 3 ? 0.75 : straight ? 0.25 : 0.45;
-    if (!r.chance(roomy)) { cut(blk, [[c[0] - W / 2, c[1] - W / 2, z], [c[0] + W / 2, c[1] + W / 2, z + H]]); continue; }
+    if (!r.chance(roomy)) {
+      cut(blk, [[c[0] - W / 2, c[1] - W / 2, z], [c[0] + W / 2, c[1] + W / 2, z + H]]);
+      // A plain corner or crossing: a tube light of its own on the ceiling, so every place where the way divides is lit.
+      if (open.length > 1) tubeLamp(m, [c[0], c[1], z + H], 'down', open[0], profs[0].lamp, 1.2, 340, { min: [c[0] - TILE / 2, c[1] - TILE / 2, z], max: [c[0] + TILE / 2, c[1] + TILE / 2, z + H] }, 110);
+      continue;
+    }
 
     // A room: how far it reaches each way from the junction's middle. Never more than 160, so it keeps a wall to whatever passes two tiles away.
     const R = lay.blocks[blk].rect;
