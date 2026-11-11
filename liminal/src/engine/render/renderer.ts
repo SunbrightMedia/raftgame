@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Digicam, type CameraParams } from './digicam';
 import { SourcePost, type SourcePostParams } from './sourcePost';
+import { CamcorderPost, type CamcorderParams } from './camcorder';
 
 THREE.ColorManagement.enabled = false;
 THREE.Object3D.DEFAULT_UP.set(0, 0, 1);
@@ -29,6 +30,9 @@ export class LowResRenderer {
   /** Source's camera instead of the digicam (Source-lit maps): exposure histogram, bloom, clamp. */
   sourceCamera: SourcePostParams | null = null;
   private sourcePost = new SourcePost();
+  /** The capture-matched camcorder (camcorder.ts): fixed exposure, glow, film curve, tape, lens; a 4:3 picture. Wins over the others. */
+  camcorder: CamcorderParams | null = null;
+  private camcorderPost = new CamcorderPost();
   /** Source light → radiance (see worldUniforms.sourceUnit). */
   sourceUnit = 300 / Math.PI;
   private lastFrame = performance.now();
@@ -154,7 +158,7 @@ export class LowResRenderer {
     const w = this.canvas.clientWidth || window.innerWidth;
     const h = this.canvas.clientHeight || window.innerHeight;
     if (this.canvas.width !== w || this.canvas.height !== h) this.gl.setSize(w, h, false);
-    const aspect = w / h;
+    const aspect = this.camcorder?.bars ? 4 / 3 : w / h;
     if (this.viewMatch) {
       // A window onto a larger image whose centre is the match's image centre.
       const m = this.viewMatch, fullW = w + 2 * Math.abs(m.dx), fullH = h + 2 * Math.abs(m.dy);
@@ -250,6 +254,11 @@ export class LowResRenderer {
     if (this.blitMat.map !== frame.texture) { this.blitMat.map = frame.texture; this.blitMat.needsUpdate = true; }
     const now = performance.now(), dt = Math.min(0.25, (now - this.lastFrame) / 1000);
     this.lastFrame = now;
+    if (this.camcorder) {
+      const hfov = 2 * Math.atan(Math.tan((this.camera.fov * Math.PI) / 360) * this.camera.aspect);
+      this.camcorderPost.render(this.gl, frame, this.camcorder, hfov, dt);
+      return;
+    }
     if (this.sourceCamera) {
       if (this.cameraOver && this.camera_) {
         if (!this.overTarget || this.overTarget.width !== iw || this.overTarget.height !== ih) {

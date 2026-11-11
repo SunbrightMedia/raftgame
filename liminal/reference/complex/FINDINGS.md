@@ -106,6 +106,33 @@ Levels of the 10 corrected frames (luminance, 0–1 display values):
     fit exactly at `a = 0.7·FOV` (error 0.015 vs 0.048 at 0.6 and 0.051 at
     0.8).
 
+## Checked by rebuilding it (camera model "camcorder")
+
+`src/engine/render/camcorder.ts` is our rebuild. The test bench
+(`tools/camcorder/check.html`, `run.cjs`, `compare.py`) feeds the game's own
+captured scene picture into it and compares every stage with the game's:
+
+| frame | after tone curve | finished picture | mean colour, ours / game |
+|---|---|---|---|
+| 18325 (lit room) | 0.023 | 0.034 | 0.526 0.483 0.101 / 0.526 0.481 0.113 |
+| 20732 (dark hall) | 0.008 | 0.016 | 0.216 0.173 0.040 / 0.218 0.174 0.043 |
+
+(mean absolute error per pixel, 0–1; grain and tape noise are random, JPEG
+adds the rest). Frame 19893's scene picture was saved over a 0–40 range, too
+coarse for this test.
+
+What the rebuild taught:
+- **A warm multiplier before the tone curve**: the tonemapper multiplies the
+  picture by a buffer we could not read. Fitting four frames gives
+  0.84 / 0.83 / 0.64 (red / green / blue), the same in every frame. Part of
+  the yellow is the camera after all.
+- The glow picture was stored linearly (its true peak values prove it), so
+  the glow is 0.19 as measured. The lens dirt adds about 40% on average:
+  glow × (1 + 20 × dirt) with a dirt mean near 0.022. Our dirt is an even
+  film with large soft variations; ours is not theirs.
+- RenderDoc stored HDR pictures linearly when it stretched their range, and
+  stored the window image with an extra sRGB curve.
+
 ## What this means for us
 
 - Our "old camera" (digicam) and the Source post are the wrong models for
