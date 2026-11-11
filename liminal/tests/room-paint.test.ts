@@ -3,11 +3,11 @@ import { readFileSync } from 'node:fs';
 import { parseMap, type FaceTex } from '../src/data/map';
 import { verticalFaces, roomAt } from '../tools/lib/roomPaint';
 import { PMP_ROOMS, NOOK_ROOMS, REC_ROOMS, LQ_ROOMS } from '../junk/tools/lib/rooms';
-import { HOUSE_TEST_ROOMS } from '../tools/house/rooms';
+import { HOUSE_TEST_ROOMS, HOUSE_IV_ROOMS } from '../tools/house/rooms';
 
-describe.each([['pmp_basement', PMP_ROOMS], ['pmp_nook', NOOK_ROOMS], ['rec_room', REC_ROOMS], ['laquinta', LQ_ROOMS], ['house_test', HOUSE_TEST_ROOMS]] as const)('%s room paint', (name, ROOMS) => {
+describe.each([['pmp_basement', PMP_ROOMS], ['pmp_nook', NOOK_ROOMS], ['rec_room', REC_ROOMS], ['laquinta', LQ_ROOMS], ['house_test', HOUSE_TEST_ROOMS], ['house_iv', HOUSE_IV_ROOMS]] as const)('%s room paint', (name, ROOMS) => {
   it('every painted wall face shows the paint of the room it faces', () => {
-    const m = parseMap(JSON.parse(readFileSync(new URL(name === 'house_test' ? '../maps/house_test.json' : `../junk/maps/${name}.json`, import.meta.url), 'utf8')));
+    const m = parseMap(JSON.parse(readFileSync(new URL(name.startsWith('house_') ? `../maps/${name}.json` : `../junk/maps/${name}.json`, import.meta.url), 'utf8')));
     const paints = new Set(ROOMS.map((r) => r.paint));
     const bad: string[] = [];
     for (const b of m.brushes) {

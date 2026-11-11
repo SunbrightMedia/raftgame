@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Rng } from '../../world/rng';
+import { kelvinToLinear } from '../light/units';
 
 /**
  * A camcorder look rebuilt from a frame capture of a reference game
@@ -19,11 +20,31 @@ import { Rng } from '../../world/rng';
  *     then the tape pass: slow hue wobble, lifted black, per-line colour
  *     noise, horizontal streaks.
  *  5. Lens bend and a 4:3 picture with black bars.
+ *
+ * Options for other camcorders, all off by default (the capture's camera has
+ * none of them): white balance to the lamps' colour, auto exposure, a flatter
+ * scene contrast, and a glow that only lamps make (threshold) and spreads
+ * wider or tighter (size). The "Infinite house" look uses all of them
+ * (STYLE.md, reference 6; maps/house_iv.json).
  */
 export interface CamcorderParams {
   exposure: number;
+  /** White balance in kelvin: light of this colour comes out neutral (0 = off, as the capture). */
+  whiteBalance: number;
+  /** Auto exposure: the picture's log-average is brought to `aeKey`, within ± `aeRange` stops of `exposure`. */
+  autoExposure: boolean;
+  aeKey: number;
+  aeRange: number;
+  /** How fast auto exposure follows (per second); ≥ 100 snaps (screenshots). */
+  aeRate: number;
+  /** Scene contrast before the tone curve, round mid grey (1 = as is; under 1 flatter, as Blender's Filmic view). */
+  contrast: number;
   tintR: number; tintG: number; tintB: number;
   glow: number;
+  /** Scales the glow's three widths (1 = the capture's). */
+  glowSize: number;
+  /** Only light brighter than this (tone-curve input units) glows; 0 = the whole picture, as the capture. */
+  glowThreshold: number;
   dirt: number;
   fringe: number;
   vignette: number;
@@ -134,6 +155,7 @@ vec3 grade(vec3 lin) {
 
 // ---------------------------------------------------------------- passes
 const QUAD = new THREE.PlaneGeometry(2, 2);
+const METER_W = 64, METER_H = 48;
 const VERT = /* glsl */ `varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`;
 function pass(fragmentShader: string, uniforms: Record<string, THREE.IUniform>) {
   const mat = new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader, uniforms, depthTest: false, depthWrite: false });
@@ -237,14 +259,30 @@ export class CamcorderPost {
   /** Tests: a fixed clock for the tape pass (seconds), or null for real time. */
   debugTime: number | null = null;
 
+  // Auto exposure meter: log2 luminance of the picture (white-balanced, before exposure), 2^-16 .. 2^8 in 0..1.
+  private meterPass = pass(/* glsl */ `
+    uniform sampler2D src; uniform vec3 wb; varying vec2 vUv;
+    void main() {
+      float l = dot(texture2D(src, vUv).rgb * wb, vec3(0.2126, 0.7152, 0.0722));
+      gl_FragColor = vec4(vec3(clamp((log2(max(l, 1e-7)) + 16.0) / 24.0, 0.0, 1.0)), 1.0);
+    }`, { src: { value: null }, wb: { value: new THREE.Vector3(1, 1, 1) } });
+  private meter = new THREE.WebGLRenderTarget(METER_W, METER_H, { depthBuffer: false, type: THREE.UnsignedByteType, colorSpace: THREE.NoColorSpace, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
+  private meterBuf = new Uint8Array(METER_W * METER_H * 4);
+  /** The exposure auto exposure has reached (0 = not yet metered). */
+  aeExposure = 0;
+  private aeGoal = 0;
+
   private prep = pass(/* glsl */ `
-    uniform sampler2D src; uniform vec2 texel; uniform vec3 scale; varying vec2 vUv;
+    uniform sampler2D src; uniform vec2 texel; uniform vec3 scale; uniform float thresh; varying vec2 vUv;
     void main() {
       // 4 bilinear taps = a 4×4 box: the half-size picture, already exposed and tinted
       vec3 c = texture2D(src, vUv + texel * vec2(-0.5, -0.5)).rgb + texture2D(src, vUv + texel * vec2(0.5, -0.5)).rgb
              + texture2D(src, vUv + texel * vec2(-0.5, 0.5)).rgb + texture2D(src, vUv + texel * vec2(0.5, 0.5)).rgb;
-      gl_FragColor = vec4(max(c * 0.25 * scale, 0.0), 1.0);
-    }`, { src: { value: null }, texel: { value: new THREE.Vector2() }, scale: { value: new THREE.Vector3(1, 1, 1) } });
+      c = max(c * 0.25 * scale, 0.0);
+      // With a threshold only what is brighter glows (as a renderer's glare effect), keeping its colour.
+      if (thresh > 0.0) { float l = max(c.r, max(c.g, c.b)); c *= max(l - thresh, 0.0) / max(l, 1e-4); }
+      gl_FragColor = vec4(c, 1.0);
+    }`, { src: { value: null }, texel: { value: new THREE.Vector2() }, scale: { value: new THREE.Vector3(1, 1, 1) }, thresh: { value: 0 } });
 
   private half = pass(/* glsl */ `
     uniform sampler2D src; uniform vec2 texel; varying vec2 vUv;
@@ -272,7 +310,7 @@ export class CamcorderPost {
   private tone = pass(/* glsl */ `
     uniform sampler2D src; uniform sampler2D g1; uniform sampler2D g2; uniform sampler2D g3; uniform sampler2D dirtTex;
     uniform vec3 scale; uniform vec3 glowW; uniform float dirt; uniform vec2 fringe; uniform float vignette; uniform float aspect; uniform float seed;
-    uniform float dbg; uniform vec3 tint;
+    uniform float dbg; uniform vec3 tint; uniform float contrast;
     varying vec2 vUv;
     ${TONE}
     void main() {
@@ -285,6 +323,8 @@ export class CamcorderPost {
       if (dbg > 0.5) { gl_FragColor = vec4(sqrt(max(dbg < 1.5 ? sc * scale / tint / 40.0 : glow / tint / 1.28, 0.0)), 1.0); return; }
       glow *= 1.0 + dirt * texture2D(dirtTex, vUv).r;
       vec3 x = sc * scale + glow;
+      // flatter (or steeper) round mid grey, on luminance so colours keep their hue and saturation
+      if (contrast != 1.0) { float lx = max(dot(x, vec3(0.2126, 0.7152, 0.0722)), 1e-6); x *= pow(lx / 0.18, contrast - 1.0); }
       vec2 v = vec2(p.x, p.y / aspect) * (1.41421356 / sqrt(1.0 + 1.0 / (aspect * aspect))) * vignette;
       float k = 1.0 / (1.0 + dot(v, v));
       x *= k * k;
@@ -294,7 +334,7 @@ export class CamcorderPost {
     }`, {
     src: { value: null }, g1: { value: null }, g2: { value: null }, g3: { value: null }, dirtTex: { value: null },
     scale: { value: new THREE.Vector3(1, 1, 1) }, glowW: { value: new THREE.Vector3() }, dirt: { value: 0 }, fringe: { value: new THREE.Vector2() },
-    vignette: { value: 0.4 }, aspect: { value: 4 / 3 }, seed: { value: 0 }, dbg: { value: 0 }, tint: { value: new THREE.Vector3(1, 1, 1) },
+    vignette: { value: 0.4 }, aspect: { value: 4 / 3 }, seed: { value: 0 }, dbg: { value: 0 }, tint: { value: new THREE.Vector3(1, 1, 1) }, contrast: { value: 1 },
   });
 
   private sharp = pass(/* glsl */ `
@@ -384,13 +424,55 @@ export class CamcorderPost {
     gl.render(p.scene, this.cam);
   }
 
+  /**
+   * The exposure that brings the picture's log-average (centre-weighted, as a camcorder meters; the darkest and
+   * brightest tenth left out) to `aeKey`,
+   * within ± aeRange stops of `exposure`; eased at `aeRate` per second, metered every fourth frame (the read
+   * back from the graphics card stalls it). aeRate ≥ 100, or no exposure yet, snaps to it.
+   */
+  private autoExpose(gl: THREE.WebGLRenderer, src: THREE.WebGLRenderTarget, wb: [number, number, number], p: CamcorderParams, dt: number): number {
+    const snap = p.aeRate >= 100 || this.aeExposure <= 0;
+    if (snap || this.frame % 4 === 0) {
+      const m = this.meterPass.u;
+      m.src.value = src.texture; (m.wb.value as THREE.Vector3).set(wb[0] * p.tintR, wb[1] * p.tintG, wb[2] * p.tintB);
+      this.draw(gl, this.meterPass, this.meter);
+      gl.readRenderTargetPixels(this.meter, 0, 0, METER_W, METER_H, this.meterBuf);
+      // centre-weighted mean of log2 luminance, leaving out the darkest and brightest tenth (lamps, black holes)
+      const samples: [number, number][] = [];
+      let wall = 0;
+      for (let y = 0; y < METER_H; y++) for (let x = 0; x < METER_W; x++) {
+        const u = (x + 0.5) / METER_W - 0.5, v = (y + 0.5) / METER_H - 0.5;
+        const w = Math.exp(-(u * u + v * v) / 0.35);
+        samples.push([this.meterBuf[(y * METER_W + x) * 4] / 255 * 24 - 16, w]); wall += w;
+      }
+      samples.sort((q, r) => q[0] - r[0]);
+      let cum = 0, sum = 0, wsum = 0;
+      for (const [l, w] of samples) {
+        if (cum >= 0.1 * wall && cum + w <= 0.9 * wall) { sum += l * w; wsum += w; }
+        cum += w;
+      }
+      const range = Math.pow(2, p.aeRange);
+      this.aeGoal = Math.min(p.exposure * range, Math.max(p.exposure / range, p.aeKey / Math.pow(2, sum / Math.max(wsum, 1e-9))));
+    }
+    if (snap) this.aeExposure = this.aeGoal;
+    else this.aeExposure *= Math.pow(this.aeGoal / this.aeExposure, Math.min(1, p.aeRate * dt));
+    return this.aeExposure;
+  }
+
   private gauss(gl: THREE.WebGLRenderer, src: THREE.WebGLRenderTarget, tmp: THREE.WebGLRenderTarget, out: THREE.WebGLRenderTarget, sigmaTexels: number): void {
+    // One pass covers ±3σ with its 31 taps at most 1.5 texels apart (σ ≤ 7.5); a wider glow is several passes
+    // (σ adds in quadrature). Wider taps skip texels and leave stripes.
+    const s = Math.max(0.5, sigmaTexels), n = Math.min(16, Math.max(1, Math.ceil((s / 7.5) ** 2)));
     const u = this.blur.u;
-    u.sigma.value = Math.max(0.5, sigmaTexels);
-    u.src.value = src.texture; (u.dir.value as THREE.Vector2).set(1 / src.width, 0);
-    this.draw(gl, this.blur, tmp);
-    u.src.value = tmp.texture; (u.dir.value as THREE.Vector2).set(0, 1 / src.height);
-    this.draw(gl, this.blur, out);
+    u.sigma.value = s / Math.sqrt(n);
+    let from = src;
+    for (let i = 0; i < n; i++) {
+      u.src.value = from.texture; (u.dir.value as THREE.Vector2).set(1 / src.width, 0);
+      this.draw(gl, this.blur, tmp);
+      u.src.value = tmp.texture; (u.dir.value as THREE.Vector2).set(0, 1 / src.height);
+      this.draw(gl, this.blur, out);
+      from = out;
+    }
   }
 
   /**
@@ -406,7 +488,11 @@ export class CamcorderPost {
     let ow = cw, oh = Math.round(cw / aspect);
     if (oh > ch) { oh = ch; ow = Math.round(ch * aspect); }
     this.ensure(src.width, src.height, ow, oh);
-    const scale = new THREE.Vector3(p.tintR, p.tintG, p.tintB).multiplyScalar(p.exposure);
+    const wb = whiteBalanceGains(p.whiteBalance ?? 0);
+    let exposure = p.exposure;
+    if (p.autoExposure) exposure = this.autoExpose(gl, src, wb, p, dt);
+    else this.aeExposure = 0;
+    const scale = new THREE.Vector3(p.tintR * wb[0], p.tintG * wb[1], p.tintB * wb[2]).multiplyScalar(exposure);
     // the upscaler's softness: blur the picture first (glow and tone both read it)
     if (p.soften > 0) {
       if (!this.softA || this.softA.width !== src.width || this.softA.height !== src.height) {
@@ -418,16 +504,17 @@ export class CamcorderPost {
     }
     // glow chain
     const pr = this.prep.u;
-    pr.src.value = src.texture; (pr.texel.value as THREE.Vector2).set(1 / src.width, 1 / src.height); (pr.scale.value as THREE.Vector3).copy(scale);
+    pr.src.value = src.texture; (pr.texel.value as THREE.Vector2).set(1 / src.width, 1 / src.height); (pr.scale.value as THREE.Vector3).copy(scale); pr.thresh.value = p.glowThreshold ?? 0;
     this.draw(gl, this.prep, this.down[0]);
     for (let i = 1; i < 4; i++) {
       const hu = this.half.u;
       hu.src.value = this.down[i - 1].texture; (hu.texel.value as THREE.Vector2).set(1 / this.down[i - 1].width, 1 / this.down[i - 1].height);
       this.draw(gl, this.half, this.down[i]);
     }
-    this.gauss(gl, this.down[0], this.tmp[0], this.glowRt[0], 0.006 * this.down[0].width);
-    this.gauss(gl, this.down[2], this.tmp[2], this.glowRt[1], 0.025 * this.down[2].width);
-    this.gauss(gl, this.down[3], this.tmp[3], this.glowRt[2], 0.08 * this.down[3].width);
+    const gs = Math.max(0.05, p.glowSize ?? 1);
+    this.gauss(gl, this.down[0], this.tmp[0], this.glowRt[0], 0.006 * gs * this.down[0].width);
+    this.gauss(gl, this.down[2], this.tmp[2], this.glowRt[1], 0.025 * gs * this.down[2].width);
+    this.gauss(gl, this.down[3], this.tmp[3], this.glowRt[2], 0.08 * gs * this.down[3].width);
     // tone
     const t = this.tone.u;
     t.src.value = src.texture; t.g1.value = this.glowRt[0].texture; t.g2.value = this.glowRt[1].texture; t.g3.value = this.glowRt[2].texture; t.dirtTex.value = this.dirt;
@@ -436,7 +523,7 @@ export class CamcorderPost {
     t.dirt.value = p.dirt;
     // fringe 0.3 → red 0.003087, green 0.001781 of the half-picture (wavelength-weighted)
     (t.fringe.value as THREE.Vector2).set(p.fringe * 0.01 * 1.029, p.fringe * 0.01 * 0.5936);
-    t.vignette.value = p.vignette;
+    t.vignette.value = p.vignette; t.contrast.value = p.contrast ?? 1;
     t.aspect.value = aspect;
     t.seed.value = (this.frame * 7.31) % 1000;
     t.dbg.value = this.debugStage === 'scene' ? 1 : this.debugStage === 'glow' ? 2 : 0;
@@ -467,4 +554,11 @@ export class CamcorderPost {
     gl.render(this.lens.scene, this.cam);
     gl.setViewport(0, 0, cw, ch);
   }
+}
+
+/** Gains that make light of `kelvin` neutral, keeping its luminance (0 = none). */
+export function whiteBalanceGains(kelvin: number): [number, number, number] {
+  if (!(kelvin > 0)) return [1, 1, 1];
+  const c = kelvinToLinear(kelvin);
+  return [1 / c[0], 1 / c[1], 1 / c[2]];
 }

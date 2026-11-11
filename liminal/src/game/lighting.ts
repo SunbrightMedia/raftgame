@@ -187,6 +187,8 @@ export class Lighting {
       const b = bakeSettings as Record<string, unknown>;
       delete b.bounceEven; delete b.bounceProbe;
     }
+    // A white fill (the default) keys as before the colour setting existed.
+    if (!(bakeSettings.ambientKelvin > 0)) delete (bakeSettings as Record<string, unknown>).ambientKelvin;
     // Material colours matter too (bounce light): a recoloured texture must re-bake.
     // Keyed on each texture's definition, not its measured pixels, so the key is
     // the same in every browser (see TextureRegistry.identity).
@@ -458,7 +460,7 @@ export class Lighting {
       emissive,
       albedo,
       params: {
-        ambient: [L.ambientLux, L.ambientLux, L.ambientLux],
+        ambient: L.ambientKelvin > 0 ? kelvinToLinear(L.ambientKelvin).map((c) => c * L.ambientLux) as [number, number, number] : [L.ambientLux, L.ambientLux, L.ambientLux],
         lightScale: L.lightScale,
         bounces: over.bounces ?? L.bounces,
         bounceScale: L.bounceScale,
@@ -520,7 +522,7 @@ export function lightFromEntity(origin: [number, number, number], p: Props): Bak
     return { pos: origin, color: col, I0: cd > 0 ? cd : cosNPeak(lm, n), dir: [0, 0, -1], n, cutoffDeg: num('cutoff', 87), softDeg: 3, spill: 0, ...(num('shadows', 1) === 0 ? { shadows: false } : {}) };
   }
   if (type === 'dome') {
-    const n = 0.6, lm = num('lumens', 800) * 0.8; // ~80% gets out through the glass
+    const n = num('n', 0.6), lm = num('lumens', 800) * 0.8; // ~80% gets out through the glass
     return { pos: origin, color, I0: cosNPeak(lm, n), dir: [0, 0, -1], n, cutoffDeg: 88, softDeg: 2, spill: 0 };
   }
   if (type === 'down' || type === 'up') {

@@ -248,6 +248,66 @@
       "contrast": 0.9
     },
     {
+      "name": "house6/carpet_brown",
+      "from": "house/carpet_plush",
+      "color": "#847462",
+      "contrast": 0.7
+    },
+    {
+      "name": "house6/soot",
+      "from": "office/plaster",
+      "color": "#171412",
+      "contrast": 0.4
+    },
+    {
+      "name": "house6/wood_dark",
+      "from": "house/panel_wood",
+      "color": "#6b5038",
+      "contrast": 0.8
+    },
+    {
+      "name": "house6/trim_cream",
+      "from": "house/trim_white",
+      "color": "#ddd5bf",
+      "contrast": 0.5
+    },
+    {
+      "name": "house6/brick",
+      "from": "ind/brick_red",
+      "color": "#8a5a40",
+      "contrast": 0.9
+    },
+    {
+      "name": "house6/window",
+      "from": "office/plaster",
+      "color": "#2e2a26",
+      "contrast": 0.3
+    },
+    {
+      "name": "house6/wood_mid",
+      "from": "house/panel_wood",
+      "color": "#6b4a2e",
+      "contrast": 0.8
+    },
+    {
+      "name": "house6/fabric_grey",
+      "from": "house/upholstery",
+      "color": "#76767a",
+      "contrast": 0.9
+    },
+    {
+      "name": "house6/counter",
+      "from": "office/plaster",
+      "color": "#55524d",
+      "contrast": 0.5
+    },
+    {
+      "name": "house6/dark",
+      "from": "office/plaster",
+      "color": "#141414",
+      "contrast": 0.3
+    },
+    {
       "name": "cx/paint_yellow",
       "from": "office/plaster",
       "color": "#f0ec81",

@@ -22,6 +22,10 @@
     "cx/carpet": {"roughness": 1, "f0": 0.024, "gloss": 1, "sheen": 0, "bump": 0, "cavity": 0},
     "cx/ceiling": {"roughness": 0.58, "f0": 0.007, "gloss": 1, "bump": 0, "cavity": 0},
     "cx/cloth": {"roughness": 0.87, "f0": 0.04, "gloss": 1, "sheen": 0},
-    "cx/door_dark": {"roughness": 0.2, "f0": 0.01, "gloss": 1}
+    "cx/door_dark": {"roughness": 0.2, "f0": 0.01, "gloss": 1},
+    "house6/counter": {"roughness": 0.45, "f0": 0.04, "gloss": 0.6},
+    "house6/dark": {"roughness": 0.85, "f0": 0.04, "gloss": 0.3},
+    "house6/window": {"roughness": 0.35, "f0": 0.04, "gloss": 0.5},
+    "house6/soot": {"roughness": 1, "gloss": 0}
   }
 }

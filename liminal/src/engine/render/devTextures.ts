@@ -592,6 +592,19 @@ const DEFS: Record<string, Def> = {
     emissive: { kelvin: 3000, luminance: 9000, castsLight: false },
     paint: (g, w, h) => { g.fillStyle = '#f4efe4'; g.fillRect(0, 0, w, h); },
   },
+  // Flush dome lens for the house look: a real one is ~4800 cd/m² (1600 lm × 0.8 out of a 13" disc), but the
+  // video's lamps read as soft blobs that only just reach white; at 1500 the camera's glow makes that shape.
+  'fixture/dome_soft': {
+    px: [32, 32], world: [12, 12], material: 'glass',
+    emissive: { kelvin: 2700, luminance: 1500, castsLight: false },
+    paint: (g, w, h) => { g.fillStyle = '#f4efe4'; g.fillRect(0, 0, w, h); },
+  },
+  // Wall sconce shade (frosted glass): its luminance goes with a 450 lm bulb, not a ceiling dome's.
+  'fixture/sconce': {
+    px: [32, 32], world: [12, 12], material: 'glass',
+    emissive: { kelvin: 2700, luminance: 2500, castsLight: false },
+    paint: (g, w, h) => { g.fillStyle = '#f4efe4'; g.fillRect(0, 0, w, h); },
+  },
   missing: {
     px: [32, 32], world: [32, 32], raw: true,
     paint: (g, w, h) => {

@@ -372,6 +372,26 @@ Map: `laquinta`. Plan in `tools/gen-laquinta.ts`'s header.
   about 6 % of the picture's height and fades out by about 12 % (The
   Complex's glow is about ten times tighter). Grain could not be measured:
   YouTube's compression removed it.
+- **Rebuilt (map `house_iv`, Nov 2026; `tools/house/gen-house-iv.ts`).**
+  The camera was solved from the frames (straight edges → vanishing points,
+  one lens for all three): 64.4° wide (4:3), almost no barrel bend, tilted
+  3-5° down. With 80" doors (36" counter) for scale: eye 66 / 53 / 59",
+  **ceilings 101 / 115 / 115"** — taller than a normal basement (not 8' as
+  guessed above); much of the empty, tall feel. The "louvred" doors of frame
+  3 are six-panel doors: the slots are panel shadows. **(claude)**
+- What made it match, each general (the same for all three frames): the
+  camera balances white to its lamps (2900 K for 2700 K lamps leaves the
+  measured warmth); auto exposure; a flatter scene contrast (0.75, as
+  Blender's Filmic view); a fill light in the lamps' colour (4 lx at
+  2700 K: far walls and ceilings are lit more evenly than bounce alone gives;
+  a white fill turns blue once white is balanced); trim and doors the **same
+  cream as the walls** (they read as bright as the walls in every frame);
+  raised panels with real bevels; a glow just round the lamps (threshold),
+  half at ~45 px of 720. Mean error 0.052 / 0.074 / 0.060; most surfaces
+  within ±15 %. Still off: the far end of frame 3's hall is darker than the
+  video (0.66×), and one near wall in frame 2 (0.8×). Blender renders keep
+  one exposure, so the video's frame 1 room likely has more lamps out of
+  sight; our auto exposure hides that.
 
 ## Reference 7: The Complex: Expedition (Steam, pgWave, 2025)
 

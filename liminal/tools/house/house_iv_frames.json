@@ -1,0 +1,6 @@
+{
+ "_": "Studio poses (x,y,feet z,yaw,pitch; feet = eye - 48) of the three frames of the Infinite house video, measured with a 64.4 deg (4:3) lens. ref: i.ytimg.com/vi/qs5LrOkvVKM/maxresN.jpg, picture at x 160-1120.",
+ "K": { "pose": "0,0,18,50.3,4.9", "eye": 66, "ref": "maxres1" },
+ "F": { "pose": "1000,0,5.2,92.3,4.8", "eye": 53.2, "ref": "maxres2" },
+ "D": { "pose": "2000,0,11.2,128.2,3.4", "eye": 59.2, "ref": "maxres3" }
+}
