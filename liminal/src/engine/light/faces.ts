@@ -300,22 +300,63 @@ export function inFace(f: Face, s: number, t: number): boolean {
   return true;
 }
 
+const axial = (v: Axis): number => (Math.abs(v[0]) > 0.99999 ? 0 : Math.abs(v[1]) > 0.99999 ? 1 : Math.abs(v[2]) > 0.99999 ? 2 : -1);
+const boxLike = new WeakMap<SolidPlanes, boolean>();
+/** Is the solid an axis-aligned box (every plane square to an axis)? */
+function isBoxSolid(s: SolidPlanes): boolean {
+  let v = boxLike.get(s);
+  if (v === undefined) { v = s.planes.every((p) => axial(p.n) >= 0); boxLike.set(s, v); }
+  return v;
+}
+
+/**
+ * Is the whole face hidden inside other solids? Never a guess: a face is
+ * dropped only if (1) one solid holds all of it, or (2) it is a rectangle
+ * square to the axes and boxes square to the axes cover it between them.
+ * Anything else is kept (a hidden face that is drawn costs a little; a face
+ * in plain sight that is dropped is a hole in the world).
+ *
+ * (This used to try 25 points on the face. A tall box hung in a frame whose
+ * beams crossed its side at just those heights lost that side; so did a
+ * floor mostly under a slab.)
+ */
 function isBuried(f: Face, others: SolidPlanes[]): boolean {
-  // Sample points just outside the face; if every one is inside some other
-  // solid, the face can't be seen.
-  const N = 4;
-  let tested = 0;
-  for (let i = 0; i <= N; i++) {
-    for (let j = 0; j <= N; j++) {
-      const s = Math.min(Math.max((f.width * i) / N, 0.5), f.width - 0.5);
-      const t = Math.min(Math.max((f.height * j) / N, 0.5), f.height - 0.5);
-      if (!inFace(f, s, t)) continue;
-      tested++;
-      const p = facePoint(f, s, t, 0.5);
-      if (!others.some((o) => insideSolid(o, p))) return false;
+  if (!others.length) return false;
+  // The face's corners, drawn in by half a unit (a solid that ends flush with the face's edge still covers it) and
+  // lifted half a unit off the face.
+  const poly = f.poly ?? [[0, 0], [f.width, 0], [f.width, f.height], [0, f.height]];
+  let cs = 0, ct = 0;
+  for (const [a, b] of poly) { cs += a / poly.length; ct += b / poly.length; }
+  const corners = poly.map(([a, b]) => { const ds = cs - a, dt = ct - b, l = Math.hypot(ds, dt) || 1, k = Math.min(0.5, l / 2) / l; return facePoint(f, a + ds * k, b + dt * k, 0.5); });
+  // (1) One solid holds every corner: solids are convex, so it holds all between them too.
+  for (const o of others) if (corners.every((p) => insideSolid(o, p))) return true;
+  // (2) A rectangle square to the axes, covered by boxes square to the axes.
+  const an = axial(f.n), ar = axial(f.r), au = axial(f.u);
+  if (an < 0 || ar < 0 || au < 0 || f.width < 1.01 || f.height < 1.01) return false;
+  if (f.poly && !(f.poly.length === 4 && f.poly.every(([a, b]) => (Math.abs(a) < 1e-6 || Math.abs(a - f.width) < 1e-6) && (Math.abs(b) < 1e-6 || Math.abs(b - f.height) < 1e-6)))) return false;
+  const c0 = f.origin[an] + f.n[an] * 0.5;
+  const lo = 0.5, hiS = f.width - 0.5, hiT = f.height - 0.5;
+  const rects: number[][] = [];
+  for (const o of others) {
+    if (!isBoxSolid(o) || !(o.min[an] + 1e-3 < c0 && c0 < o.max[an] - 1e-3)) continue;
+    // The box's reach along the face's own two directions.
+    const span = (axis: number, dir: number): [number, number] => (dir > 0 ? [o.min[axis] - f.origin[axis], o.max[axis] - f.origin[axis]] : [f.origin[axis] - o.max[axis], f.origin[axis] - o.min[axis]]);
+    const [s0, s1] = span(ar, f.r[ar]), [t0, t1] = span(au, f.u[au]);
+    const a0 = Math.max(lo, s0), a1 = Math.min(hiS, s1), b0 = Math.max(lo, t0), b1 = Math.min(hiT, t1);
+    if (a1 > a0 && b1 > b0) rects.push([s0, s1, t0, t1]);
+  }
+  if (!rects.length) return false;
+  // Cut the face along every box edge; each piece's middle must be inside some box.
+  const cuts = (from: number, to: number, k: number) => [...new Set([from, to, ...rects.flatMap((r) => [r[k], r[k + 1]]).filter((v) => v > from && v < to)])].sort((a, b) => a - b);
+  const xs = cuts(lo, hiS, 0), ys = cuts(lo, hiT, 2);
+  for (let i = 0; i < Math.max(1, xs.length - 1); i++) {
+    const x = xs.length > 1 ? (xs[i] + xs[i + 1]) / 2 : xs[0];
+    for (let j = 0; j < Math.max(1, ys.length - 1); j++) {
+      const y = ys.length > 1 ? (ys[j] + ys[j + 1]) / 2 : ys[0];
+      if (!rects.some((r) => r[0] < x && x < r[1] && r[2] < y && y < r[3])) return false;
     }
   }
-  return tested > 0;
+  return true;
 }
 
 // ---------------------------------------------------------------------------

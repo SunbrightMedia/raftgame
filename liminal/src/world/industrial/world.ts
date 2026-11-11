@@ -85,6 +85,8 @@ interface Inner {
   finish: Finish; hollows: Hollow[]; doors: Door[]; steps: { min: V3; max: V3; riser: Dir }[]; ribs: [V3, V3][];
   /** Stair flights: the middle of the low end's first stair tile, the way up, the width, the low floor's height. */
   ramps: { c: V3; d: Dir; w: number; z: number }[];
+  /** Air outside the mass that its lamps shine into (in front of each doorway): nothing is cut there. */
+  spill: { min: V3; max: V3 }[];
 }
 
 interface Ctx {
@@ -167,7 +169,7 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
       const doors = cut?.doors ?? [];
       if (kind === 'machine') skeleton(ctx, r, x0, y0, x1, y1, z0, z1, 512, D.steel, doors);
       wallRuns(ctx, r, x0, y0, x1, y1, z0, z1, (kind === 'machine' ? 0.5 : 0.25) * D.pipes, doors);
-      if (cut) { fitOut(ctx, p, cut); m.fogVolume([x0, y0, bottom - 64], [x1, y1, z1], INSIDE_FOG); m.lampShade([x0, y0, z0], [x1, y1, z1]); }
+      if (cut) { fitOut(ctx, p, cut); m.fogVolume([x0, y0, bottom - 64], [x1, y1, z1], INSIDE_FOG); m.lampShade([x0, y0, z0], [x1, y1, z1]); m.air([...cut.hollows, ...cut.spill]); }
     }
   }
 
@@ -242,17 +244,15 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
 
 // Lamp colours Valve types into Portal 2 (docs/P2_STUDY.md), and an amber for marker lamps.
 const LAMP = { warm: [250, 230, 170] as V3, white: [255, 245, 215] as V3, cool: [183, 204, 218] as V3, amber: [255, 150, 60] as V3 };
-type LampBox = { min: V3; max: V3 };
-
 /**
  * A bell lamp hanging from `top` (the underside of a beam or a ceiling): the
- * fixture, its light, and the glow seen on it. In the open unless `box` shuts
- * it in the room it hangs in.
+ * fixture, its light, and the glow seen on it. In the open, or `inside` a
+ * mass (then it lights only what it can see through the mass's hollows).
  */
-function bellLamp(m: MapOut, top: V3, color: V3, brightness: number, reach: number, box?: LampBox): void {
+function bellLamp(m: MapOut, top: V3, color: V3, brightness: number, reach: number, inside = false): void {
   m.prop('props_bts/light_hanging_1a', top, [0, 0, 0], { solid: false });
   const at: V3 = [top[0], top[1], top[2] - 76];
-  m.lamp(at, color, brightness, 120, reach, box ? { box } : { open: true });
+  m.lamp(at, color, brightness, 120, reach, inside ? { indoor: true } : { open: true });
   m.glow([at[0], at[1], at[2] - 8], color, 70, 1.5);
 }
 
@@ -261,12 +261,12 @@ function bellLamp(m: MapOut, top: V3, color: V3, brightness: number, reach: numb
  * ceiling (mount 'down'); the tube lies along `run`. `at` is the point of the
  * wall or ceiling it is fixed to.
  */
-function tubeLamp(m: MapOut, at: V3, mount: Dir | 'down', run: Dir, color: V3, brightness: number, reach: number, box?: LampBox, size = 80): void {
+function tubeLamp(m: MapOut, at: V3, mount: Dir | 'down', run: Dir, color: V3, brightness: number, reach: number, inside = false, size = 80): void {
   const out: V3 = mount === 'down' ? [0, 0, -1] : [DX[mount], DY[mount], 0];
   // light_cage001a: 128 long on its own y, its back 6 behind its origin on its own x.
   m.prop('props_bts/light_cage001a', [at[0] + out[0] * 6, at[1] + out[1] * 6, at[2] + out[2] * 6], mount === 'down' ? [90, run * 90 - 90, 0] : [0, mount * 90, 0], { solid: false });
   const p: V3 = [at[0] + out[0] * 16, at[1] + out[1] * 16, at[2] + out[2] * 16];
-  m.lamp(p, color, brightness, size, reach, box ? { box } : { open: true });
+  m.lamp(p, color, brightness, size, reach, inside ? { indoor: true } : { open: true });
   m.glow([at[0] + out[0] * 12, at[1] + out[1] * 12, at[2] + out[2] * 12], color, 48, 1.2);
 }
 
@@ -301,7 +301,7 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
   const out = new Map<number, Inner>();
   const get = (blk: number): Inner => {
     let v = out.get(blk);
-    if (!v) { v = { finish: root.fork(`finish${blk}`).pick(FINISH[kindOf(blk)]), hollows: [], doors: [], steps: [], ribs: [], ramps: [] }; out.set(blk, v); }
+    if (!v) { v = { finish: root.fork(`finish${blk}`).pick(FINISH[kindOf(blk)]), hollows: [], doors: [], steps: [], ribs: [], ramps: [], spill: [] }; out.set(blk, v); }
     return v;
   };
   const cut = (blk: number, box: [V3, V3]) => { const v = get(blk); v.hollows.push({ min: box[0], max: box[1], finish: v.finish }); ctx.hollows.push({ min: box[0], max: box[1] }); };
@@ -326,6 +326,25 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
   /** A doorway in a mass's face is never wider or taller than this, whatever the corridor behind it. */
   const DOOR_W = 128, DOOR_H = 168, NECK = 96;
   const dirs: Dir[] = [0, 1, 2, 3];
+  /**
+   * The air a doorway's light spills into: straight out from the door (in
+   * tile tx, ty, facing f) as far as the street is open, three tiles at most,
+   * and a tile to each side where that is open all the way. Lamps inside
+   * shine through the door into it (lightGridCore.ts).
+   */
+  const spill = (blk: number, tx: number, ty: number, f: Dir, z: number, dh: number): void => {
+    const free = (x: number, y: number) => x >= 0 && y >= 0 && x < N && y < N && blockOf(x, y) < 0;
+    let depth = 0;
+    while (depth < 3 && free(tx + DX[f] * (depth + 1), ty + DY[f] * (depth + 1))) depth++;
+    if (!depth) return;
+    const lx = -DY[f], ly = DX[f];
+    // (Where a mass stands to the side, the air still reaches its face: the margin every mass keeps.)
+    const wide = [1, -1].map((side) => { for (let k = 1; k <= depth; k++) if (!free(tx + DX[f] * k + lx * side, ty + DY[f] * k + ly * side)) return MARGIN; return TILE; });
+    // (It ends at the far tiles' edge, not on the face of the mass across the street: in that last strip stand the
+    // porches of that mass's own doors, and their sides must not let this light in.)
+    const b = slab([tx * TILE + TILE / 2, ty * TILE + TILE / 2, 0], f, TILE / 2, TILE / 2 + depth * TILE, -(TILE / 2 + wide[1]), TILE / 2 + wide[0], z - 48, z + dh + 96);
+    get(blk).spill.push({ min: b[0], max: b[1] });
+  };
 
   // ---- shafts: at some junctions the mass is hollow from far below to well above every level, and the catwalks
   // cross it in the open, one over the other, hung from beams that span it wall to wall
@@ -383,7 +402,7 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
         steelIn.push([[c[0] + o - 6, y0, z + 216], [c[0] + o + 6, y1, z + 236]]);
         for (const q of [-47, 47]) steelIn.push([[c[0] + o - 1.5, c[1] + q - 1.5, z - 10], [c[0] + o + 1.5, c[1] + q + 1.5, z + 216]]);
       }
-      bellLamp(m, [c[0] + 47, c[1], z + 216], LAMP.warm, 2, 720, { min: box.min, max: box.max });
+      bellLamp(m, [c[0] + 47, c[1], z + 216], LAMP.warm, 2, 720, true);
       // Over each run of deck, at every other tile and at the last: a beam across, square to the run, and two rods.
       for (const dd of open) for (let k = 1; k <= reach[dd]; k++) {
         if (k % 2 !== 0 && k !== reach[dd]) continue;
@@ -421,7 +440,7 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
     if (r.chance(0.5)) {
       const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
       m.prop('props_bts/light_hanging_1a', [cx, cy, zTop], [0, 0, 0], { solid: false });
-      m.lamp([cx, cy, zTop - 80], LAMP.white, 5, 420, zTop - zOf(0) + 1400, { dir: [0, 0, -1], cone: 32, inner: 12, box: { min: box.min, max: box.max } });
+      m.lamp([cx, cy, zTop - 80], LAMP.white, 5, 420, zTop - zOf(0) + 1400, { dir: [0, 0, -1], cone: 32, inner: 12, indoor: true });
       m.glow([cx, cy, zTop - 84], LAMP.white, 90, 2);
       m.beam([cx, cy, zTop - 86], [0, 0, -1], 1100, 260, LAMP.white, 0.35);
     }
@@ -461,20 +480,20 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
       if (where(i - 1) < 0) {
         cut(blk, along(c, d, u0, u0 + NECK, dw, z, z + dh));
         get(blk).doors.push({ side: opposite(d), at, z, w: dw, h: dh, stub: i, balcony: lay.nodes.get(`${ends[0].id}:${endLevel[0]}`) === (1 << d) });
+        spill(blk, seq[i][0], seq[i][1], opposite(d), z, dh);
         u0 += NECK;
       }
       if (where(e + 1) < 0) {
         cut(blk, along(c, d, u1 - NECK, u1, dw, z, z + dh));
         get(blk).doors.push({ side: d, at, z, w: dw, h: dh, stub: seq.length - 1 - e, balcony: lay.nodes.get(`${ends[1].id}:${endLevel[1]}`) === (1 << opposite(d)) });
+        spill(blk, seq[e][0], seq[e][1], d, z, dh);
         u1 -= NECK;
       }
       cut(blk, along(c, d, u0, u1, p.w, z, z + p.h));
-      // Caged tube lights along the ceiling, shut in this run of corridor (so they light no other level through the floor).
-      // (Where the run ends at a junction inside the mass, the box takes in the junction too: a plain corner has no lamp of its own.)
-      const whole = along(c, d, -TILE / 2 - (where(i - 1) >= 0 ? TILE + TILE / 2 : 0), (e - i) * TILE + TILE / 2 + (where(e + 1) >= 0 ? TILE + TILE / 2 : 0), p.w, z, z + p.h);
+      // Caged tube lights along the ceiling.
       if (p.lamps) for (let u = u0 + Math.min(p.lamps, u1 - u0) / 2; u < u1 - 40; u += p.lamps) {
         const q: V3 = [c[0] + DX[d] * u, c[1] + DY[d] * u, z + p.h];
-        if (!inShaft(blk, q[0], q[1])) tubeLamp(m, q, 'down', d, p.lamp, 1.3, 420, { min: whole[0], max: whole[1] }, 120);
+        if (!inShaft(blk, q[0], q[1])) tubeLamp(m, q, 'down', d, p.lamp, 1.3, 420, true, 120);
       }
       // Steel ribs along it: two posts and a head, standing a little proud of the walls.
       if (p.ribs) for (let u = u0 + p.ribs / 2; u < u1 - 32; u += p.ribs) {
@@ -490,12 +509,11 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
       const c: V3 = [seq[i0][0] * TILE + TILE / 2, seq[i0][1] * TILE + TILE / 2, 0];
       const z = zOf(lo);
       cut(blk, along(c, d, -TILE / 2, 3 * TILE + TILE / 2, p.w, z, zOf(hi) + p.h));
-      const hallBox = along(c, d, -TILE / 2, 3 * TILE + TILE / 2, p.w, z, zOf(hi) + p.h);
       // Its lamps are on the side walls, a little above head height, one low on the flight and one high, on opposite sides.
       if (p.lamps) [96, 352].forEach((u, n) => {
         const side = ((d + (n ? 1 : 3)) % 4) as Dir;   // the wall this lamp is on
         const at: V3 = [c[0] + DX[d] * u + DX[side] * (p.w / 2), c[1] + DY[d] * u + DY[side] * (p.w / 2), z + (u + TILE / 2) / 2 + 118];
-        tubeLamp(m, at, opposite(side), d, p.lamp, 1.6, 420, { min: hallBox[0], max: hallBox[1] });
+        tubeLamp(m, at, opposite(side), d, p.lamp, 1.6, 420, true);
       });
       ctx.notes.push({ kind: 'stairhall', at: [c[0] - DX[d] * 100, c[1] - DY[d] * 100, z], yaw: d * 90 });
       const RUN = 32, RISE = 16;   // 16 steps: one level over four tiles
@@ -525,7 +543,7 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
     if (!r.chance(roomy)) {
       cut(blk, [[c[0] - W / 2, c[1] - W / 2, z], [c[0] + W / 2, c[1] + W / 2, z + H]]);
       // A plain corner or crossing: a tube light of its own on the ceiling, so every place where the way divides is lit.
-      if (open.length > 1) tubeLamp(m, [c[0], c[1], z + H], 'down', open[0], profs[0].lamp, 1.2, 340, { min: [c[0] - TILE / 2, c[1] - TILE / 2, z], max: [c[0] + TILE / 2, c[1] + TILE / 2, z + H] }, 110);
+      if (open.length > 1) tubeLamp(m, [c[0], c[1], z + H], 'down', open[0], profs[0].lamp, 1.2, 340, true, 110);
       continue;
     }
 
@@ -569,14 +587,19 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
     if (slit === null) {
       const mid: V3 = [(lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2, hi[2]];
       const tone = r.pick([LAMP.warm, LAMP.warm, LAMP.white]);
-      if (hgt >= 200) bellLamp(m, mid, tone, hgt > 300 ? 2.2 : 1.6, hgt > 300 ? 620 : 440, { min: lo, max: hi });
-      else tubeLamp(m, mid, 'down', entry, tone, 1.5, 400, { min: lo, max: hi });
+      if (hgt >= 200) bellLamp(m, mid, tone, hgt > 300 ? 2.2 : 1.6, hgt > 300 ? 620 : 440, true);
+      else tubeLamp(m, mid, 'down', entry, tone, 1.5, 400, true);
     }
     ctx.notes.push({ kind: slit !== null ? 'lookout' : hgt > 300 ? 'tallroom' : open.length === 1 ? 'endroom' : 'room', at: [c[0] + DX[entry] * 30, c[1] + DY[entry] * 30, z], yaw: opposite(entry) * 90 });
     if (slit !== null) {
       const sw = Math.min(192, 2 * Math.min(ext[(slit + 1) % 4], ext[(slit + 3) % 4]) - 32);
       cut(blk, along(c, slit, ext[slit] - 1, ext[slit] + 17, sw, z + 46, z + 78));
       get(blk).doors.push({ side: slit, at: slit % 2 === 0 ? c[1] : c[0], z: z + 46, w: sw, h: 32, slit: true, stub: 0, balcony: false });
+      // Light from inside goes out through it: across the open strip in front of the face, then into the street.
+      const toFace = slit < 2 ? face[slit] - c[slit % 2] : c[slit % 2] - face[slit];
+      const strip = along(c, slit, toFace, toFace + MARGIN, Math.max(sw, TILE), z - 2, z + 174);
+      get(blk).spill.push({ min: strip[0], max: strip[1] });
+      spill(blk, J.x + DX[slit], J.y + DY[slit], slit, z + 46, 32);
     }
   }
   return out;

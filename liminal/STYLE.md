@@ -357,7 +357,10 @@ for every pass of this world, and the first two for every world.
   behind it. The catwalk from a doorway to the street's lane rests on two
   beams out of the wall and hangs by a rod from the wall above. No white
   pipes in rooms (they read as bright models).
-- Every change to the generator must still pass `npm run world:walk`.
+- Every change to the generator must still pass `npm run world:walk` and
+  `npm run world:look` (the user: faults like see-through stairs and light
+  with hard edges must be caught fast and by a tool, not by a search of the
+  whole map; and every seed must just work, with no checking by hand).
 - **Stairs are for the eye, a ramp for the feet.** The unseen ramp over a
   flight of steps is a clip brush (`group: 'clip'`): a brush with no drawn
   face hides nothing, so the steps inside it still show. (A plain NODRAW
@@ -372,22 +375,29 @@ for every pass of this world, and the first two for every world.
   over the Source camera's picture, at a fixed exposure and with no colour
   cast of its own (`camera.over`).
 - **Light without a bake.** The world is made in the page, so nothing can be
-  baked. Lamps are worked out per pixel (`engine/render/lightGrid.ts`): no
-  shadows, so each lamp inside a mass is shut in the box of the corridor,
-  room or shaft it hangs in, and lamps in the open do not reach the insides
-  of masses. A little cool light falls on everything; unlit steel reads as a
-  dark shape against the fog, each lamp makes a warm pool. Fixtures: bell
-  lamps under the catwalk beams, in rooms and shafts; caged tube lights on
-  corridor ceilings, stair hall walls and over every doorway (doors show
-  from far off); small amber marker lamps **only up the corners of the big
-  masses** (the user: they look good only there; not on bridges or
-  landings); a bridge has the streets' own frame over it with a bell lamp,
-  a look-out landing a post with an arm and a bell lamp; tube lights in the
-  gaps of some chamber stacks.
-  About one tunnel in eight has very few lamps; a look-out room is always
-  dark; every plain corner and crossing inside a mass has a lamp of its own
-  (a place where the way divides must be readable). With no bounced light,
-  a lamp shut in a room also gives a faint even fill through its reach.
+  baked. Lamps are worked out per pixel (`engine/render/lightGrid.ts`,
+  `lightGridCore.ts`), with shadows and no shadow maps: the generator says
+  where the air is inside each mass (the boxes it cut: corridors, rooms,
+  shafts, and the air in front of each doorway and slit), and a lamp inside
+  lights a point only if the straight line between them stays in that air.
+  So light goes through a doorway in a wedge, stops at a corner, never
+  comes through a wall or a floor, and spills out of a door onto its porch.
+  **A wall or a floor between two hollows must be at least 12 thick**, or
+  light shows through (the look check counts these). Lamps in the open (the
+  streets) have no shadows yet, and do not reach the insides of masses. A
+  little cool light falls on everything; unlit steel reads as a dark shape
+  against the fog, each lamp makes a warm pool. Fixtures: bell lamps under
+  the catwalk beams, in rooms and shafts; caged tube lights on corridor
+  ceilings, stair hall walls and over every doorway (doors show from far
+  off); small amber marker lamps **only up the corners of the big masses**
+  (the user: they look good only there; not on bridges or landings); a
+  bridge has the streets' own frame over it with a bell lamp, a look-out
+  landing a post with an arm and a bell lamp; tube lights in the gaps of
+  some chamber stacks. About one tunnel in eight has very few lamps; a
+  look-out room is always dark; every plain corner and crossing inside a
+  mass has a lamp of its own (a place where the way divides must be
+  readable). With no bounced light, a lamp inside also gives a faint even
+  fill to all it can see.
 - **Fog** (the user asked for layers, more intense further back, and blur):
   three layers by distance, each with its own density and colour. **The
   fog is dark: this is an endless plant under the ground, and nothing far

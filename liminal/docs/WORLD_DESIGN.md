@@ -229,8 +229,15 @@ Checks:
 
 Next, in this order:
 
-1. **Checks**: a walk test over the real collision, and the maze's numbers
-   per seed (both done: `npm run world:walk`, `npm run world:plan`). Now:
+1. **Checks**: a walk test over the real collision, a look check, and the
+   maze's numbers per seed (all done: `npm run world:walk`,
+   `npm run world:look`, `npm run world:plan`). The look check stands at
+   eye points along every walk, casts a fan of sight lines, and finds what
+   an eye would catch at once: a surface that is not drawn (a hole), no
+   drawn floor under the feet, lamp light through a wall, lamp light
+   missing in plain sight of the lamp, a wall too thin to stop light, a
+   lamp inside a mass but in no box of air. Each fault comes with a pose
+   to look at it from. A seed is good when both checks pass. Now:
    dead ends 10-13% of nodes, loops 13-16% of walks, runs between choices
    about 35% short / 50% middling / 13% long, a third of the walks inside
    the masses. Seeds are not yet rejected by these numbers.
@@ -258,3 +265,118 @@ Next, in this order:
    parts delivered to an empty bay, new clean steel grafted onto old, a
    count that no longer adds up. The fault is where the instruction is
    being issued. Exits to other worlds are where it has built through.
+
+## 10. Lots: the endless world (design, agreed direction; not built yet)
+
+**Where we are.** The industrial world is *not* made of lots today. One
+generator plans a whole 160 × 160 tile world at once (districts, then blocks
+and streets, then one maze over all of it) and then builds it. It is seeded
+and repeatable, but it has an edge, and nothing can be added to it far away.
+
+**What the user asked for.** No edge, ever. New ground made far enough away
+not to be seen, with no stutter, for a very long way. Only what is near is
+loaded; the rest is remembered (it is a function of the seed). Sections and
+features easy to add once there is an editor. Every seed works with no check
+by hand. A fix to the generator fixes every world.
+
+### The lot
+
+- The world is an endless grid of **lots**, 32 tiles square (4096 units,
+  about 100 m), full height. A lot is a pure function of
+  (world seed, lot x, lot y): the same lot every time, whatever was made
+  before it.
+- Each lot **owns the avenue along its south side and its west side** and
+  the crossing at its south-west corner. So every lot is ringed by avenues,
+  each built by exactly one lot. An avenue's lane keeps one line for the
+  whole of its length, so lanes meet squarely at every crossing.
+- **Borders are agreed before either side is built.** For each border there
+  is a small pure function of (seed, border): where the neighbour's streets
+  come out onto the avenue, how wide, on which levels a catwalk crosses.
+  Both lots read the same function, so the streets, catwalks and doors line
+  up without either lot looking at the other's inside. Every border has at
+  least one crossing.
+- **Inside**, a lot is planned as the whole world is now: blocks and streets
+  by cutting, a maze over junctions and levels. Two rules make it safe:
+  streets may reach the north and east sides only at the agreed crossings;
+  and the lot's maze must join every crossing to every other (if the random
+  maze leaves one out, the shortest way to it is added). Then the whole
+  world is one maze, because each lot is, and each border has a crossing.
+- A lot's **kind** (canyons, alleys, yards, works, racks) comes from its
+  place: kind = table[(x + 2y) mod 5], shuffled by the seed. No lot has a
+  neighbour of its own kind.
+- An avenue is not always an open street. By the border's hash it may be a
+  narrow alley, a wide street, a hall with bridges, or a **wall**: a long
+  mass with the lane as a corridor inside it and a doorway at each crossing.
+  That breaks the long straight views and makes district edges felt.
+
+### Building a lot in three steps (so no lot waits on another)
+
+1. **Plan** (pure, a few milliseconds): the layout, each mass's box, the
+   hollows and doorways inside the masses. Needs only the border functions.
+2. **Build** (the geometry): needs the plans of the eight lots round it (to
+   tie tubes, frames and catwalks to the masses across an avenue).
+3. **Light**: the lamp grid for the lot's own cells, from its lamps and the
+   neighbours' lamps near the border.
+
+So to show a lot, its neighbours are planned and built in memory too, but
+only out to a known distance, and each step's result is kept.
+
+### Loading (no edge, no stutter)
+
+- Lots are made in a **worker** (the generator has no three.js in it), and
+  come back as plain arrays: vertices by texture, prop places by model,
+  collision brushes, lamps. The page uploads them a little each frame.
+- **Rings** round the player: planned out to 4 lots, built out to 3, drawn
+  within the fog's reach (about 6000 units, so 2 lots). A lot is always
+  built before the fog can show it. Lots further than 4 are dropped; they
+  are remade from the seed when needed.
+- **Collision** is per lot; a move asks the lots it touches.
+- **Far distances**: positions are kept as (lot, place in the lot). What is
+  drawn is placed relative to the lot the player is in, so numbers on the
+  graphics card stay small however far the player has walked.
+- **Culling**: by lot (outside the view, or past the fog); then by the
+  masses themselves, which are boxes and hide whole streets behind them
+  (a small depth picture of the nearest masses, on the CPU, each frame).
+
+### Adding things (for the editor, later)
+
+Two sizes of module:
+
+- **A hand-made lot**: a map of one lot with its crossings declared. A hash
+  of the lot's place says "this lot is the special one" (rarely); its
+  borders then take the hand-made lot's crossings, and the neighbours, which
+  read the same border functions, fit themselves to it.
+- **A set piece**: something smaller that goes inside a lot where the plan
+  has a place for it: a room at a junction, a dead end's reward, a machine
+  in a hall, a landmark. Each declares what it needs (its size, its
+  doorways) and how often it may appear. The generator's own rooms, shafts,
+  shelters and landings become the first entries of that list.
+
+### Ways between worlds
+
+Two ways were weighed.
+
+1. **Lots of different worlds side by side**, with a rule for every pair of
+   worlds on how their edges meet. The number of rules grows with the square
+   of the number of worlds, each world's fog, light, scale and sound must be
+   blended at the seam, and one world's long views would show the other.
+2. **Portals**: rare openings, seen through, that lead to another world.
+   One rule per world (what a portal's frame looks like there). Each world
+   keeps its own fog and light with no blending. It fits the fiction (the
+   doors of House of Leaves and MyHouse.wad, section 7's "seams"). The cost:
+   a portal in view means two worlds drawn at once, and the loader must keep
+   lots round both ends.
+
+**Recommended: portals**, as the rule; and a few hand-made lots that belong
+to two worlds at once (a tunnel that is industrial at one end and something
+else at the other) where the user wants a slow change. The lot system above
+is needed either way.
+
+### Order of work
+
+A. Borders and lots in the planner; a world of N × N lots loaded at once
+   (proves the seams). B. The loader: worker, slices, per-lot drawing,
+   collision and lamps; dropping far lots. C. Positions relative to the
+   player's lot; culling by masses. D. Portals. E. Hand-made lots and set
+   pieces, with the editor.
+

@@ -61,9 +61,12 @@ it *feels* right; that's the user's call.
   STYLE.md "World: industrial v2", design in `docs/WORLD_DESIGN.md`). It uses
   Portal 2 pieces as placeholders: the user allows them in this private repo
   and in private artifacts, never in the published main page.
-  - After any change to the generator: `npm run world:walk -- <seed>` must
-    pass on a few seeds (the player's own movement walks every catwalk,
-    stair and corridor). Look at it with the studio and
+  - After any change to the generator: `npm run world:walk -- <seed>` and
+    `npm run world:look -- <seed>` must pass on a few seeds. The first
+    walks every catwalk, stair and corridor with the player's own movement.
+    The second casts sight lines from every walk and finds holes (faces not
+    drawn), missing floors, and lamp light that leaks or is cut; each fault
+    comes with a studio pose. Look at the world with the studio and
     `tools/world/spots.ts` / `tour.ts` poses (pose z = the feet, not the eyes).
   - The private page makes the world from a seed (map path
     `world:industrial:<seed>`; N and B change it; P lays the old camera's

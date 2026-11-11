@@ -168,16 +168,26 @@ export class MapOut {
    * A lamp worked out per pixel with no bake (engine/render/lightGrid.ts).
    * color 0..255; brightness 1 = a surface right at it is fully lit; size:
    * the distance where that has halved; reach: it gives nothing past here.
-   * dir/inner/cone: a spot (degrees from its axis). box: it lights only what
-   * is inside. open: it hangs in the open air (it does not light the inside
-   * of lampShade boxes).
+   * dir/inner/cone: a spot (degrees from its axis). indoor: it hangs inside a
+   * mass, and lights what it can see through the map's boxes of air (`air`).
+   * open: it hangs in the open air (it does not light the inside of
+   * lampShade boxes).
    */
-  lamp(origin: V3, color: V3, brightness: number, size: number, reach: number, o: { dir?: V3; inner?: number; cone?: number; box?: { min: V3; max: V3 }; open?: boolean } = {}): number {
+  lamp(origin: V3, color: V3, brightness: number, size: number, reach: number, o: { dir?: V3; inner?: number; cone?: number; indoor?: boolean; open?: boolean } = {}): number {
     const props: Record<string, unknown> = { color, brightness, size, reach };
     if (o.dir) { props.dir = o.dir; props.cone = o.cone ?? 45; props.inner = o.inner ?? (o.cone ?? 45) / 2; }
-    if (o.box) props.box = { min: o.box.min.map(r3), max: o.box.max.map(r3) };
+    if (o.indoor) props.indoor = true;
     if (o.open) props.open = true;
     return this.ent('lamp', origin, undefined, props);
+  }
+
+  /**
+   * Boxes of air cut out of a mass (its corridors, rooms and shafts): where
+   * the light of the lamps inside can go. One entity for the lot.
+   */
+  air(boxes: { min: V3; max: V3 }[]): number {
+    const lo = [0, 1, 2].map((k) => Math.min(...boxes.map((b) => b.min[k]))), hi = [0, 1, 2].map((k) => Math.max(...boxes.map((b) => b.max[k])));
+    return this.ent('lamp_air', [(lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2, (lo[2] + hi[2]) / 2] as V3, undefined, { boxes: boxes.flatMap((b) => [...b.min.map(r3), ...b.max.map(r3)]) });
   }
 
   /** A box whose inside lamps in the open do not light (a mass with rooms in it). */

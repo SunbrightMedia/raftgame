@@ -81,6 +81,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     port: 5173,
     // Saving config/maps from the game must not trigger a page reload.
-    watch: { ignored: ['**/config/**', '**/maps/**', '**/textures/**'] },
+    // (The big folders that are no part of the page are not watched: with them, a few tools running at once used up the system's file watchers.)
+    watch: { ignored: ['**/config/**', '**/maps/**', '**/textures/**', '**/.venv-look/**', '**/models/**', '**/catalogue*/**', '**/dist*/**', '**/junk/**', '**/docs/**'] },
   },
 }));

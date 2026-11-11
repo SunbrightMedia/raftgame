@@ -23,7 +23,8 @@
     "world": "vite-node tools/world/gen.ts --",
     "world:walk": "vite-node tools/world/walk.ts --",
     "world:plan": "vite-node tools/world/plan.ts --",
-    "fetch:textures": "python3 tools/fetch_textures.py"
+    "fetch:textures": "python3 tools/fetch_textures.py",
+    "world:look": "vite-node tools/world/look.ts --"
   },
   "dependencies": {
     "three": "^0.187.0"
