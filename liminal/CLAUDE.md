@@ -77,3 +77,14 @@ it *feels* right; that's the user's call.
     the old hashed ones), and tell the user to keep that link private.
 - **The old maps are in `junk/`** (kept, not used). Work follows
   `docs/PIPELINE.md`; the game boots into `maps/blank.json` meanwhile.
+- **Backrooms Planner** (2D map tool, `src/planner/`, page `planner.html`;
+  study and plan in `docs/BACKROOMS_MAPS.md`). Generator: plan tree →
+  port-to-port placement in zone frames → routed loops → zone recipes; walls
+  are the outline of all floors. `tests/planner.test.ts` must pass (every zone
+  walkable on 16 maps). Debug views: `npm run planner:render -- <dir> <seeds>`,
+  `tools/planner/zoom.ts`, `tools/planner/ascii.ts`. Publish:
+  `npm run build:planner && node tools/planner/make-page.mjs <out.html>`, then
+  the artifact https://claude.ai/artifact/RuMoZpbzboHkN6ztKqb3c4 with
+  `capabilities: {downloads: true}` (saves go through the viewer; `prompt()`
+  and plain downloads do not work in artifacts).
+

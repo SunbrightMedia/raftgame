@@ -5,6 +5,12 @@ backrooms map will be made." Only one story, plus vents and the space above
 the ceiling tiles. The next step is a 2D web tool that makes top-down plans
 from a seed, with about 50 modular features that snap together.
 
+**Decisions (user, 2026-11-11):** a knob for turned groups (square by
+default, up to map 1's look); one finite map per seed; small floor-height
+changes inside the one story are allowed; drawings in the clean-plan look of
+map 1. Built as the Backrooms Planner (`src/planner/`, 71 features: the 70
+below plus "dark room").
+
 This file is the study. The images are not in the repo (they belong to other
 people); everything needed is written down here, with numbers measured from
 the pixels. Rules from it go into the generator; section 6 is the plan.
