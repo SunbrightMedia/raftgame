@@ -1,16 +1,18 @@
 """
 Compare a render of a rebuilt capture frame with the capture's own final picture.
 
-  python3 -I tools/recreate/compare.py <render.png> <capture.jpg> [side.jpg] [errors.png]
+  python3 -I tools/recreate/compare.py <render.png> <capture.jpg> [side.jpg] [errors.png] [--regions file.json]
 
 Both pictures are cropped to 4:3 and brought to 1440x1080. Prints the mean
 colour of the regions below (ours | capture | brightness ratio) and the mean
 absolute error over the whole picture; optionally saves a side-by-side and an
 error map (grey = equal, white = ours brighter, black = ours darker, ×4).
-The regions are those of frame 19893 (tools/recreate/cx-frame4.ts).
+The regions are those of frame 19893 (tools/recreate/cx-frame4.ts) unless --regions gives a JSON
+object {name: [x0, y0, x1, y1]} (tools/recreate/regions/).
 The capture's picture must be in true colours: RenderDoc saved the finals
 with one sRGB curve too many (reference/complex/true_final.py).
 """
+import json
 import sys
 import numpy as np
 from PIL import Image
@@ -34,6 +36,10 @@ def load(path):
     return np.asarray(im.crop(((w - cw) // 2, 0, (w - cw) // 2 + cw, h)).resize((1440, 1080))).astype(float) / 255
 
 
+if '--regions' in sys.argv:
+    k = sys.argv.index('--regions')
+    REGIONS = json.load(open(sys.argv[k + 1]))
+    sys.argv = sys.argv[:k] + sys.argv[k + 2:]
 ours, ref = load(sys.argv[1]), load(sys.argv[2])
 tot = 0.0
 for k, (x0, y0, x1, y1) in REGIONS.items():

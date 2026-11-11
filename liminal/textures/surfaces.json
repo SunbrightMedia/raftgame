@@ -19,7 +19,9 @@
   },
   "textures": {
     "cx/paint_yellow": {"roughness": 1, "f0": 0.04, "gloss": 1},
-    "cx/carpet_dim": {"roughness": 1, "f0": 0.024, "gloss": 1, "sheen": 0, "bump": 0, "cavity": 0},
-    "cx/ceiling_dim": {"roughness": 0.58, "f0": 0.007, "gloss": 1, "bump": 0, "cavity": 0}
+    "cx/carpet": {"roughness": 1, "f0": 0.024, "gloss": 1, "sheen": 0, "bump": 0, "cavity": 0},
+    "cx/ceiling": {"roughness": 0.58, "f0": 0.007, "gloss": 1, "bump": 0, "cavity": 0},
+    "cx/cloth": {"roughness": 0.87, "f0": 0.04, "gloss": 1, "sheen": 0},
+    "cx/door_dark": {"roughness": 0.2, "f0": 0.01, "gloss": 1}
   }
 }

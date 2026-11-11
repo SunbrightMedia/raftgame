@@ -136,87 +136,69 @@ What the rebuild taught:
 - RenderDoc stored HDR pictures linearly when it stretched their range, and
   stored the window image with an extra sRGB curve.
 
-## Rebuilding frame 19893 (map `cx_frame4`)
+## Rebuilding the capture's area (map `cx_area_a`)
 
-`tools/recreate/cx-frame4.ts` rebuilds the room of frame 19893 (measured from
-its G-buffer) and `tools/recreate/compare.py` compares our render with the
-capture. Going through the frame's own buffers taught more than the picture:
+The rebuild checks our light against the capture with nothing fitted per frame. Tools
+(`tools/recreate/`): `measure.py` turns a frame's own depth and G-buffer into the room's planes,
+panels and materials at true size; `cx-area-a.ts` builds the map; `cx.ts` holds everything shared
+(materials, lamps, units, camera, light model); `frames.json` has each frame's camera pose and tape
+clock; `compare.py` with `regions/<frame>.json` compares a render with the capture.
 
-- **The panels are dim.** At the tone curve's input (pass 394, after the
-  upscaler) a ceiling panel is 3.0 / 2.55 / 1.66, the lit right wall 0.42 /
-  0.31: the panel is only ~7× the wall, colour (1, 0.85, 0.55). (The 115 and
-  40 peaks of the scene pictures are a few hot pixels elsewhere.) A real LED
-  panel would be ~40× and glow 5× too much around itself; this was the main
-  error of the first rebuild. Same in every frame that shows a panel (8 of
-  10): its brightest pixels end at about 0.96 / 0.95 / 0.93 in the final
-  picture and never clip (at most 0.0025% of pixels reach 0.98).
-- **The room's lights cast no shadows.** The frame draws its 14 lights as
-  "BatchedLights" and has no shadow-map passes at all, so light passes through
-  the soffit onto the wall under it and the alcove's face. Lumen shadows only
-  its own bounce light (the 95 "Non raytraced shadows" dispatches of its
-  surface cache). Our `spot` lights take `shadows: 0` for this. Same in all
-  10 frames: 14 to 73 lights, all batched, no shadow passes.
-- **Lumen's bounce is weak and even.** Pass 363 (bounce light only, before
-  the direct light is added) divided by the base colour gives about 0.15–0.21
-  on every surface: walls, floor and ceiling alike, about 0.75× the direct
-  light on the right wall. Our physical bounce in a closed yellow room is
-  stronger and uneven (the ceiling sees the lit floor), so the rebuild uses
-  darker stand-ins for the ceiling tiles (#767357, half the G-buffer's
-  #a29d78) and the carpet (#897f37 for #a39644). An even fill instead of our
-  bounce made the walls even but the floor and ceiling wrong; not kept.
-- **Materials** (G-buffer B: metallic / specular / roughness): walls 0 / 0.5
-  / 1 (F0 0.04, fully rough), carpet 0 / 0.3 / 1 (F0 0.024), ceiling tiles
-  0.01 / 0.086 / 0.58. Even fully rough, F0 0.04 gives a white sheen at
-  grazing angles that adds blue to the yellow walls.
-- **Fog** is on (exponential height fog) but its colour is black: it only
-  dims far surfaces by ~1%. **Depth of field** is on, with circles of
-  confusion under one pixel: no visible blur.
-- **The clock.** The tape pass reads the game time: 93.907 s in this frame
-  (hue turned −1.3°), 105.93 s in 20732. Rendering at the same time makes the
-  red/green balance of the walls match.
-- **Softness.** The capture's edges are softer than ours (strongest gradients
-  0.043 across x, 0.031 across y; ours 0.055 / 0.078 without it): its
-  upscaler (TSR, from 70%). A 0.7 px blur before the chain (`soften`) matches
-  the edges across x. Across y the ten frames differ (strongest-gradient ratio
-  y/x from 0.54 to 1.40), so the rest is the camera moving (head bob) in that
-  frame, not the camera model. Also smoother than ours: the carpet and the
-  ceiling tiles (no visible relief or grid at this distance).
+What the frames' own buffers showed:
 
-Result (mean colour of each region, 0–1 display values):
+- **True size from depth.** The motion-blur step keeps linear depth in cm (its "Velocity
+  Flatten" picture, blue channel): the floor rows all give the same eye height, 161 cm (63.3"),
+  in every frame. Rooms are 4.04 m (159") high. (The first rebuild of frame 19893 guessed the scale
+  from 60 cm ceiling tiles and came out at 0.62×; tiles and panels are really about 92 cm.)
+- **One area.** The view constants give each camera's world position (a row of the view
+  constants and its negative, the pre-view translation), so all ten frames share one set of world
+  coordinates. Frames 18325, 18829 and 19259 were taken in one hall (624" × 546", a 3 × 3 grid of
+  panels), 19893 and 20169 in the corridor south of it (19893's "alcove" is the hall's south
+  recess), the others further west and south. `measure.py --world` lines them up within an inch.
+- **The lamps** sit 8 cm under the ceiling (235 cm above the eye in every frame). Two read lamps
+  of the hall stand at its panels, with constants "10000": that is red 1 cd (the constants carry
+  cd × 100² for centimetres), so luminance 0.8635 cd, colour (1, 0.871, 0.386). Other lamps differ:
+  one at 8000 (18325), a dim red point light near the floor (21167). Every lamp in a frame is drawn
+  unshadowed (14 to 73 per frame), so lamps in neighbouring rooms light through walls; the first
+  export kept only one lamp per frame, hence `complex_deep.ps1`.
+- **Units.** With lamps in those units and the game's own exposure (34.13; in our rebuilds both
+  scaled by 1000 to stay clear of the baker's 0.02 lux cutoff), the hall comes out right without
+  fitting anything: walls 0.84 to 0.93 of the capture, floors 0.91 to 1.09, panels and boxes 0.95
+  to 1.02. The panels are dim emitters, about 2.9 in the tone curve's input units (88 cd/m² in
+  ours).
+- **Bounce.** In the hall the game's bounce light (pass "DiffuseIndirectComposite" / base colour)
+  is floor 0.18, walls 0.30, ceiling 0.35. Our physical bounce (2 passes + the remaining-bounce
+  term, the engine's default) gives 0.21 / 0.22 / 0.32; an "even" bounce (as if gathered by probes
+  in the air, `light.bounceEven`) gives 0.19 / 0.19 / 0.17 and was wrong: it only seemed right in
+  the first, mis-scaled rebuild of 19893. Kept as an option, not used.
+- **Materials** (G-buffer B: metallic / specular / roughness): walls 0 / 0.5 / 1 (F0 0.04), carpet
+  0 / 0.3 / 1 (F0 0.024), tiles 0.01 / 0.086 / 0.58, box cloth 0 / 0.5 / 0.87. Base colours: paint
+  #f0ec81, carpet #a39644, tiles #a29d78, cloth #6a716e, floor tape #f0ce22, door #1b1d1c.
+- **Fog** is on but black (dims far surfaces ~1%); **depth of field** blurs under one pixel.
+- **The clock**: the tape pass reads the game time (frames.json); the same time makes the walls'
+  red/green balance match.
+- **Softness**: the game's upscaler leaves edges softer than ours; 0.7 px matches them across x
+  (along y frames differ with the camera's motion).
 
-| region | capture | first rebuild | now |
-|---|---|---|---|
-| right wall | 0.717 0.639 0.170 | 0.712 0.648 0.141 (0.98) | 0.727 0.648 0.168 (1.01) |
-| back wall | 0.681 0.604 0.153 | 0.683 0.620 0.127 (0.99) | 0.690 0.613 0.142 (1.01) |
-| floor | 0.545 0.441 0.080 | 0.531 0.435 0.043 (0.95) | 0.551 0.447 0.069 (1.00) |
-| ceiling tiles | 0.240 0.183 0.041 | 0.232 0.188 0.058 (1.03) | 0.236 0.185 0.037 (0.99) |
-| soffit side | 0.594 0.514 0.122 | 0.602 0.537 0.109 (1.02) | 0.614 0.531 0.118 (1.03) |
-| alcove face | 0.607 0.518 0.070 | 0.530 0.453 0.037 (0.85) | 0.598 0.511 0.079 (0.99) |
-| far left wall | 0.654 0.576 0.139 | 0.629 0.552 0.080 (0.92) | 0.709 0.622 0.144 (1.08) |
-| light panel | 0.956 0.949 0.917 | 0.994 0.997 0.994 (1.06) | 0.956 0.951 0.922 (1.00) |
-| mean abs error, whole picture | | 0.0400 | 0.0292 |
-| mean abs error, 8 regions | | 0.0277 | 0.0110 |
+Result, all from one map with the shared settings (region brightness ours / capture):
 
-(Brightness ratio to the capture in brackets.) What is left: the
-game's lens-dirt smudges (round soft blobs on the right wall and the alcove
-face; we do not copy their dirt), the far left wall 8% bright, its motion
-blur, its finer noise, and a few edges (baseboards, the ceiling grid).
+| frame | walls | floor | ceiling | panels | whole-picture error |
+|---|---|---|---|---|---|
+| 18829 (hall) | 0.84 – 0.93 | 1.07 – 1.09 | 0.84 | 0.98 – 1.00 | 0.049 |
+| 18325 (hall) | 0.88 – 0.91 | 1.00 – 1.05 | 0.80 – 0.84 | 0.95 – 0.98 | 0.055 |
+| 19259 (hall) | 0.87 – 0.92 | 0.91 – 1.06 | 0.79 | 0.98 – 1.00 | 0.057 |
+| 19893 (corridor) | 1.20 – 1.37 | 1.46 | 1.77 | 1.01 | 0.114 |
+| 20169 (corridor) | 0.37 – 0.38 | 0.23 – 0.29 | 0.65 | – | 0.213 |
 
-General or fitted to this frame?
-- General (read from the game's own data, or checked on other frames): the
-  unshadowed lights, the dim panels, the light colour, the materials' sheen,
-  blue 0.75 (three frames, two of them through the bench with the game's own
-  scene), fog and depth of field.
-- Measured on this frame only: the softness (0.7 px); its cause (the
-  upscaler) is general, its amount is one frame's.
-- Fitted to this frame: the exposure (one number links our light units to
-  the game's), the carpet and ceiling stand-in colours (they stand in for
-  the game's weaker, even bounce; a different room shape would need other
-  values, so the real fix is a bounce that behaves like the game's), the
-  alcove's depth and slope and its lamp (the alcove is mostly hidden), and the
-  smoother carpet and ceiling textures (chosen by eye). The clock only syncs
-  the tape wobble for the comparison.
-- The test: rebuild a second frame with nothing retuned.
+Open:
+- The corridor's lamps are not known (only two panels show, one ceiling panel is switched off,
+  the west part is lit by lamps out of view): 19893 is too bright, 20169 far too dark. The deep
+  export lists every lamp.
+- In the hall, walls and ceilings are 10 – 20 % dark and floors up to 9 % bright, the same in all
+  three frames: our direct light favours the floor and our bounce gives the walls less than the
+  game's. The 8-bit captures are too coarse on the floor to split direct from bounce exactly; the
+  deep export's lossless buffers can.
+- Not modelled: the hazmat figures, the tripods, a rifle on a box.
 
 ## What this means for us
 
@@ -228,7 +210,8 @@ General or fitted to this frame?
 - The world must carry the colour: warm yellow paint, warm panel lights, dark
   ceiling tiles, real bounce light. No grading trick will make it.
 - Its lighting is game lighting, not physics: dim panel surfaces, separate
-  unshadowed spot lights, a weak even bounce.
+  unshadowed spot lights of about 1 cd, a fixed exposure of 34.13; bounce close
+  to physical.
 - Camera: 98° wide (4:3) plus the bend, then motion blur when turning.
 - We make our own noise and dirt textures (procedural or CC0); we do not
   take the game's.

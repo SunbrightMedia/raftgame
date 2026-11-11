@@ -106,6 +106,8 @@ export const SETTINGS = {
       skyHorizon: color('Sky colour at the horizon', '#e4e8ec'),
       skyBand: num('Horizon haze height', 2.5, 0.2, 30, 0.1, 'How high above the horizon the pale haze reaches before the sky turns its overhead colour. Photos of clear days: a few degrees.', '°'),
       extraBounces: num('Remaining bounces', 1, 0, 1, 0.05, 'Adds the light from all bounces beyond the simulated ones, coloured by what each spot sees: a salmon-carpeted room fills with salmon light. 0 = off (old).'),
+      bounceEven: num('Bounce evenness', 0, 0, 1, 0.05, 'How bounce light is gathered. 0 = physically: each spot gets what its own side of the room sends (a ceiling over a lit floor gets far more than the floor). 1 = as engines that keep bounce light in probes in the air (Lumen, in the reference capture): floor, walls and ceiling of a room get about the same.'),
+      bounceProbe: num('Bounce probe lift', 24, 2, 96, 1, 'With evenness: how far into the room the probe point sits.', 'u'),
       bounceScale: num('Bounce ×', 1, 0, 3, 0.05, '1 = physically correct bounce.'),
       bounceSamples: num('Bounce rays', 40, 4, 128, 1, 'Rays per luxel per bounce. More = smoother, slower.'),
       ambientLux: num('Ambient fill', 0, 0, 30, 0.1, 'Flat extra light everywhere. Physically 0.', 'lx'),

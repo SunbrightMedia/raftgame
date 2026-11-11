@@ -182,6 +182,11 @@ export class Lighting {
       const b = bakeSettings as Record<string, unknown>;
       delete b.skyZenith; delete b.skyHorizon; delete b.skyBand;
     }
+    // Physical bounce (evenness 0, the default) keys as before the setting existed, so saved lightmaps stay valid.
+    if (!(bakeSettings.bounceEven > 0)) {
+      const b = bakeSettings as Record<string, unknown>;
+      delete b.bounceEven; delete b.bounceProbe;
+    }
     // Material colours matter too (bounce light): a recoloured texture must re-bake.
     // Keyed on each texture's definition, not its measured pixels, so the key is
     // the same in every browser (see TextureRegistry.identity).
@@ -464,6 +469,8 @@ export class Lighting {
         aoDirect: L.aoDirect,
         aoCurve: L.aoCurve,
         extraBounces: L.extraBounces,
+        bounceEven: L.bounceEven,
+        bounceProbe: L.bounceProbe,
         ...(L.skyLuminance > 0 ? { sky: { luminance: L.skyLuminance, zenith: skyColour(L.skyZenith), horizon: skyColour(L.skyHorizon), band: Math.sin((Math.max(0.1, L.skyBand) * Math.PI) / 180) } } : {}),
       },
     };
@@ -487,7 +494,8 @@ type Props = Record<string, unknown>;
  *                    the reference capture's ceiling panels), cut off at
  *                    `cutoff` degrees; `color` (sRGB hex) instead of kelvin;
  *                    `shadows: 0` = its direct light ignores geometry, as the
- *                    capture's unshadowed engine lights (its bounce stays shadowed)
+ *                    capture's unshadowed engine lights (its bounce stays shadowed);
+ *                    `candela` = peak intensity straight down, instead of lumens
  * Units and sources: see engine/light/units.ts.
  */
 export function lightFromEntity(origin: [number, number, number], p: Props): BakeLight {
@@ -507,9 +515,9 @@ export function lightFromEntity(origin: [number, number, number], p: Props): Bak
     return { pos: [origin[0] - dir[0] * D, origin[1] - dir[1] * D, origin[2] - dir[2] * D], color, I0: num('lux', 90000) * (D * INCH) ** 2 };
   }
   if (type === 'spot') {
-    const n = num('n', 2.2), lm = num('lumens', 3000);
+    const n = num('n', 2.2), lm = num('lumens', 3000), cd = num('candela', 0);
     const col = typeof p.color === 'string' ? emitterColor({ kelvin: num('kelvin', 4000), color: p.color }) : color;
-    return { pos: origin, color: col, I0: cosNPeak(lm, n), dir: [0, 0, -1], n, cutoffDeg: num('cutoff', 87), softDeg: 3, spill: 0, ...(num('shadows', 1) === 0 ? { shadows: false } : {}) };
+    return { pos: origin, color: col, I0: cd > 0 ? cd : cosNPeak(lm, n), dir: [0, 0, -1], n, cutoffDeg: num('cutoff', 87), softDeg: 3, spill: 0, ...(num('shadows', 1) === 0 ? { shadows: false } : {}) };
   }
   if (type === 'dome') {
     const n = 0.6, lm = num('lumens', 800) * 0.8; // ~80% gets out through the glass

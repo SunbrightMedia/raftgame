@@ -254,16 +254,28 @@
       "contrast": 0.35
     },
     {
-      "name": "cx/ceiling_dim",
+      "name": "cx/ceiling",
       "from": "office/ceiling_speckle",
-      "color": "#767357",
+      "color": "#a29d78",
       "contrast": 0.3
     },
     {
-      "name": "cx/carpet_dim",
+      "name": "cx/carpet",
       "from": "liminal/backrooms_carpet",
-      "color": "#897f37",
+      "color": "#a39644",
       "contrast": 0.2
+    },
+    {
+      "name": "cx/door_dark",
+      "from": "office/plaster",
+      "color": "#1b1d1c",
+      "contrast": 0.2
+    },
+    {
+      "name": "cx/cloth",
+      "from": "house/upholstery",
+      "color": "#6a716e",
+      "contrast": 0.5
     }
   ]
 }

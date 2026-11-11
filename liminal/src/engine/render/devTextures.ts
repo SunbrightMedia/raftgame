@@ -459,15 +459,29 @@ const DEFS: Record<string, Def> = {
       g.putImageData(img, 0, 0);
     },
   },
-  // A 2×2 ft LED panel with a flat white diffuser (as in the reference capture's ceilings).
-  // The capture's panels are dim: at the tone curve's input (pass 394) a panel is 3.0 / 2.55 / 1.66
-  // against 0.42 / 0.31 on the lit right wall, so about 7× the wall, colour (1, 0.85, 0.55). A real
-  // panel (~3600 lm over 0.33 m², ≈ 3500 cd/m²) would be ~40× and glow far too much. The light on
-  // the room is a "spot" entity.
+  // A 3×3 ft LED panel with a flat white diffuser (the reference capture's ceilings). The capture's
+  // panels are dim: at the tone curve's input a panel is about 2.9 (scene units, colour 1 / 0.85 /
+  // 0.55), the lit right wall 0.42: about 7× the wall. In the rebuilds' units (game light × 1000,
+  // exposure 34.13 / 1000; tools/recreate/cx.ts) that is 2.9 / 0.03413 ≈ 88 cd/m². A real panel
+  // (≈ 3500 cd/m²) would glow far too much. The light on the room is a "spot" entity.
   'cx/ledpanel': {
-    px: [64, 64], world: [24, 24], material: 'glass',
-    emissive: { kelvin: 4000, color: '#ffecc5', luminance: 540, castsLight: false },
+    px: [64, 64], world: [36, 36], material: 'glass',
+    emissive: { kelvin: 4000, color: '#ffecc5', luminance: 88, castsLight: false },
     paint: (g, w, h) => { g.fillStyle = '#fbfbf7'; g.fillRect(0, 0, w, h); g.fillStyle = '#d8d8d2'; g.fillRect(0, 0, w, 2); g.fillRect(0, h - 2, w, 2); g.fillRect(0, 0, 2, h); g.fillRect(w - 2, 0, 2, h); },
+  },
+  // Floor tape, 7" wide: yellow (the reference capture's #f0ce22) with dark chevrons pointing along +u.
+  'cx/tape': {
+    px: [32, 32], world: [7, 7], material: 'plastic',
+    paint: (g, w, h) => {
+      g.fillStyle = '#f0ce22'; g.fillRect(0, 0, w, h);
+      g.fillStyle = '#2e2b1c';
+      g.beginPath(); g.moveTo(w * 0.62, h * 0.18); g.lineTo(w * 0.86, h * 0.5); g.lineTo(w * 0.62, h * 0.82); g.lineTo(w * 0.44, h * 0.82); g.lineTo(w * 0.68, h * 0.5); g.lineTo(w * 0.44, h * 0.18); g.closePath(); g.fill();
+    },
+  },
+  // A ceiling panel that is switched off (the reference capture's corridor has one): dark diffuser, grey frame.
+  'cx/panel_off': {
+    px: [64, 64], world: [36, 36], material: 'glass',
+    paint: (g, w, h) => { g.fillStyle = '#1c1c1a'; g.fillRect(0, 0, w, h); g.fillStyle = '#9a9a92'; g.fillRect(0, 0, w, 2); g.fillRect(0, h - 2, w, 2); g.fillRect(0, 0, 2, h); g.fillRect(w - 2, 0, 2, h); },
   },
   // 2×4 troffer with a flat diffuser, cool-white tubes (4100 K) in a thin dark frame.
   'mall/troffer': {

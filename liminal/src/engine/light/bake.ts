@@ -94,6 +94,17 @@ export interface BakeParams {
    */
   extraBounces?: number;
   /**
+   * 0..1. How bounce light is gathered. 0 = physically: each spot gathers
+   * what its own side of the room sends it (a ceiling over a lit floor gets
+   * far more than the floor does). 1 = as engines that keep bounce light in
+   * probes in the air (Unreal's Lumen, in the reference capture): each spot
+   * gets the average of what is around a point lifted into the room, from
+   * both sides, so floor, walls and ceiling of a room get about the same.
+   */
+  bounceEven?: number;
+  /** With bounceEven: how far into the room that point sits (world units). */
+  bounceProbe?: number;
+  /**
    * Open sky (outdoor maps): rays that escape see sky luminance (cd/m²),
    * coloured from horizon to zenith (linear, luminance 1 each). Absent = indoors.
    */
@@ -329,6 +340,7 @@ export function bake(input: BakeInput): BakeOutput {
   // ---- bounces: each luxel gathers the light reflected by whatever it sees.
   for (const fs of samples) { dilate(fs, fs.direct); fs.total.set(fs.direct); }
   const dirs = hemisphere(Math.max(1, Math.round(p.bounceSamples)));
+  const even = clamp(p.bounceEven ?? 0, 0, 1), probe = p.bounceProbe ?? 24;
   const lastGathered = new Map<FaceSamples, Float32Array>(), lastBounce = new Map<FaceSamples, Float32Array>();
   for (let pass = 0; pass < Math.min(2, Math.round(p.bounces)); pass++) {
     const gathered = new Map<FaceSamples, Float32Array>();
@@ -382,6 +394,42 @@ export function bake(input: BakeInput): BakeOutput {
           r += v[0] * alb[0]; g += v[1] * alb[1]; b += v[2] * alb[2];
           acc(v[0] * alb[0], v[1] * alb[1], v[2] * alb[2], dx, dy, dz);
           qr += alb[0]; qg += alb[1]; qb += alb[2];
+        }
+        if (even > 0) {
+          // The other half of a probe in the room's air: from a point lifted off the
+          // surface (never past whatever is in front of it), the hemisphere facing
+          // back towards the surface. Averaged with the half above, it is the light
+          // all around that point, whichever way the surface faces.
+          const lift = grid.cast(px, py, pz, f.n[0] * probe, f.n[1] * probe, f.n[2] * probe);
+          const d = lift ? Math.max(0.5, lift.t * probe * 0.5) : probe;
+          const ox = px + f.n[0] * d, oy = py + f.n[1] * d, oz = pz + f.n[2] * d;
+          let er = 0, eg = 0, eb = 0;
+          for (const [a, c, h] of dirs) {
+            const x = a * cr - c * sr, y = a * sr + c * cr;
+            const dx = f.r[0] * x + f.u[0] * y - f.n[0] * h;
+            const dy = f.r[1] * x + f.u[1] * y - f.n[1] * h;
+            const dz = f.r[2] * x + f.u[2] * y - f.n[2] * h;
+            const hit = grid.cast(ox, oy, oz, dx * 4096, dy * 4096, dz * 4096);
+            if (!hit) {
+              if (p.sky && dz > 0) {
+                const t = 1 - Math.exp(-dz / p.sky.band), L = p.sky.luminance * Math.PI;
+                er += L * (p.sky.horizon[0] + (p.sky.zenith[0] - p.sky.horizon[0]) * t);
+                eg += L * (p.sky.horizon[1] + (p.sky.zenith[1] - p.sky.horizon[1]) * t);
+                eb += L * (p.sky.horizon[2] + (p.sky.zenith[2] - p.sky.horizon[2]) * t);
+              }
+              continue;
+            }
+            const hs = byId.get(hit.faceId);
+            if (!hs || hs.emitting) continue;
+            const v = lookup(hs, ox + dx * 4096 * hit.t, oy + dy * 4096 * hit.t, oz + dz * 4096 * hit.t);
+            const alb = input.albedo[hs.face.tex] ?? [0.5, 0.5, 0.5];
+            er += v[0] * alb[0]; eg += v[1] * alb[1]; eb += v[2] * alb[2];
+          }
+          const w = even / 2;
+          r = r * (1 - w) + er * w; g = g * (1 - w) + eg * w; b = b * (1 - w) + eb * w;
+          // The even part has no direction: it only weakens the directional lightmap.
+          sx *= 1 - w; sy *= 1 - w; sz *= 1 - w;
+          st = st * (1 - w) + (0.2126 * er + 0.7152 * eg + 0.0722 * eb) * w;
         }
         out[k * 3] = (r / dirs.length) * p.bounceScale;
         out[k * 3 + 1] = (g / dirs.length) * p.bounceScale;
