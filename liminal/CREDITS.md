@@ -77,3 +77,4 @@ Copyright © 2001-2024 Contributors to the Freedoom project. All rights reserved
 | model | source | licence |
 |---|---|---|
 | `cc0/padded_chair` | From SchoolChair_01 by Ethan Place, Poly Haven (CC0): shell replaced by a padded seat and back, frame darkened | CC0 1.0 |
+| `house/armchair_soft` | Original: soft upholstered armchair built from rounded cushions (tools/models/armchair_soft.json) | original |

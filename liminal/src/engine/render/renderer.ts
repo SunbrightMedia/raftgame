@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Digicam, type CameraParams } from './digicam';
 import { SourcePost, type SourcePostParams } from './sourcePost';
-import { CamcorderPost, type CamcorderParams } from './camcorder';
+import { CamcorderPost, type CamcorderMotion, type CamcorderParams } from './camcorder';
 
 THREE.ColorManagement.enabled = false;
 THREE.Object3D.DEFAULT_UP.set(0, 0, 1);
@@ -154,6 +154,47 @@ export class LowResRenderer {
    */
   viewMatch: { fovY: number; dx: number; dy: number } | null = null;
 
+  private vpNow = new THREE.Matrix4();
+  private vpPrev = new THREE.Matrix4();
+  private vpInv = new THREE.Matrix4();
+  private vpTest = new THREE.Matrix4();
+  private prevPos = new THREE.Vector3();
+  private prevDir = new THREE.Vector3();
+  private hasPrev = false;
+
+  /**
+   * The camcorder's motion blur inputs for this frame: where the camera was a shutter time ago (from last
+   * frame's camera, scaled to the shutter), or, with a test turn speed, the camera turned back by that much.
+   * None after a jump (a teleport, a new view): more than 48" or 25° in one frame.
+   */
+  private shutterMotion(dt: number): CamcorderMotion | null {
+    const c = this.camcorder, depth = this.target?.depthTexture;
+    this.camera.updateMatrixWorld();
+    this.vpNow.multiplyMatrices(this.camera.projectionMatrix, this.camera.matrixWorldInverse);
+    const pos = this.camera.getWorldPosition(new THREE.Vector3()), dir = this.camera.getWorldDirection(new THREE.Vector3());
+    const jumped = !this.hasPrev || pos.distanceTo(this.prevPos) > 48 || dir.angleTo(this.prevDir) > (25 * Math.PI) / 180;
+    let out: CamcorderMotion | null = null;
+    const shutter = (c?.motionBlur ?? 0) / 1000;
+    if (c && depth && shutter > 0) {
+      this.vpInv.copy(this.vpNow).invert();
+      if (c.motionTestYaw) {
+        // the camera as it was when the shutter opened: turned back about world up by speed × shutter
+        const back = new THREE.Matrix4().makeRotationZ((-c.motionTestYaw * Math.PI / 180) * shutter);
+        const cam = this.camera.matrixWorld.clone();
+        const p = new THREE.Vector3().setFromMatrixPosition(cam);
+        const rot = new THREE.Matrix4().extractRotation(cam).premultiply(back);
+        rot.setPosition(p);
+        this.vpTest.multiplyMatrices(this.camera.projectionMatrix, rot.invert());
+        out = { depth, invViewProj: this.vpInv, prevViewProj: this.vpTest, scale: 1 };
+      } else if (!jumped && dt > 0) {
+        out = { depth, invViewProj: this.vpInv, prevViewProj: this.vpPrev, scale: Math.min(2, shutter / dt) };
+      }
+    }
+    this.vpPrev.copy(this.vpNow);
+    this.prevPos.copy(pos); this.prevDir.copy(dir); this.hasPrev = true;
+    return out;
+  }
+
   render(scene: THREE.Scene): void {
     const w = this.canvas.clientWidth || window.innerWidth;
     const h = this.canvas.clientHeight || window.innerHeight;
@@ -209,7 +250,7 @@ export class LowResRenderer {
     const filter = this.upscale === 'nearest' ? THREE.NearestFilter : THREE.LinearFilter;
     const samples = this.lowAA ? 0 : msaa;
     this.stats.aa = samples;
-    const wantDepth = this.distanceBlur !== null;
+    const wantDepth = this.distanceBlur !== null || (this.camcorder?.motionBlur ?? 0) > 0;
     if (!this.target || this.target.width !== iw || this.target.height !== ih || this.target.texture.magFilter !== filter || this.target.samples !== samples || (this.target.depthTexture !== null) !== wantDepth) {
       this.target?.depthTexture?.dispose();
       this.target?.dispose();
@@ -256,7 +297,7 @@ export class LowResRenderer {
     this.lastFrame = now;
     if (this.camcorder) {
       const hfov = 2 * Math.atan(Math.tan((this.camera.fov * Math.PI) / 360) * this.camera.aspect);
-      this.camcorderPost.render(this.gl, frame, this.camcorder, hfov, dt);
+      this.camcorderPost.render(this.gl, frame, this.camcorder, hfov, dt, this.shutterMotion(dt));
       return;
     }
     if (this.sourceCamera) {

@@ -250,7 +250,7 @@
     {
       "name": "house6/carpet_brown",
       "from": "ph/dirty_carpet",
-      "color": "#796953",
+      "color": "#766a58",
       "contrast": 0.22
     },
     {
@@ -262,8 +262,8 @@
     {
       "name": "house6/wood_dark",
       "from": "ph/dark_wood",
-      "color": "#5a4030",
-      "contrast": 0.9
+      "color": "#4e3a2b",
+      "contrast": 0.35
     },
     {
       "name": "house6/trim_cream",
@@ -286,13 +286,13 @@
     {
       "name": "house6/trim_white",
       "from": "house/trim_white",
-      "color": "#f3f1ea",
+      "color": "#e8e2d2",
       "contrast": 0.3
     },
     {
       "name": "house6/paint_ivory",
       "from": "ph/beige_wall",
-      "color": "#dcd7c8",
+      "color": "#d8d2c2",
       "contrast": 0.8
     },
     {

@@ -1,0 +1,20 @@
+{
+ "name": "house/armchair_soft",
+ "credit": "Original: soft upholstered armchair built from rounded cushions (tools/models/armchair_soft.json)",
+ "license": "original",
+ "_comment": "The grey club armchair in the \"Infinite house\" frame 2: a skirted base, a seat cushion, two rolled arms, a thick back and a loose back cushion. Model space: inches, front towards -y, back at +y. Fabric: Poly Haven's wool herringbone recoloured grey (house6/fabric_grey, 10.9 in a repeat).",
+ "pads": [
+  {"material": "house6/fabric_grey", "face": "up", "centre": [0, 0, 7.65], "size": [32, 32, 14.7], "radius": 3, "edge": 2.0, "uv": 10.9},
+  {"material": "house6/fabric_grey", "face": "up", "centre": [0, -3.5, 17.4], "size": [21, 22.5, 4.6], "radius": 2.5, "edge": 1.9, "bulge": 0.7, "uv": 10.9},
+  {"material": "house6/fabric_grey", "face": "side", "centre": [-13.25, 0, 20], "size": [32, 12, 5.5], "radius": 3.5, "edge": 2.7, "bulge": 0.3, "uv": 10.9},
+  {"material": "house6/fabric_grey", "face": "side", "centre": [13.25, 0, 20], "size": [32, 12, 5.5], "radius": 3.5, "edge": 2.7, "bulge": 0.3, "uv": 10.9},
+  {"material": "house6/fabric_grey", "face": "front", "centre": [0, 12.2, 25.5], "size": [32, 22, 7.5], "radius": 6, "edge": 3.2, "bulge": 0.8, "tilt": 6, "uv": 10.9},
+  {"material": "house6/fabric_grey", "face": "front", "centre": [0, 6.6, 26.5], "size": [20.5, 14.5, 4.2], "radius": 3.2, "edge": 1.9, "bulge": 0.9, "tilt": 9, "uv": 10.9}
+ ],
+ "shadowBoxes": [
+  [[-16, -16, 0], [16, 16, 15]],
+  [[-16, 8.5, 15], [16, 16, 36]],
+  [[-16, -16, 15], [-10.5, 16, 26]],
+  [[10.5, -16, 15], [16, 16, 26]]
+ ]
+}

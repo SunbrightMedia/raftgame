@@ -67,18 +67,18 @@ const m = new MapBuilder();
   const dg2 = k.doorGap(264, 32);
   k.wallX(NE, NE + T, px1, E + T, [dg2]);
   k.door('x', NE, -1, 264, 1, { w: 32 });
-  k.sconce('x', NE, -1, 332, 78, 60, 2700);
+  k.sconce('x', NE, -1, 332, 78, 25, 2300);              // dim and orange in the video: a small glow on a dark wall
   // the kitchenette: base cabinets to x 60 (counter 36"), an upper cabinet 60-95" with open shelves to its left
   k.baseCabinets('x', N, -1, -110, 0, 4);
   k.baseCabinets('x', N, -1, 0, 60, 2);
   k.upperCabinets('x', N, -1, -110, 18, 60, 95, 4);
   k.upperCabinets('x', N, -1, 30, 57, 60, 95, 1, true);
-  // trim: baseboards round every wall face (none behind the cabinets); this room has no crown in the video
-  k.baseRun('x', S, 1, W, E); k.baseRun('y', W, 1, S, N); k.baseRun('y', E, -1, S, NE); k.baseRun('x', N, -1, 60, bx0);
-  k.baseRun('y', bx0, -1, NE + 1, dg.a - 3.25); k.baseRun('y', bx0, -1, dg.b + 3.25, N);
-  k.baseRun('x', NE, -1, bx0 + 1, bx1); k.baseRun('y', bx1, -1, pz + 1, NE); k.baseRun('x', pz, -1, bx1 + 1, px1 - 1); k.baseRun('y', px1, 1, pz + 1, NE);
-  k.baseRun('x', NE, -1, px1, dg2.a - 3.25); k.baseRun('x', NE, -1, dg2.b + 3.25, E);
-  k.dome(40, 55, 1600, 2700);                             // just above the top of the picture
+  // No trim in this room: at full size the video shows no baseboard on the block or under the cabinets, and no crown.
+  // The lamp is overhead in front of the camera (the floor in view as bright as the ceiling, as in the video).
+  // East of the pilaster is a hall of its own, lit only by its sconce (the video's far right is dark, its door
+  // grey): a wall along its south side, out of the picture, keeps the room's lamp off it.
+  k.wallX(45 - T, 45, px1, E);
+  k.dome(40, 55, 1600, 2850);                            // a little cooler than the others: the video's frame 1 is greyer
 }
 
 // ---------------------------------------------------------------- F: the fireplace room (camera at 1000, 0)
@@ -104,7 +104,9 @@ const m = new MapBuilder();
   k.fireplace('x', N, -1, ox - 7, { d: 12, fd: 10 });
   k.door('x', N, -1, ox + 47, 1, { w: 32 });
   k.door('y', E, -1, 182, 1, { w: 30 });
-  k.armchair(ox + 34, 150, 118, 1.15);
+  // The armchair: soft cushions, not stepped boxes (tools/models/armchair_soft.json); its front faces 118°, turned
+  // away from the camera. The model's front is -y, so its yaw is that + 90.
+  m.prop([ox + 34, 150, 0], 'house/armchair_soft', 118 + 90, 1.15);
   // trim
   k.baseRun('x', N, -1, W, ox - 38.5); k.baseRun('x', N, -1, ox + 24.5, fd.a - 3.25); k.baseRun('x', N, -1, fd.b + 3.25, E);
   k.baseRun('y', W, 1, S0, N); k.baseRun('y', E, -1, S1, ed.a - 3.25); k.baseRun('y', E, -1, ed.b + 3.25, N);
@@ -160,13 +162,20 @@ m.write('house_iv', HOUSE_IV_ROOMS, {
   light: { luxelSize: 3, bounces: 2, extraBounces: 1, ambientLux: 6, ambientKelvin: 2700 },
   fog: { enabled: false },
   render: { internalHeight: 540 },
-  view: { fov: 64.4, viewBob: 0 },
+  // a camera held by hand: the found-footage research's first cue (a locked-off view reads as a render)
+  view: { fov: 64.4, viewBob: 0, handheld: 0.6 },
   camera: { model: 'camcorder', flash: false },
   // "Cassette": the video's camera, as measured on its frames (STYLE.md): soft but edge-enhanced, warm, lamps
   // blown out with a wide bloom.
   camcorder: {
-    exposure: 0.012, whiteBalance: 2900, autoExposure: true, aeKey: 0.11, aeRange: 3, aeRate: 1.5,
-    tintR: 1, tintG: 1, tintB: 1, glow: 0.45, glowSize: 0.9, glowThreshold: 2, contrast: 0.75, dirt: 0, fringe: 0.15,
-    vignette: 0.15, soften: 3, sharpen: 1.0, sharpenRadius: 2.6, posterize: 0, grain: 0.12, lift: 0.02, lineChroma: 0, hueWobble: 0, streaks: 0, lens: 0, bars: true,
+    exposure: 0.012, whiteBalance: 2950, autoExposure: true, aeKey: 0.11, aeRange: 3, aeRate: 1.5,
+    // the lamps: soft warm blobs with a white core, no disc edge (the glow mostly in its middle width)
+    tintR: 1, tintG: 1, tintB: 1, glow: 0.35, glowSize: 0.8, glowNear: 0.3, glowMid: 0.6, glowFar: 0.1, glowThreshold: 2, contrast: 0.75, dirt: 0, fringe: 0.15,
+    vignette: 0.15, soften: 1.6, sharpen: 0.5, sharpenRadius: 2.0, posterize: 0, grain: 0, lift: 0.02, lineChroma: 0, hueWobble: 0, streaks: 0, lens: 0, bars: true,
+    // The video signal, fitted to the frames (scratchpad meas/metrics.py): brightness edges 3-4 px wide at 960 with no
+    // halo, colour edges ~11 px, little fine texture but colour blotches in flat areas.
+    chromaBlur: 5.2, chromaDelay: 0.4, lumaNoise: 0.025, chromaNoise: 0.16, codec: 0.035, codecRadius: 1.5,
+    // a 1/50 s shutter: turning smears the picture (the video's frame 1 is smeared ~9 px sideways)
+    motionBlur: 20,
   },
 });

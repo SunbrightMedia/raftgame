@@ -26,6 +26,17 @@ import { kelvinToLinear } from '../light/units';
  * scene contrast, and a glow that only lamps make (threshold) and spreads
  * wider or tighter (size). The "Infinite house" look uses all of them
  * (STYLE.md, reference 6; maps/house_iv.json).
+ *
+ * Motion blur (off by default): the shutter's time smears the scene along the
+ * camera's motion, from the depth and the camera's previous position.
+ *
+ * The video signal (after sharpening, also off by default): per-pixel sensor
+ * noise, stronger in the dark; colour noise and a colour band limit, so the
+ * noise comes out as slow colour blotches and colour is far softer than
+ * brightness (tape and DV keep colour at a fraction of the detail), shifted
+ * right by the tape's colour delay; then a codec's smoothing: brightness
+ * detail fainter than a threshold is averaged away, edges kept, as a low
+ * bitrate does (it also eats most of the fine noise, leaving blotches).
  */
 export interface CamcorderParams {
   exposure: number;
@@ -47,6 +58,10 @@ export interface CamcorderParams {
   glowSize: number;
   /** Only light brighter than this (tone-curve input units) glows; 0 = the whole picture, as the capture. */
   glowThreshold: number;
+  /** Shares of the glow in its three widths (σ 0.6%, 2.5%, 8% of the width × size); default the capture's 0.612 / 0.241 / 0.147. */
+  glowNear?: number;
+  glowMid?: number;
+  glowFar?: number;
   dirt: number;
   fringe: number;
   vignette: number;
@@ -61,6 +76,34 @@ export interface CamcorderParams {
   streaks: number;
   lens: number;
   bars: boolean;
+  /** Extra blur of the colour only, σ in thousandths of the picture width (0 = off). */
+  chromaBlur?: number;
+  /** Colour shifted right of the brightness, thousandths of the picture width. */
+  chromaDelay?: number;
+  /** Per-pixel brightness noise before the codec, stronger in the dark. */
+  lumaNoise?: number;
+  /** Per-pixel colour noise before the colour blur (comes out as blotches). */
+  chromaNoise?: number;
+  /** Codec smoothing: brightness differences under this (picture units) are averaged away; 0 = off. */
+  codec?: number;
+  /** How far the codec smoothing reaches, thousandths of the picture width. */
+  codecRadius?: number;
+  /** Shutter time in ms: the picture smears along the camera's motion while it is open (0 = off). */
+  motionBlur?: number;
+  /** Stills: blur as if the camera were turning this fast about the vertical (deg/s, + = to the left). */
+  motionTestYaw?: number;
+}
+
+/**
+ * What the motion blur needs from the renderer: the scene's depth, the camera now (inverse view-projection)
+ * and where the camera was when the shutter opened (its view-projection), as a scale on the motion since
+ * that matrix (shutter time / time since it).
+ */
+export interface CamcorderMotion {
+  depth: THREE.Texture;
+  invViewProj: THREE.Matrix4;
+  prevViewProj: THREE.Matrix4;
+  scale: number;
 }
 
 // ---------------------------------------------------------------- colour maths (rows)
@@ -349,6 +392,100 @@ export class CamcorderPost {
       gl_FragColor = vec4(max(c + dot(d, vec3(0.3, 0.59, 0.11)), 0.0), 1.0);
     }`, { src: { value: null }, amount: { value: 7 }, radius: { value: 0.001 } });
 
+  // Shutter blur: each pixel's point in the world (from depth) seen by the camera as it was when the shutter
+  // opened; the picture is averaged along that path. Lamps smear into streaks, as on tape.
+  private motion = pass(/* glsl */ `
+    uniform sampler2D src; uniform sampler2D depthTex; uniform mat4 invVP; uniform mat4 prevVP; uniform float scale; uniform vec2 texel; uniform float maxLen;
+    varying vec2 vUv;
+    void main() {
+      float d = texture2D(depthTex, vUv).r;
+      vec4 w = invVP * vec4(vUv * 2.0 - 1.0, d * 2.0 - 1.0, 1.0);
+      w /= w.w;
+      vec4 pp = prevVP * w;
+      vec2 v = (vUv - (pp.xy / pp.w * 0.5 + 0.5)) * scale;
+      if (pp.w <= 0.0) v = vec2(0.0);
+      float len = length(v / texel);
+      if (len > maxLen) v *= maxLen / len;
+      if (len < 0.5) { gl_FragColor = vec4(texture2D(src, vUv).rgb, 1.0); return; }
+      vec3 sum = vec3(0.0);
+      for (int i = 0; i < 24; i++) sum += texture2D(src, vUv - v * ((float(i) + 0.5) / 24.0 - 0.5)).rgb;
+      gl_FragColor = vec4(sum / 24.0, 1.0);
+    }`, { src: { value: null }, depthTex: { value: null }, invVP: { value: new THREE.Matrix4() }, prevVP: { value: new THREE.Matrix4() }, scale: { value: 1 }, texel: { value: new THREE.Vector2() }, maxLen: { value: 64 } });
+  private motionRt: THREE.WebGLRenderTarget | null = null;
+
+  // The video signal, horizontal half: brightness + noise, colour + noise band-limited along the line and delayed.
+  // Out: (Y, Cb, Cr).
+  private sigH = pass(/* glsl */ `
+    uniform sampler2D src; uniform vec2 texel; uniform float sigma; uniform float delay; uniform float lumaNoise; uniform float chromaNoise; uniform float frame;
+    varying vec2 vUv;
+    float h(vec2 p) {
+      uvec2 q = uvec2(ivec2(p) + ivec2(4096)) * uvec2(1597334673u, 3812015801u);
+      uint n = (q.x ^ q.y ^ (uint(frame) * 2654435761u)) * 1597334677u;
+      n ^= n >> 16u; n *= 0x7feb352du; n ^= n >> 15u;
+      return float(n & 0xffffffu) / 16777215.0;
+    }
+    vec3 yuv(vec2 uv) {
+      vec3 c = texture2D(src, uv).rgb;
+      float y = dot(c, vec3(0.299, 0.587, 0.114));
+      return vec3(y, (c.b - y) * 0.564, (c.r - y) * 0.713);
+    }
+    void main() {
+      vec3 c = yuv(vUv);
+      vec2 px = floor(vUv / texel);
+      // sensor noise, triangular (mean 0), stronger in the dark
+      float d = 1.0 - clamp(c.x, 0.0, 1.0);
+      float y = c.x + lumaNoise * (0.35 + 0.65 * d * d) * (h(px) + h(px + vec2(7.0, 13.0)) - 1.0);
+      vec2 cc = vec2(0.0); float ws = 0.0;
+      if (sigma < 0.3) {
+        vec2 q = vUv - vec2(delay, 0.0) * texel, qp = floor(q / texel);
+        cc = yuv(q).yz + chromaNoise * vec2(h(qp + vec2(31.0, 5.0)) + h(qp + vec2(53.0, 11.0)) - 1.0, h(qp + vec2(71.0, 3.0)) + h(qp + vec2(97.0, 17.0)) - 1.0);
+        ws = 1.0;
+      } else {
+        float step = max(1.0, sigma / 5.0);
+        for (int i = -15; i <= 15; i++) {
+          float x = float(i) * step;
+          float w = exp(-0.5 * x * x / (sigma * sigma));
+          vec2 q = vUv + vec2(x - delay, 0.0) * texel, qp = floor(q / texel);
+          vec2 n = chromaNoise * vec2(h(qp + vec2(31.0, 5.0)) + h(qp + vec2(53.0, 11.0)) - 1.0, h(qp + vec2(71.0, 3.0)) + h(qp + vec2(97.0, 17.0)) - 1.0);
+          cc += (yuv(q).yz + n) * w; ws += w;
+        }
+      }
+      gl_FragColor = vec4(y, cc / ws, 1.0);
+    }`, { src: { value: null }, texel: { value: new THREE.Vector2() }, sigma: { value: 0 }, delay: { value: 0 }, lumaNoise: { value: 0 }, chromaNoise: { value: 0 }, frame: { value: 0 } });
+
+  // Vertical half of the colour band limit, the codec's edge-keeping smoothing of brightness, back to RGB.
+  private sigV = pass(/* glsl */ `
+    uniform sampler2D src; uniform vec2 texel; uniform float sigma; uniform float codec; uniform float codecR;
+    varying vec2 vUv;
+    void main() {
+      vec3 c0 = texture2D(src, vUv).rgb;
+      vec2 cc = c0.yz;
+      if (sigma >= 0.3) {
+        cc = vec2(0.0); float ws = 0.0;
+        float step = max(1.0, sigma / 5.0);
+        for (int i = -15; i <= 15; i++) {
+          float x = float(i) * step;
+          float w = exp(-0.5 * x * x / (sigma * sigma));
+          cc += texture2D(src, vUv + vec2(0.0, x) * texel).yz * w; ws += w;
+        }
+        cc /= ws;
+      }
+      float y = c0.x;
+      if (codec > 0.0) {
+        float sum = 0.0, wsum = 0.0, st = max(0.75, codecR * 0.7);
+        for (int j = -3; j <= 3; j++) for (int i = -3; i <= 3; i++) {
+          vec2 o = vec2(float(i), float(j)) * st;
+          float yy = texture2D(src, vUv + o * texel).x, dd = yy - c0.x;
+          float w = exp(-0.5 * dot(o, o) / (codecR * codecR) - 0.5 * dd * dd / (codec * codec));
+          sum += yy * w; wsum += w;
+        }
+        y = sum / wsum;
+      }
+      float r = y + cc.y / 0.713, b = y + cc.x / 0.564;
+      float g = (y - 0.299 * r - 0.114 * b) / 0.587;
+      gl_FragColor = vec4(max(vec3(r, g, b), 0.0), 1.0);
+    }`, { src: { value: null }, texel: { value: new THREE.Vector2() }, sigma: { value: 0 }, codec: { value: 0 }, codecR: { value: 1 } });
+
   private finish = pass(/* glsl */ `
     uniform sampler2D src; uniform sampler2D grainTex; uniform sampler2D streakTex;
     uniform float steps, grain, lift, lineChroma, hueAmp, streaks, time, lines; uniform vec2 jitter, outSize;
@@ -481,9 +618,23 @@ export class CamcorderPost {
    * `src`: linear radiance. Draws the finished picture into the canvas, in a
    * centred 4:3 box with black bars when `p.bars`.
    */
-  render(gl: THREE.WebGLRenderer, src: THREE.WebGLRenderTarget, p: CamcorderParams, hfovRad: number, dt: number): void {
+  render(gl: THREE.WebGLRenderer, src: THREE.WebGLRenderTarget, p: CamcorderParams, hfovRad: number, dt: number, motion?: CamcorderMotion | null): void {
     this.time = this.debugTime ?? this.time + dt;
     this.frame++;
+    // the shutter: smear the scene along the camera's motion (before the lens glow, as the sensor sees it)
+    if (motion && (p.motionBlur ?? 0) > 0) {
+      if (!this.motionRt || this.motionRt.width !== src.width || this.motionRt.height !== src.height) {
+        this.motionRt?.dispose();
+        this.motionRt = rt(src.width, src.height);
+      }
+      const u = this.motion.u;
+      u.src.value = src.texture; u.depthTex.value = motion.depth;
+      (u.invVP.value as THREE.Matrix4).copy(motion.invViewProj); (u.prevVP.value as THREE.Matrix4).copy(motion.prevViewProj);
+      u.scale.value = motion.scale; (u.texel.value as THREE.Vector2).set(1 / src.width, 1 / src.height);
+      u.maxLen.value = 0.08 * src.width;
+      this.draw(gl, this.motion, this.motionRt);
+      src = this.motionRt;
+    }
     const size = gl.getSize(new THREE.Vector2());
     const cw = size.x, ch = size.y;
     const aspect = p.bars ? 4 / 3 : cw / ch;
@@ -521,7 +672,7 @@ export class CamcorderPost {
     const t = this.tone.u;
     t.src.value = src.texture; t.g1.value = this.glowRt[0].texture; t.g2.value = this.glowRt[1].texture; t.g3.value = this.glowRt[2].texture; t.dirtTex.value = this.dirt;
     (t.scale.value as THREE.Vector3).copy(scale);
-    (t.glowW.value as THREE.Vector3).set(0.612, 0.241, 0.147).multiplyScalar(p.glow);
+    (t.glowW.value as THREE.Vector3).set(p.glowNear ?? 0.612, p.glowMid ?? 0.241, p.glowFar ?? 0.147).multiplyScalar(p.glow);
     t.dirt.value = p.dirt;
     // fringe 0.3 → red 0.003087, green 0.001781 of the half-picture (wavelength-weighted)
     (t.fringe.value as THREE.Vector2).set(p.fringe * 0.01 * 1.029, p.fringe * 0.01 * 0.5936);
@@ -536,6 +687,17 @@ export class CamcorderPost {
     this.sharp.u.src.value = this.outA!.texture; this.sharp.u.amount.value = p.sharpen; this.sharp.u.radius.value = 0.001 * (p.sharpenRadius ?? 1);
     this.draw(gl, this.sharp, this.outB);
     if (this.debugStage === 'sharp') return this.show(gl, this.outB!);
+    // the video signal: noise, colour band limit and delay, codec smoothing (outB → outA → outB)
+    const cb = (p.chromaBlur ?? 0) * 0.001 * ow, ln = p.lumaNoise ?? 0, cn = p.chromaNoise ?? 0, codec = p.codec ?? 0;
+    if (cb >= 0.3 || ln > 0 || cn > 0 || codec > 0 || (p.chromaDelay ?? 0) !== 0) {
+      const a = this.sigH.u, b = this.sigV.u;
+      a.src.value = this.outB!.texture; (a.texel.value as THREE.Vector2).set(1 / ow, 1 / oh);
+      a.sigma.value = cb; a.delay.value = (p.chromaDelay ?? 0) * 0.001 * ow; a.lumaNoise.value = ln; a.chromaNoise.value = cn; a.frame.value = this.frame % 65536;
+      this.draw(gl, this.sigH, this.outA);
+      b.src.value = this.outA!.texture; (b.texel.value as THREE.Vector2).set(1 / ow, 1 / oh);
+      b.sigma.value = cb; b.codec.value = codec; b.codecR.value = Math.max(0.3, (p.codecRadius ?? 1.5) * 0.001 * ow);
+      this.draw(gl, this.sigV, this.outB);
+    }
     // banding, grain, tape
     const f = this.finish.u;
     f.src.value = this.outB!.texture; f.grainTex.value = this.grainTex; f.streakTex.value = this.streakTex;

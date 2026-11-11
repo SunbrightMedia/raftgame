@@ -22,7 +22,8 @@ Changing the model to fit (all optional):
             "radius": face corner radius, "edge": edge radius (<= t/2), "bulge": dome of the front face,
             "tilt": degrees about x (+ leans the top back, towards +y), "uv": inches per texture repeat}]:
     soft-edged slabs added to the mesh (cushions, struts), smooth shading all round. "front" = the slab's
-    face looks along -y (w across x, h up z); "up" = it looks up (w across x, h along y). Each texture
+    face looks along -y (w across x, h up z); "up" = it looks up (w across x, h along y); "side" = it looks
+    along +x (w along y, h up z). Each texture
     name gets its own material slot after the glTF's.
 """
 import json, os, sys
@@ -123,8 +124,11 @@ def pad(spec):
     cap(0, -T / 2, -1, 0.0)
     V, F = np.array(V, float), np.array(F, np.int64)
     # local (a across, b up the face, c out of the face) -> model axes, tilted about x, moved to the centre
-    if spec.get('face', 'front') == 'front':
+    face = spec.get('face', 'front')
+    if face == 'front':
         M = np.array([[1, 0, 0], [0, 0, -1], [0, 1, 0]], float)   # a -> x, b -> z, c -> -y
+    elif face == 'side':
+        M = np.array([[0, 0, 1], [1, 0, 0], [0, 1, 0]], float)    # a -> y, b -> z, c -> x
     else:
         M = np.eye(3)                                              # a -> x, b -> y, c -> z (no mirror: the winding stays)
     ct, st = np.cos(tilt), np.sin(tilt)
@@ -162,12 +166,21 @@ def fetch_polyhaven(pid, res):
 
 def main():
     spec = json.load(open(sys.argv[1]))
+    if not spec.get('gltf') and not spec.get('polyhaven'):
+        return build(spec, None)
     gpath = spec['gltf'] if spec.get('gltf') else fetch_polyhaven(spec['polyhaven'], spec.get('res', '1k'))
-    g = json.load(open(gpath))
-    gdir = os.path.dirname(gpath)
-    bufs = [open(os.path.join(gdir, b['uri']), 'rb').read() for b in g['buffers']]
+    return build(spec, gpath)
+
+
+def build(spec, gpath):
+    if gpath is None:
+        g, gdir, bufs, mats = {'scenes': [{'nodes': []}], 'nodes': []}, '', [], []
+    else:
+        g = json.load(open(gpath))
+        gdir = os.path.dirname(gpath)
+        bufs = [open(os.path.join(gdir, b['uri']), 'rb').read() for b in g['buffers']]
+        mats = g.get('materials', [])
     conv = np.array([[1, 0, 0], [0, 0, -1], [0, 1, 0]], float) * IN * spec.get('scale', 1)
-    mats = g.get('materials', [])
     P, N, U, I, groups = [], [], [], [], []
     vbase = 0
 
@@ -198,12 +211,13 @@ def main():
     scene = g['scenes'][g.get('scene', 0)]
     for r in scene['nodes']:
         walk(r, np.eye(4))
-    P = np.concatenate(P); N = np.concatenate(N); U = np.concatenate(U)
-    I = np.concatenate(I).astype(np.int64)
+    P = np.concatenate(P) if P else np.zeros((0, 3)); N = np.concatenate(N) if N else np.zeros((0, 3))
+    U = np.concatenate(U) if U else np.zeros((0, 2))
+    I = np.concatenate(I).astype(np.int64) if I else np.zeros(0, np.int64)
     # material slots: the glTF materials in order, each to its texture name from the spec
     names = []
     slot_of = {}
-    for t in spec['textures']:
+    for t in spec.get('textures', []):
         mi = t['material'] if isinstance(t['material'], int) else next(i for i, m in enumerate(mats) if m.get('name') == t['material'])
         while len(names) <= mi: names.append('missing')
         names[mi] = t['name']
@@ -259,7 +273,7 @@ def main():
     # textures: the colour map, recoloured if asked, into textures/src; an index entry with the credit
     idx_path = os.path.join(ROOT, 'textures', 'index.json')
     index = json.load(open(idx_path))
-    for t in spec['textures']:
+    for t in spec.get('textures', []):
         img = Image.open(os.path.join(gdir, t['from'])).convert('RGB')
         if t.get('recolour'):
             img, n = recolour(img, t['recolour']); print(f"  {t['name']}: recoloured {n} px")
@@ -286,7 +300,7 @@ def main():
         'bounds': [lo, hi], 'hull': [lo, hi],
         'meshes': [{'slot': int(m), 'vertexOffset': 0, 'vertexCount': int(len(P)), 'indexOffset': int(o), 'indexCount': int(n)} for m, o, n in groups],
         **({'shadowBoxes': spec['shadowBoxes']} if spec.get('shadowBoxes') else {}),
-        'credit': spec.get('credit', ''), 'license': 'CC0 1.0',
+        'credit': spec.get('credit', ''), 'license': spec.get('license', 'CC0 1.0'),
     }
     json.dump(header, open(os.path.join(out_dir, stem + '.json'), 'w'))
     print(f"wrote models/{spec['name']}.json: {len(P)} vertices, {len(I) // 3} triangles, bounds {[round(v, 1) for v in lo]} .. {[round(v, 1) for v in hi]}")

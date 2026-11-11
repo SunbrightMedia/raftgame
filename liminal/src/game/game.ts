@@ -430,6 +430,15 @@ export class Game {
     this.sky.follow(cam);
     this.fogBackdrop.follow(cam);
     cam.rotateZ(((this.player.roll(s) + this.viewRoll) * Math.PI) / 180);
+    // A camera held by hand: slow drift in turn, tilt and roll (overlapping waves, never repeating exactly).
+    const hh = s.view.handheld;
+    if (hh > 0) {
+      const t = performance.now() / 1000, w = (f: number, ph: number) => Math.sin(t * f * 2 * Math.PI + ph);
+      const d2r = Math.PI / 180;
+      cam.rotateY(hh * d2r * (0.6 * w(0.37, 0.3) + 0.3 * w(0.83, 1.1) + 0.1 * w(1.9, 2.3)));
+      cam.rotateX(hh * d2r * 0.8 * (0.6 * w(0.29, 2.0) + 0.3 * w(0.71, 0.4) + 0.1 * w(2.3, 1.4)));
+      cam.rotateZ(hh * d2r * 0.5 * (0.7 * w(0.23, 0.9) + 0.3 * w(0.61, 2.7)));
+    }
     const C = s.camera;
     worldUniforms.flashOn.value = C.flash ? 1 : 0;
     worldUniforms.flashPos.value.set(eye.x, eye.y, eye.z + C.flashHeight);

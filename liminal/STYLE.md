@@ -48,6 +48,13 @@ the user having to say them again.
   fabric, wood) come from Poly Haven's CC0 photos (`tools/fetch_polyhaven.py`),
   recoloured to the reference's measured colour. Build a prop from brushes
   only when nothing close exists.
+- **Found footage is the camera as much as the room.** A clean render reads
+  as CG however good the room is. Match the reference's signal, measured
+  on its frames: colour far softer than brightness, colour noise as
+  blotches (not fine RGB grain), faint detail smoothed away as a codec does,
+  no sharpening halos unless the reference has them, shutter blur on camera
+  moves, a handheld sway, lamps as soft blobs. Research and numbers:
+  `docs/FOUND_FOOTAGE.md`.
 
 **Overall target**
 - **Source-engine liminal, not Minecraft retro.** Textures smooth and fairly
