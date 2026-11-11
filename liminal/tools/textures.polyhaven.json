@@ -1,0 +1,12 @@
+{
+ "_comment": "CC0 materials from Poly Haven (polyhaven.com), fetched by tools/fetch_polyhaven.py: colour map only, at `px`. size: real-world inches one repeat covers (blank = Poly Haven's own dimensions).",
+ "textures": [
+  {"name": "ph/red_brick", "polyhaven": "red_brick", "material": "concrete", "px": 512},
+  {"name": "ph/beige_wall", "polyhaven": "beige_wall_001", "material": "plaster", "px": 512},
+  {"name": "ph/beige_wall_textured", "polyhaven": "beige_wall_002", "material": "plaster", "px": 512},
+  {"name": "ph/dirty_carpet", "polyhaven": "dirty_carpet", "material": "carpet", "px": 512},
+  {"name": "ph/wool_herringbone", "polyhaven": "poly_wool_herringbone", "material": "fabric", "px": 512},
+  {"name": "ph/dark_wood", "polyhaven": "dark_wood", "material": "wood", "px": 512},
+  {"name": "ph/leather_white", "polyhaven": "leather_white", "material": "fabric", "px": 512}
+ ]
+}

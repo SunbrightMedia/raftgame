@@ -33,7 +33,7 @@ import { HOUSE_IV_ROOMS } from './rooms';
 
 const T = 5;
 const TEX: HouseTex = {
-  paint: 'house6/paint_ivory', carpet: 'house6/carpet_brown', ceiling: 'house6/ceiling', trim: 'house6/trim_white',
+  paint: 'house6/paint_ivory', carpet: 'house6/carpet_brown', ceiling: 'house6/ceiling_paint', trim: 'house6/trim_white',
   brass: 'pmp/brass', dome: 'fixture/dome', chrome: 'fixture/chrome', brick: 'house6/brick', soot: 'house6/soot',
   woodDark: 'house6/wood_dark', fabric: 'house6/fabric_grey', counter: 'house6/counter', glassDark: 'house6/dark',
   woodPlaque: 'house6/wood_mid', sconce: 'fixture/sconce',
@@ -58,7 +58,9 @@ const m = new MapBuilder();
   m.box([bx0 + T, NE, 0], [bx1, N, k.H], TEX.paint);
   k.door('y', bx0, -1, 147, -1, { w: 32 });
   k.plaque('x', NE, -1, 128, 78, 34, 6);
-  k.chair(152, 105, 270);
+  // The chair: Poly Haven's SchoolChair_01 (CC0) with a padded seat and back (tools/models/padded_chair.json),
+  // its back to the pilaster, facing west (the video sees the back's face, the seat reaching to the left).
+  m.prop([150, 104.5, 0], 'cc0/padded_chair', -90, 0.9);
   // the pilaster: its two outside corners rounded
   k.rblock(bx1, pz, px1, N, [true, true, false, false]);
   // the north wall east of the pilaster, with a door (dark, far from the lamp) and the sconce

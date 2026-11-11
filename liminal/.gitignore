@@ -18,3 +18,4 @@ maps/iw/
 catalogue-iw/
 dist-industrial/
 dist-planner/
+.cache/

@@ -41,6 +41,13 @@ the user having to say them again.
   a dark wedge can be a missing wall, not a shadow; a floor may not exist.
 - **Suggest first when asked to suggest.** If the user asks for a suggestion
   before fixes, reply with the suggestion and wait; change nothing.
+- **Real models and real materials before hand-built ones.** For a prop in a
+  reference, first look for the closest CC0 model (Poly Haven first), then
+  change its geometry and texture until it matches (`tools/models/`: drop
+  parts, add soft-edged pads, recolour). Materials (brick, plaster, carpet,
+  fabric, wood) come from Poly Haven's CC0 photos (`tools/fetch_polyhaven.py`),
+  recoloured to the reference's measured colour. Build a prop from brushes
+  only when nothing close exists.
 
 **Overall target**
 - **Source-engine liminal, not Minecraft retro.** Textures smooth and fairly

@@ -24,6 +24,8 @@ export interface ModelHeader {
   shadow?: number[];
   /** Player collision: convex pieces of the Source collision model (planes [nx, ny, nz, d], corner points). */
   collision?: { planes: number[][]; points: number[][] }[];
+  /** Our bake's shadow shapes: boxes in model space ([min, max]) that block light, for models we import (tools/models). */
+  shadowBoxes?: [[number, number, number], [number, number, number]][];
 }
 
 /** Catalogue build: where a model's compacted data is (tools/source/pack_catalogue.py). */

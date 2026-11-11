@@ -32,6 +32,7 @@ Procedural textures (`dev/*`, `house/wallpaper_*`, `house/paneling`, `office/vin
 | [PaintedPlaster012 from ambientCG.com](https://ambientcg.com/a/PaintedPlaster012) | CC0 1.0 | `ind/paint_green` |
 | [Plaster001 from ambientCG.com](https://ambientcg.com/a/Plaster001) | CC0 1.0 | `office/plaster` |
 | [Plaster007 from ambientCG.com](https://ambientcg.com/a/Plaster007) | CC0 1.0 | `office/plaster_worn` |
+| [SchoolChair_01 by Ethan Place, Poly Haven (darkened)](https://polyhaven.com/a/SchoolChair_01) | CC0 1.0 | `cc0/schoolchair_01` |
 | [Seamless carpet by StarNinjas](https://opengameart.org/content/seamless-carpet) | CC0 1.0 | `house/carpet_shag` |
 | [Sidewall sample, 1900s. Cooper Hewitt, Smithsonian Design Museum](https://collection.cooperhewitt.org/view/objects/asitem/id/182732) | CC0 1.0 | `wallpaper/grapes_1900s` |
 | [Sidewall sample, 1900s. Cooper Hewitt, Smithsonian Design Museum](https://collection.cooperhewitt.org/view/objects/asitem/id/182715) | CC0 1.0 | `wallpaper/leaves_pale_1900s` |
@@ -52,14 +53,27 @@ Procedural textures (`dev/*`, `house/wallpaper_*`, `house/paneling`, `office/vin
 | [WoodFloor039 from ambientCG.com](https://ambientcg.com/a/WoodFloor039) | CC0 1.0 | `house/panel_wood` |
 | [WoodFloor043 from ambientCG.com](https://ambientcg.com/a/WoodFloor043) | CC0 1.0 | `house/planks_old` |
 | [WoodFloor051 from ambientCG.com](https://ambientcg.com/a/WoodFloor051) | CC0 1.0 | `house/woodfloor` |
+| [beige_wall_001 by Dimitrios Savva, Rico Cilliers, from Poly Haven](https://polyhaven.com/a/beige_wall_001) | CC0 1.0 | `ph/beige_wall` |
+| [beige_wall_002 by Dimitrios Savva, Rico Cilliers, from Poly Haven](https://polyhaven.com/a/beige_wall_002) | CC0 1.0 | `ph/beige_wall_textured` |
+| [dark_wood by Dario Barresi, Dimitrios Savva, Rico Cilliers, from Poly Haven](https://polyhaven.com/a/dark_wood) | CC0 1.0 | `ph/dark_wood` |
+| [dirty_carpet by Rohit Seervi, from Poly Haven](https://polyhaven.com/a/dirty_carpet) | CC0 1.0 | `ph/dirty_carpet` |
+| [leather_white by Rob Tuytel, from Poly Haven](https://polyhaven.com/a/leather_white) | CC0 1.0 | `ph/leather_white` |
+| [poly_wool_herringbone by colormass, Rico Cilliers, from Poly Haven](https://polyhaven.com/a/poly_wool_herringbone) | CC0 1.0 | `ph/wool_herringbone` |
+| [red_brick by Rob Tuytel, from Poly Haven](https://polyhaven.com/a/red_brick) | CC0 1.0 | `ph/red_brick` |
 
 ## Carpets supplied by the user
 
 Photos of carpet samples supplied by the user, made tileable by `tools/make_carpets.py`
-(sources in `tools/carpet_sources/`): `carpet/chevron_blue`, `carpet/camo_olive`, `carpet/floral_navy`, `carpet/confetti_blue`.
+(sources in `tools/carpet_sources/`): `carpet/camo_olive`, `carpet/chevron_blue`, `carpet/confetti_blue`, `carpet/floral_navy`.
 
 ## Freedoom (1226 textures, `freedoom/*`)
 
 From [Freedoom](https://freedoom.github.io), under the BSD 3-Clause licence, which requires this notice in any build that includes them. Full licence text: `textures/freedoom/LICENSE.txt`.
 
 Copyright © 2001-2024 Contributors to the Freedoom project. All rights reserved.
+
+## Models
+
+| model | source | licence |
+|---|---|---|
+| `cc0/padded_chair` | From SchoolChair_01 by Ethan Place, Poly Haven (CC0): shell replaced by a padded seat and back, frame darkened | CC0 1.0 |

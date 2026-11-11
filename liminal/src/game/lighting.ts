@@ -7,6 +7,7 @@ import { layoutLightmap, solidPlanes, type LightmapLayout } from '../engine/ligh
 import type { TextureRegistry } from '../engine/render/textures';
 import type { Settings } from '../data/settings';
 import type { Level } from './level';
+import { worldUniforms } from '../engine/render/worldMaterial';
 import type { Storage } from '../data/storage';
 import { AmbientTree, lightModelsRuntime } from '../engine/light/modelLight';
 import { SolidGrid } from '../engine/light/bake';
@@ -107,6 +108,13 @@ function decodeRGBEToHalf(bytes: Uint8Array): Uint16Array {
   return half;
 }
 /** RGBE (5 bytes per texel, see encodeRGBE) → RGBA floats. */
+/** RGB triples as RGBA (alpha 1), for encodeRGBE. */
+function rgbToRGBA(rgb: Float32Array): Float32Array {
+  const out = new Float32Array((rgb.length / 3) * 4);
+  for (let i = 0; i < rgb.length / 3; i++) { out[i * 4] = rgb[i * 3]; out[i * 4 + 1] = rgb[i * 3 + 1]; out[i * 4 + 2] = rgb[i * 3 + 2]; out[i * 4 + 3] = 1; }
+  return out;
+}
+
 function decodeRGBEToFloat(bytes: Uint8Array): Float32Array {
   const n = bytes.length / 5, out = new Float32Array(n * 4);
   for (let i = 0; i < n; i++) {
@@ -195,7 +203,8 @@ export class Lighting {
     const mats: Record<string, unknown> = {};
     for (const f of level.faces) if (!(f.tex in mats)) mats[f.tex] = textures.identity(f.tex);
     if (level.source) return hash(JSON.stringify(['source', SOURCE_BAKE_VERSION, SOURCE_BAKE, level.map.brushes, level.map.entities, mats]));
-    return hash(JSON.stringify([BAKE_VERSION, bakeSettings, s.textures, level.map.brushes, level.map.entities, mats]));
+    const props = level.propFingerprint();
+    return hash(JSON.stringify([BAKE_VERSION, bakeSettings, s.textures, level.map.brushes, level.map.entities, mats, ...(props.length ? [props] : [])]));
   }
 
   /** Ask for lighting if anything that affects it changed. */
@@ -347,6 +356,16 @@ export class Lighting {
           const mask = await pipe(fromBase64(c.mask), new DecompressionStream('deflate-raw'));
           if (gen !== this.seq) return;
           this.apply(layout, half, L.filter, dir, mask);
+          const probes = c.props ? level.propProbes() : null;
+          if (c.props && probes) {
+            const px = decodeRGBEToFloat(await pipe(fromBase64(c.props), new DecompressionStream('deflate-raw')));
+            if (gen !== this.seq) return;
+            if (px.length / 4 === probes.pos.length / 3) {
+              const rgb = new Float32Array(px.length / 4 * 3);
+              for (let i = 0; i < px.length / 4; i++) { rgb[i * 3] = px[i * 4]; rgb[i * 3 + 1] = px[i * 4 + 1]; rgb[i * 3 + 2] = px[i * 4 + 2]; }
+              this.applyPropLight(rgb, probes.offsets);
+            }
+          }
           this.status = `lighting loaded from cache (${Math.round(performance.now() - t0)} ms)`;
           this.shownAt = performance.now();
           return;
@@ -360,8 +379,9 @@ export class Lighting {
     const quickLuxel = Math.max(L.luxelSize, 32);
     const quickLayout = layoutLightmap(level.faces, quickLuxel, 2048, L.thinSamples);
     // Light panels as a coarse grid of emitters (a 2x4 troffer = 1 light, not 18): the preview's cost is lights × luxels.
-    const quick = this.buildInput(level, s, textures, quickLayout, { bounces: Math.min(1, L.bounces), bounceSamples: 8, surfaceSpacing: 48 });
-    const full = this.buildInput(level, s, textures, layout, {});
+    const probes = level.propProbes();
+    const quick = this.buildInput(level, s, textures, quickLayout, { bounces: Math.min(1, L.bounces), bounceSamples: 8, surfaceSpacing: 48 }, probes, false);
+    const full = this.buildInput(level, s, textures, layout, {}, probes, true);
     this.status = 'baking…';
     let fullDone = false;
     this.worker.onmessage = (e: MessageEvent<{ id: number; out: BakeOutput }>) => {
@@ -380,14 +400,16 @@ export class Lighting {
       }
       fullDone = true;
       this.apply(layout, half, L.filter, dir, mask);
+      if (out.probeLight && probes) this.applyPropLight(out.probeLight, probes.offsets);
       this.status = `baked ${out.luxels.toLocaleString()} luxels, ${out.lights} lights in ${out.ms} ms`;
       this.shownAt ||= performance.now();
       this.worker?.terminate();
       this.worker = null;
       // Save wherever this build saves files (map folder on the dev server, the
       // artifact's db, localStorage), so the same map + settings never bakes twice.
-      void Promise.all([pipe(encodeRGBE(out.pixels), new CompressionStream('deflate-raw')), pipe(dir, new CompressionStream('deflate-raw')), pipe(mask, new CompressionStream('deflate-raw'))]).then(([z, zd, zm]) => {
-        const cache: LightmapCache = { format: 'liminal-lightmap', version: BAKE_VERSION, encoding: 'rgbe-deflate', key, width: out.width, height: out.height, luxel: L.luxelSize, data: toBase64(z), dir: toBase64(zd), mask: toBase64(zm) };
+      const propPx = out.probeLight ? rgbToRGBA(out.probeLight) : null;
+      void Promise.all([pipe(encodeRGBE(out.pixels), new CompressionStream('deflate-raw')), pipe(dir, new CompressionStream('deflate-raw')), pipe(mask, new CompressionStream('deflate-raw')), propPx ? pipe(encodeRGBE(propPx), new CompressionStream('deflate-raw')) : Promise.resolve(null)]).then(([z, zd, zm, zp]) => {
+        const cache: LightmapCache = { format: 'liminal-lightmap', version: BAKE_VERSION, encoding: 'rgbe-deflate', key, width: out.width, height: out.height, luxel: L.luxelSize, data: toBase64(z), dir: toBase64(zd), mask: toBase64(zm), ...(zp ? { props: toBase64(zp) } : {}) };
         return this.storage.write(this.cachePath(level), JSON.stringify(cache));
       }).then(() => { if (gen === this.seq) this.status += ' · cached'; }, (e) => console.warn('lightmap cache not saved', e));
     };
@@ -440,7 +462,15 @@ export class Lighting {
     this.onBaked?.(layout, tex, dtex, mtex);
   }
 
-  private buildInput(level: Level, s: Settings, textures: TextureRegistry, layout: LightmapLayout, over: Partial<{ bounces: number; bounceSamples: number; surfaceSpacing: number }>): BakeInput {
+  /** Our maps' props: their irradiance per vertex (lux) as the prop shader's vertex light (albedo × it × sourceUnit = what a wall shows). */
+  private applyPropLight(lux: Float32Array, offsets: Int32Array): void {
+    const k = 1 / (Math.PI * worldUniforms.sourceUnit.value);
+    const v = new Float32Array(lux.length);
+    for (let i = 0; i < lux.length; i++) v[i] = lux[i] * k;
+    this.onPropLight?.(v, offsets);
+  }
+
+  private buildInput(level: Level, s: Settings, textures: TextureRegistry, layout: LightmapLayout, over: Partial<{ bounces: number; bounceSamples: number; surfaceSpacing: number }>, probes: ReturnType<Level['propProbes']> = null, light = false): BakeInput {
     const L = s.light;
     const emissive: BakeInput['emissive'] = {};
     const albedo: BakeInput['albedo'] = {};
@@ -449,13 +479,16 @@ export class Lighting {
       albedo[f.tex] = t.albedo;
       if (t.emissive && t.emissive.castsLight) emissive[f.tex] = { color: emitterColor(t.emissive), luminance: t.emissive.luminance };
     }
+    const brushBoxes = level.map.brushes.filter((b) => b.solid !== false && b.group !== 'clip').map(solidPlanes);
     return {
       faces: level.faces,
       width: layout.width,
       height: layout.height,
       rects: [...layout.rects],
-      // Clip brushes (invisible player blockers, as Source's) don't block light.
-      boxes: level.map.brushes.filter((b) => b.solid !== false && b.group !== 'clip').map(solidPlanes),
+      // Clip brushes (invisible player blockers, as Source's) don't block light; props' shadow shapes do.
+      boxes: probes ? [...brushBoxes, ...probes.boxes] : brushBoxes,
+      ...(probes ? { propBoxStart: brushBoxes.length } : {}),
+      ...(probes && light ? { probes: { pos: probes.pos, nrm: probes.nrm } } : {}),
       lights: mapLights(level),
       emissive,
       albedo,

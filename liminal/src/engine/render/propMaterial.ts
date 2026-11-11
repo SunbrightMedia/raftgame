@@ -42,10 +42,15 @@ export function makePropMaterial(tex: TexEntry): THREE.ShaderMaterial {
       varying vec3 vViewPos;   // exact per pixel: a distance interpolated across a huge face is far off
       #define vDepth length(vViewPos)
       #define vFogZ (cameraPosition.z + dot(viewMatrix[2].xyz, vViewPos))
-      varying vec3 vLight;
+      // centroid: with MSAA, a pixel only partly covered by a thin triangle is shaded at its centre,
+      // outside the triangle, where plain interpolation runs past the vertex values (even below 0).
+      centroid varying vec3 vLight;
+      varying float vBaked;   // the same at every vertex, so it never runs past 0 or 1
       void main() {
-        vLight = vec3(-1.0);
+        vLight = vec3(0.0);
+        vBaked = 0.0;
         if (propLightOn > 0.5) {
+          vBaked = 1.0;
           int i = int(lightOffset) + gl_VertexID;
           vLight = texelFetch(propLight, ivec2(i % 2048, i / 2048), 0).rgb;
           if (gamma22 > 0.5) {
@@ -86,7 +91,8 @@ export function makePropMaterial(tex: TexEntry): THREE.ShaderMaterial {
       varying vec3 vViewPos;   // exact per pixel: a distance interpolated across a huge face is far off
       #define vDepth length(vViewPos)
       #define vFogZ (cameraPosition.z + dot(viewMatrix[2].xyz, vViewPos))
-      varying vec3 vLight;
+      centroid varying vec3 vLight;
+      varying float vBaked;
       uniform float gamma22;
       vec3 toLinear(vec3 c) { return gamma22 > 0.5 ? pow(c, vec3(2.2)) : mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }
       void main() {
@@ -99,13 +105,15 @@ export function makePropMaterial(tex: TexEntry): THREE.ShaderMaterial {
         float shade = n2.x * (n.x > 0.0 ? 0.82 : 0.74) + n2.y * (n.y > 0.0 ? 0.9 : 0.66) + n2.z * (n.z > 0.0 ? 1.0 : 0.58);
         // Baked per-vertex light (Source linear) once the bake has it; until then an even light with direction shading.
         vec3 L;
-        if (gamma22 > 0.5 && lightmapOn > 0.5 && vLight.r >= 0.0) {
+        vec3 vl = max(vLight, 0.0);
+        bool baked = lightmapOn > 0.5 && vBaked > 0.5;
+        if (gamma22 > 0.5 && baked) {
           // Non-HDR: gamma-space albedo × vertex light (see the vertex shader), clamped like the frame buffer.
-          vec3 g = tx.rgb * vLight;
+          vec3 g = tx.rgb * vl;
           if (selfIllum > 0.5) g = mix(g, tx.rgb * selfIllumTint, tx.a);
           L = pow(clamp(g, 0.0, 1.0), vec3(2.2)) * sourceUnit;
         } else {
-          if (lightmapOn > 0.5 && vLight.r >= 0.0) L = rho * vLight * sourceUnit * brightness;
+          if (baked) L = rho * vl * sourceUnit * brightness;
           // No bake: the map's lamps worked out here (lightGrid.ts), or, with none, an even light with direction shading.
           else if (lgOn > 0.5) L = rho * gridLight(cameraPosition + vViewPos * mat3(viewMatrix), n) * (brightness / 3.14159265);
           else L = rho * sourceUnit * mix(1.0, shade, faceShade) * brightness;

@@ -1,0 +1,27 @@
+{
+ "polyhaven": "SchoolChair_01",
+ "res": "1k",
+ "name": "cc0/padded_chair",
+ "credit": "From SchoolChair_01 by Ethan Place, Poly Haven (CC0): shell replaced by a padded seat and back, frame darkened",
+ "_comment": "The chair in the \"Infinite house\" frame 1: a white padded back and seat, dark legs. Poly Haven's school chair keeps its steel frame (legs and the two back rails); its slotted shell (every part that doesn't reach the floor) is dropped for two vinyl pads. Model space: inches, front towards -y.",
+ "textures": [
+  {
+   "material": 0,
+   "name": "cc0/schoolchair_01",
+   "from": "textures/SchoolChair_01_diff_1k.jpg",
+   "material_type": "metal",
+   "recolour": {"hue": [0, 360], "minSat": 0, "to": "#1c1b1a"},
+   "credit": "SchoolChair_01 by Ethan Place, Poly Haven (darkened)",
+   "url": "https://polyhaven.com/a/SchoolChair_01"
+  }
+ ],
+ "dropParts": {"above": 10},
+ "pads": [
+  {"material": "house6/vinyl_white", "face": "up", "centre": [0, -4.4, 20.4], "size": [19.2, 16.8, 1.8], "radius": 2.2, "edge": 0.8, "bulge": 0.35, "uv": 11.8},
+  {"material": "house6/vinyl_white", "face": "front", "centre": [0, 7.33, 31.5], "size": [18, 15, 2.2], "radius": 3, "edge": 1.0, "bulge": 0.4, "tilt": 3, "uv": 11.8}
+ ],
+ "shadowBoxes": [
+  [[-9.6, -12.8, 19.5], [9.6, 4.0, 21.6]],
+  [[-9.0, 6.0, 24.0], [9.0, 8.6, 39.0]]
+ ]
+}

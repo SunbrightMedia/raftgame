@@ -9,8 +9,8 @@ import { buildPropMeshes, cullProps, disposeProps, setPropLight } from '../engin
 import { buildLabels } from '../engine/render/labels';
 import { buildGlows, disposeGlows } from '../engine/render/glows';
 import { buildRopes } from '../engine/render/ropes';
-import { propSolids } from '../engine/collision/props';
-import { buildFaces, solidPlanes, type Face, type LightmapLayout } from '../engine/light/faces';
+import { propModel, propSolids, sourceAxes } from '../engine/collision/props';
+import { buildFaces, solidPlanes, type Face, type LightmapLayout, type SolidPlanes } from '../engine/light/faces';
 import { type Vec3, v3 } from '../engine/vec3';
 import type { PropInstance } from '../engine/light/vradProps';
 import { isSourceLit, propBakeData, propShadowTris, sourceBakeInfo } from './sourceLighting';
@@ -130,6 +130,72 @@ export class Level {
       const m = inst.matrix.slice(); m[12] += o[0]; m[13] += o[1]; m[14] += o[2];
       return { model: inst.model, matrix: m };
     });
+  }
+
+  /**
+   * Our maps' props, for the bake to light (Source-lit maps light theirs their own way): every prop's vertices
+   * in world space (positions, normals), where each prop's vertices start (the order the prop meshes read
+   * their light in), and the solids their models give as shadow shapes (ModelHeader.shadowBoxes).
+   */
+  propProbes(): { pos: Float32Array; nrm: Float32Array; offsets: Int32Array; boxes: SolidPlanes[] } | null {
+    if (this.source) return null;
+    const data = propBakeData(this.map, (name) => {
+      const g = this.models.get(name)?.geometry;
+      return g ? { positions: g.getAttribute('position').array as Float32Array, normals: g.getAttribute('normal').array as Float32Array } : undefined;
+    });
+    if (!data.instances.length) return null;
+    const offsets = new Int32Array(data.instances.length);
+    let total = 0;
+    data.instances.forEach((inst, i) => { offsets[i] = total; total += data.models[inst.model].positions.length / 3; });
+    const pos = new Float32Array(total * 3), nrm = new Float32Array(total * 3);
+    data.instances.forEach((inst, i) => {
+      const m = data.models[inst.model], M = inst.matrix, o = offsets[i];
+      for (let v = 0; v < m.positions.length / 3; v++) {
+        const x = m.positions[v * 3], y = m.positions[v * 3 + 1], z = m.positions[v * 3 + 2];
+        const a = m.normals[v * 3], b = m.normals[v * 3 + 1], c = m.normals[v * 3 + 2];
+        for (let k = 0; k < 3; k++) {
+          pos[(o + v) * 3 + k] = M[k] * x + M[4 + k] * y + M[8 + k] * z + M[12 + k];
+          nrm[(o + v) * 3 + k] = M[k] * a + M[4 + k] * b + M[8 + k] * c;
+        }
+      }
+    });
+    // Shadow shapes: boxes in model space; upright props make them prisms, anything tipped their bounding box.
+    const boxes: SolidPlanes[] = [];
+    let id = 10_000_000;
+    for (const e of this.map.entities) {
+      const name = propModel(e);
+      const h = name ? this.models.header(name) : undefined;
+      if (!h?.shadowBoxes || !this.models.get(name!)) continue;
+      const s = typeof e.props?.scale === 'number' ? e.props.scale : 1;
+      const [f, l, u] = sourceAxes(e.angles as [number, number, number] | undefined);
+      const w = (x: number, y: number, z: number) => [0, 1, 2].map((k) => e.origin[k] + (f[k] * x + l[k] * y + u[k] * z) * s);
+      for (const [lo, hi] of h.shadowBoxes) {
+        const corners = [0, 1, 2, 3, 4, 5, 6, 7].map((c) => w(c & 1 ? hi[0] : lo[0], c & 2 ? hi[1] : lo[1], c & 4 ? hi[2] : lo[2]));
+        const min = [0, 1, 2].map((k) => Math.min(...corners.map((p) => p[k]))) as [number, number, number];
+        const max = [0, 1, 2].map((k) => Math.max(...corners.map((p) => p[k]))) as [number, number, number];
+        const upright = Math.abs(u[2] - 1) < 1e-6;
+        if (upright) {
+          const pts = [corners[0], corners[1], corners[3], corners[2]].map((p) => [p[0], p[1]] as [number, number]);
+          boxes.push(solidPlanes({ id: id++, type: 'prism', points: pts, z0: min[2], z1: max[2], min, max, tex: '' } as never));
+        } else boxes.push(solidPlanes({ id: id++, type: 'box', min, max, tex: '' } as never));
+      }
+    }
+    return { pos, nrm, offsets, boxes };
+  }
+
+  /** What of the props' models the bake depends on (empty without props, so such maps key as before). */
+  propFingerprint(): unknown[] {
+    if (this.source) return [];
+    const out: unknown[] = [];
+    const seen = new Set<string>();
+    for (const e of this.map.entities) {
+      const name = propModel(e)?.toLowerCase();
+      if (!name || seen.has(name)) continue;
+      seen.add(name);
+      const h = this.models.header(name);
+      if (h) out.push([name, h.vertexCount, h.indexCount, h.bounds, h.shadowBoxes ?? null]);
+    }
+    return out;
   }
 
   /** Baked per-vertex light for the props (Source-lit maps). */

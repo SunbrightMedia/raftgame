@@ -27,6 +27,8 @@
     "house6/dark": {"roughness": 0.85, "f0": 0.04, "gloss": 0.3},
     "house6/window": {"roughness": 0.35, "f0": 0.04, "gloss": 0.5},
     "house6/trim_white": {"roughness": 0.3, "f0": 0.04, "gloss": 1},
+    "house6/brick": {"roughness": 0.85, "bump": 0.3, "relief": 1},
+    "house6/carpet_brown": {"roughness": 1, "bump": 0.08, "relief": 0.3, "gloss": 0},
     "house6/soot": {"roughness": 1, "gloss": 0}
   }
 }

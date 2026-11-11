@@ -249,9 +249,9 @@
     },
     {
       "name": "house6/carpet_brown",
-      "from": "house/carpet_plush",
-      "color": "#7f7464",
-      "contrast": 0.6
+      "from": "ph/dirty_carpet",
+      "color": "#796953",
+      "contrast": 0.22
     },
     {
       "name": "house6/soot",
@@ -261,9 +261,9 @@
     },
     {
       "name": "house6/wood_dark",
-      "from": "house/panel_wood",
-      "color": "#6b5038",
-      "contrast": 0.8
+      "from": "ph/dark_wood",
+      "color": "#5a4030",
+      "contrast": 0.9
     },
     {
       "name": "house6/trim_cream",
@@ -273,9 +273,9 @@
     },
     {
       "name": "house6/brick",
-      "from": "ind/brick_red",
-      "color": "#7a4a2e",
-      "contrast": 0.3
+      "from": "ph/red_brick",
+      "color": "#6b492a",
+      "contrast": 1.35
     },
     {
       "name": "house6/window",
@@ -291,9 +291,15 @@
     },
     {
       "name": "house6/paint_ivory",
-      "from": "office/plaster",
+      "from": "ph/beige_wall",
       "color": "#dcd7c8",
       "contrast": 0.8
+    },
+    {
+      "name": "house6/ceiling_paint",
+      "from": "ph/beige_wall_textured",
+      "color": "#d7d2c6",
+      "contrast": 0.6
     },
     {
       "name": "house6/wood_mid",
@@ -303,9 +309,9 @@
     },
     {
       "name": "house6/fabric_grey",
-      "from": "house/upholstery",
+      "from": "ph/wool_herringbone",
       "color": "#707074",
-      "contrast": 0.35
+      "contrast": 0.8
     },
     {
       "name": "house6/counter",
@@ -318,6 +324,12 @@
       "from": "office/plaster",
       "color": "#141414",
       "contrast": 0.3
+    },
+    {
+      "name": "house6/vinyl_white",
+      "from": "ph/leather_white",
+      "color": "#ece8de",
+      "contrast": 0.5
     },
     {
       "name": "cx/paint_yellow",

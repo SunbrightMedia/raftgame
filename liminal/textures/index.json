@@ -15565,6 +15565,102 @@
    "credit": "Photo of a carpet sample, supplied by the user",
    "url": "",
    "license": "user-supplied"
+  },
+  {
+   "name": "ph/red_brick",
+   "file": "src/ph__red_brick.jpg",
+   "size": [
+    55.1,
+    55.1
+   ],
+   "material": "concrete",
+   "credit": "red_brick by Rob Tuytel, from Poly Haven",
+   "url": "https://polyhaven.com/a/red_brick",
+   "license": "CC0 1.0"
+  },
+  {
+   "name": "ph/beige_wall",
+   "file": "src/ph__beige_wall.jpg",
+   "size": [
+    118.1,
+    118.1
+   ],
+   "material": "plaster",
+   "credit": "beige_wall_001 by Dimitrios Savva, Rico Cilliers, from Poly Haven",
+   "url": "https://polyhaven.com/a/beige_wall_001",
+   "license": "CC0 1.0"
+  },
+  {
+   "name": "ph/beige_wall_textured",
+   "file": "src/ph__beige_wall_textured.jpg",
+   "size": [
+    118.1,
+    118.1
+   ],
+   "material": "plaster",
+   "credit": "beige_wall_002 by Dimitrios Savva, Rico Cilliers, from Poly Haven",
+   "url": "https://polyhaven.com/a/beige_wall_002",
+   "license": "CC0 1.0"
+  },
+  {
+   "name": "ph/dirty_carpet",
+   "file": "src/ph__dirty_carpet.jpg",
+   "size": [
+    23.6,
+    23.6
+   ],
+   "material": "carpet",
+   "credit": "dirty_carpet by Rohit Seervi, from Poly Haven",
+   "url": "https://polyhaven.com/a/dirty_carpet",
+   "license": "CC0 1.0"
+  },
+  {
+   "name": "ph/wool_herringbone",
+   "file": "src/ph__wool_herringbone.jpg",
+   "size": [
+    10.9,
+    10.9
+   ],
+   "material": "fabric",
+   "credit": "poly_wool_herringbone by colormass, Rico Cilliers, from Poly Haven",
+   "url": "https://polyhaven.com/a/poly_wool_herringbone",
+   "license": "CC0 1.0"
+  },
+  {
+   "name": "ph/dark_wood",
+   "file": "src/ph__dark_wood.jpg",
+   "size": [
+    78.7,
+    78.7
+   ],
+   "material": "wood",
+   "credit": "dark_wood by Dario Barresi, Dimitrios Savva, Rico Cilliers, from Poly Haven",
+   "url": "https://polyhaven.com/a/dark_wood",
+   "license": "CC0 1.0"
+  },
+  {
+   "name": "ph/leather_white",
+   "file": "src/ph__leather_white.jpg",
+   "size": [
+    11.8,
+    11.8
+   ],
+   "material": "fabric",
+   "credit": "leather_white by Rob Tuytel, from Poly Haven",
+   "url": "https://polyhaven.com/a/leather_white",
+   "license": "CC0 1.0"
+  },
+  {
+   "name": "cc0/schoolchair_01",
+   "file": "src/cc0__schoolchair_01.jpg",
+   "size": [
+    128,
+    128
+   ],
+   "material": "metal",
+   "credit": "SchoolChair_01 by Ethan Place, Poly Haven (darkened)",
+   "url": "https://polyhaven.com/a/SchoolChair_01",
+   "license": "CC0 1.0"
   }
  ]
 }

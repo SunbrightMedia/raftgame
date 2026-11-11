@@ -128,6 +128,14 @@ export interface BakeInput {
   /** LINEAR average albedo per texture (0..1 reflectance). */
   albedo: Record<string, RGB>;
   params: BakeParams;
+  /**
+   * Points on props (models) to light: world positions and normals, xyz each. Props have no lightmap: they
+   * draw with this light per vertex (direct light from every light, shadowed by the room, plus the room's
+   * bounced light gathered at the point and the ambient fill).
+   */
+  probes?: { pos: Float32Array; nrm: Float32Array };
+  /** Solids from this index on are props' shadow shapes: they shadow the room, but not the probes. */
+  propBoxStart?: number;
 }
 
 export interface BakeOutput {
@@ -151,6 +159,8 @@ export interface BakeOutput {
   ms: number;
   luxels: number;
   lights: number;
+  /** Irradiance (lux, RGB) at each of input.probes. */
+  probeLight?: Float32Array;
 }
 
 /** Below this irradiance (lux) a light is considered out of range. */
@@ -477,6 +487,13 @@ export function bake(input: BakeInput): BakeOutput {
     }
   }
 
+  // ---- props: light at their vertices, from the finished room (all bounces in)
+  let probeLight: Float32Array | undefined;
+  if (input.probes && input.probes.pos.length >= 3) {
+    const own = input.propBoxStart !== undefined && input.propBoxStart < boxes.length ? new SolidGrid(boxes.slice(0, input.propBoxStart)) : grid;
+    probeLight = lightProbes(input.probes, lights, ranges, own, byId, input.albedo, p);
+  }
+
   // ---- write the atlas
   const pixels = new Float32Array(input.width * input.height * 4);
   const dirPixels = new Float32Array(input.width * input.height * 4);
@@ -520,7 +537,72 @@ export function bake(input: BakeInput): BakeOutput {
       }
     }
   }
-  return { pixels, dirPixels, maskPixels, width: input.width, height: input.height, ms: Date.now() - t0, luxels, lights: lights.length };
+  return { pixels, dirPixels, maskPixels, width: input.width, height: input.height, ms: Date.now() - t0, luxels, lights: lights.length, ...(probeLight ? { probeLight } : {}) };
+}
+
+/**
+ * Irradiance (lux, RGB) at points on props: direct light from every light (per-pixel ones too: a prop has no
+ * per-pixel lights), shadowed by `grid`; the light the finished room reflects towards the point, gathered over
+ * its hemisphere; the ambient fill, darkened by what is close round the point.
+ */
+function lightProbes(pr: { pos: Float32Array; nrm: Float32Array }, lights: BakeLight[], ranges: number[], grid: SolidGrid, byId: Map<number, FaceSamples>, albedo: Record<string, RGB>, p: BakeParams): Float32Array {
+  const n = pr.pos.length / 3, out = new Float32Array(n * 3);
+  const dirs = hemisphere(Math.max(16, Math.round(p.bounceSamples)));
+  const aoR = p.aoRadius ?? 24;
+  for (let i = 0; i < n; i++) {
+    let nx = pr.nrm[i * 3], ny = pr.nrm[i * 3 + 1], nz = pr.nrm[i * 3 + 2];
+    const nl = Math.hypot(nx, ny, nz) || 1; nx /= nl; ny /= nl; nz /= nl;
+    const px = pr.pos[i * 3] + nx * 0.25, py = pr.pos[i * 3 + 1] + ny * 0.25, pz = pr.pos[i * 3 + 2] + nz * 0.25;
+    let r = 0, g = 0, b = 0;
+    for (let li = 0; li < lights.length; li++) {
+      const l = lights[li];
+      const dx = l.pos[0] - px, dy = l.pos[1] - py, dz = l.pos[2] - pz;
+      const d2 = dx * dx + dy * dy + dz * dz;
+      if (d2 > ranges[li] * ranges[li]) continue;
+      const d = Math.sqrt(d2) || 1e-6;
+      const ndotl = (dx * nx + dy * ny + dz * nz) / d;
+      if (ndotl <= 0) continue;
+      const I = intensityToward(l, -dx / d, -dy / d, -dz / d);
+      if (I <= 0) continue;
+      if (l.shadows !== false && grid.occluded(px, py, pz, l.pos[0], l.pos[1], l.pos[2])) continue;
+      const dm = d * INCH, w = (I * ndotl) / (dm * dm);
+      r += l.color[0] * w; g += l.color[1] * w; b += l.color[2] * w;
+    }
+    // a frame round the normal for the gather
+    let tx = -ny, ty = nx, tz = 0;
+    if (Math.abs(nz) > 0.9) { tx = 0; ty = -nz; tz = ny; }
+    const tl = Math.hypot(tx, ty, tz) || 1; tx /= tl; ty /= tl; tz /= tl;
+    const bx = ny * tz - nz * ty, by = nz * tx - nx * tz, bz = nx * ty - ny * tx;
+    const rot = hash(i * 7919 + 17) * Math.PI * 2, cr = Math.cos(rot), sr = Math.sin(rot);
+    let ir = 0, ig = 0, ib = 0, occ = 0;
+    for (const [a, c, h] of dirs) {
+      const x = a * cr - c * sr, y = a * sr + c * cr;
+      const dx = tx * x + bx * y + nx * h, dy = ty * x + by * y + ny * h, dz = tz * x + bz * y + nz * h;
+      const hit = grid.cast(px, py, pz, dx * 4096, dy * 4096, dz * 4096);
+      if (!hit) {
+        if (p.sky && dz > 0) {
+          const t = 1 - Math.exp(-dz / p.sky.band), L = p.sky.luminance * Math.PI;
+          ir += L * (p.sky.horizon[0] + (p.sky.zenith[0] - p.sky.horizon[0]) * t);
+          ig += L * (p.sky.horizon[1] + (p.sky.zenith[1] - p.sky.horizon[1]) * t);
+          ib += L * (p.sky.horizon[2] + (p.sky.zenith[2] - p.sky.horizon[2]) * t);
+        }
+        continue;
+      }
+      const dist = hit.t * 4096;
+      if (dist < aoR) occ += 1 - dist / aoR;
+      const hs = byId.get(hit.faceId);
+      if (!hs || hs.emitting) continue;
+      const v = lookup(hs, px + dx * 4096 * hit.t, py + dy * 4096 * hit.t, pz + dz * 4096 * hit.t);
+      const alb = albedo[hs.face.tex] ?? [0.5, 0.5, 0.5];
+      ir += v[0] * alb[0]; ig += v[1] * alb[1]; ib += v[2] * alb[2];
+    }
+    const k = p.bounceScale / dirs.length;
+    const o = Math.min(1, (occ / dirs.length) * 2.2), ao = 1 - (p.aoStrength ?? 0) * Math.pow(o, p.aoCurve ?? 1);
+    out[i * 3] = r + (ir * k + p.ambient[0]) * ao;
+    out[i * 3 + 1] = g + (ig * k + p.ambient[1]) * ao;
+    out[i * 3 + 2] = b + (ib * k + p.ambient[2]) * ao;
+  }
+  return out;
 }
 
 

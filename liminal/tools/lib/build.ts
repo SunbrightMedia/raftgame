@@ -74,6 +74,11 @@ export class MapBuilder {
     this.entities.push({ id: 1000 + this.eid++, class: 'light', origin, props });
   }
 
+  /** A model prop (models/<model>.json): `yaw` turns it about z (its front faces -y at 0 for imported glTF models). */
+  prop(origin: V3, model: string, yaw = 0, scale = 1): void {
+    this.entities.push({ id: 1000 + this.eid++, class: 'prop', origin, angles: [0, yaw, 0], props: { model, ...(scale !== 1 ? { scale } : {}) } });
+  }
+
   start(origin: V3, pitch: number, yaw: number): void {
     this.entities.unshift({ id: 1, class: 'player_start', origin, angles: [pitch, yaw, 0] });
   }
