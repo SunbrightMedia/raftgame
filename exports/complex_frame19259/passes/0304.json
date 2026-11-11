@@ -1,0 +1,33 @@
+{
+ "index": 304,
+ "kind": "clear",
+ "events": [
+  5799,
+  5799
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "ClearStencil (%s)"
+ ],
+ "first": "ID3D11DeviceContext::ClearDepthStencilView()",
+ "last": "ID3D11DeviceContext::ClearDepthStencilView()",
+ "shaders": {},
+ "constants": {},
+ "reads": {},
+ "draws": [],
+ "outputs": [],
+ "depth": {
+  "id": "ResourceId::19356",
+  "name": "2D Depth Target 19356",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "mips": 1,
+  "array": 1,
+  "format": "D32S8_TYPELESS",
+  "samples": 1
+ },
+ "images": []
+}

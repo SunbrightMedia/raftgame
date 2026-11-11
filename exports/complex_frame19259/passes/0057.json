@@ -1,0 +1,154 @@
+{
+ "index": 57,
+ "kind": "draw",
+ "events": [
+  1556,
+  1669
+ ],
+ "count": 23,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "PrePass %s %s",
+  "DepthPassParallel"
+ ],
+ "first": "ID3D11DeviceContext::DrawIndexedInstanced()",
+ "last": "ID3D11DeviceContext::DrawIndexedInstanced()",
+ "shaders": {
+  "vs": [
+   "shaders/vs_6064.txt"
+  ]
+ },
+ "constants": {},
+ "reads": {},
+ "draws": [
+  {
+   "event": 1556,
+   "name": "ID3D11DeviceContext::DrawIndexedInstanced()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1560,
+   "name": "ID3D11DeviceContext::DrawIndexedInstanced()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1564,
+   "name": "ID3D11DeviceContext::DrawIndexedInstanced()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1568,
+   "name": "ID3D11DeviceContext::DrawIndexedInstanced()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1573,
+   "name": "ID3D11DeviceContext::DrawIndexedInstanced()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1577,
+   "name": "ID3D11DeviceContext::DrawIndexedInstanced()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1587,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1592,
+   "name": "ID3D11DeviceContext::DrawIndexedInstanced()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1596,
+   "name": "ID3D11DeviceContext::DrawIndexedInstanced()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1601,
+   "name": "ID3D11DeviceContext::DrawIndexedInstanced()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1605,
+   "name": "ID3D11DeviceContext::DrawIndexedInstanced()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1610,
+   "name": "ID3D11DeviceContext::DrawIndexedInstanced()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1620,
+   "name": "ID3D11DeviceContext::DrawIndexedInstanced()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1624,
+   "name": "ID3D11DeviceContext::DrawIndexedInstanced()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1629,
+   "name": "ID3D11DeviceContext::DrawIndexedInstanced()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1633,
+   "name": "ID3D11DeviceContext::DrawIndexedInstanced()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1637,
+   "name": "ID3D11DeviceContext::DrawIndexedInstanced()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1641,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1651,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1655,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1659,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1664,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1669,
+   "name": "ID3D11DeviceContext::DrawIndexedInstanced()",
+   "vs": "ResourceId::6064"
+  }
+ ],
+ "outputs": [],
+ "depth": {
+  "id": "ResourceId::19356",
+  "name": "2D Depth Target 19356",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "mips": 1,
+  "array": 1,
+  "format": "D32S8_TYPELESS",
+  "samples": 1
+ },
+ "images": []
+}

@@ -1,0 +1,120 @@
+shader ResourceId::7863, stage cs, name "Compute Shader 7863"
+entry point: main
+constant block 0 "cbuffer0" (544 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+    +80    float4 cb0_v5 1x4
+    +96    float4 cb0_v6 1x4
+    +112   float4 cb0_v7 1x4
+    +128   float4 cb0_v8 1x4
+    +144   float4 cb0_v9 1x4
+    +160   float4 cb0_v10 1x4
+    +176   float4 cb0_v11 1x4
+    +192   float4 cb0_v12 1x4
+    +208   float4 cb0_v13 1x4
+    +224   float4 cb0_v14 1x4
+    +240   float4 cb0_v15 1x4
+    +256   float4 cb0_v16 1x4
+    +272   float4 cb0_v17 1x4
+    +288   float4 cb0_v18 1x4
+    +304   float4 cb0_v19 1x4
+    +320   float4 cb0_v20 1x4
+    +336   float4 cb0_v21 1x4
+    +352   float4 cb0_v22 1x4
+    +368   float4 cb0_v23 1x4
+    +384   float4 cb0_v24 1x4
+    +400   float4 cb0_v25 1x4
+    +416   float4 cb0_v26 1x4
+    +432   float4 cb0_v27 1x4
+    +448   float4 cb0_v28 1x4
+    +464   float4 cb0_v29 1x4
+    +480   float4 cb0_v30 1x4
+    +496   float4 cb0_v31 1x4
+    +512   float4 cb0_v32 1x4
+    +528   float4 cb0_v33 1x4
+read  0 "texture0" (TextureType.Buffer)
+write 0 "uav0" (TextureType.Buffer)
+write 1 "uav1" (TextureType.Buffer)
+write 2 "uav2" (TextureType.Buffer)
+write 3 "uav3" (TextureType.Buffer)
+write 4 "uav4" (TextureType.Buffer)
+write 5 "uav5" (TextureType.Buffer)
+write 6 "uav6" (TextureType.Buffer)
+write 7 "uav7" (TextureType.Buffer)
+
+==================== disassembly: DXBC ====================
+
+Shader hash cc59cfc6-a4c59104-77c103e9-6cd3cce9
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[34], immediateIndexed
+      dcl_resource_buffer (uint,uint,uint,uint) t0
+      dcl_uav_typed_buffer (sint,sint,sint,sint) u0
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u1
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u2
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u3
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u4
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u5
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u6
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u7
+      dcl_temps 1
+      dcl_thread_group 1, 1, 1
+   0: ld_uav_typed(buffer)(sint,sint,sint,sint) r0.x, l(0, 0, 0, 0), u0.xyzw
+   1: ilt r0.x, r0.x, l(0)
+   2: if_nz r0.x
+   3:   store_uav_typed u0.xyzw, l(0, 0, 0, 0), l(0, 0, 0, 0)
+   4: endif
+   5: ld_uav_typed(buffer)(sint,sint,sint,sint) r0.x, l(0, 0, 0, 0), u0.xyzw
+   6: ilt r0.x, cb0[33].w, r0.x
+   7: if_nz r0.x
+   8:   store_uav_typed u0.xyzw, l(0, 0, 0, 0), cb0[33].wwww
+   9: endif
+  10: ld_uav_typed(buffer)(uint,uint,uint,uint) r0.x, l(0, 0, 0, 0), u1.xyzw
+  11: ult r0.x, cb0[33].w, r0.x
+  12: if_nz r0.x
+  13:   store_uav_typed u1.xyzw, l(0, 0, 0, 0), cb0[33].wwww
+  14: endif
+  15: ld_indexable(buffer)(uint,uint,uint,uint) r0.x, l(0, 0, 0, 0), t0.xyzw
+  16: imad r0.y, r0.x, l(10), cb0[33].z
+  17: iadd r0.y, r0.y, l(-1)
+  18: udiv r0.y, null, r0.y, cb0[33].z
+  19: store_uav_typed u2.xyzw, l(0, 0, 0, 0), r0.yyyy
+  20: store_uav_typed u2.xyzw, l(1, 1, 1, 1), l(1, 1, 1, 1)
+  21: store_uav_typed u2.xyzw, l(2, 2, 2, 2), l(1, 1, 1, 1)
+  22: store_uav_typed u3.xyzw, l(0, 0, 0, 0), l(1, 1, 1, 1)
+  23: store_uav_typed u3.xyzw, l(1, 1, 1, 1), l(1, 1, 1, 1)
+  24: store_uav_typed u3.xyzw, l(2, 2, 2, 2), r0.xxxx
+  25: store_uav_typed u4.xyzw, l(0, 0, 0, 0), l(0, 0, 0, 0)
+  26: iadd r0.yz, cb0[7].xxyx, cb0[33].yyxy
+  27: iadd r0.yz, r0.yyzy, l(0, -1, -1, 0)
+  28: udiv r0.yz, null, r0.yyzy, cb0[33].yyxy
+  29: store_uav_typed u5.xyzw, l(0, 0, 0, 0), r0.yyyy
+  30: store_uav_typed u5.xyzw, l(1, 1, 1, 1), r0.yyyy
+  31: store_uav_typed u5.xyzw, l(2, 2, 2, 2), r0.xxxx
+  32: ishl r0.y, l(2), cb0[7].z
+  33: iadd r0.y, r0.y, cb0[8].y
+  34: iadd r0.y, r0.y, cb0[33].x
+  35: iadd r0.y, r0.y, l(-1)
+  36: udiv r0.y, null, r0.y, cb0[33].x
+  37: store_uav_typed u6.xyzw, l(0, 0, 0, 0), r0.yyyy
+  38: store_uav_typed u6.xyzw, l(1, 1, 1, 1), r0.yyyy
+  39: store_uav_typed u6.xyzw, l(2, 2, 2, 2), r0.xxxx
+  40: store_uav_typed u7.xyzw, l(0, 0, 0, 0), r0.zzzz
+  41: store_uav_typed u7.xyzw, l(1, 1, 1, 1), r0.zzzz
+  42: store_uav_typed u7.xyzw, l(2, 2, 2, 2), r0.xxxx
+  43: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

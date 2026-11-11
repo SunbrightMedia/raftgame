@@ -1,0 +1,28 @@
+{
+ "index": 407,
+ "kind": "copy",
+ "events": [
+  8299,
+  8299
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "PostProcessing",
+  "EnqueueCopy(%s)"
+ ],
+ "first": "ID3D11DeviceContext::CopySubresourceRegion()",
+ "last": "ID3D11DeviceContext::CopySubresourceRegion()",
+ "shaders": {},
+ "constants": {},
+ "reads": {},
+ "draws": [],
+ "outputs": [
+  {
+   "id": "ResourceId::9591",
+   "name": "Buffer 9591"
+  }
+ ],
+ "images": []
+}

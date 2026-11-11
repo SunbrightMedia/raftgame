@@ -1,0 +1,617 @@
+{
+ "index": 416,
+ "kind": "draw",
+ "events": [
+  8420,
+  8420
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "PostProcessing",
+  "PostProcessMaterial %dx%d Material=%s",
+  "\u0360\u65d8\u0192"
+ ],
+ "first": "ID3D11DeviceContext::DrawIndexed()",
+ "last": "ID3D11DeviceContext::DrawIndexed()",
+ "shaders": {
+  "vs": [
+   "shaders/vs_8880.txt"
+  ],
+  "ps": [
+   "shaders/ps_8881.txt"
+  ]
+ },
+ "constants": {
+  "ps": {
+   "ResourceId::8881": [
+    {
+     "block": "cbuffer0",
+     "bytes": 624,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.09,
+        0.5
+       ]
+      },
+      {
+       "name": "cb0_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        0.0,
+        10.876633,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v4",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v5",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        1.0,
+        0.5,
+        0.5
+       ]
+      },
+      {
+       "name": "cb0_v6",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.000347,
+        0.000463,
+        0.999653,
+        0.999537
+       ]
+      },
+      {
+       "name": "cb0_v7",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.454545,
+        1.0,
+        1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v8",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v9",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1440.0,
+        1080.0,
+        0.000694,
+        0.000926
+       ]
+      },
+      {
+       "name": "cb0_v10",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        720.0,
+        -540.0,
+        720.0,
+        540.0
+       ]
+      },
+      {
+       "name": "cb0_v11",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v12",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1440.0,
+        1080.0,
+        0.000694,
+        0.000926
+       ]
+      },
+      {
+       "name": "cb0_v13",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v14",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v15",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.000347,
+        0.000463,
+        0.999653,
+        0.999537
+       ]
+      },
+      {
+       "name": "cb0_v16",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1440.0,
+        1080.0,
+        0.000694,
+        0.000926
+       ]
+      },
+      {
+       "name": "cb0_v17",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        720.0,
+        -540.0,
+        720.0,
+        540.0
+       ]
+      },
+      {
+       "name": "cb0_v18",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v19",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1440.0,
+        1080.0,
+        0.000694,
+        0.000926
+       ]
+      },
+      {
+       "name": "cb0_v20",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v21",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v22",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.000347,
+        0.000463,
+        0.999653,
+        0.999537
+       ]
+      },
+      {
+       "name": "cb0_v23",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.1,
+        0.9,
+        172.800034,
+        172.800034
+       ]
+      },
+      {
+       "name": "cb0_v24",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        32768.0,
+        1.0,
+        0.010984,
+        3.0
+       ]
+      },
+      {
+       "name": "cb0_v25",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        0.033333,
+        0.333333,
+        0.000977
+       ]
+      },
+      {
+       "name": "cb0_v26",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        1.0,
+        1.0,
+        0.6
+       ]
+      },
+      {
+       "name": "cb0_v27",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        3.1e-05,
+        0.0,
+        1.0,
+        0.97856
+       ]
+      },
+      {
+       "name": "cb0_v28",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.967363,
+        1.5,
+        1.0,
+        10.0
+       ]
+      },
+      {
+       "name": "cb0_v29",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.18,
+        0.01,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v30",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        1.4743208920141424e+20,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v31",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.228409574923436e+18,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v32",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.1973417956970162e+32,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v33",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.99902,
+        1.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v34",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.00049,
+        0.000654,
+        0.998529,
+        0.999346
+       ]
+      },
+      {
+       "name": "cb0_v35",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        0.0,
+        1.228409574923436e+18,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v36",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        10.877121,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v37",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        1.228409574923436e+18,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v38",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        0.0,
+        0.000694,
+        0.000926
+       ]
+      }
+     ]
+    },
+    {
+     "block": "cbuffer1",
+     "bytes": 48,
+     "vars": [
+      {
+       "name": "cb1_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        7.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "ps": {
+   "ResourceId::8881": [
+    {
+     "id": "ResourceId::47207",
+     "name": "2D Render Target 47207",
+     "w": 1440,
+     "h": 1080,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R10G10B10A2_UNORM",
+     "samples": 1,
+     "binding": "texture0"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 8420,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::8880",
+   "ps": "ResourceId::8881"
+  }
+ ],
+ "outputs": [
+  {
+   "id": "ResourceId::47213",
+   "name": "2D Render Target 47213",
+   "w": 1440,
+   "h": 1080,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R10G10B10A2_UNORM",
+   "samples": 1
+  }
+ ],
+ "images": [
+  {
+   "file": "images/0416_out0.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "max": [
+    1.0,
+    1.0,
+    1.0,
+    0.0
+   ],
+   "target": {
+    "id": "ResourceId::47213",
+    "name": "2D Render Target 47213",
+    "w": 1440,
+    "h": 1080,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R10G10B10A2_UNORM",
+    "samples": 1
+   }
+  }
+ ]
+}

@@ -1,0 +1,24 @@
+{
+ "index": 398,
+ "kind": "clear",
+ "events": [
+  8199,
+  8199
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "PostProcessing",
+  "MotionBlur",
+  "VelocityTileScatter %dx%d"
+ ],
+ "first": "ID3D11DeviceContext::ClearUnorderedAccessViewUint()",
+ "last": "ID3D11DeviceContext::ClearUnorderedAccessViewUint()",
+ "shaders": {},
+ "constants": {},
+ "reads": {},
+ "draws": [],
+ "outputs": [],
+ "images": []
+}

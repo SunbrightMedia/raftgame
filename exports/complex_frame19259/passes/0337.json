@@ -1,0 +1,481 @@
+{
+ "index": 337,
+ "kind": "dispatch",
+ "events": [
+  6294,
+  6294
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "DiffuseIndirectAndAO",
+  "LumenScreenProbeGather",
+  "UpdateRadianceCaches",
+  "FixupBordersAndGenerateMips"
+ ],
+ "first": "DispatchIndirect(<3, 3, 307>)",
+ "last": "DispatchIndirect(<3, 3, 307>)",
+ "shaders": {
+  "cs": [
+   "shaders/cs_7868.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::7868": [
+    {
+     "block": "cbuffer0",
+     "bytes": 496,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        8.743423764101285e+27,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        8.871231,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        8.743773219221018e+27,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.5,
+        2500.0,
+        2.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v4",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v5",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v6",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v7",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v8",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v9",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v10",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        180.421967,
+        0.0096,
+        104.166672,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v11",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        360.843933,
+        0.0048,
+        208.333344,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v12",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        721.687866,
+        0.0024,
+        416.666687,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v13",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1443.375732,
+        0.0012,
+        833.333374,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v14",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v15",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v16",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        53.5,
+        7.499999,
+        24.499998,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v17",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        39.5,
+        16.499998,
+        24.499998,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v18",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        32.5,
+        20.499998,
+        24.499998,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v19",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        28.499998,
+        22.499998,
+        24.499998,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v20",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v21",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v22",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -5520.833496,
+        -729.166565,
+        -2500.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v23",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -8125.0,
+        -3333.333252,
+        -5000.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v24",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -13333.333984,
+        -8333.333008,
+        -10000.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v25",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -23333.333984,
+        -18333.333984,
+        -20000.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v26",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v27",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v28",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.000434,
+        0.000434,
+        0.003906,
+        0.003906
+       ]
+      },
+      {
+       "name": "cb0_v29",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.000488,
+        0.000488,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v30",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::7868": [
+    {
+     "id": "ResourceId::7113",
+     "name": "Lumen.RadianceCache.ProbeTraceData",
+     "binding": "texture0"
+    },
+    {
+     "id": "ResourceId::71128",
+     "name": "2D Texture 71128",
+     "w": 2048,
+     "h": 2048,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R11G11B10_FLOAT",
+     "samples": 1,
+     "binding": "texture1"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 6294,
+   "name": "DispatchIndirect(<3, 3, 307>)",
+   "cs": "ResourceId::7868"
+  }
+ ],
+ "outputs": [
+  {
+   "id": "ResourceId::71081",
+   "name": "2D Texture 71081",
+   "w": 2304,
+   "h": 2304,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R11G11B10_FLOAT",
+   "samples": 1
+  }
+ ],
+ "images": [
+  {
+   "file": "images/0337_out0.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "max": [
+    0.0791015625,
+    0.06640625,
+    0.0166015625,
+    1.0
+   ],
+   "target": {
+    "id": "ResourceId::71081",
+    "name": "2D Texture 71081",
+    "w": 2304,
+    "h": 2304,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R11G11B10_FLOAT",
+    "samples": 1
+   }
+  }
+ ]
+}

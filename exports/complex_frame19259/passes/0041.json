@@ -1,0 +1,187 @@
+{
+ "index": 41,
+ "kind": "dispatch",
+ "events": [
+  1333,
+  1333
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "UpdateGlobalDistanceField",
+  "Clipmap:%d CacheType:%s",
+  "BuildPageUpdateTiles %d"
+ ],
+ "first": "ID3D11DeviceContext::Dispatch()",
+ "last": "ID3D11DeviceContext::Dispatch()",
+ "shaders": {
+  "cs": [
+   "shaders/cs_7748.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::7748": [
+    {
+     "block": "cbuffer0",
+     "bytes": 176,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        4.4060761878245255e+31,
+        0.0,
+        4.406107136325508e+31,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        4.40613808482649e+31,
+        0.0,
+        4.406169033327472e+31,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        4.406199981828454e+31,
+        0.0,
+        0.0,
+        403124.25
+       ]
+      },
+      {
+       "name": "cb0_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v4",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1111.111084,
+        1111.111084,
+        1111.111084,
+        1.813868
+       ]
+      },
+      {
+       "name": "cb0_v5",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -19444.445312,
+        -19444.445312,
+        -19444.445312,
+        1.780383
+       ]
+      },
+      {
+       "name": "cb0_v6",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        634.920654,
+        634.920654,
+        634.920654,
+        1.885875
+       ]
+      },
+      {
+       "name": "cb0_v7",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v8",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        4444.444336,
+        4444.444336,
+        4444.444336,
+        1.875
+       ]
+      },
+      {
+       "name": "cb0_v9",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -17777.777344,
+        -17777.777344,
+        -17777.777344,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v10",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        2539.682617,
+        2539.682617,
+        2539.682617,
+        0.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::7748": [
+    {
+     "id": "ResourceId::18676",
+     "name": "Lumen.SurfaceCacheRects",
+     "binding": "texture0"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 1333,
+   "name": "ID3D11DeviceContext::Dispatch()",
+   "cs": "ResourceId::7748"
+  }
+ ],
+ "outputs": [],
+ "images": []
+}

@@ -1,0 +1,25 @@
+{
+ "index": 95,
+ "kind": "clear",
+ "events": [
+  3635,
+  3635
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "LumenSceneLighting%s",
+  "DirectLighting",
+  "CullTiles %d lights",
+  "InitializeLightTileIndirectArgs"
+ ],
+ "first": "ID3D11DeviceContext::ClearUnorderedAccessViewUint()",
+ "last": "ID3D11DeviceContext::ClearUnorderedAccessViewUint()",
+ "shaders": {},
+ "constants": {},
+ "reads": {},
+ "draws": [],
+ "outputs": [],
+ "images": []
+}

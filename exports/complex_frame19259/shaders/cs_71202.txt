@@ -1,0 +1,255 @@
+shader ResourceId::71202, stage cs, name "Compute Shader 71202"
+entry point: main
+constant block 0 "cbuffer0" (128 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+    +80    float4 cb0_v5 1x4
+    +96    float4 cb0_v6 1x4
+    +112   float4 cb0_v7 1x4
+constant block 1 "cbuffer1" (2096 bytes)
+    +0     float4 cb1_v0 1x4
+    +16    float4 cb1_v1 1x4
+    +32    float4 cb1_v2 1x4
+    +48    float4 cb1_v3 1x4
+    +64    float4 cb1_v4 1x4
+    +80    float4 cb1_v5 1x4
+    +96    float4 cb1_v6 1x4
+    +112   float4 cb1_v7 1x4
+    +128   float4 cb1_v8 1x4
+    +144   float4 cb1_v9 1x4
+    +160   float4 cb1_v10 1x4
+    +176   float4 cb1_v11 1x4
+    +192   float4 cb1_v12 1x4
+    +208   float4 cb1_v13 1x4
+    +224   float4 cb1_v14 1x4
+    +240   float4 cb1_v15 1x4
+    +256   float4 cb1_v16 1x4
+    +272   float4 cb1_v17 1x4
+    +288   float4 cb1_v18 1x4
+    +304   float4 cb1_v19 1x4
+    +320   float4 cb1_v20 1x4
+    +336   float4 cb1_v21 1x4
+    +352   float4 cb1_v22 1x4
+    +368   float4 cb1_v23 1x4
+    +384   float4 cb1_v24 1x4
+    +400   float4 cb1_v25 1x4
+    +416   float4 cb1_v26 1x4
+    +432   float4 cb1_v27 1x4
+    +448   float4 cb1_v28 1x4
+    +464   float4 cb1_v29 1x4
+    +480   float4 cb1_v30 1x4
+    +496   float4 cb1_v31 1x4
+    +512   float4 cb1_v32 1x4
+    +528   float4 cb1_v33 1x4
+    +544   float4 cb1_v34 1x4
+    +560   float4 cb1_v35 1x4
+    +576   float4 cb1_v36 1x4
+    +592   float4 cb1_v37 1x4
+    +608   float4 cb1_v38 1x4
+    +624   float4 cb1_v39 1x4
+    +640   float4 cb1_v40 1x4
+    +656   float4 cb1_v41 1x4
+    +672   float4 cb1_v42 1x4
+    +688   float4 cb1_v43 1x4
+    +704   float4 cb1_v44 1x4
+    +720   float4 cb1_v45 1x4
+    +736   float4 cb1_v46 1x4
+    +752   float4 cb1_v47 1x4
+    +768   float4 cb1_v48 1x4
+    +784   float4 cb1_v49 1x4
+    +800   float4 cb1_v50 1x4
+    +816   float4 cb1_v51 1x4
+    +832   float4 cb1_v52 1x4
+    +848   float4 cb1_v53 1x4
+    +864   float4 cb1_v54 1x4
+    +880   float4 cb1_v55 1x4
+    +896   float4 cb1_v56 1x4
+    +912   float4 cb1_v57 1x4
+    +928   float4 cb1_v58 1x4
+    +944   float4 cb1_v59 1x4
+    +960   float4 cb1_v60 1x4
+    +976   float4 cb1_v61 1x4
+    +992   float4 cb1_v62 1x4
+    +1008  float4 cb1_v63 1x4
+    +1024  float4 cb1_v64 1x4
+    +1040  float4 cb1_v65 1x4
+    +1056  float4 cb1_v66 1x4
+    +1072  float4 cb1_v67 1x4
+    +1088  float4 cb1_v68 1x4
+    +1104  float4 cb1_v69 1x4
+    +1120  float4 cb1_v70 1x4
+    +1136  float4 cb1_v71 1x4
+    +1152  float4 cb1_v72 1x4
+    +1168  float4 cb1_v73 1x4
+    +1184  float4 cb1_v74 1x4
+    +1200  float4 cb1_v75 1x4
+    +1216  float4 cb1_v76 1x4
+    +1232  float4 cb1_v77 1x4
+    +1248  float4 cb1_v78 1x4
+    +1264  float4 cb1_v79 1x4
+    +1280  float4 cb1_v80 1x4
+    +1296  float4 cb1_v81 1x4
+    +1312  float4 cb1_v82 1x4
+    +1328  float4 cb1_v83 1x4
+    +1344  float4 cb1_v84 1x4
+    +1360  float4 cb1_v85 1x4
+    +1376  float4 cb1_v86 1x4
+    +1392  float4 cb1_v87 1x4
+    +1408  float4 cb1_v88 1x4
+    +1424  float4 cb1_v89 1x4
+    +1440  float4 cb1_v90 1x4
+    +1456  float4 cb1_v91 1x4
+    +1472  float4 cb1_v92 1x4
+    +1488  float4 cb1_v93 1x4
+    +1504  float4 cb1_v94 1x4
+    +1520  float4 cb1_v95 1x4
+    +1536  float4 cb1_v96 1x4
+    +1552  float4 cb1_v97 1x4
+    +1568  float4 cb1_v98 1x4
+    +1584  float4 cb1_v99 1x4
+    +1600  float4 cb1_v100 1x4
+    +1616  float4 cb1_v101 1x4
+    +1632  float4 cb1_v102 1x4
+    +1648  float4 cb1_v103 1x4
+    +1664  float4 cb1_v104 1x4
+    +1680  float4 cb1_v105 1x4
+    +1696  float4 cb1_v106 1x4
+    +1712  float4 cb1_v107 1x4
+    +1728  float4 cb1_v108 1x4
+    +1744  float4 cb1_v109 1x4
+    +1760  float4 cb1_v110 1x4
+    +1776  float4 cb1_v111 1x4
+    +1792  float4 cb1_v112 1x4
+    +1808  float4 cb1_v113 1x4
+    +1824  float4 cb1_v114 1x4
+    +1840  float4 cb1_v115 1x4
+    +1856  float4 cb1_v116 1x4
+    +1872  float4 cb1_v117 1x4
+    +1888  float4 cb1_v118 1x4
+    +1904  float4 cb1_v119 1x4
+    +1920  float4 cb1_v120 1x4
+    +1936  float4 cb1_v121 1x4
+    +1952  float4 cb1_v122 1x4
+    +1968  float4 cb1_v123 1x4
+    +1984  float4 cb1_v124 1x4
+    +2000  float4 cb1_v125 1x4
+    +2016  float4 cb1_v126 1x4
+    +2032  float4 cb1_v127 1x4
+    +2048  float4 cb1_v128 1x4
+    +2064  float4 cb1_v129 1x4
+    +2080  float4 cb1_v130 1x4
+read  0 "texture0" (TextureType.Texture2D)
+write 0 "uav0" (TextureType.Buffer)
+write 1 "uav1" (TextureType.Texture2D)
+write 2 "uav2" (TextureType.Texture2D)
+write 3 "uav3" (TextureType.Texture2D)
+in  vThreadGroupID0
+in  vThreadIDInGroup0
+in  vThreadID0
+
+==================== disassembly: DXBC ====================
+
+Shader hash 05f28577-b5a7bdd0-9234d2ea-cdb6ab93
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[8], immediateIndexed
+      dcl_constantbuffer cb1[131], immediateIndexed
+      dcl_resource_texture2d (float,float,float,float) t0
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u0
+      dcl_uav_typed_texture2d (float,float,float,float) u1
+      dcl_uav_typed_texture2d (float,float,float,float) u2
+      dcl_uav_typed_texture2d (uint,uint,uint,uint) u3
+      dcl_input vThreadGroupID.xy
+      dcl_input vThreadIDInGroup.xy
+      dcl_input vThreadID.xy
+      dcl_temps 3
+      dcl_tgsm_structured g0, 4, 3
+      dcl_thread_group 8, 8, 1
+   0: ult r0.x, vThreadID.x, l(9)
+   1: if_nz r0.x
+   2:   udiv null, r0.x, vThreadID.x, l(3)
+   3:   ieq r0.xy, r0.xxxx, l(1, 2, 0, 0)
+   4:   or r0.x, r0.y, r0.x
+   5:   and r0.x, r0.x, l(1)
+   6:   store_uav_typed u0.xyzw, vThreadID.xxxx, r0.xxxx
+   7: endif
+   8: ult r0.x, vThreadIDInGroup.x, l(3)
+   9: if_nz r0.x
+  10:   store_structured g0.x, vThreadIDInGroup.x, l(0), l(0)
+  11: endif
+  12: sync_g_t
+  13: ult r0.xy, vThreadID.xyxx, cb1[130].zwzz
+  14: and r0.x, r0.y, r0.x
+  15: iadd r1.xy, vThreadID.xyxx, cb1[130].xyxx
+  16: if_nz r0.x
+  17:   mov r1.zw, l(0, 0, 0, 0)
+  18:   ld_indexable(texture2d)(float,float,float,float) r0.yz, r1.xyzw, t0.xzwy
+  19:   mad r0.z, r0.z, l(255.000000), l(0.500000)
+  20:   ftou r0.z, r0.z
+  21:   and r0.z, r0.z, l(15)
+  22:   switch r0.z
+  23:   case l(7)
+  24:   mov r0.w, l(-1)
+  25:   break
+  26:   default
+  27:   mov r0.w, l(0)
+  28:   break
+  29:   endswitch
+  30:   if_nz r0.z
+  31:     ieq r2.xyzw, r0.zzzz, l(7, 6, 2, 4)
+  32:     or r0.z, r2.z, r2.y
+  33:     ieq r1.z, l(1), cb0[7].x
+  34:     or r0.w, r0.w, r1.z
+  35:     add r1.z, r0.y, -cb0[7].y
+  36:     add r1.z, r1.z, l(0.200000)
+  37:     mul_sat r1.z, r1.z, l(5.000000)
+  38:     movc r0.z, r0.z, cb0[6].y, cb0[6].x
+  39:     add r0.y, -r0.y, r0.z
+  40:     mul_sat r0.y, r0.y, cb0[6].z
+  41:     lt r0.z, r1.z, l(1.000000)
+  42:     lt r0.y, r0.y, l(1.000000)
+  43:     and r0.y, r0.y, r0.z
+  44:     or r0.y, r2.w, r0.y
+  45:     or r0.y, r0.y, r0.w
+  46:     and r0.y, r0.y, l(1)
+  47:     movc r0.y, r2.x, l(2), r0.y
+  48:     store_structured g0.x, r0.y, l(0), l(1)
+  49:   endif
+  50: endif
+  51: sync_g_t
+  52: ld_structured r0.y, l(0), l(0), g0.xxxx
+  53: ult r0.y, l(0), r0.y
+  54: movc r0.y, r0.y, l(0), l(255)
+  55: ld_structured r0.z, l(1), l(0), g0.xxxx
+  56: ult r0.z, l(0), r0.z
+  57: movc r0.y, r0.z, l(1), r0.y
+  58: ld_structured r0.z, l(2), l(0), g0.xxxx
+  59: ult r0.z, l(0), r0.z
+  60: movc r0.y, r0.z, l(2), r0.y
+  61: ieq r0.zw, vThreadIDInGroup.xxxy, l(0, 0, 0, 0)
+  62: and r0.z, r0.w, r0.z
+  63: if_nz r0.z
+  64:   store_uav_typed u3.xyzw, vThreadGroupID.xyyy, r0.yyyy
+  65: endif
+  66: ieq r0.y, r0.y, l(255)
+  67: and r0.x, r0.x, r0.y
+  68: if_nz r0.x
+  69:   store_uav_typed u1.xyzw, r1.xyyy, l(0, 0, 0, 0)
+  70:   store_uav_typed u2.xyzw, r1.xyyy, l(0, 0, 0, 0)
+  71: endif
+  72: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

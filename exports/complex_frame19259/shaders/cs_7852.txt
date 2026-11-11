@@ -1,0 +1,72 @@
+shader ResourceId::7852, stage cs, name "Compute Shader 7852"
+entry point: main
+constant block 0 "cbuffer0" (128 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+    +80    float4 cb0_v5 1x4
+    +96    float4 cb0_v6 1x4
+    +112   float4 cb0_v7 1x4
+read  0 "structuredbuffer0" (TextureType.Buffer)
+write 0 "uav0" (TextureType.Buffer)
+
+==================== disassembly: DXBC ====================
+
+Shader hash bbc81ef3-77bf4184-92303f92-5b5d9901
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[8], immediateIndexed
+      dcl_resource_structured t0, 4
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u0
+      dcl_temps 2
+      dcl_thread_group 1, 1, 1
+   0: ubfe r0.x, l(29), l(0), cb0[3].x
+   1: store_uav_typed u0.xyzw, l(0, 0, 0, 0), r0.xxxx
+   2: ld_structured_indexable(structured_buffer, stride=4)(mixed,mixed,mixed,mixed) r0.x, l(0), l(0), t0.xxxx
+   3: umin r0.x, r0.x, cb0[7].x
+   4: iadd r0.x, r0.x, cb0[6].w
+   5: iadd r0.x, r0.x, cb0[3].x
+   6: iadd r0.x, r0.x, l(-1)
+   7: udiv r0.y, null, r0.x, cb0[3].x
+   8: ubfe r0.z, l(29), l(0), r0.y
+   9: store_uav_typed u0.xyzw, l(1, 1, 1, 1), r0.zzzz
+  10: store_uav_typed u0.xyzw, l(2, 2, 2, 2), l(1, 1, 1, 1)
+  11: iadd r0.z, l(7), cb0[3].x
+  12: ushr r0.z, r0.z, l(3)
+  13: store_uav_typed u0.xyzw, l(3, 3, 3, 3), r0.zzzz
+  14: iadd r0.z, r0.y, l(7)
+  15: ushr r0.z, r0.z, l(3)
+  16: store_uav_typed u0.xyzw, l(4, 4, 4, 4), r0.zzzz
+  17: store_uav_typed u0.xyzw, l(5, 5, 5, 5), l(1, 1, 1, 1)
+  18: mov r0.x, cb0[3].x
+  19: imad r1.xyzw, r0.xyxy, cb0[1].xxzz, l(7, 7, 7, 7)
+  20: imad r0.xyzw, r0.xyxy, cb0[1].wwyy, l(7, 7, 7, 7)
+  21: ushr r0.xyzw, r0.xyzw, l(3, 3, 3, 3)
+  22: ushr r1.xyzw, r1.xyzw, l(3, 3, 3, 3)
+  23: store_uav_typed u0.xyzw, l(6, 6, 6, 6), r1.xxxx
+  24: store_uav_typed u0.xyzw, l(7, 7, 7, 7), r1.yyyy
+  25: store_uav_typed u0.xyzw, l(8, 8, 8, 8), l(1, 1, 1, 1)
+  26: store_uav_typed u0.xyzw, l(9, 9, 9, 9), r1.zzzz
+  27: store_uav_typed u0.xyzw, l(10, 10, 10, 10), r1.wwww
+  28: store_uav_typed u0.xyzw, l(11, 11, 11, 11), l(1, 1, 1, 1)
+  29: store_uav_typed u0.xyzw, l(12, 12, 12, 12), r0.xxxx
+  30: store_uav_typed u0.xyzw, l(13, 13, 13, 13), r0.yyyy
+  31: store_uav_typed u0.xyzw, l(14, 14, 14, 14), l(1, 1, 1, 1)
+  32: store_uav_typed u0.xyzw, l(15, 15, 15, 15), r0.zzzz
+  33: store_uav_typed u0.xyzw, l(16, 16, 16, 16), r0.wwww
+  34: store_uav_typed u0.xyzw, l(17, 17, 17, 17), l(1, 1, 1, 1)
+  35: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

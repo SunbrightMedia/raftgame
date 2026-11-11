@@ -1,0 +1,330 @@
+shader ResourceId::78729, stage vs, name "Vertex Shader 78729"
+entry point: main
+constant block 0 "cbuffer0" (32 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+constant block 1 "cbuffer1" (1232 bytes)
+    +0     float4 cb1_v0 1x4
+    +16    float4 cb1_v1 1x4
+    +32    float4 cb1_v2 1x4
+    +48    float4 cb1_v3 1x4
+    +64    float4 cb1_v4 1x4
+    +80    float4 cb1_v5 1x4
+    +96    float4 cb1_v6 1x4
+    +112   float4 cb1_v7 1x4
+    +128   float4 cb1_v8 1x4
+    +144   float4 cb1_v9 1x4
+    +160   float4 cb1_v10 1x4
+    +176   float4 cb1_v11 1x4
+    +192   float4 cb1_v12 1x4
+    +208   float4 cb1_v13 1x4
+    +224   float4 cb1_v14 1x4
+    +240   float4 cb1_v15 1x4
+    +256   float4 cb1_v16 1x4
+    +272   float4 cb1_v17 1x4
+    +288   float4 cb1_v18 1x4
+    +304   float4 cb1_v19 1x4
+    +320   float4 cb1_v20 1x4
+    +336   float4 cb1_v21 1x4
+    +352   float4 cb1_v22 1x4
+    +368   float4 cb1_v23 1x4
+    +384   float4 cb1_v24 1x4
+    +400   float4 cb1_v25 1x4
+    +416   float4 cb1_v26 1x4
+    +432   float4 cb1_v27 1x4
+    +448   float4 cb1_v28 1x4
+    +464   float4 cb1_v29 1x4
+    +480   float4 cb1_v30 1x4
+    +496   float4 cb1_v31 1x4
+    +512   float4 cb1_v32 1x4
+    +528   float4 cb1_v33 1x4
+    +544   float4 cb1_v34 1x4
+    +560   float4 cb1_v35 1x4
+    +576   float4 cb1_v36 1x4
+    +592   float4 cb1_v37 1x4
+    +608   float4 cb1_v38 1x4
+    +624   float4 cb1_v39 1x4
+    +640   float4 cb1_v40 1x4
+    +656   float4 cb1_v41 1x4
+    +672   float4 cb1_v42 1x4
+    +688   float4 cb1_v43 1x4
+    +704   float4 cb1_v44 1x4
+    +720   float4 cb1_v45 1x4
+    +736   float4 cb1_v46 1x4
+    +752   float4 cb1_v47 1x4
+    +768   float4 cb1_v48 1x4
+    +784   float4 cb1_v49 1x4
+    +800   float4 cb1_v50 1x4
+    +816   float4 cb1_v51 1x4
+    +832   float4 cb1_v52 1x4
+    +848   float4 cb1_v53 1x4
+    +864   float4 cb1_v54 1x4
+    +880   float4 cb1_v55 1x4
+    +896   float4 cb1_v56 1x4
+    +912   float4 cb1_v57 1x4
+    +928   float4 cb1_v58 1x4
+    +944   float4 cb1_v59 1x4
+    +960   float4 cb1_v60 1x4
+    +976   float4 cb1_v61 1x4
+    +992   float4 cb1_v62 1x4
+    +1008  float4 cb1_v63 1x4
+    +1024  float4 cb1_v64 1x4
+    +1040  float4 cb1_v65 1x4
+    +1056  float4 cb1_v66 1x4
+    +1072  float4 cb1_v67 1x4
+    +1088  float4 cb1_v68 1x4
+    +1104  float4 cb1_v69 1x4
+    +1120  float4 cb1_v70 1x4
+    +1136  float4 cb1_v71 1x4
+    +1152  float4 cb1_v72 1x4
+    +1168  float4 cb1_v73 1x4
+    +1184  float4 cb1_v74 1x4
+    +1200  float4 cb1_v75 1x4
+    +1216  float4 cb1_v76 1x4
+constant block 2 "cbuffer2" (96 bytes)
+    +0     float4 cb2_v0 1x4
+    +16    float4 cb2_v1 1x4
+    +32    float4 cb2_v2 1x4
+    +48    float4 cb2_v3 1x4
+    +64    float4 cb2_v4 1x4
+    +80    float4 cb2_v5 1x4
+constant block 3 "cbuffer3" (176 bytes)
+    +0     float4 cb3_v0 1x4
+    +16    float4 cb3_v1 1x4
+    +32    float4 cb3_v2 1x4
+    +48    float4 cb3_v3 1x4
+    +64    float4 cb3_v4 1x4
+    +80    float4 cb3_v5 1x4
+    +96    float4 cb3_v6 1x4
+    +112   float4 cb3_v7 1x4
+    +128   float4 cb3_v8 1x4
+    +144   float4 cb3_v9 1x4
+    +160   float4 cb3_v10 1x4
+read  0 "texture0" (TextureType.Buffer)
+in  ATTRIBUTE0
+in  ATTRIBUTE1
+in  ATTRIBUTE2
+in  ATTRIBUTE3
+in  ATTRIBUTE5
+in  ATTRIBUTE4
+in  SV_VertexID0
+out TEXCOORD10
+out TEXCOORD11
+out TEXCOORD1
+out TEXCOORD3
+out TEXCOORD6
+out SV_POSITION0
+
+==================== disassembly: DXBC ====================
+
+Shader hash e62ba4a9-d519c28d-0f9a04bb-c986a47f
+
+vs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[2], immediateIndexed
+      dcl_constantbuffer cb1[77], immediateIndexed
+      dcl_constantbuffer cb2[6], immediateIndexed
+      dcl_constantbuffer cb3[11], immediateIndexed
+      dcl_resource_buffer (float,float,float,float) t0
+      dcl_input v0.xyz
+      dcl_input v1.xyz
+      dcl_input v2.xyzw
+      dcl_input v4.xyzw
+      dcl_input v5.xy
+      dcl_input_sgv v6.x, vertexid
+      dcl_output o0.xyzw
+      dcl_output o1.xyzw
+      dcl_output o2.xyzw
+      dcl_output o3.xyzw
+      dcl_output o4.xyzw
+      dcl_output_siv o5.xyzw, position
+      dcl_temps 13
+   0: mul r0.xyz, v0.yyyy, cb2[3].xyzx
+   1: mad r0.xyz, v0.xxxx, cb2[2].xyzx, r0.xyzx
+   2: mad r0.xyz, v0.zzzz, cb2[4].xyzx, r0.xyzx
+   3: add r0.xyz, r0.xyzx, cb2[5].xyzx
+   4: add r1.xyz, cb2[1].xyzx, cb3[9].xyzx
+   5: add r2.xyz, -cb1[68].xyzx, cb1[70].xyzx
+   6: mad r2.xyz, cb3[6].wwww, r2.xyzx, cb1[68].xyzx
+   7: add r3.xyz, -cb1[67].xyzx, cb1[69].xyzx
+   8: mad r3.xyz, cb3[6].wwww, r3.xyzx, cb1[67].xyzx
+   9: add r4.xyz, -r2.xyzx, cb3[0].xyzx
+  10: mad r2.xyz, cb3[0].wwww, r4.xyzx, r2.xyzx
+  11: add r4.xyz, r3.xyzx, cb3[1].xyzx
+  12: mad r3.xyz, cb3[1].wwww, r4.xyzx, -r3.xyzx
+  13: add r4.xyz, -r1.zxyz, cb1[64].zxyz
+  14: add r5.xyz, -r0.zxyz, cb1[73].zxyz
+  15: mad r4.xyz, r4.xyzx, l(2097152.000000, 2097152.000000, 2097152.000000, 0.000000), r5.xyzx
+  16: dp3 r0.w, r4.xyzx, r4.xyzx
+  17: max r1.w, r0.w, l(0.000000)
+  18: rsq r1.w, r1.w
+  19: mul r4.xyz, r1.wwww, r4.xyzx
+  20: lt r1.w, l(0), cb3[6].x
+  21: if_nz r1.w
+  22:   mad_sat r0.w, r0.w, cb3[6].y, -cb3[6].z
+  23:   mul r5.xyz, r4.xyzx, l(0.000000, 1.000000, 0.000000, 0.000000)
+  24:   mad r5.xyz, r4.zxyz, l(1.000000, 0.000000, 0.000000, 0.000000), -r5.xyzx
+  25:   dp2 r1.w, r5.xyxx, r5.xyxx
+  26:   max r1.w, r1.w, l(0.000000)
+  27:   rsq r1.w, r1.w
+  28:   mul r6.xyz, r1.wwww, r5.xyzx
+  29:   mul r7.xyz, r4.xyzx, r6.yzxy
+  30:   mad r6.xyz, r4.zxyz, r6.zxyz, -r7.xyzx
+  31:   mad r5.xyz, r5.xyzx, r1.wwww, -r2.xyzx
+  32:   mad r5.xyz, r0.wwww, r5.xyzx, r2.xyzx
+  33:   dp3 r1.w, r5.xyzx, r5.xyzx
+  34:   rsq r1.w, r1.w
+  35:   mul r5.xyz, r1.wwww, r5.xyzx
+  36:   add r6.xyz, -r3.xyzx, r6.xyzx
+  37:   mad r6.xyz, r0.wwww, r6.xyzx, r3.xyzx
+  38:   dp3 r0.w, r6.xyzx, r6.xyzx
+  39:   rsq r0.w, r0.w
+  40:   mul r6.xyz, r0.wwww, r6.xyzx
+  41: else
+  42:   mul r7.xyz, v1.yyyy, cb2[3].xyzx
+  43:   mad r7.xyz, v1.xxxx, cb2[2].xyzx, r7.xyzx
+  44:   mad r7.xyz, v1.zzzz, cb2[4].xyzx, r7.xyzx
+  45:   add r7.xyz, r7.xyzx, cb2[5].xyzx
+  46:   add r7.xyz, r0.xyzx, -r7.xyzx
+  47:   dp3 r0.w, r7.xyzx, r7.xyzx
+  48:   max r0.w, r0.w, l(0.000000)
+  49:   rsq r0.w, r0.w
+  50:   mul r7.xyz, r0.wwww, r7.xyzx
+  51:   mul r8.xyz, r4.xyzx, r7.yzxy
+  52:   mad r8.xyz, r4.zxyz, r7.zxyz, -r8.xyzx
+  53:   dp3 r0.w, r8.xyzx, r8.xyzx
+  54:   max r0.w, r0.w, l(0.000000)
+  55:   rsq r0.w, r0.w
+  56:   mul r8.xyz, r0.wwww, r8.xyzx
+  57:   mul r9.xyz, r4.zxyz, cb3[0].zxyz
+  58:   mad r9.xyz, cb3[0].yzxy, r4.xyzx, -r9.xyzx
+  59:   dp3 r0.w, r9.xyzx, r9.xyzx
+  60:   max r0.w, r0.w, l(0.000000)
+  61:   rsq r0.w, r0.w
+  62:   mul r9.xyz, r0.wwww, r9.xyzx
+  63:   lt r10.xyz, l(0, 0, 0, 0), cb3[2].yzwy
+  64:   mul r11.xyz, r4.xyzx, l(0.000000, 1.000000, 0.000000, 0.000000)
+  65:   mad r11.xyz, r4.zxyz, l(1.000000, 0.000000, 0.000000, 0.000000), -r11.xyzx
+  66:   dp2 r0.w, r11.xyxx, r11.xyxx
+  67:   max r0.w, r0.w, l(0.000000)
+  68:   rsq r0.w, r0.w
+  69:   mul r11.xyz, r0.wwww, r11.xyzx
+  70:   mul r12.xyz, r4.xyzx, r11.yzxy
+  71:   mad r4.xyz, r4.zxyz, r11.zxyz, -r12.xyzx
+  72:   movc r2.xyz, r10.zzzz, r11.xyzx, r2.xyzx
+  73:   movc r3.xyz, r10.zzzz, r4.xyzx, r3.xyzx
+  74:   movc r2.xyz, r10.yyyy, cb3[0].xyzx, r2.xyzx
+  75:   movc r3.xyz, r10.yyyy, -r9.xyzx, r3.xyzx
+  76:   movc r5.xyz, r10.xxxx, r8.xyzx, r2.xyzx
+  77:   movc r6.xyz, r10.xxxx, -r7.xyzx, r3.xyzx
+  78: endif
+  79: mad r0.w, v2.z, cb3[8].x, cb3[8].y
+  80: sincos r2.x, r3.x, r0.w
+  81: mul r2.yzw, r5.xxyz, r3.xxxx
+  82: mad r4.xyz, r2.xxxx, r6.xyzx, r2.yzwy
+  83: mul r2.xyz, r5.zxyz, r2.xxxx
+  84: mad r2.xyz, r3.xxxx, r6.zxyz, -r2.xyzx
+  85: lt r3.xy, l(0, 0, 0, 0), v2.xyxx
+  86: lt r3.zw, v2.xxxy, l(0, 0, 0, 0)
+  87: iadd r3.xy, -r3.xyxx, r3.zwzz
+  88: itof r3.xy, r3.xyxx
+  89: if_nz cb0[1].y
+  90:   utof r0.w, v6.x
+  91:   utof r1.w, cb0[1].y
+  92:   div r0.w, r0.w, r1.w
+  93:   ge r2.w, r0.w, -r0.w
+  94:   frc r0.w, r0.w
+  95:   movc r0.w, r2.w, r0.w, -r0.w
+  96:   mul r0.w, r1.w, r0.w
+  97:   ftou r0.w, r0.w
+  98:   mul r1.w, cb3[5].y, cb3[5].x
+  99:   div r2.w, v2.w, r1.w
+ 100:   ge r3.z, r2.w, -r2.w
+ 101:   frc r2.w, abs(r2.w)
+ 102:   movc r2.w, r3.z, r2.w, -r2.w
+ 103:   mul r1.w, r1.w, r2.w
+ 104:   ftou r1.w, r1.w
+ 105:   mul r2.w, r3.y, r3.x
+ 106:   lt r2.w, r2.w, l(0)
+ 107:   iadd r3.z, cb0[1].y, l(-1)
+ 108:   iadd r3.z, -r0.w, r3.z
+ 109:   movc r0.w, r2.w, r3.z, r0.w
+ 110:   imad r0.w, r1.w, cb0[1].y, r0.w
+ 111:   ld_indexable(buffer)(float,float,float,float) r3.zw, r0.wwww, t0.zwxy
+ 112:   lt r5.xy, r3.xyxx, l(0, 0, 0, 0)
+ 113:   add r5.zw, -r3.zzzw, l(0.000000, 0.000000, 1.000000, 1.000000)
+ 114:   movc r5.xy, r5.xyxx, r5.zwzz, r3.zwzz
+ 115: else
+ 116:   lt r3.xy, r3.xyxx, l(0, 0, 0, 0)
+ 117:   add r5.zw, -v5.xxxy, l(0.000000, 0.000000, 1.000000, 1.000000)
+ 118:   movc r3.zw, r3.xxxy, r5.zzzw, v5.xxxy
+ 119:   mov r5.xy, v5.xyxx
+ 120: endif
+ 121: add r6.xyz, r1.xyzx, -cb1[64].xyzx
+ 122: add r7.xyz, r0.xyzx, cb1[76].xyzx
+ 123: mad r6.xyz, r6.xyzx, l(2097152.000000, 2097152.000000, 2097152.000000, 0.000000), r7.xyzx
+ 124: add r3.xy, r5.xyxx, cb3[10].xyxx
+ 125: mul r3.xy, r3.xyxx, abs(v2.xyxx)
+ 126: mad r5.xyz, r3.xxxx, r4.xyzx, r6.xyzx
+ 127: mad r5.xyz, r3.yyyy, r2.yzxy, r5.xyzx
+ 128: frc r4.w, v2.w
+ 129: add r0.w, -r4.w, v2.w
+ 130: add r0.w, r0.w, l(0.500000)
+ 131: div r1.w, r0.w, cb3[5].x
+ 132: ge r2.w, r1.w, -r1.w
+ 133: frc r1.w, abs(r1.w)
+ 134: movc r1.w, r2.w, r1.w, -r1.w
+ 135: mul r1.w, r1.w, cb3[5].x
+ 136: round_ni r3.x, r1.w
+ 137: mul r0.w, r0.w, cb3[5].z
+ 138: round_ni r3.y, r0.w
+ 139: add r3.xy, r3.zwzz, r3.xyxx
+ 140: mul o3.xy, r3.xyxx, cb3[5].zwzz
+ 141: mul r3.xyz, r2.zxyz, r4.zxyz
+ 142: mad r3.xyz, r4.yzxy, r2.xyzx, -r3.xyzx
+ 143: dp3 r0.w, r3.xyzx, r3.xyzx
+ 144: rsq r0.w, r0.w
+ 145: mul r3.xyz, r0.wwww, r3.xyzx
+ 146: lt r6.xy, cb3[8].zzzz, l(0.500000, 1.500000, 0.000000, 0.000000)
+ 147: mad r0.xyz, r1.xyzx, l(2097152.000000, 2097152.000000, 2097152.000000, 0.000000), r0.xyzx
+ 148: add r1.xyz, r0.xyzx, -cb3[3].xyzx
+ 149: dp3 r0.w, r1.xyzx, r1.xyzx
+ 150: rsq r0.w, r0.w
+ 151: mul r7.xyz, r0.wwww, r1.xyzx
+ 152: dp3 r0.w, cb3[4].xyzx, r1.xyzx
+ 153: mad r1.xyz, r0.wwww, cb3[4].xyzx, cb3[3].xyzx
+ 154: add r0.xyz, r0.xyzx, -r1.xyzx
+ 155: dp3 r0.w, r0.xyzx, r0.xyzx
+ 156: rsq r0.w, r0.w
+ 157: mul r0.xyz, r0.wwww, r0.xyzx
+ 158: movc r0.xyz, r6.yyyy, r7.xyzx, r0.xyzx
+ 159: movc r0.xyz, r6.xxxx, r3.xyzx, r0.xyzx
+ 160: mul r1.xyzw, r5.yyyy, cb1[1].xyzw
+ 161: mad r1.xyzw, r5.xxxx, cb1[0].xyzw, r1.xyzw
+ 162: mad r1.xyzw, r5.zzzz, cb1[2].xyzw, r1.xyzw
+ 163: add o5.xyzw, r1.xyzw, cb1[3].xyzw
+ 164: mul r1.xyz, r0.yzxy, r2.xyzx
+ 165: mad r1.xyz, r2.zxyz, r0.zxyz, -r1.xyzx
+ 166: dp3 r0.w, r1.xyzx, r4.xyzx
+ 167: lt r1.x, l(0), r0.w
+ 168: lt r0.w, r0.w, l(0)
+ 169: iadd r0.w, -r1.x, r0.w
+ 170: itof o1.w, r0.w
+ 171: mov o0.xyzw, r4.xyzw
+ 172: mov o1.xyz, r0.xyzx
+ 173: mov o2.xyzw, v4.xyzw
+ 174: mov o3.zw, l(0, 0, 0, 0)
+ 175: mov o4.xyz, r5.xyzx
+ 176: mov o4.w, l(1.000000)
+ 177: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

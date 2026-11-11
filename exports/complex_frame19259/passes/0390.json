@@ -1,0 +1,131 @@
+{
+ "index": 390,
+ "kind": "draw",
+ "events": [
+  8112,
+  8112
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "PostProcessing",
+  "DOF(Alpha=%s)",
+  "DOF IndirectScatter(%s Bokeh=%s Occlusion=%s) %dx%d"
+ ],
+ "first": "DrawIndexedInstancedIndirect(<96, 0>)",
+ "last": "DrawIndexedInstancedIndirect(<96, 0>)",
+ "shaders": {
+  "vs": [
+   "shaders/vs_8846.txt"
+  ],
+  "ps": [
+   "shaders/ps_8847.txt"
+  ]
+ },
+ "constants": {
+  "ps": {
+   "ResourceId::8847": [
+    {
+     "block": "cbuffer0",
+     "bytes": 32,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        504.0,
+        378.0,
+        0.001984,
+        0.002646
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.102917,
+        0.7,
+        1.0,
+        1.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "ps": {
+   "ResourceId::8847": [
+    {
+     "id": "ResourceId::47177",
+     "name": "2D Texture 47177",
+     "w": 32,
+     "h": 32,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R16_FLOAT",
+     "samples": 1,
+     "binding": "texture0"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 8112,
+   "name": "DrawIndexedInstancedIndirect(<96, 0>)",
+   "vs": "ResourceId::8846",
+   "ps": "ResourceId::8847"
+  }
+ ],
+ "outputs": [
+  {
+   "id": "ResourceId::47181",
+   "name": "2D Render Target 47181",
+   "w": 672,
+   "h": 378,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R16G16B16A16_FLOAT",
+   "samples": 1
+  }
+ ],
+ "images": [
+  {
+   "file": "images/0390_out0.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "max": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "target": {
+    "id": "ResourceId::47181",
+    "name": "2D Render Target 47181",
+    "w": 672,
+    "h": 378,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R16G16B16A16_FLOAT",
+    "samples": 1
+   }
+  }
+ ]
+}

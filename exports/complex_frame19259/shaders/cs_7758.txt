@@ -1,0 +1,303 @@
+shader ResourceId::7758, stage cs, name "Compute Shader 7758"
+entry point: main
+constant block 0 "cbuffer0" (128 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+    +80    float4 cb0_v5 1x4
+    +96    float4 cb0_v6 1x4
+    +112   float4 cb0_v7 1x4
+read  0 "texture0" (TextureType.Texture3D)
+read  1 "texture1" (TextureType.Texture3D)
+write 0 "uav0" (TextureType.Texture3D)
+sampler 0 "sampler0"
+in  vThreadID0
+
+==================== disassembly: DXBC ====================
+
+Shader hash a5e15579-00c00410-3da5e6af-2063b6bd
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[8], immediateIndexed
+      dcl_sampler s0, mode_default
+      dcl_resource_texture3d (uint,uint,uint,uint) t0
+      dcl_resource_texture3d (float,float,float,float) t1
+      dcl_uav_typed_texture3d (float,float,float,float) u0
+      dcl_input vThreadID.xyz
+      dcl_temps 5
+      dcl_thread_group 4, 4, 4
+   0: ult r0.xyz, vThreadID.xyzx, cb0[4].xxxx
+   1: and r0.x, r0.y, r0.x
+   2: and r0.x, r0.z, r0.x
+   3: if_nz r0.x
+   4:   iadd r0.x, l(-1), cb0[4].x
+   5:   imin r0.yzw, r0.xxxx, vThreadID.xxyz
+   6:   itof r0.yzw, r0.yyzw
+   7:   add r0.yzw, r0.yyzw, l(0.000000, 0.500000, 0.500000, 0.500000)
+   8:   mad r0.yzw, r0.yyzw, cb0[4].yyyy, cb0[6].xxyz
+   9:   frc r0.yzw, r0.yyzw
+  10:   frc r0.yzw, r0.yyzw
+  11:   utof r1.x, cb0[3].w
+  12:   mul r1.yzw, r0.yyzw, r1.xxxx
+  13:   imul null, r2.x, cb0[3].w, cb0[4].z
+  14:   mov r3.xy, l(0, 0, 0, 0)
+  15:   itof r3.z, r2.x
+  16:   mad r0.yzw, r0.yyzw, r1.xxxx, r3.yyyz
+  17:   ftoi r2.xyz, r0.yzwy
+  18:   mov r2.w, l(0)
+  19:   ld_indexable(texture3d)(uint,uint,uint,uint) r0.y, r2.xyzw, t0.yxzw
+  20:   ult r0.z, r0.y, l(-1)
+  21:   if_nz r0.z
+  22:     and r2.xy, r0.yyyy, l(0.000000, 0.000000, 0.000000, 0.000000)
+  23:     ubfe r2.z, l(7), l(7), r2.x
+  24:     ubfe r2.w, l(10), l(14), r0.y
+  25:     frc r0.yzw, r1.yyzw
+  26:     ishl r1.yzw, r2.yyzw, l(0, 3, 3, 3)
+  27:     utof r1.yzw, r1.yyzw
+  28:     mad r0.yzw, r0.yyzw, l(0.000000, 7.000000, 7.000000, 7.000000), r1.yyzw
+  29:     add r0.yzw, r0.yyzw, l(0.000000, 0.500000, 0.500000, 0.500000)
+  30:     mul r0.yzw, r0.yyzw, cb0[3].xxyz
+  31:     sample_l(texture3d)(float,float,float,float) r0.y, r0.yzwy, t1.yxzw, s0, l(0)
+  32:     lt r0.z, r0.y, l(1.000000)
+  33:     mad r0.w, r0.y, cb0[6].w, cb0[7].x
+  34:     movc r0.y, r0.z, r0.w, r0.y
+  35:   else
+  36:     mov r0.y, l(1.000000)
+  37:   endif
+  38:   iadd r2.yzw, vThreadID.xxyz, l(0, -1, 0, 0)
+  39:   imax r2.x, r2.y, l(0)
+  40:   imin r1.yzw, r0.xxxx, r2.xxzw
+  41:   itof r1.yzw, r1.yyzw
+  42:   add r1.yzw, r1.yyzw, l(0.000000, 0.500000, 0.500000, 0.500000)
+  43:   mad r1.yzw, r1.yyzw, cb0[4].yyyy, cb0[6].xxyz
+  44:   frc r1.yzw, r1.yyzw
+  45:   frc r1.yzw, r1.yyzw
+  46:   mul r2.xyz, r1.xxxx, r1.yzwy
+  47:   mad r1.yzw, r1.yyzw, r1.xxxx, r3.yyyz
+  48:   ftoi r4.xyz, r1.yzwy
+  49:   mov r4.w, l(0)
+  50:   ld_indexable(texture3d)(uint,uint,uint,uint) r0.z, r4.xyzw, t0.yzxw
+  51:   ult r0.w, r0.z, l(-1)
+  52:   if_nz r0.w
+  53:     and r4.xy, r0.zzzz, l(0.000000, 0.000000, 0.000000, 0.000000)
+  54:     ubfe r4.z, l(7), l(7), r4.x
+  55:     ubfe r4.w, l(10), l(14), r0.z
+  56:     frc r1.yzw, r2.xxyz
+  57:     ishl r2.xyz, r4.yzwy, l(3, 3, 3, 0)
+  58:     utof r2.xyz, r2.xyzx
+  59:     mad r1.yzw, r1.yyzw, l(0.000000, 7.000000, 7.000000, 7.000000), r2.xxyz
+  60:     add r1.yzw, r1.yyzw, l(0.000000, 0.500000, 0.500000, 0.500000)
+  61:     mul r1.yzw, r1.yyzw, cb0[3].xxyz
+  62:     sample_l(texture3d)(float,float,float,float) r0.z, r1.yzwy, t1.yzxw, s0, l(0)
+  63:     lt r0.w, r0.z, l(1.000000)
+  64:     mad r1.y, r0.z, cb0[6].w, cb0[7].x
+  65:     movc r0.z, r0.w, r1.y, r0.z
+  66:   else
+  67:     mov r0.z, l(1.000000)
+  68:   endif
+  69:   iadd r1.yzw, vThreadID.xxyz, l(0, 1, 0, 0)
+  70:   imin r1.yzw, r0.xxxx, r1.yyzw
+  71:   itof r1.yzw, r1.yyzw
+  72:   add r1.yzw, r1.yyzw, l(0.000000, 0.500000, 0.500000, 0.500000)
+  73:   mad r1.yzw, r1.yyzw, cb0[4].yyyy, cb0[6].xxyz
+  74:   frc r1.yzw, r1.yyzw
+  75:   frc r1.yzw, r1.yyzw
+  76:   mul r2.xyz, r1.xxxx, r1.yzwy
+  77:   mad r1.yzw, r1.yyzw, r1.xxxx, r3.yyyz
+  78:   ftoi r4.xyz, r1.yzwy
+  79:   mov r4.w, l(0)
+  80:   ld_indexable(texture3d)(uint,uint,uint,uint) r0.w, r4.xyzw, t0.yzwx
+  81:   ult r1.y, r0.w, l(-1)
+  82:   if_nz r1.y
+  83:     and r4.xy, r0.wwww, l(0.000000, 0.000000, 0.000000, 0.000000)
+  84:     ubfe r4.z, l(7), l(7), r4.x
+  85:     ubfe r4.w, l(10), l(14), r0.w
+  86:     frc r1.yzw, r2.xxyz
+  87:     ishl r2.xyz, r4.yzwy, l(3, 3, 3, 0)
+  88:     utof r2.xyz, r2.xyzx
+  89:     mad r1.yzw, r1.yyzw, l(0.000000, 7.000000, 7.000000, 7.000000), r2.xxyz
+  90:     add r1.yzw, r1.yyzw, l(0.000000, 0.500000, 0.500000, 0.500000)
+  91:     mul r1.yzw, r1.yyzw, cb0[3].xxyz
+  92:     sample_l(texture3d)(float,float,float,float) r0.w, r1.yzwy, t1.yzwx, s0, l(0)
+  93:     lt r1.y, r0.w, l(1.000000)
+  94:     mad r1.z, r0.w, cb0[6].w, cb0[7].x
+  95:     movc r0.w, r1.y, r1.z, r0.w
+  96:   else
+  97:     mov r0.w, l(1.000000)
+  98:   endif
+  99:   min r0.z, r0.w, r0.z
+ 100:   iadd r2.xyz, vThreadID.xyzx, l(0, -1, 0, 0)
+ 101:   imax r2.w, r2.y, l(0)
+ 102:   imin r1.yzw, r0.xxxx, r2.xxwz
+ 103:   itof r1.yzw, r1.yyzw
+ 104:   add r1.yzw, r1.yyzw, l(0.000000, 0.500000, 0.500000, 0.500000)
+ 105:   mad r1.yzw, r1.yyzw, cb0[4].yyyy, cb0[6].xxyz
+ 106:   frc r1.yzw, r1.yyzw
+ 107:   frc r1.yzw, r1.yyzw
+ 108:   mul r2.xyz, r1.xxxx, r1.yzwy
+ 109:   mad r1.yzw, r1.yyzw, r1.xxxx, r3.yyyz
+ 110:   ftoi r4.xyz, r1.yzwy
+ 111:   mov r4.w, l(0)
+ 112:   ld_indexable(texture3d)(uint,uint,uint,uint) r0.w, r4.xyzw, t0.yzwx
+ 113:   ult r1.y, r0.w, l(-1)
+ 114:   if_nz r1.y
+ 115:     and r4.xy, r0.wwww, l(0.000000, 0.000000, 0.000000, 0.000000)
+ 116:     ubfe r4.z, l(7), l(7), r4.x
+ 117:     ubfe r4.w, l(10), l(14), r0.w
+ 118:     frc r1.yzw, r2.xxyz
+ 119:     ishl r2.xyz, r4.yzwy, l(3, 3, 3, 0)
+ 120:     utof r2.xyz, r2.xyzx
+ 121:     mad r1.yzw, r1.yyzw, l(0.000000, 7.000000, 7.000000, 7.000000), r2.xxyz
+ 122:     add r1.yzw, r1.yyzw, l(0.000000, 0.500000, 0.500000, 0.500000)
+ 123:     mul r1.yzw, r1.yyzw, cb0[3].xxyz
+ 124:     sample_l(texture3d)(float,float,float,float) r0.w, r1.yzwy, t1.yzwx, s0, l(0)
+ 125:     lt r1.y, r0.w, l(1.000000)
+ 126:     mad r1.z, r0.w, cb0[6].w, cb0[7].x
+ 127:     movc r0.w, r1.y, r1.z, r0.w
+ 128:   else
+ 129:     mov r0.w, l(1.000000)
+ 130:   endif
+ 131:   iadd r1.yzw, vThreadID.xxyz, l(0, 0, 1, 0)
+ 132:   imin r1.yzw, r0.xxxx, r1.yyzw
+ 133:   itof r1.yzw, r1.yyzw
+ 134:   add r1.yzw, r1.yyzw, l(0.000000, 0.500000, 0.500000, 0.500000)
+ 135:   mad r1.yzw, r1.yyzw, cb0[4].yyyy, cb0[6].xxyz
+ 136:   frc r1.yzw, r1.yyzw
+ 137:   frc r1.yzw, r1.yyzw
+ 138:   mul r2.xyz, r1.xxxx, r1.yzwy
+ 139:   mad r1.yzw, r1.yyzw, r1.xxxx, r3.yyyz
+ 140:   ftoi r4.xyz, r1.yzwy
+ 141:   mov r4.w, l(0)
+ 142:   ld_indexable(texture3d)(uint,uint,uint,uint) r1.y, r4.xyzw, t0.yxzw
+ 143:   ult r1.z, r1.y, l(-1)
+ 144:   if_nz r1.z
+ 145:     and r4.xy, r1.yyyy, l(0.000000, 0.000000, 0.000000, 0.000000)
+ 146:     ubfe r4.z, l(7), l(7), r4.x
+ 147:     ubfe r4.w, l(10), l(14), r1.y
+ 148:     frc r1.yzw, r2.xxyz
+ 149:     ishl r2.xyz, r4.yzwy, l(3, 3, 3, 0)
+ 150:     utof r2.xyz, r2.xyzx
+ 151:     mad r1.yzw, r1.yyzw, l(0.000000, 7.000000, 7.000000, 7.000000), r2.xxyz
+ 152:     add r1.yzw, r1.yyzw, l(0.000000, 0.500000, 0.500000, 0.500000)
+ 153:     mul r1.yzw, r1.yyzw, cb0[3].xxyz
+ 154:     sample_l(texture3d)(float,float,float,float) r1.y, r1.yzwy, t1.yxzw, s0, l(0)
+ 155:     lt r1.z, r1.y, l(1.000000)
+ 156:     mad r1.w, r1.y, cb0[6].w, cb0[7].x
+ 157:     movc r1.y, r1.z, r1.w, r1.y
+ 158:   else
+ 159:     mov r1.y, l(1.000000)
+ 160:   endif
+ 161:   min r0.w, r0.w, r1.y
+ 162:   iadd r2.xyz, vThreadID.xyzx, l(0, 0, -1, 0)
+ 163:   imax r2.w, r2.z, l(0)
+ 164:   imin r1.yzw, r0.xxxx, r2.xxyw
+ 165:   itof r1.yzw, r1.yyzw
+ 166:   add r1.yzw, r1.yyzw, l(0.000000, 0.500000, 0.500000, 0.500000)
+ 167:   mad r1.yzw, r1.yyzw, cb0[4].yyyy, cb0[6].xxyz
+ 168:   frc r1.yzw, r1.yyzw
+ 169:   frc r1.yzw, r1.yyzw
+ 170:   mul r2.xyz, r1.xxxx, r1.yzwy
+ 171:   mad r1.yzw, r1.yyzw, r1.xxxx, r3.yyyz
+ 172:   ftoi r4.xyz, r1.yzwy
+ 173:   mov r4.w, l(0)
+ 174:   ld_indexable(texture3d)(uint,uint,uint,uint) r1.y, r4.xyzw, t0.yxzw
+ 175:   ult r1.z, r1.y, l(-1)
+ 176:   if_nz r1.z
+ 177:     and r4.xy, r1.yyyy, l(0.000000, 0.000000, 0.000000, 0.000000)
+ 178:     ubfe r4.z, l(7), l(7), r4.x
+ 179:     ubfe r4.w, l(10), l(14), r1.y
+ 180:     frc r1.yzw, r2.xxyz
+ 181:     ishl r2.xyz, r4.yzwy, l(3, 3, 3, 0)
+ 182:     utof r2.xyz, r2.xyzx
+ 183:     mad r1.yzw, r1.yyzw, l(0.000000, 7.000000, 7.000000, 7.000000), r2.xxyz
+ 184:     add r1.yzw, r1.yyzw, l(0.000000, 0.500000, 0.500000, 0.500000)
+ 185:     mul r1.yzw, r1.yyzw, cb0[3].xxyz
+ 186:     sample_l(texture3d)(float,float,float,float) r1.y, r1.yzwy, t1.yxzw, s0, l(0)
+ 187:     lt r1.z, r1.y, l(1.000000)
+ 188:     mad r1.w, r1.y, cb0[6].w, cb0[7].x
+ 189:     movc r1.y, r1.z, r1.w, r1.y
+ 190:   else
+ 191:     mov r1.y, l(1.000000)
+ 192:   endif
+ 193:   iadd r2.xyz, vThreadID.xyzx, l(0, 0, 1, 0)
+ 194:   imin r2.xyz, r0.xxxx, r2.xyzx
+ 195:   itof r2.xyz, r2.xyzx
+ 196:   add r2.xyz, r2.xyzx, l(0.500000, 0.500000, 0.500000, 0.000000)
+ 197:   mad r2.xyz, r2.xyzx, cb0[4].yyyy, cb0[6].xyzx
+ 198:   frc r2.xyz, r2.xyzx
+ 199:   frc r2.xyz, r2.xyzx
+ 200:   mul r4.xyz, r1.xxxx, r2.xyzx
+ 201:   mad r1.xzw, r2.xxyz, r1.xxxx, r3.xxyz
+ 202:   ftoi r2.xyz, r1.xzwx
+ 203:   mov r2.w, l(0)
+ 204:   ld_indexable(texture3d)(uint,uint,uint,uint) r0.x, r2.xyzw, t0.xyzw
+ 205:   ult r1.x, r0.x, l(-1)
+ 206:   if_nz r1.x
+ 207:     and r2.xy, r0.xxxx, l(0.000000, 0.000000, 0.000000, 0.000000)
+ 208:     ubfe r2.z, l(7), l(7), r2.x
+ 209:     ubfe r2.w, l(10), l(14), r0.x
+ 210:     frc r1.xzw, r4.xxyz
+ 211:     ishl r2.xyz, r2.yzwy, l(3, 3, 3, 0)
+ 212:     utof r2.xyz, r2.xyzx
+ 213:     mad r1.xzw, r1.xxzw, l(7.000000, 0.000000, 7.000000, 7.000000), r2.xxyz
+ 214:     add r1.xzw, r1.xxzw, l(0.500000, 0.000000, 0.500000, 0.500000)
+ 215:     mul r1.xzw, r1.xxzw, cb0[3].xxyz
+ 216:     sample_l(texture3d)(float,float,float,float) r0.x, r1.xzwx, t1.xyzw, s0, l(0)
+ 217:     lt r1.x, r0.x, l(1.000000)
+ 218:     mad r1.z, r0.x, cb0[6].w, cb0[7].x
+ 219:     movc r0.x, r1.x, r1.z, r0.x
+ 220:   else
+ 221:     mov r0.x, l(1.000000)
+ 222:   endif
+ 223:   min r0.x, r0.x, r1.y
+ 224:   min r1.x, r0.x, r0.w
+ 225:   min r1.x, r0.z, r1.x
+ 226:   max r1.y, r0.x, r0.w
+ 227:   max r1.y, r0.z, r1.y
+ 228:   ne r1.zw, r0.zzzz, r1.xxxy
+ 229:   and r1.z, r1.w, r1.z
+ 230:   ne r1.w, r0.w, r1.x
+ 231:   ne r2.x, r0.w, r1.y
+ 232:   and r1.w, r1.w, r2.x
+ 233:   movc r0.x, r1.w, r0.w, r0.x
+ 234:   movc r0.x, r1.z, r0.z, r0.x
+ 235:   add r0.z, r1.x, l(0.125000)
+ 236:   min r0.y, r0.z, r0.y
+ 237:   add r0.z, r0.x, r1.x
+ 238:   mul r0.x, r0.x, r0.x
+ 239:   mad r0.x, r1.x, r1.x, r0.x
+ 240:   add r0.w, r0.x, l(-0.015625)
+ 241:   add r0.w, r0.w, r0.w
+ 242:   mad r0.w, r0.z, r0.z, -r0.w
+ 243:   sqrt r0.w, r0.w
+ 244:   add r0.w, r0.w, r0.z
+ 245:   mul r0.w, r0.w, l(0.500000)
+ 246:   min r0.y, r0.w, r0.y
+ 247:   add r0.z, r1.y, r0.z
+ 248:   mad r0.x, r1.y, r1.y, r0.x
+ 249:   add r0.x, r0.x, l(-0.015625)
+ 250:   mul r0.x, r0.x, l(3.000000)
+ 251:   mad r0.x, r0.z, r0.z, -r0.x
+ 252:   sqrt r0.x, r0.x
+ 253:   add r0.x, r0.x, r0.z
+ 254:   mul r0.x, r0.x, l(0.333333)
+ 255:   min r0.x, r0.x, r0.y
+ 256:   mov r1.xy, vThreadID.xyxx
+ 257:   iadd r1.zw, vThreadID.zzzz, cb0[5].xxxx
+ 258:   store_uav_typed u0.xyzw, r1.xyzw, r0.xxxx
+ 259: endif
+ 260: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

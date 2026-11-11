@@ -1,0 +1,216 @@
+{
+ "index": 353,
+ "kind": "dispatch",
+ "events": [
+  6527,
+  6527
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "DiffuseIndirectAndAO",
+  "LumenScreenProbeGather",
+  "FixupBorders"
+ ],
+ "first": "DispatchIndirect(<72, 63, 1>)",
+ "last": "DispatchIndirect(<72, 63, 1>)",
+ "shaders": {
+  "cs": [
+   "shaders/cs_7880.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::7880": [
+    {
+     "block": "cbuffer0",
+     "bytes": 128,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        8.780466006792915e+27,
+        0.0,
+        8.776140319094606e+27,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v4",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.005,
+        2.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v5",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.021164,
+        0.024691,
+        0.001323,
+        0.001543
+       ]
+      },
+      {
+       "name": "cb0_v6",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.02381,
+        0.027778,
+        12.245689,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v7",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.024691,
+        0.001323,
+        0.001543
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::7880": [
+    {
+     "id": "ResourceId::71212",
+     "name": "2D Texture 71212",
+     "w": 42,
+     "h": 36,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R32_UINT",
+     "samples": 1,
+     "binding": "texture0"
+    },
+    {
+     "id": "ResourceId::51999",
+     "name": "InstanceCulling.CompactionBlockDataIndices",
+     "binding": "structuredbuffer1"
+    },
+    {
+     "id": "ResourceId::71153",
+     "name": "2D Texture 71153",
+     "w": 672,
+     "h": 576,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R11G11B10_FLOAT",
+     "samples": 1,
+     "binding": "texture2"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 6527,
+   "name": "DispatchIndirect(<72, 63, 1>)",
+   "cs": "ResourceId::7880"
+  }
+ ],
+ "outputs": [
+  {
+   "id": "ResourceId::71174",
+   "name": "2D Texture 71174",
+   "w": 756,
+   "h": 648,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R11G11B10_FLOAT",
+   "samples": 1
+  }
+ ],
+ "images": [
+  {
+   "file": "images/0353_out0.jpg",
+   "black": 0.0,
+   "white": 8.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "max": [
+    8.0,
+    6.625,
+    4.375,
+    1.0
+   ],
+   "target": {
+    "id": "ResourceId::71174",
+    "name": "2D Texture 71174",
+    "w": 756,
+    "h": 648,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R11G11B10_FLOAT",
+    "samples": 1
+   }
+  }
+ ]
+}

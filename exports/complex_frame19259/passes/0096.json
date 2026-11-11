@@ -1,0 +1,148 @@
+{
+ "index": 96,
+ "kind": "dispatch",
+ "events": [
+  3650,
+  3650
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "LumenSceneLighting%s",
+  "DirectLighting",
+  "CullTiles %d lights",
+  "CompactLightTiles"
+ ],
+ "first": "DispatchIndirect(<2587, 1, 1>)",
+ "last": "DispatchIndirect(<2587, 1, 1>)",
+ "shaders": {
+  "cs": [
+   "shaders/cs_7798.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::7798": [
+    {
+     "block": "cbuffer0",
+     "bytes": 96,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v4",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v5",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::7798": [
+    {
+     "id": "ResourceId::59094",
+     "name": "Lumen.DirectLighting.LightTileOffsetNumPerCardTile",
+     "binding": "structuredbuffer0"
+    },
+    {
+     "id": "ResourceId::51999",
+     "name": "InstanceCulling.CompactionBlockDataIndices",
+     "binding": "structuredbuffer1"
+    },
+    {
+     "id": "ResourceId::59098",
+     "name": "Lumen.DirectLighting.CompactedLightTiles",
+     "binding": "structuredbuffer2"
+    },
+    {
+     "id": "ResourceId::6679",
+     "name": "InstanceCullingLoadBalancer.Batches",
+     "binding": "structuredbuffer3"
+    },
+    {
+     "id": "ResourceId::59091",
+     "name": "Lumen.CardTiles",
+     "binding": "structuredbuffer4"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 3650,
+   "name": "DispatchIndirect(<2587, 1, 1>)",
+   "cs": "ResourceId::7798"
+  }
+ ],
+ "outputs": [],
+ "images": []
+}
