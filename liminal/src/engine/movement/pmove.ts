@@ -1,7 +1,7 @@
 import {
   type Vec3, v3, copy, set, add, sub, scale, madd, dot, cross, len, len2d, normalize, angleVectors,
 } from '../vec3';
-import type { CollisionWorld, TraceResult } from '../collision/trace';
+import type { TraceWorld, TraceResult } from '../collision/trace';
 
 /**
  * Every constant the movement uses. Read fresh each tick, so changing a value
@@ -153,7 +153,7 @@ const MAX_CLIP_PLANES = 5;
  * recognise as "Source movement".
  */
 export class PlayerMove {
-  constructor(public world: CollisionWorld) {}
+  constructor(public world: TraceWorld) {}
 
   private ps!: PlayerState;
   private p!: MoveParams;

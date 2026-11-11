@@ -17,7 +17,8 @@
  * too thin to stop the light) and how much of the open lamps' light falls
  * where a mass stands in the way (they have no shadows yet).
  *
- *   npx vite-node tools/world/look.ts -- [seed] [--step 128] [--json out.json]
+ *   npx vite-node tools/world/look.ts -- [seed] [--lots n] [--old] [--step 128] [--json out.json]
+ * (Which world: tools/world/made.ts.)
  *
  * Each fault is listed with a studio pose ("x,y,z,yaw,pitch", z = the feet)
  * that looks straight at it.
@@ -29,18 +30,17 @@ import { propSolids, type PropShape } from '../../src/engine/collision/props';
 import { buildLightGrid, gridLightAt, lampGives, LAMP_TEXELS } from '../../src/engine/render/lightGridCore';
 import { mapLamps } from '../../src/engine/render/mapLamps';
 import { RayWorld, type RayBrush } from '../../src/world/check/rays';
-import { industrial, GEOMETRY_SETTINGS } from '../../src/world/industrial/world';
+import { GEOMETRY_SETTINGS } from '../../src/world/industrial/world';
+import { toolWorld, walkTiles } from './made';
 
-const args = process.argv.slice(2).filter((a) => a !== '--');
-const seed = Number(args.find((a) => /^\d+$/.test(a)) ?? 1);
+const t0 = performance.now();
+const tw = toolWorld();
+const { seed, made, rest: args } = tw;
 const opt = (name: string, d: number) => (args.includes(name) ? Number(args[args.indexOf(name) + 1]) : d);
 const STEP = opt('--step', 128);
 const jsonOut = args.includes('--json') ? args[args.indexOf('--json') + 1] : null;
 const FAR = 2600, EYE = GEOMETRY_SETTINGS.hull.eyeHeight;
 const AMBIENT = GEOMETRY_SETTINGS.light.lampAmbient;
-const t0 = performance.now();
-
-const made = industrial(seed);
 const lay = made.layout;
 const map = parseMap(JSON.parse(serializeMap(made.map.toMap('industrial', GEOMETRY_SETTINGS))));
 
@@ -80,7 +80,7 @@ L.lamps.forEach((l, i) => {
 const tBuilt = performance.now();
 
 // ---- eye points: along every walk
-const N = lay.params.size, LV = lay.params.levels, T = 128, LEVEL = 256;
+const N = lay.params.size, LV = lay.params.levels, LEVEL = 256;
 const zOf = (l: number) => (l - Math.floor(LV / 2)) * LEVEL;
 function waypoints(w: (typeof lay.walks)[number]): number[][] {
   const s = lay.segments[w.segment];
@@ -90,9 +90,9 @@ function waypoints(w: (typeof lay.walks)[number]): number[][] {
   const up = w.lb >= w.la;
   const i0 = lo === hi ? n : Math.floor((n - 4) / 2);
   const zAt = (i: number) => (i < i0 ? zOf(lo) : i >= i0 + 4 ? zOf(hi) : zOf(lo) + 32 + 64 * (i - i0));
-  const pts = [[A.x * T + 64, A.y * T + 64, zOf(w.la)]];
-  s.tiles.forEach(([x, y], k) => pts.push([x * T + 64, y * T + 64, zAt(up ? k : n - 1 - k)]));
-  pts.push([B.x * T + 64, B.y * T + 64, zOf(w.lb)]);
+  const pts = [[tw.px(A.x), tw.py(A.y), zOf(w.la)]];
+  s.tiles.forEach(([x, y], k) => pts.push([tw.px(x), tw.py(y), zAt(up ? k : n - 1 - k)]));
+  pts.push([tw.px(B.x), tw.py(B.y), zOf(w.lb)]);
   return pts;
 }
 void N;
@@ -225,6 +225,7 @@ function lookFrom(x: number, y: number, zGuess: number): void {
 }
 
 for (const w of lay.walks) {
+  if (!tw.built(walkTiles(made, w))) continue;
   const pts = waypoints(w);
   for (let k = 1; k < pts.length; k++) {
     const a = pts[k - 1], b = pts[k], len = Math.hypot(b[0] - a[0], b[1] - a[1]);

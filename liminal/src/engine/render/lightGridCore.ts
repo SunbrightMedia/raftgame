@@ -233,7 +233,7 @@ function outsideHull(planes: number[][], min: ArrayLike<number>, max: ArrayLike<
  * open do not light. `airs`: the map's boxes of air (the insides of its
  * masses), for the lamps that hang there. Null when there are no lamps.
  */
-export function buildLightGrid(lamps: GridLamp[], shades: Box3[] = [], airs: Box3[] = []): LightGrid | null {
+export function buildLightGrid(lamps: GridLamp[], shades: Box3[] = [], airs: Box3[] = [], window?: { origin: number[]; dims: number[] }): LightGrid | null {
   if (!lamps.length) return null;
   const air = mergeBoxes(airs);
   const airHash = new SpatialHash(air, 512);
@@ -295,8 +295,9 @@ export function buildLightGrid(lamps: GridLamp[], shades: Box3[] = [], airs: Box
       lo[k] = Math.min(lo[k], a); hi[k] = Math.max(hi[k], b);
     }
   });
-  const origin = lo.map((v, k) => Math.floor(v / CELL[k]) * CELL[k]);
-  const dims = hi.map((v, k) => Math.max(1, Math.min(k === 2 ? 64 : 512, Math.ceil((v - origin[k]) / CELL[k]))));
+  // (`window`: only these cells are filled, whatever the lamps reach: one lot's own cells, lit by its lamps and its neighbours'.)
+  const origin = window ? [...window.origin] : lo.map((v, k) => Math.floor(v / CELL[k]) * CELL[k]);
+  const dims = window ? [...window.dims] : hi.map((v, k) => Math.max(1, Math.min(k === 2 ? 64 : 512, Math.ceil((v - origin[k]) / CELL[k]))));
   const [nx, ny, nz] = dims;
   const at = (x: number, y: number, z: number) => (z * ny + y) * nx + x;
   const cellRange = (min: number[], max: number[]) => [0, 1, 2].map((k) => [Math.max(0, Math.floor((min[k] - origin[k]) / CELL[k])), Math.min(dims[k] - 1, Math.floor((max[k] - origin[k]) / CELL[k]))]);
@@ -496,4 +497,26 @@ export function lampsListedAt(g: LightGrid, p: number[]): number[] {
   const out: number[] = [];
   for (let q = 0; q < g.grid[c * 2 + 1]; q++) out.push(g.list[(g.grid[c * 2] + q) * 2]);
   return out;
+}
+
+/**
+ * The grid for a world loaded lot by lot: a square window of lots that wraps
+ * round. Each lot has a slot (its place modulo the window) with room for its
+ * cells, its list entries, its lamps and its chains; a lot's part is written
+ * when the lot arrives, and written over by the lot that later takes its slot.
+ */
+export interface LightWindow {
+  /** Lots a side; cells a lot's side; cells up; the height of the lowest cell's floor. */
+  lots: number; lotCells: number; nz: number; z0: number;
+  /** Room per lot: list entries (a multiple of the list texture's width), lamps (a multiple of a row of them), chain texels (a multiple of the chain texture's width). */
+  listCap: number; lampCap: number; chainCap: number;
+}
+/** One lot's part of the grid, as the lot builder makes it (world/lotBuild.ts): indices already count from the lot's slot. */
+export interface LotLight { cells: Float32Array; list: Float32Array; lamps: Float32Array; chains: Float32Array }
+
+/** What a lot's slot is, and where its parts begin. */
+export function lightSlot(w: LightWindow, i: number, j: number): { x: number; y: number; n: number; listAt: number; lampAt: number; chainAt: number } {
+  const mod = (a: number) => ((a % w.lots) + w.lots) % w.lots;
+  const x = mod(i), y = mod(j), n = y * w.lots + x;
+  return { x, y, n, listAt: n * w.listCap, lampAt: n * w.lampCap, chainAt: n * w.chainCap };
 }

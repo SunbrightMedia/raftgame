@@ -4,7 +4,8 @@
  * hall), both ways, over the world's real collision. Anything that stops the
  * player, drops them, or leaves them short is listed.
  *
- *   npx vite-node tools/world/walk.ts -- [seed] [--json out.json] [--max N]
+ *   npx vite-node tools/world/walk.ts -- [seed] [--lots n] [--old] [--json out.json] [--max N]
+ * (Which world: tools/world/made.ts. In a world of lots only the walks wholly in the built lots are walked.)
  */
 import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
 import { parseMap, serializeMap } from '../../src/data/map';
@@ -14,14 +15,13 @@ import { convexBrush } from '../../src/engine/collision/brush';
 import { propSolids, type PropShape } from '../../src/engine/collision/props';
 import { v3, type Vec3 } from '../../src/engine/vec3';
 import { PlayerMove, DEFAULT_MOVE, newPlayerState, type UserCmd } from '../../src/engine/movement/pmove';
-import { industrial, GEOMETRY_SETTINGS } from '../../src/world/industrial/world';
+import { GEOMETRY_SETTINGS } from '../../src/world/industrial/world';
+import { toolWorld, walkTiles } from './made';
 
-const args = process.argv.slice(2).filter((a) => a !== '--');
-const seed = Number(args.find((a) => /^\d+$/.test(a)) ?? 1);
-const jsonOut = args.includes('--json') ? args[args.indexOf('--json') + 1] : null;
 const t0 = performance.now();
-
-const made = industrial(seed);
+const tw = toolWorld();
+const { seed, made, rest: args } = tw;
+const jsonOut = args.includes('--json') ? args[args.indexOf('--json') + 1] : null;
 const lay = made.layout;
 const map = parseMap(JSON.parse(serializeMap(made.map.toMap('industrial', GEOMETRY_SETTINGS))));
 const P = { ...DEFAULT_MOVE, ...GEOMETRY_SETTINGS.hull };
@@ -42,7 +42,7 @@ const world = new CollisionWorld([
 ]);
 const tBuilt = performance.now();
 
-const N = lay.params.size, L = lay.params.levels, T = 128, LEVEL = 256;
+const N = lay.params.size, L = lay.params.levels, LEVEL = 256;
 const zOf = (l: number) => (l - Math.floor(L / 2)) * LEVEL;
 const blockOf = (x: number, y: number) => lay.tileBlock[y * N + x];
 const DT = 1 / 66;
@@ -66,9 +66,9 @@ function waypoints(w: (typeof lay.walks)[number]): Vec3[] {
     if (i >= i0 + 4) return zOf(hi);
     return zOf(lo) + 32 + 64 * (i - i0);
   };
-  const pts: Vec3[] = [v3(A.x * T + 64, A.y * T + 64, zOf(w.la))];
-  s.tiles.forEach(([x, y], k) => pts.push(v3(x * T + 64, y * T + 64, zAt(up ? k : n - 1 - k))));
-  pts.push(v3(B.x * T + 64, B.y * T + 64, zOf(w.lb)));
+  const pts: Vec3[] = [v3(tw.px(A.x), tw.py(A.y), zOf(w.la))];
+  s.tiles.forEach(([x, y], k) => pts.push(v3(tw.px(x), tw.py(y), zAt(up ? k : n - 1 - k))));
+  pts.push(v3(tw.px(B.x), tw.py(B.y), zOf(w.lb)));
   return pts;
 }
 
@@ -96,8 +96,10 @@ function walk(pts: Vec3[]): { ok: boolean; reason: string; at: Vec3; target: Vec
 }
 
 const maxArg = args.includes('--max') ? Number(args[args.indexOf('--max') + 1]) : Infinity;
+let walked = 0;
 lay.walks.forEach((w, wi) => {
-  if (wi >= maxArg) return;
+  if (wi >= maxArg || !tw.built(walkTiles(made, w))) return;
+  walked++;
   const s = lay.segments[w.segment];
   const stairs = w.la !== w.lb;
   const where = s.tunnel ? 'tunnel' : 'street';
@@ -112,7 +114,7 @@ void blockOf;
 
 const by = new Map<string, number>();
 for (const f of fails) { const k = `${f.where}${f.stairs ? ' stairs' : ''}: ${f.reason.replace(/\(.*\)/, '')}`; by.set(k, (by.get(k) ?? 0) + 1); }
-console.log(`seed ${seed}: ${lay.walks.length} walks (${count.street} street, ${count.streetStairs} street stairs, ${count.tunnel} tunnel, ${count.tunnelStairs} tunnel stairs), both ways`);
+console.log(`seed ${seed}: ${walked} walks (${count.street} street, ${count.streetStairs} street stairs, ${count.tunnel} tunnel, ${count.tunnelStairs} tunnel stairs), both ways`);
 console.log(`world built in ${Math.round(tBuilt - t0)} ms, walked in ${Math.round(performance.now() - tBuilt)} ms`);
 console.log(fails.length ? `${fails.length} FAILED` : 'all walks pass');
 for (const [k, n] of [...by].sort((a, b) => b[1] - a[1])) console.log(`  ${n} × ${k}`);

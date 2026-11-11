@@ -1,4 +1,4 @@
-import { industrial, GEOMETRY_SETTINGS } from '../world/industrial/world';
+import { industrialWorld, GEOMETRY_SETTINGS } from '../world/industrial/world';
 /** The private industrial-world page (npm run build:industrial): the world is made in the page from a seed; only the Portal 2 pieces the generator uses are packed. See globs.dev.ts. */
 export const textureUrls: Record<string, string> = {};
 export const textureManifests = import.meta.glob('../../textures/p2lib/index.json', { eager: true, import: 'default' }) as Record<string, unknown>;
@@ -13,5 +13,5 @@ export const catalogue = {
 };
 /** Worlds made in the page from a seed (a map path "world:<name>:<seed>"), in place of a map file. */
 export const worlds: Record<string, (seed: number) => unknown> = {
-  industrial: (seed) => industrial(seed).map.toMap('industrial', GEOMETRY_SETTINGS),
+  industrial: (seed) => industrialWorld(seed).map.toMap('industrial', GEOMETRY_SETTINGS),
 };

@@ -1,4 +1,5 @@
 import { MAP_FORMAT, type BrushDef, type EntityDef, type MapFile } from '../data/map';
+import { sidePolygon } from '../data/convex';
 
 /**
  * Collects what a generator makes (brushes, props, lights, glows) and turns it
@@ -63,8 +64,17 @@ export class MapOut {
     return f;
   }
 
+  /**
+   * With a filter set, only what belongs is written: a brush by the middle of
+   * its bounds, anything else by its origin (the rest returns −1). A world
+   * made lot by lot is built as a square of lots at a time, and each thing is
+   * written once, by the lot its middle is in.
+   */
+  keep: ((p: V3) => boolean) | null = null;
+
   /** An axis-aligned box. */
   box(min: V3, max: V3, o: BoxOpts): number {
+    if (this.keep && !this.keep([(min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2])) return -1;
     const planes: number[][] = [[-1, 0, 0, -min[0]], [1, 0, 0, max[0]], [0, -1, 0, -min[1]], [0, 1, 0, max[1]], [0, 0, -1, -min[2]], [0, 0, 1, max[2]]];
     const faces: Record<string, unknown> = {};
     SIDES.forEach((side, i) => {
@@ -78,7 +88,17 @@ export class MapOut {
    * Any convex solid: its bounding planes [nx, ny, nz, d] (inside: n·p ≤ d),
    * each with its texture (NODRAW to hide a side).
    */
-  convex(planes: [number, number, number, number][], tex: string | string[], o: Omit<BoxOpts, 'tex' | 'sides'> = {}): number {
+  convex(planes: [number, number, number, number][], tex: string | string[], o: Omit<BoxOpts, 'tex' | 'sides'> = {}, middle?: V3): number {
+    if (this.keep) {
+      // Its middle: given, or the middle of its corners' bounds.
+      let c = middle;
+      if (!c) {
+        const lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity];
+        planes.forEach((_, k) => { for (const q of sidePolygon(planes, k)) for (let a = 0; a < 3; a++) { lo[a] = Math.min(lo[a], q[a]); hi[a] = Math.max(hi[a], q[a]); } });
+        c = [(lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2, (lo[2] + hi[2]) / 2];
+      }
+      if (!this.keep(c)) return -1;
+    }
     const faces: Record<string, unknown> = {};
     planes.forEach((p, i) => { faces[String(i)] = this.face([p[0], p[1], p[2]], typeof tex === 'string' ? tex : tex[i] ?? NODRAW, o); });
     return this.push(planes, faces, o);
@@ -101,7 +121,7 @@ export class MapOut {
     return this.convex([
       pl(s, dot(s, a) + wide / 2), pl(neg(s), -dot(s, a) + wide / 2),
       pl(t, dot(t, a) + deep / 2), pl(neg(t), -dot(t, a) + deep / 2),
-      pl(u, dot(u, b)), pl(neg(u), -dot(u, a))], tex, o);
+      pl(u, dot(u, b)), pl(neg(u), -dot(u, a))], tex, o, [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2]);
   }
 
   private push(planes: number[][], faces: Record<string, unknown>, o: { group?: string; solid?: boolean }): number {
@@ -114,6 +134,7 @@ export class MapOut {
   }
 
   private ent(cls: string, origin: V3, angles: V3 | undefined, props: Record<string, unknown>): number {
+    if (this.keep && !this.keep(origin)) return -1;
     const e: EntityDef = { id: 100000 + this.nextId++, class: cls, origin: origin.map(r3) as V3, props };
     if (angles) e.angles = angles.map(r3) as V3;
     this.entities.push(e);
@@ -207,6 +228,25 @@ export class MapOut {
   /** Text in the world (engine/render/labels.ts), for debug views of a generated layout. */
   label(origin: V3, text: string, size: number, yaw = 0, plane: 'floor' | 'wall' = 'floor'): number {
     return this.ent('label', origin, [0, yaw, 0], { text, size, plane });
+  }
+
+  /**
+   * Moves everything written so far by `d`. (A lot is built in the middle of
+   * a square of lots, then moved so that places are measured from its own
+   * corner. Textures are laid by world place and are not moved with it: a
+   * move by whole lots leaves them where they were on every surface.)
+   */
+  shift(d: V3): void {
+    const add = (v: number[], k = 0) => { v[k] = r3(v[k] + d[0]); v[k + 1] = r3(v[k + 1] + d[1]); v[k + 2] = r3(v[k + 2] + d[2]); };
+    for (const b of this.brushes as unknown as { planes: number[][] }[]) for (const p of b.planes) p[3] = r3(p[3] + p[0] * d[0] + p[1] * d[1] + p[2] * d[2]);
+    for (const e of this.entities) {
+      add(e.origin);
+      const q = (e.props ?? {}) as { to?: number[]; min?: number[]; max?: number[]; boxes?: number[] };
+      if (q.to) add(q.to);
+      if (q.min) add(q.min);
+      if (q.max) add(q.max);
+      if (q.boxes) for (let k = 0; k < q.boxes.length; k += 3) add(q.boxes, k);
+    }
   }
 
   toMap(name: string, settings: Record<string, unknown>): MapFile {

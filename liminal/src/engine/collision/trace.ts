@@ -21,6 +21,12 @@ export interface TraceResult {
   brush: CollisionBrush | null;
 }
 
+/** Anything a hull can be swept through: one map's collision world, or several side by side (a world loaded piece by piece). */
+export interface TraceWorld {
+  trace(start: Vec3, end: Vec3, mins: Vec3, maxs: Vec3): TraceResult;
+  testPosition(pos: Vec3, mins: Vec3, maxs: Vec3): boolean;
+}
+
 /**
  * The static collision world: convex brushes in uniform grids, so a trace only
  * tests the brushes near its swept bounds, then a per-brush bounding-box
@@ -33,7 +39,7 @@ const CELL = 64;
 /** A brush is filed in the first grid where its longest side spans at most this many cells. */
 const MAX_SPAN = 4;
 interface Grid { cell: number; map: Map<number, number[]>; all: number[] }
-export class CollisionWorld {
+export class CollisionWorld implements TraceWorld {
   brushes: CollisionBrush[] = [];
   private grids: Grid[] = [];
   private stamp: Int32Array;

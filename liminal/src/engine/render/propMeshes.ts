@@ -24,7 +24,7 @@ export const PROP_REGION = 2048;
  * Props drawn instanced: one InstancedMesh per (model, skin, region of the
  * map), its materials picked per mesh slot by the skin table.
  */
-export function buildPropMeshes(entities: EntityDef[], models: ModelRegistry, textures: TextureRegistry, offsetOf?: (e: EntityDef) => [number, number, number] | undefined): THREE.Group {
+export function buildPropMeshes(entities: EntityDef[], models: ModelRegistry, textures: TextureRegistry, offsetOf?: (e: EntityDef) => [number, number, number] | undefined, shared?: Map<string, THREE.Material>): THREE.Group {
   const group = new THREE.Group();
   group.name = 'props';
   const batches = new Map<string, { model: string; skin: number; twoSided: boolean; mats: THREE.Matrix4[]; light: number[] }>();
@@ -45,7 +45,8 @@ export function buildPropMeshes(entities: EntityDef[], models: ModelRegistry, te
     const off = offsetOf?.(e);
     b.mats.push(sourceAnglesMatrix(e.angles, off ? [e.origin[0] + off[0], e.origin[1] + off[1], e.origin[2] + off[2]] : e.origin, scale));
   }
-  const materials = new Map<string, THREE.Material>();
+  // (`shared`: materials kept from call to call, for a world loaded piece by piece.)
+  const materials = shared ?? new Map<string, THREE.Material>();
   const material = (tex: string, twoSided = false) => {
     const k = twoSided ? `${tex}#2` : tex;
     let m = materials.get(k);
@@ -97,13 +98,13 @@ export function cullProps(g: THREE.Group, eye: THREE.Vector3, reach: number, det
   }
 }
 
-/** Dispose prop materials (geometry belongs to the ModelRegistry and is shared). */
-export function disposeProps(g: THREE.Group): void {
+/** Dispose prop materials (geometry belongs to the ModelRegistry and is shared). `keepMaterials`: they are shared with other groups. */
+export function disposeProps(g: THREE.Group, keepMaterials = false): void {
   const seen = new Set<THREE.Material>();
   g.traverse((o) => {
     const m = o as THREE.InstancedMesh;
     if (!m.isInstancedMesh) return;
-    (Array.isArray(m.material) ? m.material : [m.material]).forEach((x) => { if (!seen.has(x)) { seen.add(x); x.dispose(); } });
+    if (!keepMaterials) (Array.isArray(m.material) ? m.material : [m.material]).forEach((x) => { if (!seen.has(x)) { seen.add(x); x.dispose(); } });
     // The batch's own geometry object goes (it would pile up, one per batch per map loaded), but not the model's
     // buffers it shares: those are taken off it first, so only its own light offsets are freed.
     const geo = m.geometry;

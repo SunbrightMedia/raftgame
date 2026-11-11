@@ -11,15 +11,20 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { serializeMap } from '../../src/data/map';
 import { testbed, BTS_SETTINGS } from '../../src/world/industrial/testbed';
 import { blockout } from '../../src/world/industrial/blockout';
-import { industrial, GEOMETRY_SETTINGS } from '../../src/world/industrial/world';
+import { industrial, industrialLots, industrialWorld, GEOMETRY_SETTINGS } from '../../src/world/industrial/world';
 
-const [what = 'testbed', seedArg] = process.argv.slice(2).filter((a) => a !== '--');
+// (--old: the old generator, one whole world with an edge, in place of the world of lots; --lots n: that many lots a side.)
+const argv = process.argv.slice(2).filter((a) => a !== '--');
+const old = argv.includes('--old');
+const lotsAt = argv.indexOf('--lots'), lots = lotsAt >= 0 ? Number(argv[lotsAt + 1]) : 0;
+const world = old ? industrial : lots ? (n: number) => industrialLots(n, -Math.floor(lots / 2), -Math.floor(lots / 2), lots) : industrialWorld;
+const [what = 'testbed', seedArg] = argv.filter((a, k) => a !== '--old' && a !== '--lots' && argv[k - 1] !== '--lots');
 const seed = seedArg ? Number(seedArg) : 1;
 const t0 = performance.now();
 if (what === 'kit') {
   const tex = new Set<string>(), ents = new Map<string, unknown>();
   for (let n = 1; n <= (seedArg ? seed : 16); n++) {
-    const m = industrial(n).map.toMap('kit', GEOMETRY_SETTINGS);
+    const m = world(n).map.toMap('kit', GEOMETRY_SETTINGS);
     for (const b of m.brushes as unknown as { faces: Record<string, { tex: string }> }[]) for (const f of Object.values(b.faces)) tex.add(f.tex);
     for (const e of m.entities) {
       const p = (e.props ?? {}) as Record<string, unknown>;
@@ -33,7 +38,7 @@ if (what === 'kit') {
   console.log(`maps/iw/industrial-kit.json: ${brushes.length} textures, ${ents.size} models and sprites`);
   process.exit(0);
 }
-const made = what === 'blockout' ? blockout(seed) : what === 'industrial' ? industrial(seed) : null;
+const made = what === 'blockout' ? blockout(seed) : what === 'industrial' ? world(seed) : null;
 const out = what === 'testbed' ? testbed(seed) : made?.map ?? null;
 if (made) {
   const l = made.layout;

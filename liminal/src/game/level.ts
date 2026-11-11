@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { MapFile } from '../data/map';
-import { CollisionWorld } from '../engine/collision/trace';
+import { CollisionWorld, type TraceWorld } from '../engine/collision/trace';
 import { convexBrush } from '../engine/collision/brush';
 import { buildFaceMeshes, disposeGroup } from '../engine/render/brushMesh';
 import type { TextureRegistry } from '../engine/render/textures';
@@ -19,7 +19,8 @@ import { sourceLayout, SOURCE_LM_WIDTH } from '../engine/light/vrad';
 
 /** A map turned into things the engine uses: collision, faces, render meshes, spawn. */
 export class Level {
-  collision: CollisionWorld;
+  /** What the player moves against. (A world loaded lot by lot puts its own here: game/lotWorld.ts.) */
+  collision: TraceWorld;
   /** Brush entities moved from where the map places them (by entity name), e.g. an elevator between floors. */
   private movers = new Map<string, [number, number, number]>();
   readonly faces: Face[];

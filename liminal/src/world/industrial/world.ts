@@ -3,6 +3,7 @@ import { Rng } from '../rng';
 import { carve, type Finish, type Hollow } from '../carve';
 import { walkTile, stairs, tubePath, TILE, STEP, DX, DY, opposite, type Dir } from '../kit/aperture';
 import { makeLayout, type Block, type DistrictKind, type Layout, type LayoutParams, type Street } from './layout';
+import { LOT, windowLayout } from './lots';
 
 /**
  * The industrial world's geometry, from a layout (layout.ts): what each mass
@@ -57,7 +58,7 @@ const FINISH: Record<'machine' | 'pier', Finish[]> = {
 export type WorldParams = Partial<LayoutParams>;
 
 type MassKind = 'chambers' | 'machine' | 'pier' | 'frame' | 'bridge';
-interface MassBox { x0: number; y0: number; x1: number; y1: number; z0: number; z1: number; kind: MassKind }
+interface MassBox { x0: number; y0: number; x1: number; y1: number; z0: number; z1: number; kind: MassKind; /** A name that is the same from wherever the world is built (for its own random stream). */ key: string }
 /** How a district is dressed: its steel, what its masses are, how many cables, tubes and pipes it carries. */
 interface District { steel: string; mass: (readonly [MassKind, number])[]; cables: number; tubes: number; pipes: number }
 const DRESS: Record<DistrictKind, Omit<District, 'steel'>> = {
@@ -85,8 +86,6 @@ interface Inner {
   finish: Finish; hollows: Hollow[]; doors: Door[]; steps: { min: V3; max: V3; riser: Dir }[]; ribs: [V3, V3][];
   /** Stair flights: the middle of the low end's first stair tile, the way up, the width, the low floor's height. */
   ramps: { c: V3; d: Dir; w: number; z: number }[];
-  /** Air outside the mass that its lamps shine into (in front of each doorway): nothing is cut there. */
-  spill: { min: V3; max: V3 }[];
 }
 
 interface Ctx {
@@ -106,12 +105,54 @@ interface Ctx {
   top: number; bottom: number; deep: number; size: number;
   /** Places worth a look when reviewing (kind, a point to stand on, the way to face). */
   notes: Note[];
+  /** Names of a block and of a junction that are the same from wherever the plan was cut; where the plan's corner is in the whole world (tiles). */
+  bk: (id: number) => string; jk: (id: number) => string; origin: [number, number];
 }
 
-export function industrial(seed: number, params: WorldParams = {}): { map: MapOut; layout: Layout; notes: Note[] } {
-  const lay = makeLayout(seed, params);
+export function industrial(seed: number, params: WorldParams = {}): Made {
+  return { ...build(seed, makeLayout(seed, params)), offset: [0, 0], kept: () => true };
+}
+
+/** A world as built: its map, the plan it was built from, and how the two fit. */
+export interface Made {
+  map: MapOut; layout: Layout; notes: Note[];
+  /** Add this to a place worked out from the plan's tiles (tile × 128) to get the place in the map. */
+  offset: [number, number];
+  /** Is this tile of the plan in the part that was built? (A world of lots is planned a lot wider all round than it is built.) */
+  kept: (tx: number, ty: number) => boolean;
+}
+
+/**
+ * The world of lots (lots.ts): the lots i0..i0+n−1 by j0..j0+n−1 of the
+ * endless world of this seed, built as one map. It is planned as a square a
+ * lot wider all round (what stands across each avenue must be known), and
+ * only what belongs to the lots asked for is written. Places in the map are
+ * measured from the south-west corner of lot i0, j0.
+ */
+export function industrialLots(seed: number, i0: number, j0: number, n: number, params: WorldParams = {}): Made {
+  const lay = windowLayout(seed, i0 - 1, j0 - 1, n + 2, params);
+  const lo = LOT * TILE, hi = (n + 1) * LOT * TILE;
+  const inside = (p: number[]) => p[0] >= lo && p[0] < hi && p[1] >= lo && p[1] < hi;
+  const made = build(seed, lay, inside);
+  made.map.shift([-lo, -lo, 0]);
+  const notes = made.notes.filter((q) => inside(q.at)).map((q) => ({ ...q, at: [q.at[0] - lo, q.at[1] - lo, q.at[2]] as V3 }));
+  return { ...made, notes, offset: [-lo, -lo], kept: (tx, ty) => tx >= LOT && tx < (n + 1) * LOT && ty >= LOT && ty < (n + 1) * LOT };
+}
+
+/** The world as the game loads it for now: a square of lots of the endless world, with lot 0, 0 in the middle. (Next: lots made and dropped as the player moves.) */
+export const WORLD_LOTS = 5;
+export const industrialWorld = (seed: number, params: WorldParams = {}): Made => industrialLots(seed, -Math.floor(WORLD_LOTS / 2), -Math.floor(WORLD_LOTS / 2), WORLD_LOTS, params);
+
+/** Builds the geometry of a plan. `keep`: write only what this says yes to (by its middle). */
+function build(seed: number, lay: Layout, keep: ((p: V3) => boolean) | null = null): { map: MapOut; layout: Layout; notes: Note[] } {
   const m = new MapOut();
+  m.keep = keep;
   const root = new Rng(seed).fork('world');
+  // Names for the plan's parts that do not change with where the plan was cut from the world (a plan of the old
+  // whole-world kind has only numbers).
+  const [ox, oy] = lay.origin ?? [0, 0];
+  const bk = (id: number) => lay.blocks[id].key ?? String(id);
+  const jk = (id: number) => lay.junctions[id].key ?? String(id);
   const L = lay.params.levels, N = lay.params.size;
   const zOf = (level: number) => (level - Math.floor(L / 2)) * LEVEL;
   const centre = (x: number, y: number, level: number): V3 => [x * TILE + TILE / 2, y * TILE + TILE / 2, zOf(level)];
@@ -120,13 +161,13 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
 
   // ---- districts: the layout's, dressed. Steel is grey; one district in five has yellow.
   const dr = root.fork('districts');
-  const dress: District[] = lay.districts.map((d) => ({ steel: dr.chance(0.2) ? T.yellow : T.steel, ...DRESS[d.kind] }));
+  const dress: District[] = lay.districts.map((d) => ({ steel: (d.key ? root.fork(`dress${d.key}`) : dr).chance(0.2) ? T.yellow : T.steel, ...DRESS[d.kind] }));
   const districtAt = (x: number, y: number) => dress[lay.districtAt(x / TILE, y / TILE).id];
   /** The mass a tile is inside, or −1 (a street or a hall: open air). */
   const massOf = (x: number, y: number) => { const b = lay.tileBlock[y * N + x]; return b >= 0 && lay.blocks[b].kind === 'mass' ? b : -1; };
 
   const bottom = zOf(0), top = zOf(L - 1);
-  const ctx: Ctx = { m, lay, root, L, zOf, steel, masses: [], walkZ: new Map(), decks: new Map(), hollows: [], trestle: new Map(), districtAt, top, bottom, deep: bottom - DEPTH, size, notes: [] };
+  const ctx: Ctx = { m, lay, root, L, zOf, steel, masses: [], walkZ: new Map(), decks: new Map(), hollows: [], trestle: new Map(), districtAt, top, bottom, deep: bottom - DEPTH, size, notes: [], bk, jk, origin: [ox, oy] };
   const noteWalk = (x: number, y: number, z: number) => { const k = `${x},${y}`; const a = ctx.walkZ.get(k); if (a) a.push(z); else ctx.walkZ.set(k, [z]); };
   const noteDeck = (x: number, y: number, z: number, flat: boolean) => { const k = `${x},${y}`; const a = ctx.decks.get(k); if (a) a.push({ z, flat }); else ctx.decks.set(k, [{ z, flat }]); };
 
@@ -138,7 +179,7 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
   const plans = new Map<number, Plan>();
   for (const b of lay.blocks) {
     if (b.kind !== 'mass') continue;
-    const r = root.fork(`mass${b.id}`);
+    const r = root.fork(`mass${bk(b.id)}`);
     const x0 = b.rect.x0 * TILE + MARGIN, y0 = b.rect.y0 * TILE + MARGIN, x1 = b.rect.x1 * TILE - MARGIN, y1 = b.rect.y1 * TILE - MARGIN;
     const D = districtAt((x0 + x1) / 2, (y0 + y1) / 2);
     let kind = r.weighted(D.mass);
@@ -159,7 +200,7 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
   // ---- masses: all stand on something that runs down out of sight
   for (const [id, p] of plans) {
     const { r, D, kind, x0, y0, x1, y1, z0, z1 } = p;
-    ctx.masses.push({ x0, y0, x1, y1, z0, z1, kind });
+    ctx.masses.push({ x0, y0, x1, y1, z0, z1, kind, key: bk(id) });
     if (kind === 'chambers') chamberStack(ctx, r, x0, y0, x1, y1, z0, z1, D.steel);
     else if (kind === 'frame') frameTower(ctx, r, x0, y0, x1, y1, z1, D.steel);
     else {
@@ -169,7 +210,7 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
       const doors = cut?.doors ?? [];
       if (kind === 'machine') skeleton(ctx, r, x0, y0, x1, y1, z0, z1, 512, D.steel, doors);
       wallRuns(ctx, r, x0, y0, x1, y1, z0, z1, (kind === 'machine' ? 0.5 : 0.25) * D.pipes, doors);
-      if (cut) { fitOut(ctx, p, cut); m.fogVolume([x0, y0, bottom - 64], [x1, y1, z1], INSIDE_FOG); m.lampShade([x0, y0, z0], [x1, y1, z1]); m.air([...cut.hollows, ...cut.spill]); }
+      if (cut) { fitOut(ctx, p, cut); m.fogVolume([x0, y0, bottom - 64], [x1, y1, z1], INSIDE_FOG); m.lampShade([x0, y0, z0], [x1, y1, z1]); m.air(cut.hollows); }
     }
   }
 
@@ -205,7 +246,7 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
   }
   // Junction tiles. A few dead ends hold a small shelter; the rest just end.
   const er = root.fork('ends');
-  const ends: { c: V3; open: Dir }[] = [];
+  const ends: { c: V3; open: Dir; key: string }[] = [];
   for (const [k, mask] of lay.nodes) {
     const [j, l] = k.split(':').map(Number);
     const J = lay.junctions[j];
@@ -213,28 +254,65 @@ export function industrial(seed: number, params: WorldParams = {}): { map: MapOu
     noteWalk(J.x, J.y, c[2]);
     if (massOf(J.x, J.y) >= 0) continue;   // inside a mass: a room or a corner, cut with the rest
     const open = ([0, 1, 2, 3] as Dir[]).filter((dd) => mask & (1 << dd));
-    if (open.length === 1) ends.push({ c, open: open[0] });
+    if (open.length === 1) ends.push({ c, open: open[0], key: `${jk(j)}:${l}` });
     else walkTile(m, c, mask);
   }
   const S = lay.junctions[lay.start.junction];
   const sc = centre(S.x, S.y, lay.start.level);
-  // Shelters: far from the start and from each other.
-  const sheltered: V3[] = [];
-  for (const e of er.shuffle(ends)) {
-    const farEnough = Math.hypot(e.c[0] - sc[0], e.c[1] - sc[1]) > size * 0.2 && sheltered.every((q) => Math.hypot(e.c[0] - q[0], e.c[1] - q[1]) > size * 0.25);
-    if (sheltered.length < 4 && farEnough) { shelter(ctx, er, e.c, e.open); sheltered.push(e.c); }
-    else if (er.chance(0.4)) lookoutLanding(ctx, e.c, e.open);
-    else walkTile(m, e.c, 1 << e.open);
+  if (lay.origin) {
+    // A world of lots has no middle and no edge: each dead end draws for itself. A shelter is rare.
+    for (const e of ends) {
+      const r = root.fork(`end${e.key}`);
+      const what = r.weighted([['shelter', 0.05], ['landing', 0.38], ['plain', 0.57]] as const);
+      if (what === 'shelter') shelter(ctx, r, e.c, e.open);
+      else if (what === 'landing') lookoutLanding(ctx, e.c, e.open);
+      else walkTile(m, e.c, 1 << e.open);
+    }
+  } else {
+    // Shelters: far from the start and from each other.
+    const sheltered: V3[] = [];
+    for (const e of er.shuffle(ends)) {
+      const farEnough = Math.hypot(e.c[0] - sc[0], e.c[1] - sc[1]) > size * 0.2 && sheltered.every((q) => Math.hypot(e.c[0] - q[0], e.c[1] - q[1]) > size * 0.25);
+      if (sheltered.length < 4 && farEnough) { shelter(ctx, er, e.c, e.open); sheltered.push(e.c); }
+      else if (er.chance(0.4)) lookoutLanding(ctx, e.c, e.open);
+      else walkTile(m, e.c, 1 << e.open);
+    }
   }
 
-  // ---- what carries the bridges over the halls; then the streets: the frames that carry the catwalks and the
-  // tube lines, a few cables, boxes of machinery from wall to wall
+  // ---- what carries the bridges over the halls; what stands in the halls; then the streets. Each street first
+  // gets its box of machinery (if it has one), so that every street's tubes and frames, and the wandering tubes,
+  // see every box whatever order the streets come in; then its frames, tube line and cables.
   trestles(ctx);
-  for (const s of lay.streets) street(ctx, root.fork(`street${s.id}`), s);
+  for (const b of lay.blocks) if (b.kind === 'hall') hall(ctx, root.fork(`hall${bk(b.id)}`), b);
+  // The open air is air too, at every height: each street and each hall, and the strip every mass keeps clear in
+  // front of each of its faces. A lamp inside a mass shines out of its doorway into the street, onto the faces
+  // across it, and in at a doorway there (lightGridCore.ts). A doorway's porch stands in that strip, and its sides
+  // must stop the light: so the strip is left out for a little way each side of every doorway.
+  const AIR_TOP = top + 6000;
+  for (const s of lay.streets) m.air([{ min: [s.rect.x0 * TILE, s.rect.y0 * TILE, ctx.deep], max: [s.rect.x1 * TILE, s.rect.y1 * TILE, AIR_TOP] }]);
+  for (const b of lay.blocks) if (b.kind === 'hall') m.air([{ min: [b.rect.x0 * TILE, b.rect.y0 * TILE, ctx.deep], max: [b.rect.x1 * TILE, b.rect.y1 * TILE, AIR_TOP] }]);
+  for (const [id, p] of plans) {
+    const R = lay.blocks[id].rect, bx0 = R.x0 * TILE, by0 = R.y0 * TILE, bx1 = R.x1 * TILE, by1 = R.y1 * TILE;
+    if (p.kind === 'frame') { m.air([{ min: [bx0, by0, ctx.deep], max: [bx1, by1, AIR_TOP] }]); continue; }   // open steel: air all through
+    const strips: { min: V3; max: V3 }[] = [];
+    for (const side of [0, 1, 2, 3] as Dir[]) {
+      const alongY = side % 2 === 0;   // an east or west face runs along y
+      const from = alongY ? by0 : bx0, to = alongY ? by1 : bx1;
+      const porches = (inner.get(id)?.doors ?? []).filter((d) => d.side === side && !d.slit).map((d) => [d.at - d.w / 2 - 20, d.at + d.w / 2 + 20]).sort((a, b) => a[0] - b[0]);
+      let at = from;
+      for (const [a, b] of [...porches, [to, to]]) {
+        if (a - at >= 16) strips.push(alongY ? { min: [side === 0 ? p.x1 : bx0, at, ctx.deep], max: [side === 0 ? bx1 : p.x0, a, AIR_TOP] } : { min: [at, side === 1 ? p.y1 : by0, ctx.deep], max: [a, side === 1 ? by1 : p.y0, AIR_TOP] });
+        at = Math.max(at, b);
+      }
+    }
+    m.air(strips);
+  }
+  const sr = (s: Street) => root.fork(`street${s.key ?? s.id}`);
+  for (const s of lay.streets) streetBox(ctx, sr(s).fork('box'), s);
+  for (const s of lay.streets) street(ctx, sr(s), s);
 
-  // ---- tubes that leave one wall and arrive in another; what stands in the halls
+  // ---- tubes that leave one wall and arrive in another
   wanderingTubes(ctx, root.fork('tubes'));
-  for (const b of lay.blocks) if (b.kind === 'hall') hall(ctx, root.fork(`hall${b.id}`), b);
 
   m.start([sc[0], sc[1], sc[2] + 2], 0, 0);
   return { map: m, layout: lay, notes: ctx.notes };
@@ -301,7 +379,7 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
   const out = new Map<number, Inner>();
   const get = (blk: number): Inner => {
     let v = out.get(blk);
-    if (!v) { v = { finish: root.fork(`finish${blk}`).pick(FINISH[kindOf(blk)]), hollows: [], doors: [], steps: [], ribs: [], ramps: [], spill: [] }; out.set(blk, v); }
+    if (!v) { v = { finish: root.fork(`finish${ctx.bk(blk)}`).pick(FINISH[kindOf(blk)]), hollows: [], doors: [], steps: [], ribs: [], ramps: [] }; out.set(blk, v); }
     return v;
   };
   const cut = (blk: number, box: [V3, V3]) => { const v = get(blk); v.hollows.push({ min: box[0], max: box[1], finish: v.finish }); ctx.hollows.push({ min: box[0], max: box[1] }); };
@@ -316,7 +394,7 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
     const k = `${blk}:${axis}:${fixed}`;
     let p = profiles.get(k);
     if (!p) {
-      const r = root.fork(`tunnel${k}`);
+      const r = root.fork(`tunnel${ctx.bk(blk)}:${axis}:${fixed + ctx.origin[axis === 0 ? 1 : 0]}`);
       const [w, h] = r.weighted([[[96, 120], 2], [[96, 160], 2], [[104, 136], 3], [[112, 128], 3], [[128, 128], 2], [[128, 200], 2], [[96, 232], 1.5], [[160, 112], 1.5], [[144, 144], 1]] as const);
       p = { w, h, ribs: r.weighted([[0, 5], [256, 3], [384, 2]] as const), lamps: r.weighted([[384, 5], [640, 3], [1152, 1.2]] as const), lamp: r.pick([LAMP.warm, LAMP.warm, LAMP.white, LAMP.cool]) };
       profiles.set(k, p);
@@ -326,26 +404,6 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
   /** A doorway in a mass's face is never wider or taller than this, whatever the corridor behind it. */
   const DOOR_W = 128, DOOR_H = 168, NECK = 96;
   const dirs: Dir[] = [0, 1, 2, 3];
-  /**
-   * The air a doorway's light spills into: straight out from the door (in
-   * tile tx, ty, facing f) as far as the street is open, three tiles at most,
-   * and a tile to each side where that is open all the way. Lamps inside
-   * shine through the door into it (lightGridCore.ts).
-   */
-  const spill = (blk: number, tx: number, ty: number, f: Dir, z: number, dh: number): void => {
-    const free = (x: number, y: number) => x >= 0 && y >= 0 && x < N && y < N && blockOf(x, y) < 0;
-    let depth = 0;
-    while (depth < 3 && free(tx + DX[f] * (depth + 1), ty + DY[f] * (depth + 1))) depth++;
-    if (!depth) return;
-    const lx = -DY[f], ly = DX[f];
-    // (Where a mass stands to the side, the air still reaches its face: the margin every mass keeps.)
-    const wide = [1, -1].map((side) => { for (let k = 1; k <= depth; k++) if (!free(tx + DX[f] * k + lx * side, ty + DY[f] * k + ly * side)) return MARGIN; return TILE; });
-    // (It ends at the far tiles' edge, not on the face of the mass across the street: in that last strip stand the
-    // porches of that mass's own doors, and their sides must not let this light in.)
-    const b = slab([tx * TILE + TILE / 2, ty * TILE + TILE / 2, 0], f, TILE / 2, TILE / 2 + depth * TILE, -(TILE / 2 + wide[1]), TILE / 2 + wide[0], z - 48, z + dh + 96);
-    get(blk).spill.push({ min: b[0], max: b[1] });
-  };
-
   // ---- shafts: at some junctions the mass is hollow from far below to well above every level, and the catwalks
   // cross it in the open, one over the other, hung from beams that span it wall to wall
   const shafts = new Map<number, Box>();        // by junction
@@ -364,7 +422,7 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
   for (const J of lay.junctions) {
     const blk = blockOf(J.x, J.y), lv = levelsOf.get(J.id);
     if (blk < 0 || !lv) continue;
-    const r = root.fork(`shaft${J.id}`);
+    const r = root.fork(`shaft${ctx.jk(J.id)}`);
     if (!r.chance(lv.length >= 2 ? 0.5 : 0.15)) continue;
     // How many tiles it reaches each way from the junction. It keeps two tiles of wall to the mass's faces, takes in
     // no other junction, no lane that is not this junction's own, and no stairs; nor comes within a tile of any.
@@ -480,13 +538,11 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
       if (where(i - 1) < 0) {
         cut(blk, along(c, d, u0, u0 + NECK, dw, z, z + dh));
         get(blk).doors.push({ side: opposite(d), at, z, w: dw, h: dh, stub: i, balcony: lay.nodes.get(`${ends[0].id}:${endLevel[0]}`) === (1 << d) });
-        spill(blk, seq[i][0], seq[i][1], opposite(d), z, dh);
         u0 += NECK;
       }
       if (where(e + 1) < 0) {
         cut(blk, along(c, d, u1 - NECK, u1, dw, z, z + dh));
         get(blk).doors.push({ side: d, at, z, w: dw, h: dh, stub: seq.length - 1 - e, balcony: lay.nodes.get(`${ends[1].id}:${endLevel[1]}`) === (1 << opposite(d)) });
-        spill(blk, seq[e][0], seq[e][1], d, z, dh);
         u1 -= NECK;
       }
       cut(blk, along(c, d, u0, u1, p.w, z, z + p.h));
@@ -537,7 +593,7 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
     if (shafts.has(j)) continue;   // the junction hangs in a shaft
     open.forEach((dd, n) => cut(blk, along(c, dd, 0, TILE / 2, profs[n].w, z, z + profs[n].h)));
     const W = Math.max(...profs.map((p) => p.w)), H = Math.max(...profs.map((p) => p.h));
-    const r = root.fork(`node${k}`);
+    const r = root.fork(`node${ctx.jk(j)}:${l}`);
     const straight = open.length === 2 && opposite(open[0]) === open[1];
     const roomy = open.length === 1 ? 1 : open.length >= 3 ? 0.75 : straight ? 0.25 : 0.45;
     if (!r.chance(roomy)) {
@@ -595,11 +651,6 @@ function interiors(ctx: Ctx, kindOf: (blk: number) => 'machine' | 'pier'): Map<n
       const sw = Math.min(192, 2 * Math.min(ext[(slit + 1) % 4], ext[(slit + 3) % 4]) - 32);
       cut(blk, along(c, slit, ext[slit] - 1, ext[slit] + 17, sw, z + 46, z + 78));
       get(blk).doors.push({ side: slit, at: slit % 2 === 0 ? c[1] : c[0], z: z + 46, w: sw, h: 32, slit: true, stub: 0, balcony: false });
-      // Light from inside goes out through it: across the open strip in front of the face, then into the street.
-      const toFace = slit < 2 ? face[slit] - c[slit % 2] : c[slit % 2] - face[slit];
-      const strip = along(c, slit, toFace, toFace + MARGIN, Math.max(sw, TILE), z - 2, z + 174);
-      get(blk).spill.push({ min: strip[0], max: strip[1] });
-      spill(blk, J.x + DX[slit], J.y + DY[slit], slit, z + 46, 32);
     }
   }
   return out;
@@ -927,7 +978,19 @@ function street(ctx: Ctx, r: Rng, s: Street): void {
     }
   }
 
-  // ---- a box of machinery from wall to wall, above every catwalk under it: the street closes over for a stretch
+}
+
+/**
+ * A box of machinery from wall to wall over a street, above every catwalk
+ * under it: the street closes over for a stretch. (Made for every street
+ * before any street's frames and tubes, which may fix to it.)
+ */
+function streetBox(ctx: Ctx, r: Rng, s: Street): void {
+  const { m, zOf, L } = ctx;
+  const a0 = s.axis === 0 ? s.rect.x0 : s.rect.y0, a1 = s.axis === 0 ? s.rect.x1 : s.rect.y1;
+  const e0 = (s.axis === 0 ? s.rect.y0 : s.rect.x0), e1 = (s.axis === 0 ? s.rect.y1 : s.rect.x1);
+  const pt = (alongU: number, acrossU: number, z: number): V3 => (s.axis === 0 ? [alongU, acrossU, z] : [acrossU, alongU, z]);
+  const WALLS: MassKind[] = ['machine', 'pier', 'chambers'];
   const len = (a1 - a0) * TILE;
   if (len >= 8 * TILE && r.chance(0.3)) {
     const n = r.int(2, 6), i = r.int(a0 + 1, a1 - n - 1);
@@ -942,14 +1005,14 @@ function street(ctx: Ctx, r: Rng, s: Street): void {
     // It needs a wall to sit in at both ends, along its whole length, at this height; and no doorway or slit behind it.
     let held = true;
     for (let t = i; t < i + n && held; t++) {
-      for (const zz of [z + 8, z + h - 8]) held &&= inMass(ctx, pt(t * TILE + 64, w0 - 40, zz)) && inMass(ctx, pt(t * TILE + 64, w1 + 40, zz));
+      for (const zz of [z + 8, z + h - 8]) held &&= inMass(ctx, pt(t * TILE + 64, w0 - 40, zz), WALLS) && inMass(ctx, pt(t * TILE + 64, w1 + 40, zz), WALLS);
       for (let zz = z + 8; zz < z + h && held; zz += 64) held &&= !inHollow(ctx, pt(t * TILE + 64, w0 + 16, zz), 70) && !inHollow(ctx, pt(t * TILE + 64, w1 - 16, zz), 70);
     }
     if (held) {
       const p = pt(i * TILE, w0, z), q = pt((i + n) * TILE, w1, z + h);
       const lo: V3 = [Math.min(p[0], q[0]), Math.min(p[1], q[1]), z], hi: V3 = [Math.max(p[0], q[0]), Math.max(p[1], q[1]), z + h];
       m.box(lo, hi, { tex: r.pick([...T.dark, ...T.panels]), lightmapscale: 64 });
-      ctx.masses.push({ x0: lo[0], y0: lo[1], x1: hi[0], y1: hi[1], z0: z, z1: z + h, kind: 'bridge' });
+      ctx.masses.push({ x0: lo[0], y0: lo[1], x1: hi[0], y1: hi[1], z0: z, z1: z + h, kind: 'bridge', key: `box${s.key ?? s.id}` });
     }
   }
 }
@@ -976,7 +1039,9 @@ function hitsWalk(ctx: Ctx, p: V3, radius: number): boolean {
 /** The nearest solid wall beside p (straight along x or y, at p's height): how far, and which way. */
 function nearestWall(ctx: Ctx, p: V3): { dist: number; dir: [number, number] } | null {
   let best: { dist: number; dir: [number, number] } | null = null;
-  const take = (dist: number, dir: [number, number]) => { if (dist >= 0 && (!best || dist < best.dist)) best = { dist, dir }; };
+  // (Two walls as near as each other: the one to the east wins, then west, north, south; never the one that came first.)
+  const rank = (d: [number, number]) => (d[0] > 0 ? 0 : d[0] < 0 ? 1 : d[1] > 0 ? 2 : 3);
+  const take = (dist: number, dir: [number, number]) => { if (dist >= 0 && (!best || dist < best.dist || (dist === best.dist && rank(dir) < rank(best.dir)))) best = { dist, dir }; };
   for (const b of ctx.masses) {
     if (!SOLID.includes(b.kind) || p[2] < b.z0 + 8 || p[2] > b.z1 - 8) continue;
     if (p[1] > b.y0 + 8 && p[1] < b.y1 - 8) { take(b.x0 - p[0], [1, 0]); take(p[0] - b.x1, [-1, 0]); }
@@ -992,7 +1057,7 @@ function nearestWall(ctx: Ctx, p: V3): { dist: number; dir: [number, number] } |
  * to the nearest wall along its way. None passes through a corridor or a
  * room, in the open or inside a wall.
  */
-function wanderingTubes(ctx: Ctx, r: Rng): void {
+function wanderingTubes(ctx: Ctx, all: Rng): void {
   const { m, steel } = ctx;
   const AX: V3[] = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
   const snap = (v: number) => Math.round(v / 128) * 128;
@@ -1000,12 +1065,18 @@ function wanderingTubes(ctx: Ctx, r: Rng): void {
   const blocked = (q: V3) => hitsWalk(ctx, q, 70) || inHollow(ctx, q, 64);
   /** Is the straight run from p for `len` along d free of walks and of anything cut into the masses? */
   const freeRun = (p: V3, d: V3, len: number) => { for (let u = 0; u <= len; u += 64) if (blocked([p[0] + d[0] * u, p[1] + d[1] * u, p[2] + d[2] * u])) return false; return true; };
+  // No tube goes further than this from where it leaves its wall (each way): in a world built lot by lot, all of a
+  // tube must lie within what any lot that holds a piece of it knows of its neighbours.
+  const FAR = 12 * TILE;
   for (const b of [...ctx.masses]) {
     if (b.kind !== 'machine' && b.kind !== 'pier' && b.kind !== 'chambers') continue;
+    // Each mass has its own stream, and each try of each mass: whether one tube is built never changes another
+    // (so a mass's tubes are the same whatever else is built with it, and from wherever the world is built).
+    const mass = all.fork(b.key);
     const D = ctx.districtAt((b.x0 + b.x1) / 2, (b.y0 + b.y1) / 2);
-    const n = Math.round(r.range(1, 5) * D.tubes);
-    let built = 0;
-    for (let t = 0; t < n * 8 && built < n; t++) {
+    const tries = Math.round(mass.range(1, 5) * D.tubes * 3);
+    for (let t = 0; t < tries; t++) {
+      const r = mass.fork(t);
       const side = r.int(0, 3);
       let d: V3 = AX[side];
       const z = snap(r.range(Math.max(b.z0 + 200, ctx.bottom - 700), Math.min(b.z1 - 200, ctx.top + 900)));
@@ -1018,7 +1089,7 @@ function wanderingTubes(ctx: Ctx, r: Rng): void {
         let run = 0;
         for (let u = 64; u <= want; u += 64) {
           const q: V3 = [cur[0] + d[0] * u, cur[1] + d[1] * u, cur[2] + d[2] * u];
-          if (blocked(q) || q[0] < 0 || q[1] < 0 || q[0] > ctx.size || q[1] > ctx.size) break;
+          if (blocked(q) || q[0] < 0 || q[1] < 0 || q[0] > ctx.size || q[1] > ctx.size || Math.abs(q[0] - p0[0]) > FAR || Math.abs(q[1] - p0[1]) > FAR) break;
           if (u % 128 === 0) run = u;
           if (leg > 0 && u % 128 === 0 && inMass(ctx, q, SOLID)) {
             if (!freeRun(q, d, 384)) break;   // something is cut into the wall behind here: no way in
@@ -1053,7 +1124,6 @@ function wanderingTubes(ctx: Ctx, r: Rng): void {
         }
       }
       if (!held) continue;
-      built++;
       tubePath(m, pts);
       for (const { p, w } of struts) {
         const q: V3 = [p[0] + w.dir[0] * (w.dist + 136), p[1] + w.dir[1] * (w.dist + 136), p[2]];
@@ -1144,7 +1214,7 @@ function hall(ctx: Ctx, r: Rng, b: Block): void {
   const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
   const D = ctx.districtAt(cx, cy);
   frameTower(ctx, r, cx - fx / 2, cy - fy / 2, cx + fx / 2, cy + fy / 2, ctx.top + r.range(600, 3000), D.steel);
-  ctx.masses.push({ x0: cx - fx / 2, y0: cy - fy / 2, x1: cx + fx / 2, y1: cy + fy / 2, z0: ctx.deep, z1: ctx.top + 600, kind: 'frame' });
+  ctx.masses.push({ x0: cx - fx / 2, y0: cy - fy / 2, x1: cx + fx / 2, y1: cy + fy / 2, z0: ctx.deep, z1: ctx.top + 600, kind: 'frame', key: `hall${b.key ?? b.id}` });
 }
 
 // ---------------------------------------------------------------- shelters

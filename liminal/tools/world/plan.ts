@@ -9,10 +9,14 @@
  */
 import { writeFileSync } from 'node:fs';
 import { makeLayout } from '../../src/world/industrial/layout';
+import { windowLayout } from '../../src/world/industrial/lots';
 
-const args = process.argv.slice(2).filter((a) => a !== '--');
-const seed = Number(args[0] ?? 1), out = args[1] ?? `maps/iw/plan_${seed}.ppm`;
-const lay = makeLayout(seed);
+// With --lots n: the plan of a square of n lots a side, round lot 0, 0 (the world of lots, lots.ts).
+const all = process.argv.slice(2).filter((a) => a !== '--');
+const lots = all.includes('--lots') ? Number(all[all.indexOf('--lots') + 1]) : 0;
+const args = all.filter((a, k) => a !== '--lots' && all[k - 1] !== '--lots');
+const seed = Number(args[0] ?? 1), out = args[1] ?? `maps/iw/plan_${seed}${lots ? '_lots' : ''}.ppm`;
+const lay = lots ? windowLayout(seed, -Math.floor(lots / 2), -Math.floor(lots / 2), lots) : makeLayout(seed);
 const N = lay.params.size, S = 6;
 const img = new Uint8Array(N * S * N * S * 3);
 const put = (x: number, y: number, c: number[]) => { const yy = N * S - 1 - y; if (x < 0 || yy < 0 || x >= N * S || yy >= N * S) return; img.set(c, (yy * N * S + x) * 3); };

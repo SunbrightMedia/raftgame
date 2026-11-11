@@ -28,7 +28,7 @@ import type { Dir } from '../kit/aperture';
  * Pure data, fixed by the seed: the same seed is always the same world.
  */
 export interface Rect { x0: number; y0: number; x1: number; y1: number }   // tiles, x1/y1 exclusive
-export interface Block { id: number; rect: Rect; kind: 'mass' | 'hall'; /** A hall with a bridge across it. */ bridged?: boolean }
+export interface Block { id: number; rect: Rect; kind: 'mass' | 'hall'; /** A hall with a bridge across it. */ bridged?: boolean; /** A name that is the same wherever the plan is made from (a world of lots: its place in the whole world); else its number. */ key?: string }
 export type DistrictKind = 'canyons' | 'alleys' | 'yards' | 'works' | 'racks';
 /** The grain of one kind of district. */
 export interface Grain {
@@ -41,7 +41,7 @@ export interface Grain {
   /** Share of masses cut by tunnels, and the most tunnels one mass can have. */
   tunnels: number; tunnelMax: number;
 }
-export interface District extends Grain { id: number; kind: DistrictKind; /** Its middle, in tiles. */ x: number; y: number }
+export interface District extends Grain { id: number; kind: DistrictKind; /** Its middle, in tiles. */ x: number; y: number; /** In a world of lots: the lot's place, a name that is the same from wherever the plan is made. */ key?: string }
 /**
  * canyons: big masses, middling streets, some tunnels (the world as it was).
  * alleys: small masses and one-tile streets: a tight maze of catwalks in the open.
@@ -56,8 +56,8 @@ export const GRAIN: Record<DistrictKind, Grain> = {
   works: { maxBlock: 36, minBlock: 20, streets: [[1, 3], [3, 3]], halls: 0.04, tunnels: 1, tunnelMax: 6 },
   racks: { maxBlock: 22, minBlock: 10, streets: [[3, 4], [5, 1]], halls: 0.15, tunnels: 0.3, tunnelMax: 2 },
 };
-export interface Street { id: number; rect: Rect; /** 0 = runs along x, 1 = along y. */ axis: 0 | 1; /** The lane's fixed coordinate (y for axis 0, x for axis 1). */ lane: number; width: number }
-export interface Junction { id: number; x: number; y: number }
+export interface Street { id: number; rect: Rect; /** 0 = runs along x, 1 = along y. */ axis: 0 | 1; /** The lane's fixed coordinate (y for axis 0, x for axis 1). */ lane: number; width: number; key?: string }
+export interface Junction { id: number; x: number; y: number; key?: string }
 /** A run of lane tiles between two junctions (a's and b's tiles not included). */
 export interface Segment {
   id: number; a: number; b: number; /** Direction from a to b. */ dir: Dir; tiles: [number, number][];
@@ -115,6 +115,160 @@ export interface Layout {
   districts: District[];
   /** The district a tile is in. */
   districtAt: (x: number, y: number) => District;
+  /** A plan cut from a world of lots (lots.ts): where its south-west corner is in the whole world, in tiles. */
+  origin?: [number, number];
+}
+
+const STEPX = [1, 0, -1, 0], STEPY = [0, 1, 0, -1];
+
+/**
+ * Tunnels through the masses and bridges over the halls, written into the
+ * lane map of an N × N plan (`lane`: 1 where a catwalk can run; `street`: the
+ * street a tile is in, or −1). Each block has its own random stream, and a
+ * block's tunnels depend on nothing but itself and the streets round it, so
+ * the same block gets the same tunnels wherever the plan is made from.
+ */
+export function tunnelsAndBridges(o: { N: number; lane: Uint8Array; street: Int16Array; blocks: Block[]; tunnels: (b: Block) => Rng; bridges: (b: Block) => Rng; grainOf: (b: Block) => Grain; bridgeChance: number }): void {
+  const { N, lane, street, blocks } = o;
+  // ---- 2b. tunnels through the masses
+  // A tunnel is a path of tiles: from a street's lane, across the street, into
+  // the mass and through it. It may only touch other lanes where it joins or
+  // crosses them squarely; everywhere else it keeps a tile's distance.
+  const lanePath = (tiles: number[]): boolean => {
+    const own = new Set(tiles);
+    if (own.size !== tiles.length) return false;
+    const contact = tiles.map((p) => lane[p] === 1);
+    for (let i = 0; i < tiles.length; i++) {
+      const p = tiles[i], px = p % N, py = (p - px) / N;
+      if (contact[i]) {
+        if (i > 0 && contact[i - 1]) return false;                                              // never along a lane
+        if (i > 0 && i < tiles.length - 1 && tiles[i - 1] + tiles[i + 1] !== 2 * p) return false;   // cross it straight
+        continue;
+      }
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const qx = px + dx, qy = py + dy;
+        if ((!dx && !dy) || qx < 0 || qy < 0 || qx >= N || qy >= N) continue;
+        const q = qy * N + qx;
+        if (!lane[q] || own.has(q)) continue;
+        // Another lane this close is only all right if it is the one this path joins or crosses at the next tile.
+        let joined = false;
+        for (const n of [i - 1, i + 1]) {
+          if (n < 0 || n >= tiles.length || !contact[n]) continue;
+          const c = tiles[n], cx = c % N, cy = (c - cx) / N;
+          if (Math.abs(cx - qx) + Math.abs(cy - qy) === 1) joined = true;
+        }
+        if (!joined) return false;
+      }
+    }
+    for (const p of tiles) lane[p] = 1;
+    return true;
+  };
+  /** From a block's face (side d, at fixed coordinate c) out across the street to its lane: the tiles, lane last. Null if there is no lane to reach. */
+  const mouth = (b: Block, d: Dir, c: number): number[] | null => {
+    let x = d === 0 ? b.rect.x1 : d === 2 ? b.rect.x0 - 1 : c, y = d === 1 ? b.rect.y1 : d === 3 ? b.rect.y0 - 1 : c;
+    const out: number[] = [];
+    while (x >= 0 && y >= 0 && x < N && y < N && street[y * N + x] >= 0) {
+      out.push(y * N + x);
+      if (lane[y * N + x]) return out;
+      x += STEPX[d]; y += STEPY[d];
+    }
+    return null;
+  };
+  /** Tiles of a straight run inside a block, from (x, y) for n tiles towards d. */
+  const runTiles = (x: number, y: number, d: Dir, n: number): number[] => Array.from({ length: n }, (_, i) => (y + STEPY[d] * i) * N + x + STEPX[d] * i);
+  for (const b of blocks) {
+    if (b.kind !== 'mass') continue;
+    const r = o.tunnels(b);
+    const D = o.grainOf(b);
+    if (!r.chance(D.tunnels)) continue;
+    const { x0, y0, x1, y1 } = b.rect;
+    const w = x1 - x0, h = y1 - y0;
+    const want = r.int(D.tunnelMax > 3 ? 2 : 1, Math.max(1, Math.min(D.tunnelMax, Math.floor(Math.max(w, h) / (D.tunnelMax > 3 ? 5 : 7)))));
+    const rows: number[] = [], cols: number[] = [];   // rows (fixed y) and columns (fixed x) already taken in this block
+    const clear = (taken: number[], v: number) => taken.every((t) => Math.abs(t - v) >= 4);
+    // A row or column that keeps two tiles of wall to the block's sides and four tiles to its own kind.
+    const pickRow = () => { const v = r.int(y0 + 2, y1 - 3); return h >= 5 && clear(rows, v) ? v : null; };
+    const pickCol = () => { const v = r.int(x0 + 2, x1 - 3); return w >= 5 && clear(cols, v) ? v : null; };
+    let made = 0;
+    for (let t = 0; t < want * 8 && made < want; t++) {
+      const shape = r.weighted([['straight', 5], ['bend', 3], ['dogleg', 2]] as const);
+      let path: number[] | null = null;
+      const usedRows: number[] = [], usedCols: number[] = [];
+      if (shape === 'straight') {
+        const alongX = r.chance(w / (w + h));
+        const c = alongX ? pickRow() : pickCol();
+        if (c === null) continue;
+        const [dA, dB]: [Dir, Dir] = alongX ? [2, 0] : [3, 1];
+        const len = alongX ? w : h;
+        let mA = mouth(b, dA, c), mB = mouth(b, dB, c);
+        if (!mA && !mB) continue;
+        // Some tunnels stop inside the mass, in a room, even when they could go through.
+        const through = mA !== null && mB !== null;
+        if (through && r.chance(0.22)) { if (r.chance(0.5)) mA = null; else mB = null; }
+        const inside = alongX ? runTiles(x0, c, 0, len) : runTiles(c, y0, 1, len);
+        if (mA && mB) path = [...mA.reverse(), ...inside, ...mB];
+        else {
+          // At least three tiles in. Most stop well short of the far side; some go on to its last tile but one (a look-out).
+          const deep = through && r.chance(0.45) ? len - 1 : r.int(3, Math.max(3, len - 3));   // a look-out needs a street to look at
+          path = mA ? [...mA.reverse(), ...inside.slice(0, deep)] : [...mB!.reverse(), ...inside.reverse().slice(0, deep)];
+        }
+        (alongX ? usedRows : usedCols).push(c);
+      } else if (shape === 'bend') {
+        // In by a row from the west or east side, out by a column to the south or north side.
+        const row = pickRow(), col = pickCol();
+        if (row === null || col === null) continue;
+        const dA: Dir = r.chance(0.5) ? 2 : 0, dB: Dir = r.chance(0.5) ? 3 : 1;
+        const mA = mouth(b, dA, row), mB = mouth(b, dB, col);
+        if (!mA || !mB) continue;
+        const legA = dA === 2 ? runTiles(x0, row, 0, col - x0) : runTiles(x1 - 1, row, 2, x1 - 1 - col);       // up to the corner, not on it
+        const legB = dB === 3 ? runTiles(col, row, 3, row - y0 + 1) : runTiles(col, row, 1, y1 - row);           // from the corner out
+        path = [...mA.reverse(), ...legA, ...legB, ...mB];
+        usedRows.push(row); usedCols.push(col);
+      } else {
+        // Through, with a side-step in the middle.
+        const alongX = r.chance(w / (w + h));
+        if (alongX) {
+          const r1 = pickRow(), r2 = pickRow(), col = pickCol();
+          if (r1 === null || r2 === null || col === null || Math.abs(r1 - r2) < 4) continue;
+          const mA = mouth(b, 2, r1), mB = mouth(b, 0, r2);
+          if (!mA || !mB) continue;
+          const step: Dir = r2 > r1 ? 1 : 3;
+          path = [...mA.reverse(), ...runTiles(x0, r1, 0, col - x0), ...runTiles(col, r1, step, Math.abs(r2 - r1)), ...runTiles(col, r2, 0, x1 - col), ...mB];
+          usedRows.push(r1, r2); usedCols.push(col);
+        } else {
+          const c1 = pickCol(), c2 = pickCol(), row = pickRow();
+          if (c1 === null || c2 === null || row === null || Math.abs(c1 - c2) < 4) continue;
+          const mA = mouth(b, 3, c1), mB = mouth(b, 1, c2);
+          if (!mA || !mB) continue;
+          const step: Dir = c2 > c1 ? 0 : 2;
+          path = [...mA.reverse(), ...runTiles(c1, y0, 1, row - y0), ...runTiles(c1, row, step, Math.abs(c2 - c1)), ...runTiles(c2, row, 1, y1 - row), ...mB];
+          usedCols.push(c1, c2); usedRows.push(row);
+        }
+      }
+      if (path && lanePath(path)) { made++; rows.push(...usedRows); cols.push(...usedCols); }
+    }
+  }
+
+  // ---- 2c. bridges across the halls: a lane straight over, from the street on one side to the street on the other
+  for (const b of blocks) {
+    if (b.kind !== 'hall') continue;
+    const r = o.bridges(b);
+    if (!r.chance(o.bridgeChance)) continue;
+    const { x0, y0, x1, y1 } = b.rect;
+    const w = x1 - x0, h = y1 - y0;
+    const want = r.chance(0.35) ? 2 : 1;
+    let made = 0;
+    let lastAlongX: boolean | null = null;
+    for (let t = 0; t < 10 && made < want; t++) {
+      // The second bridge crosses the first.
+      const alongX: boolean = lastAlongX === null ? r.chance(w / (w + h)) : !lastAlongX;
+      const c = alongX ? r.int(y0 + 2, y1 - 3) : r.int(x0 + 2, x1 - 3);
+      const mA = mouth(b, alongX ? 2 : 3, c), mB = mouth(b, alongX ? 0 : 1, c);
+      if (!mA || !mB) continue;
+      const over = alongX ? runTiles(x0, c, 0, w) : runTiles(c, y0, 1, h);
+      if (lanePath([...mA.reverse(), ...over, ...mB])) { made++; lastAlongX = alongX; b.bridged = true; }
+    }
+  }
 }
 
 export function makeLayout(seed: number, params: Partial<LayoutParams> = {}): Layout {
@@ -193,149 +347,7 @@ export function makeLayout(seed: number, params: Partial<LayoutParams> = {}): La
     if (s.axis === 1) { run(s.lane, s.rect.y0 - 1, 0, -1); run(s.lane, s.rect.y1, 0, 1); }
     else { run(s.rect.x0 - 1, s.lane, -1, 0); run(s.rect.x1, s.lane, 1, 0); }
   }
-  const STEPX = [1, 0, -1, 0], STEPY = [0, 1, 0, -1];
-
-  // ---- 2b. tunnels through the masses
-  // A tunnel is a path of tiles: from a street's lane, across the street, into
-  // the mass and through it. It may only touch other lanes where it joins or
-  // crosses them squarely; everywhere else it keeps a tile's distance.
-  const lanePath = (tiles: number[]): boolean => {
-    const own = new Set(tiles);
-    if (own.size !== tiles.length) return false;
-    const contact = tiles.map((p) => lane[p] === 1);
-    for (let i = 0; i < tiles.length; i++) {
-      const p = tiles[i], px = p % N, py = (p - px) / N;
-      if (contact[i]) {
-        if (i > 0 && contact[i - 1]) return false;                                              // never along a lane
-        if (i > 0 && i < tiles.length - 1 && tiles[i - 1] + tiles[i + 1] !== 2 * p) return false;   // cross it straight
-        continue;
-      }
-      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
-        const qx = px + dx, qy = py + dy;
-        if ((!dx && !dy) || qx < 0 || qy < 0 || qx >= N || qy >= N) continue;
-        const q = qy * N + qx;
-        if (!lane[q] || own.has(q)) continue;
-        // Another lane this close is only all right if it is the one this path joins or crosses at the next tile.
-        let joined = false;
-        for (const n of [i - 1, i + 1]) {
-          if (n < 0 || n >= tiles.length || !contact[n]) continue;
-          const c = tiles[n], cx = c % N, cy = (c - cx) / N;
-          if (Math.abs(cx - qx) + Math.abs(cy - qy) === 1) joined = true;
-        }
-        if (!joined) return false;
-      }
-    }
-    for (const p of tiles) lane[p] = 1;
-    return true;
-  };
-  /** From a block's face (side d, at fixed coordinate c) out across the street to its lane: the tiles, lane last. Null if there is no lane to reach. */
-  const mouth = (b: Block, d: Dir, c: number): number[] | null => {
-    let x = d === 0 ? b.rect.x1 : d === 2 ? b.rect.x0 - 1 : c, y = d === 1 ? b.rect.y1 : d === 3 ? b.rect.y0 - 1 : c;
-    const out: number[] = [];
-    while (x >= 0 && y >= 0 && x < N && y < N && street[y * N + x] >= 0) {
-      out.push(y * N + x);
-      if (lane[y * N + x]) return out;
-      x += STEPX[d]; y += STEPY[d];
-    }
-    return null;
-  };
-  /** Tiles of a straight run inside a block, from (x, y) for n tiles towards d. */
-  const runTiles = (x: number, y: number, d: Dir, n: number): number[] => Array.from({ length: n }, (_, i) => (y + STEPY[d] * i) * N + x + STEPX[d] * i);
-  const tn = root.fork('tunnels');
-  for (const b of blocks) {
-    if (b.kind !== 'mass') continue;
-    const r = tn.fork(b.id);
-    const D = districtOf(b);
-    if (!r.chance(D.tunnels)) continue;
-    const { x0, y0, x1, y1 } = b.rect;
-    const w = x1 - x0, h = y1 - y0;
-    const want = r.int(D.tunnelMax > 3 ? 2 : 1, Math.max(1, Math.min(D.tunnelMax, Math.floor(Math.max(w, h) / (D.tunnelMax > 3 ? 5 : 7)))));
-    const rows: number[] = [], cols: number[] = [];   // rows (fixed y) and columns (fixed x) already taken in this block
-    const clear = (taken: number[], v: number) => taken.every((t) => Math.abs(t - v) >= 4);
-    // A row or column that keeps two tiles of wall to the block's sides and four tiles to its own kind.
-    const pickRow = () => { const v = r.int(y0 + 2, y1 - 3); return h >= 5 && clear(rows, v) ? v : null; };
-    const pickCol = () => { const v = r.int(x0 + 2, x1 - 3); return w >= 5 && clear(cols, v) ? v : null; };
-    let made = 0;
-    for (let t = 0; t < want * 8 && made < want; t++) {
-      const shape = r.weighted([['straight', 5], ['bend', 3], ['dogleg', 2]] as const);
-      let path: number[] | null = null;
-      const usedRows: number[] = [], usedCols: number[] = [];
-      if (shape === 'straight') {
-        const alongX = r.chance(w / (w + h));
-        const c = alongX ? pickRow() : pickCol();
-        if (c === null) continue;
-        const [dA, dB]: [Dir, Dir] = alongX ? [2, 0] : [3, 1];
-        const len = alongX ? w : h;
-        let mA = mouth(b, dA, c), mB = mouth(b, dB, c);
-        if (!mA && !mB) continue;
-        // Some tunnels stop inside the mass, in a room, even when they could go through.
-        const through = mA !== null && mB !== null;
-        if (through && r.chance(0.22)) { if (r.chance(0.5)) mA = null; else mB = null; }
-        const inside = alongX ? runTiles(x0, c, 0, len) : runTiles(c, y0, 1, len);
-        if (mA && mB) path = [...mA.reverse(), ...inside, ...mB];
-        else {
-          // At least three tiles in. Most stop well short of the far side; some go on to its last tile but one (a look-out).
-          const deep = through && r.chance(0.45) ? len - 1 : r.int(3, Math.max(3, len - 3));   // a look-out needs a street to look at
-          path = mA ? [...mA.reverse(), ...inside.slice(0, deep)] : [...mB!.reverse(), ...inside.reverse().slice(0, deep)];
-        }
-        (alongX ? usedRows : usedCols).push(c);
-      } else if (shape === 'bend') {
-        // In by a row from the west or east side, out by a column to the south or north side.
-        const row = pickRow(), col = pickCol();
-        if (row === null || col === null) continue;
-        const dA: Dir = r.chance(0.5) ? 2 : 0, dB: Dir = r.chance(0.5) ? 3 : 1;
-        const mA = mouth(b, dA, row), mB = mouth(b, dB, col);
-        if (!mA || !mB) continue;
-        const legA = dA === 2 ? runTiles(x0, row, 0, col - x0) : runTiles(x1 - 1, row, 2, x1 - 1 - col);       // up to the corner, not on it
-        const legB = dB === 3 ? runTiles(col, row, 3, row - y0 + 1) : runTiles(col, row, 1, y1 - row);           // from the corner out
-        path = [...mA.reverse(), ...legA, ...legB, ...mB];
-        usedRows.push(row); usedCols.push(col);
-      } else {
-        // Through, with a side-step in the middle.
-        const alongX = r.chance(w / (w + h));
-        if (alongX) {
-          const r1 = pickRow(), r2 = pickRow(), col = pickCol();
-          if (r1 === null || r2 === null || col === null || Math.abs(r1 - r2) < 4) continue;
-          const mA = mouth(b, 2, r1), mB = mouth(b, 0, r2);
-          if (!mA || !mB) continue;
-          const step: Dir = r2 > r1 ? 1 : 3;
-          path = [...mA.reverse(), ...runTiles(x0, r1, 0, col - x0), ...runTiles(col, r1, step, Math.abs(r2 - r1)), ...runTiles(col, r2, 0, x1 - col), ...mB];
-          usedRows.push(r1, r2); usedCols.push(col);
-        } else {
-          const c1 = pickCol(), c2 = pickCol(), row = pickRow();
-          if (c1 === null || c2 === null || row === null || Math.abs(c1 - c2) < 4) continue;
-          const mA = mouth(b, 3, c1), mB = mouth(b, 1, c2);
-          if (!mA || !mB) continue;
-          const step: Dir = c2 > c1 ? 0 : 2;
-          path = [...mA.reverse(), ...runTiles(c1, y0, 1, row - y0), ...runTiles(c1, row, step, Math.abs(c2 - c1)), ...runTiles(c2, row, 1, y1 - row), ...mB];
-          usedCols.push(c1, c2); usedRows.push(row);
-        }
-      }
-      if (path && lanePath(path)) { made++; rows.push(...usedRows); cols.push(...usedCols); }
-    }
-  }
-
-  // ---- 2c. bridges across the halls: a lane straight over, from the street on one side to the street on the other
-  const br = root.fork('bridges');
-  for (const b of blocks) {
-    if (b.kind !== 'hall') continue;
-    const r = br.fork(b.id);
-    if (!r.chance(P.bridges)) continue;
-    const { x0, y0, x1, y1 } = b.rect;
-    const w = x1 - x0, h = y1 - y0;
-    const want = r.chance(0.35) ? 2 : 1;
-    let made = 0;
-    let lastAlongX: boolean | null = null;
-    for (let t = 0; t < 10 && made < want; t++) {
-      // The second bridge crosses the first.
-      const alongX: boolean = lastAlongX === null ? r.chance(w / (w + h)) : !lastAlongX;
-      const c = alongX ? r.int(y0 + 2, y1 - 3) : r.int(x0 + 2, x1 - 3);
-      const mA = mouth(b, alongX ? 2 : 3, c), mB = mouth(b, alongX ? 0 : 1, c);
-      if (!mA || !mB) continue;
-      const over = alongX ? runTiles(x0, c, 0, w) : runTiles(c, y0, 1, h);
-      if (lanePath([...mA.reverse(), ...over, ...mB])) { made++; lastAlongX = alongX; b.bridged = true; }
-    }
-  }
+  tunnelsAndBridges({ N, lane, street, blocks, tunnels: (b) => root.fork('tunnels').fork(b.id), bridges: (b) => root.fork('bridges').fork(b.id), grainOf: districtOf, bridgeChance: P.bridges });
 
   const isLane = (x: number, y: number) => x >= 0 && y >= 0 && x < N && y < N && lane[y * N + x] === 1;
   const junctions: Junction[] = [];

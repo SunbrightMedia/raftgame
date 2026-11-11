@@ -1,4 +1,4 @@
-import { industrial, GEOMETRY_SETTINGS } from '../world/industrial/world';
+import { industrialWorld, GEOMETRY_SETTINGS } from '../world/industrial/world';
 /**
  * Which asset files a build includes. Each build mode has its own copy of this
  * module (vite.config.ts aliases "@globs" to globs.<mode>.ts): Vite emits every
@@ -18,5 +18,5 @@ export const mapUrls: Record<string, string> = {};
 export const catalogue: { textures?: unknown; sheets: Record<string, string>; models?: unknown; packs: Record<string, string> } = { sheets: {}, packs: {} };
 /** Worlds made in the page from a seed (a map path "world:<name>:<seed>"), in place of a map file. */
 export const worlds: Record<string, (seed: number) => unknown> = {
-  industrial: (seed) => industrial(seed).map.toMap('industrial', GEOMETRY_SETTINGS),
+  industrial: (seed) => industrialWorld(seed).map.toMap('industrial', GEOMETRY_SETTINGS),
 };
