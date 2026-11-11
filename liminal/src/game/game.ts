@@ -14,6 +14,8 @@ import { worldUniforms, MAX_RECTS } from '../engine/render/worldMaterial';
 import { fogUniforms, fogAt, fogReach, fogThickness, FogBackdrop } from '../engine/render/fog';
 import { lightGridUniforms, setLightGrid } from '../engine/render/lightGrid';
 import { mapLamps } from '../engine/render/mapLamps';
+import { LotWorld } from './lotWorld';
+import { LOT_SIZE } from '../world/lotBuild';
 import { kelvinToLinear, emitterColor } from '../engine/light/units';
 import { angleVectors } from '../engine/vec3';
 import { Input } from './input';
@@ -51,6 +53,9 @@ export class Game {
   private fogInside: Record<string, unknown> | null = null;
   private fogMix = 0;
   /** The lamp grid of the map loaded (lamps, cells with lamps, cells with more lamps than they can hold). */
+  /** A world with no edge, held as lots round the player (lotWorld.ts); null for a map. */
+  lots: LotWorld | null = null;
+  private lotStart: ((i: number, j: number) => [number, number, number]) | null = null;
   lampStats = { lamps: 0, cells: 0, entries: 0, full: 0, chains: 0, longest: 0, cut: 0, lost: 0, airs: 0, thin: 0 };
   readonly sky = new Sky();
   readonly fogBackdrop = new FogBackdrop();
@@ -286,12 +291,25 @@ export class Game {
 
   async loadMapPath(path: string): Promise<void> {
     // "world:<name>:<seed>": made here by that world's generator, not read from a file.
-    const world = /^world:([a-z]+):(\d+)$/.exec(path);
+    // A square of the world built as one map. With ":endless" after it (NOT FINISHED, not yet checked: off unless
+    // asked for): the world has no edge and is loaded as lots round the player as they move (lotWorld.ts).
+    const world = /^world:([a-z]+):(\d+)(:endless)?$/.exec(path);
     if (world) {
+      const endless = world[3] ? assets.lots[world[1]] : undefined;
       const make = assets.worlds[world[1]];
-      if (!make) throw new Error(`no such world in this build: ${world[1]}`);
+      if (!make && !endless) throw new Error(`no such world in this build: ${world[1]}`);
       this.mapPath = path;
-      await this.setMap(parseMap(make(Number(world[2]))), path);
+      if (!endless) { await this.setMap(parseMap(make(Number(world[2]))), path); return; }
+      const seed = Number(world[2]), start = endless.start(seed, 0, 0);
+      await this.setMap(parseMap({ format: 'liminal-map', version: 1, name: path, settings: endless.settings, brushes: [], entities: [{ id: 1, class: 'player_start', origin: start, angles: [0, 0, 0] }] }), path);
+      const lots = this.lots = new LotWorld(seed, this.renderer.gl, this.textures, this.models);
+      this.lotStart = (i, j) => endless.start(seed, i, j);
+      this.scene.add(lots.root);
+      this.level!.collision = lots.collision;
+      this.player.refreshWorld(this.level!);
+      await lots.start({ x: start[0], y: start[1] });
+      if (this.lots === lots) this.player.respawn(this.level!);
+      this.mapLabel = `${path}: a world of lots, ${lots.stats.workers || 'no'} worker${lots.stats.workers === 1 ? '' : 's'}`;
       return;
     }
     const text = await this.storage.read(path);
@@ -302,6 +320,7 @@ export class Game {
 
   async setMap(map: MapFile, label: string): Promise<void> {
     const t0 = performance.now();
+    if (this.lots) { this.lots.dispose(); this.lots = null; this.lotStart = null; }
     await this.models.prepare(map.entities.map(propModel).filter((m): m is string => !!m));
     const texNames = [
       ...map.brushes.flatMap((b) => [b.tex ?? 'dev/gray', ...Object.values(b.faces ?? {}).map((f) => f?.tex ?? '')]).filter(Boolean),
@@ -387,7 +406,12 @@ export class Game {
     let steps = 0;
     while (this.acc >= tick && steps < 16) {
       this.player.tick(this.player.buildCmd(this.input), s, tick);
-      if (this.level && this.player.state.origin.z < s.hull.voidZ) this.player.respawn(this.level);
+      if (this.level && this.player.state.origin.z < s.hull.voidZ) {
+        // Fallen out of the world. In a world of lots: back to the crossing at the corner of the lot fallen from (the world's own start may be far off, and not loaded).
+        const o = this.player.state.origin;
+        if (this.lotStart) { const p = this.lotStart(Math.floor(o.x / LOT_SIZE), Math.floor(o.y / LOT_SIZE)); this.level.spawn.origin = { x: p[0], y: p[1], z: p[2] }; }
+        this.player.respawn(this.level);
+      }
       this.input.endTick();
       this.acc -= tick;
       steps++;
@@ -415,14 +439,16 @@ export class Game {
     worldUniforms.flashBeamN.value = C.flashBeam >= 90 ? 0 : Math.log(0.5) / Math.log(Math.cos(half));
     worldUniforms.flashColor.value.set(...kelvinToLinear(C.flashKelvin));
 
+    this.lots?.update(this.player.state.origin);
     // Fog of its own inside some parts of the map: go over to it (and back) in under half a second.
-    const vol = this.fogVolumes.find((v) => eye.x > v.min[0] && eye.x < v.max[0] && eye.y > v.min[1] && eye.y < v.max[1] && eye.z > v.min[2] && eye.z < v.max[2]);
-    if (vol) this.fogInside = vol.fog;
+    const vol = this.lots ? this.lots.fogAt(cam.position) : this.fogVolumes.find((v) => eye.x > v.min[0] && eye.x < v.max[0] && eye.y > v.min[1] && eye.y < v.max[1] && eye.z > v.min[2] && eye.z < v.max[2])?.fog;
+    if (vol) this.fogInside = vol;
     const want = vol ? 1 : 0;
     const moving = this.fogMix !== want;
     if (moving) this.fogMix += Math.sign(want - this.fogMix) * Math.min(Math.abs(want - this.fogMix), dt > 0 ? dt / 0.4 : 1);
     if (moving || (s.fog.source && s.fog.blend)) this.updateFog(s, forward);
     this.level?.cull(cam.position, fogReach(0.985), s.render.detailDistance);
+    this.lots?.cull(cam.position, fogReach(0.985), s.render.detailDistance);
     worldUniforms.time.value = performance.now() / 1000;
     this.renderer.render(this.scene);
     this.onFrame?.(dt);

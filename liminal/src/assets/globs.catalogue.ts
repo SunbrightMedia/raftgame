@@ -12,3 +12,5 @@ export const catalogue = {
 };
 /** Worlds made in the page from a seed: none in this build. */
 export const worlds: Record<string, (seed: number) => unknown> = {};
+/** Worlds with no edge, loaded as lots round the player: none in this build (see globs.dev.ts). */
+export const lots: Record<string, { settings: unknown; start: (seed: number, i: number, j: number) => [number, number, number] }> = {};

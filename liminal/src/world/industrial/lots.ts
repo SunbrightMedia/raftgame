@@ -48,6 +48,11 @@ export function avenue(seed: number, axis: 0 | 1, n: number): Avenue {
   return a;
 }
 
+/** Where to stand in lot i, j: on the backbone, at the crossing in the lot's south-west corner (world units; the feet). */
+export function lotStart(seed: number, i: number, j: number): [number, number, number] {
+  return [(i * LOT + avenue(seed, 1, i).lane) * 128 + 64, (j * LOT + avenue(seed, 0, j).lane) * 128 + 64, 2];
+}
+
 /** A lot's kind. No lot has a neighbour to the north, south, east or west of its own kind. */
 export function lotKind(seed: number, i: number, j: number, only?: DistrictKind): DistrictKind {
   if (only) return only;

@@ -70,6 +70,13 @@ export class ModelRegistry {
     return this.headers.get(name.toLowerCase())?.header;
   }
 
+  /** Every model's collision (its hull box, its collision model's pieces), by name in lower case: what a worker needs to make a lot's solids. */
+  shapes(): Record<string, { hull: ModelHeader['hull']; collision?: ModelHeader['collision'] }> {
+    const out: Record<string, { hull: ModelHeader['hull']; collision?: ModelHeader['collision'] }> = {};
+    for (const [name, h] of this.headers) out[name] = { hull: h.header.hull, collision: h.header.collision };
+    return out;
+  }
+
   get(name: string): Model | undefined {
     return this.models.get(name.toLowerCase());
   }

@@ -1,4 +1,5 @@
 import { industrialWorld, GEOMETRY_SETTINGS } from '../world/industrial/world';
+import { lotStart } from '../world/industrial/lots';
 /**
  * Which asset files a build includes. Each build mode has its own copy of this
  * module (vite.config.ts aliases "@globs" to globs.<mode>.ts): Vite emits every
@@ -19,4 +20,8 @@ export const catalogue: { textures?: unknown; sheets: Record<string, string>; mo
 /** Worlds made in the page from a seed (a map path "world:<name>:<seed>"), in place of a map file. */
 export const worlds: Record<string, (seed: number) => unknown> = {
   industrial: (seed) => industrialWorld(seed).map.toMap('industrial', GEOMETRY_SETTINGS),
+};
+/** Worlds with no edge, loaded as lots round the player (game/lotWorld.ts): each one's settings, and where to stand in a lot. */
+export const lots: Record<string, { settings: unknown; start: (seed: number, i: number, j: number) => [number, number, number] }> = {
+  industrial: { settings: GEOMETRY_SETTINGS, start: lotStart },
 };

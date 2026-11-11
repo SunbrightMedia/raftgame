@@ -234,6 +234,18 @@ export class TextureRegistry {
     return [...this.sources.keys(), ...this.variants.keys()].filter((n) => n !== 'missing').sort();
   }
 
+  /**
+   * How big each texture is in the world (what one repeat covers at scale 1),
+   * for all that is known without loading a picture. (A lot of the endless
+   * world is meshed in a worker, which cannot ask this registry.)
+   */
+  worldSizes(): Record<string, [number, number]> {
+    const out: Record<string, [number, number]> = {};
+    for (const [name, s] of this.sources) if (s.worldW > 0 && s.worldH > 0) out[name] = [s.worldW, s.worldH];
+    for (const [name, v] of this.variants) { const s = this.sources.get(v.from); if (s && s.worldW > 0) out[name] = [s.worldW, s.worldH]; }
+    return out;
+  }
+
   get(name: string): TexEntry {
     let e = this.entries.get(name);
     if (!e && this.variants.has(name)) {
