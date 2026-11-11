@@ -1,0 +1,43 @@
+﻿The Complex: Expedition, Steam app 2172260
+folder: C:\program files (x86)\steam\steamapps\common\The Complex Expedition
+engine (from its files): Unreal
+--- programs:
+  \TheComplexExpedition.exe: product '' , file version , company ''
+  \Engine\Extras\Redist\en-us\UEPrereqSetup_x64.exe: product 'UE Prerequisites (x64)' 1.0.18.0, file version 1.0.18.0, company 'Epic Games, Inc.'
+  \TheComplexExpedition\Binaries\Win64\TheComplexExpedition-Win64-Shipping.exe: product '' , file version , company ''
+--- libraries (their names show upscalers, sound and other middleware):
+  \Engine\Binaries\ThirdParty\DbgHelp\dbghelp.dll  1,841 KB
+  \Engine\Binaries\ThirdParty\NVIDIA\NVaftermath\Win64\GFSDK_Aftermath_Lib.x64.dll  1,837 KB
+  \Engine\Binaries\ThirdParty\Ogg\Win64\VS2015\libogg_64.dll  64 KB
+  \Engine\Binaries\ThirdParty\Phonon\Win64\GPUUtilities.dll  51 KB
+  \Engine\Binaries\ThirdParty\Phonon\Win64\phonon.dll  28,212 KB
+  \Engine\Binaries\ThirdParty\Phonon\Win64\RadeonRays.dll  537 KB
+  \Engine\Binaries\ThirdParty\Phonon\Win64\tanrt64.dll  1,336 KB
+  \Engine\Binaries\ThirdParty\Steamworks\Steamv153\Win64\steam_api64.dll  304 KB
+  \Engine\Binaries\ThirdParty\Vorbis\Win64\VS2015\libvorbisfile_64.dll  53 KB
+  \Engine\Binaries\ThirdParty\Vorbis\Win64\VS2015\libvorbis_64.dll  1,690 KB
+  \Engine\Binaries\ThirdParty\Windows\XAudio2_9\x64\xaudio2_9redist.dll  844 KB
+  \TheComplexExpedition\Binaries\Win64\boost_atomic-mt-x64.dll  33 KB
+  \TheComplexExpedition\Binaries\Win64\boost_chrono-mt-x64.dll  51 KB
+  \TheComplexExpedition\Binaries\Win64\boost_filesystem-mt-x64.dll  153 KB
+  \TheComplexExpedition\Binaries\Win64\boost_iostreams-mt-x64.dll  62 KB
+  \TheComplexExpedition\Binaries\Win64\boost_program_options-mt-x64.dll  348 KB
+  \TheComplexExpedition\Binaries\Win64\boost_python39-mt-x64.dll  203 KB
+  \TheComplexExpedition\Binaries\Win64\boost_regex-mt-x64.dll  238 KB
+  \TheComplexExpedition\Binaries\Win64\boost_system-mt-x64.dll  25 KB
+  \TheComplexExpedition\Binaries\Win64\boost_thread-mt-x64.dll  90 KB
+  \TheComplexExpedition\Binaries\Win64\OpenImageDenoise.dll  48,621 KB
+  \TheComplexExpedition\Binaries\Win64\tbb.dll  390 KB
+  \TheComplexExpedition\Binaries\Win64\tbb12.dll  302 KB
+  \TheComplexExpedition\Binaries\Win64\D3D12\D3D12Core.dll  5,379 KB
+--- data files (names and sizes; nothing is unpacked):
+  \TheComplexExpedition\Content\Paks\global.ucas  1.9 MB
+  \TheComplexExpedition\Content\Paks\global.utoc  0.0 MB
+  \TheComplexExpedition\Content\Paks\TheComplexExpedition-Windows.pak  9.9 MB
+  \TheComplexExpedition\Content\Paks\TheComplexExpedition-Windows.ucas  6,393.8 MB
+  \TheComplexExpedition\Content\Paks\TheComplexExpedition-Windows.utoc  3.8 MB
+--- the game's own log and settings files:
+  none found (the game may not write a log)
+--- this PC:
+  graphics card: NVIDIA GeForce RTX 3070, driver 32.0.15.9571
+  processor: 11th Gen Intel(R) Core(TM) i9-11900KF @ 3.50GHz
