@@ -1,0 +1,114 @@
+shader ResourceId::7912, stage vs, name "Vertex Shader 7912"
+entry point: main
+constant block 0 "cbuffer0" (160 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+    +80    float4 cb0_v5 1x4
+    +96    float4 cb0_v6 1x4
+    +112   float4 cb0_v7 1x4
+    +128   float4 cb0_v8 1x4
+    +144   float4 cb0_v9 1x4
+constant block 1 "cbuffer1" (64 bytes)
+    +0     float4 cb1_v0 1x4
+    +16    float4 cb1_v1 1x4
+    +32    float4 cb1_v2 1x4
+    +48    float4 cb1_v3 1x4
+in  SV_VertexID0
+in  ATTRIBUTE0
+out TEXCOORD0
+out SV_POSITION0
+
+==================== disassembly: DXBC ====================
+
+Shader hash 59d710f5-e1ab4503-f658db22-955e7660
+
+vs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[10], immediateIndexed
+      dcl_constantbuffer cb1[4], immediateIndexed
+      dcl_input_sgv v0.x, vertexid
+      dcl_input v1.xyz
+      dcl_output o0.xyzw
+      dcl_output_siv o1.xyzw, position
+      dcl_temps 5
+   0: ftou r0.x, cb0[5].x
+   1: if_nz r0.x
+   2:   utof r0.y, r0.x
+   3:   div r0.z, l(3.141593), r0.y
+   4:   sincos null, r0.z, r0.z
+   5:   div r0.z, l(1.000000, 1.000000, 1.000000, 1.000000), r0.z
+   6:   sincos r1.x, r2.x, cb0[5].z
+   7:   mul r0.w, r2.x, cb0[5].w
+   8:   div r1.x, r1.x, r2.x
+   9:   ftou r1.y, cb0[5].y
+  10:   imul null, r1.z, r0.x, r1.y
+  11:   ult r1.w, v0.x, r1.z
+  12:   if_nz r1.w
+  13:     udiv r2.x, r3.x, v0.x, r0.x
+  14:     ishl r1.w, r3.x, l(1)
+  15:     utof r1.w, r1.w
+  16:     mul r1.w, r1.w, l(3.141593)
+  17:     div r1.w, r1.w, r0.y
+  18:     utof r2.x, r2.x
+  19:     mul r2.x, r0.w, r2.x
+  20:     iadd r2.y, r1.y, l(-1)
+  21:     utof r2.y, r2.y
+  22:     div r2.x, r2.x, r2.y
+  23:     mul r2.y, r1.x, r2.x
+  24:     mul r2.y, r0.z, r2.y
+  25:     sincos r3.x, r4.x, r1.w
+  26:     mul r1.w, r2.y, r3.x
+  27:     mul r2.y, r2.y, r4.x
+  28:     mul r3.xyz, r1.wwww, cb0[7].xyzx
+  29:     mad r2.xzw, r2.xxxx, cb0[6].xxyz, r3.xxyz
+  30:     mad r2.xyz, r2.yyyy, cb0[8].xyzx, r2.xzwx
+  31:     add r2.xyz, r2.xyzx, cb0[9].xyzx
+  32:   else
+  33:     mul r0.w, r0.w, r1.x
+  34:     iadd r1.x, -r1.z, v0.x
+  35:     udiv r0.x, r1.x, r1.x, r0.x
+  36:     utof r0.x, r0.x
+  37:     mul r0.x, r0.x, r0.w
+  38:     iadd r0.w, r1.y, l(-1)
+  39:     utof r0.w, r0.w
+  40:     div r0.x, r0.x, r0.w
+  41:     mul r0.z, r0.z, r0.x
+  42:     mul r0.x, r0.x, r0.x
+  43:     mad r0.x, cb0[5].w, cb0[5].w, -r0.x
+  44:     sqrt r0.x, r0.x
+  45:     ishl r0.w, r1.x, l(1)
+  46:     utof r0.w, r0.w
+  47:     mul r0.w, r0.w, l(3.141593)
+  48:     div r0.y, r0.w, r0.y
+  49:     sincos r1.x, r3.x, r0.y
+  50:     mul r0.y, r0.z, r1.x
+  51:     mul r0.z, r0.z, r3.x
+  52:     mul r1.xyz, r0.yyyy, cb0[7].xyzx
+  53:     mad r0.xyw, r0.xxxx, cb0[6].xyxz, r1.xyxz
+  54:     mad r0.xyz, r0.zzzz, cb0[8].xyzx, r0.xywx
+  55:     add r2.xyz, r0.xyzx, cb0[9].xyzx
+  56:   endif
+  57: else
+  58:   mad r2.xyz, v1.xyzx, cb0[4].wwww, cb0[4].xyzx
+  59: endif
+  60: mul r0.xyzw, r2.yyyy, cb1[1].xyzw
+  61: mad r0.xyzw, r2.xxxx, cb1[0].xyzw, r0.xyzw
+  62: mad r0.xyzw, r2.zzzz, cb1[2].xyzw, r0.xyzw
+  63: add r0.xyzw, r0.xyzw, cb1[3].xyzw
+  64: mov o0.xyzw, r0.xyzw
+  65: mov o1.xyzw, r0.xyzw
+  66: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

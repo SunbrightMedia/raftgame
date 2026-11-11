@@ -1,0 +1,1589 @@
+shader ResourceId::8862, stage cs, name "Compute Shader 8862"
+entry point: main
+constant block 0 "cbuffer0" (64 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+read  0 "texture0" (TextureType.Texture2D)
+read  1 "structuredbuffer1" (TextureType.Buffer)
+write 0 "uav0" (TextureType.Texture2D)
+in  vThreadGroupID0
+in  vThreadIDInGroup0
+
+==================== disassembly: DXBC ====================
+
+Shader hash 31a7e2cd-550aebd9-376d11b4-d9b6d181
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[4], immediateIndexed
+      dcl_resource_texture2d (float,float,float,float) t0
+      dcl_resource_structured t1, 16
+      dcl_uav_typed_texture2d (float,float,float,float) u0
+      dcl_input vThreadGroupID.z
+      dcl_input vThreadIDInGroup.x
+      dcl_temps 34
+      dcl_indexableTemp x0[16], 4
+      dcl_indexableTemp x1[9], 4
+      dcl_indexableTemp x2[8], 4
+      dcl_indexableTemp x3[8], 4
+      dcl_tgsm_structured g0, 4, 2048
+      dcl_thread_group 128, 1, 1
+   0: and r0.xy, l(1, 2, 0, 0), cb0[3].wwww
+   1: if_nz r0.y
+   2:   and r0.z, l(4), cb0[3].w
+   3:   if_nz r0.x
+   4:     mov r1.x, vThreadIDInGroup.x
+   5:     mov r1.y, vThreadGroupID.z
+   6:     iadd r1.xy, r1.xyxx, cb0[0].xyxx
+   7:     ult r0.w, r1.x, cb0[0].z
+   8:     if_nz r0.w
+   9:       mov r1.zw, l(0, 0, 0, 0)
+  10:       ld_indexable(texture2d)(float,float,float,float) r2.xyzw, r1.xyzw, t0.zwxy
+  11:     else
+  12:       mov r2.xyzw, l(0, 0, 0, 0)
+  13:     endif
+  14:     iadd r3.xyzw, r1.xxxx, l(512, 128, 256, 384)
+  15:     ult r4.xyzw, r3.yzwx, cb0[0].zzzz
+  16:     if_nz r4.x
+  17:       mov r5.x, r3.y
+  18:       mov r5.y, r1.y
+  19:       mov r5.zw, l(0, 0, 0, 0)
+  20:       ld_indexable(texture2d)(float,float,float,float) r5.xyzw, r5.xyzw, t0.zwxy
+  21:     else
+  22:       mov r5.xyzw, l(0, 0, 0, 0)
+  23:     endif
+  24:     if_nz r4.y
+  25:       mov r6.x, r3.z
+  26:       mov r6.y, r1.y
+  27:       mov r6.zw, l(0, 0, 0, 0)
+  28:       ld_indexable(texture2d)(float,float,float,float) r6.xyzw, r6.xyzw, t0.zwxy
+  29:     else
+  30:       mov r6.xyzw, l(0, 0, 0, 0)
+  31:     endif
+  32:     if_nz r4.z
+  33:       mov r7.x, r3.w
+  34:       mov r7.y, r1.y
+  35:       mov r7.zw, l(0, 0, 0, 0)
+  36:       ld_indexable(texture2d)(float,float,float,float) r7.xyzw, r7.xyzw, t0.zwxy
+  37:     else
+  38:       mov r7.xyzw, l(0, 0, 0, 0)
+  39:     endif
+  40:     if_nz r4.w
+  41:       mov r3.y, r1.y
+  42:       mov r3.zw, l(0, 0, 0, 0)
+  43:       ld_indexable(texture2d)(float,float,float,float) r3.xyzw, r3.xyzw, t0.zwxy
+  44:     else
+  45:       mov r3.xyzw, l(0, 0, 0, 0)
+  46:     endif
+  47:     iadd r4.xyz, r1.xxxx, l(640, 768, 896, 0)
+  48:     ult r8.xyz, r4.xyzx, cb0[0].zzzz
+  49:     if_nz r8.x
+  50:       mov r1.x, r4.x
+  51:       mov r1.zw, l(0, 0, 0, 0)
+  52:       ld_indexable(texture2d)(float,float,float,float) r9.xyzw, r1.xyzw, t0.zwxy
+  53:     else
+  54:       mov r9.xyzw, l(0, 0, 0, 0)
+  55:     endif
+  56:     if_nz r8.y
+  57:       mov r1.x, r4.y
+  58:       mov r1.zw, l(0, 0, 0, 0)
+  59:       ld_indexable(texture2d)(float,float,float,float) r10.xyzw, r1.xyzw, t0.zwxy
+  60:     else
+  61:       mov r10.xyzw, l(0, 0, 0, 0)
+  62:     endif
+  63:     if_nz r8.z
+  64:       mov r1.x, r4.z
+  65:       mov r1.zw, l(0, 0, 0, 0)
+  66:       ld_indexable(texture2d)(float,float,float,float) r1.xyzw, r1.xyzw, t0.zwxy
+  67:     else
+  68:       mov r1.xyzw, l(0, 0, 0, 0)
+  69:     endif
+  70:   else
+  71:     mov r4.x, vThreadGroupID.z
+  72:     mov r4.y, vThreadIDInGroup.x
+  73:     iadd r4.xy, r4.xyxx, cb0[0].xyxx
+  74:     ult r0.w, r4.y, cb0[0].w
+  75:     if_nz r0.w
+  76:       mov r4.zw, l(0, 0, 0, 0)
+  77:       ld_indexable(texture2d)(float,float,float,float) r2.xyzw, r4.xyzw, t0.zwxy
+  78:     else
+  79:       mov r2.xyzw, l(0, 0, 0, 0)
+  80:     endif
+  81:     iadd r8.xyzw, r4.yyyy, l(128, 512, 256, 384)
+  82:     ult r11.xyzw, r8.xzwy, cb0[0].wwww
+  83:     if_nz r11.x
+  84:       mov r12.x, r4.x
+  85:       mov r12.y, r8.x
+  86:       mov r12.zw, l(0, 0, 0, 0)
+  87:       ld_indexable(texture2d)(float,float,float,float) r5.xyzw, r12.xyzw, t0.zwxy
+  88:     else
+  89:       mov r5.xyzw, l(0, 0, 0, 0)
+  90:     endif
+  91:     if_nz r11.y
+  92:       mov r12.x, r4.x
+  93:       mov r12.y, r8.z
+  94:       mov r12.zw, l(0, 0, 0, 0)
+  95:       ld_indexable(texture2d)(float,float,float,float) r6.xyzw, r12.xyzw, t0.zwxy
+  96:     else
+  97:       mov r6.xyzw, l(0, 0, 0, 0)
+  98:     endif
+  99:     if_nz r11.z
+ 100:       mov r12.x, r4.x
+ 101:       mov r12.y, r8.w
+ 102:       mov r12.zw, l(0, 0, 0, 0)
+ 103:       ld_indexable(texture2d)(float,float,float,float) r7.xyzw, r12.xyzw, t0.zwxy
+ 104:     else
+ 105:       mov r7.xyzw, l(0, 0, 0, 0)
+ 106:     endif
+ 107:     if_nz r11.w
+ 108:       mov r8.x, r4.x
+ 109:       mov r8.zw, l(0, 0, 0, 0)
+ 110:       ld_indexable(texture2d)(float,float,float,float) r3.xyzw, r8.xyzw, t0.zwxy
+ 111:     else
+ 112:       mov r3.xyzw, l(0, 0, 0, 0)
+ 113:     endif
+ 114:     iadd r8.xyz, r4.yyyy, l(640, 896, 768, 0)
+ 115:     ult r11.xyz, r8.xzyx, cb0[0].wwww
+ 116:     if_nz r11.x
+ 117:       mov r4.y, r8.x
+ 118:       mov r4.zw, l(0, 0, 0, 0)
+ 119:       ld_indexable(texture2d)(float,float,float,float) r9.xyzw, r4.xyzw, t0.zwxy
+ 120:     else
+ 121:       mov r9.xyzw, l(0, 0, 0, 0)
+ 122:     endif
+ 123:     if_nz r11.y
+ 124:       mov r4.y, r8.z
+ 125:       mov r4.zw, l(0, 0, 0, 0)
+ 126:       ld_indexable(texture2d)(float,float,float,float) r10.xyzw, r4.xyzw, t0.zwxy
+ 127:     else
+ 128:       mov r10.xyzw, l(0, 0, 0, 0)
+ 129:     endif
+ 130:     if_nz r11.z
+ 131:       mov r8.x, r4.x
+ 132:       mov r8.zw, l(0, 0, 0, 0)
+ 133:       ld_indexable(texture2d)(float,float,float,float) r1.xyzw, r8.xyzw, t0.zwxy
+ 134:     else
+ 135:       mov r1.xyzw, l(0, 0, 0, 0)
+ 136:     endif
+ 137:   endif
+ 138:   min r2.xyzw, -r2.xyzw, l(0, 0, 0, 0)
+ 139:   mov r4.xyzw, -r2.zwxy
+ 140:   min r2.xy, -r5.zwzz, l(0, 0, 0, 0)
+ 141:   mov r2.xy, -r2.xyxx
+ 142:   min r5.xy, -r5.xyxx, l(0, 0, 0, 0)
+ 143:   mov r2.zw, -r5.xxxy
+ 144:   min r5.xy, -r6.zwzz, l(0, 0, 0, 0)
+ 145:   mov r5.xy, -r5.xyxx
+ 146:   min r6.xy, -r6.xyxx, l(0, 0, 0, 0)
+ 147:   mov r5.zw, -r6.xxxy
+ 148:   min r6.xy, -r7.zwzz, l(0, 0, 0, 0)
+ 149:   mov r6.xy, -r6.xyxx
+ 150:   min r7.xy, -r7.xyxx, l(0, 0, 0, 0)
+ 151:   mov r6.zw, -r7.xxxy
+ 152:   min r3.xyzw, -r3.xyzw, l(0, 0, 0, 0)
+ 153:   mov r7.xyzw, -r3.zwxy
+ 154:   min r3.xy, -r9.zwzz, l(0, 0, 0, 0)
+ 155:   mov r3.xy, -r3.xyxx
+ 156:   min r8.xy, -r9.xyxx, l(0, 0, 0, 0)
+ 157:   mov r3.zw, -r8.xxxy
+ 158:   min r8.xy, -r10.zwzz, l(0, 0, 0, 0)
+ 159:   mov r8.xy, -r8.xyxx
+ 160:   min r9.xy, -r10.xyxx, l(0, 0, 0, 0)
+ 161:   mov r8.zw, -r9.xxxy
+ 162:   min r1.xyzw, -r1.xyzw, l(0, 0, 0, 0)
+ 163:   mov r9.xyzw, -r1.zwxy
+ 164:   mov x0[0].xy, r4.xyxx
+ 165:   mov x0[1].xy, r2.xyxx
+ 166:   mov x0[2].xy, r5.xyxx
+ 167:   mov x0[3].xy, r6.xyxx
+ 168:   mov x0[4].xy, r7.xyxx
+ 169:   mov x0[5].xy, r3.xyxx
+ 170:   mov x0[6].xy, r8.xyxx
+ 171:   mov x0[7].xy, r9.xyxx
+ 172:   mov x0[8].xy, r4.zwzz
+ 173:   mov x0[9].xy, r2.zwzz
+ 174:   mov x0[10].xy, r5.zwzz
+ 175:   mov x0[11].xy, r6.zwzz
+ 176:   mov x0[12].xy, r7.zwzz
+ 177:   mov x0[13].xy, r3.zwzz
+ 178:   mov x0[14].xy, r8.zwzz
+ 179:   mov x0[15].xy, r9.zwzz
+ 180:   if_nz r0.z
+ 181:     dp3 r0.z, r4.xyzx, l(0.212600, 0.715200, 0.072200, 0.000000)
+ 182:     lt r0.w, cb0[3].x, r0.z
+ 183:     add r1.x, r0.z, -cb0[3].x
+ 184:     mad r1.x, cb0[3].z, r1.x, cb0[3].x
+ 185:     min r1.x, r1.x, cb0[3].y
+ 186:     div r0.z, r1.x, r0.z
+ 187:     mul r1.xyz, r0.zzzz, r4.xyzx
+ 188:     movc r1.xzw, r0.wwww, r1.zzxy, r4.zzxy
+ 189:     mov r1.y, r4.w
+ 190:     movc r0.zw, r0.wwww, r1.xxxy, r4.zzzw
+ 191:     dp3 r1.x, r2.xyzx, l(0.212600, 0.715200, 0.072200, 0.000000)
+ 192:     lt r1.y, cb0[3].x, r1.x
+ 193:     add r4.x, r1.x, -cb0[3].x
+ 194:     mad r4.x, cb0[3].z, r4.x, cb0[3].x
+ 195:     min r4.x, r4.x, cb0[3].y
+ 196:     div r1.x, r4.x, r1.x
+ 197:     mul r4.xyz, r1.xxxx, r2.xyzx
+ 198:     movc r4.xzw, r1.yyyy, r4.zzxy, r2.zzxy
+ 199:     mov r4.y, r2.w
+ 200:     movc r1.xy, r1.yyyy, r4.xyxx, r2.zwzz
+ 201:     dp3 r2.x, r5.xyzx, l(0.212600, 0.715200, 0.072200, 0.000000)
+ 202:     lt r2.y, cb0[3].x, r2.x
+ 203:     add r2.z, r2.x, -cb0[3].x
+ 204:     mad r2.z, cb0[3].z, r2.z, cb0[3].x
+ 205:     min r2.z, r2.z, cb0[3].y
+ 206:     div r2.x, r2.z, r2.x
+ 207:     mul r2.xzw, r2.xxxx, r5.xxyz
+ 208:     movc r10.xzw, r2.yyyy, r2.wwxz, r5.zzxy
+ 209:     mov r10.y, r5.w
+ 210:     movc r2.xy, r2.yyyy, r10.xyxx, r5.zwzz
+ 211:     dp3 r2.z, r6.xyzx, l(0.212600, 0.715200, 0.072200, 0.000000)
+ 212:     lt r2.w, cb0[3].x, r2.z
+ 213:     add r4.x, r2.z, -cb0[3].x
+ 214:     mad r4.x, cb0[3].z, r4.x, cb0[3].x
+ 215:     min r4.x, r4.x, cb0[3].y
+ 216:     div r2.z, r4.x, r2.z
+ 217:     mul r5.xyz, r2.zzzz, r6.xyzx
+ 218:     movc r5.xzw, r2.wwww, r5.zzxy, r6.zzxy
+ 219:     mov r5.y, r6.w
+ 220:     movc r2.zw, r2.wwww, r5.xxxy, r6.zzzw
+ 221:     dp3 r4.x, r7.xyzx, l(0.212600, 0.715200, 0.072200, 0.000000)
+ 222:     lt r4.y, cb0[3].x, r4.x
+ 223:     add r5.x, r4.x, -cb0[3].x
+ 224:     mad r5.x, cb0[3].z, r5.x, cb0[3].x
+ 225:     min r5.x, r5.x, cb0[3].y
+ 226:     div r4.x, r5.x, r4.x
+ 227:     mul r6.xyz, r4.xxxx, r7.xyzx
+ 228:     movc r6.xzw, r4.yyyy, r6.zzxy, r7.zzxy
+ 229:     mov r6.y, r7.w
+ 230:     movc r4.xy, r4.yyyy, r6.xyxx, r7.zwzz
+ 231:     dp3 r5.x, r3.xyzx, l(0.212600, 0.715200, 0.072200, 0.000000)
+ 232:     lt r5.y, cb0[3].x, r5.x
+ 233:     add r6.x, r5.x, -cb0[3].x
+ 234:     mad r6.x, cb0[3].z, r6.x, cb0[3].x
+ 235:     min r6.x, r6.x, cb0[3].y
+ 236:     div r5.x, r6.x, r5.x
+ 237:     mul r7.xyz, r3.xyzx, r5.xxxx
+ 238:     movc r7.xzw, r5.yyyy, r7.zzxy, r3.zzxy
+ 239:     mov r7.y, r3.w
+ 240:     movc r3.xy, r5.yyyy, r7.xyxx, r3.zwzz
+ 241:     dp3 r3.z, r8.xyzx, l(0.212600, 0.715200, 0.072200, 0.000000)
+ 242:     lt r3.w, cb0[3].x, r3.z
+ 243:     add r5.x, r3.z, -cb0[3].x
+ 244:     mad r5.x, cb0[3].z, r5.x, cb0[3].x
+ 245:     min r5.x, r5.x, cb0[3].y
+ 246:     div r3.z, r5.x, r3.z
+ 247:     mul r11.xyz, r3.zzzz, r8.xyzx
+ 248:     movc r11.xzw, r3.wwww, r11.zzxy, r8.zzxy
+ 249:     mov r11.y, r8.w
+ 250:     movc r3.zw, r3.wwww, r11.xxxy, r8.zzzw
+ 251:     dp3 r5.x, r9.xyzx, l(0.212600, 0.715200, 0.072200, 0.000000)
+ 252:     lt r5.y, cb0[3].x, r5.x
+ 253:     add r6.x, r5.x, -cb0[3].x
+ 254:     mad r6.x, cb0[3].z, r6.x, cb0[3].x
+ 255:     min r6.x, r6.x, cb0[3].y
+ 256:     div r5.x, r6.x, r5.x
+ 257:     mul r8.xyz, r5.xxxx, r9.xyzx
+ 258:     movc r8.xzw, r5.yyyy, r8.zzxy, r9.zzxy
+ 259:     mov r8.y, r9.w
+ 260:     movc r5.xy, r5.yyyy, r8.xyxx, r9.zwzz
+ 261:     mov x0[0].xy, r1.zwzz
+ 262:     mov x0[1].xy, r4.zwzz
+ 263:     mov x0[2].xy, r10.zwzz
+ 264:     mov x0[3].xy, r5.zwzz
+ 265:     mov x0[4].xy, r6.zwzz
+ 266:     mov x0[5].xy, r7.zwzz
+ 267:     mov x0[6].xy, r11.zwzz
+ 268:     mov x0[7].xy, r8.zwzz
+ 269:     mov x0[8].xy, r0.zwzz
+ 270:     mov x0[9].xy, r1.xyxx
+ 271:     mov x0[10].xy, r2.xyxx
+ 272:     mov x0[11].xy, r2.zwzz
+ 273:     mov x0[12].xy, r4.xyxx
+ 274:     mov x0[13].xy, r3.xyxx
+ 275:     mov x0[14].xy, r3.zwzz
+ 276:     mov x0[15].xy, r5.xyxx
+ 277:   endif
+ 278: else
+ 279:   if_nz r0.x
+ 280:     mov r1.xw, l(1025, 0, 0, 0)
+ 281:     mov r1.z, vThreadGroupID.z
+ 282:     ld_indexable(texture2d)(float,float,float,float) r2.xyzw, r1.xzww, t0.xyzw
+ 283:     mov r1.y, vThreadIDInGroup.x
+ 284:     ld_indexable(texture2d)(float,float,float,float) r3.xyzw, r1.yzww, t0.xyzw
+ 285:     mov x1[0].xy, r3.xyxx
+ 286:     mov x1[8].xy, r3.zwzz
+ 287:     iadd r1.y, vThreadIDInGroup.x, l(128)
+ 288:     ld_indexable(texture2d)(float,float,float,float) r4.xyzw, r1.yzww, t0.zxyw
+ 289:     iadd r1.x, r1.y, l(128)
+ 290:     ld_indexable(texture2d)(float,float,float,float) r5.xyzw, r1.xzww, t0.zxyw
+ 291:     or r1.y, r1.x, l(384)
+ 292:     ld_indexable(texture2d)(float,float,float,float) r6.xyzw, r1.yzww, t0.zxyw
+ 293:     iadd r1.x, r1.y, l(128)
+ 294:     ld_indexable(texture2d)(float,float,float,float) r7.xyzw, r1.xzww, t0.xyzw
+ 295:     ieq r0.z, r1.x, l(512)
+ 296:     add r2.xyzw, r2.yxwz, r7.xyzw
+ 297:     movc r2.xyzw, r0.zzzz, r2.zxyw, r7.zxyw
+ 298:     or r1.y, r1.x, l(640)
+ 299:     ld_indexable(texture2d)(float,float,float,float) r7.xyzw, r1.yzww, t0.zxyw
+ 300:     iadd r1.x, r1.y, l(128)
+ 301:     ld_indexable(texture2d)(float,float,float,float) r8.xyzw, r1.xzww, t0.zxyw
+ 302:     or r9.x, r1.x, l(896)
+ 303:     mov r9.yzw, r1.zzww
+ 304:     ld_indexable(texture2d)(float,float,float,float) r1.xyzw, r9.xyzw, t0.zxyw
+ 305:     if_z vThreadIDInGroup.x
+ 306:       mov r9.xzw, l(1024, 0, 0, 0)
+ 307:       mov r9.y, vThreadGroupID.z
+ 308:       ld_indexable(texture2d)(float,float,float,float) r9.xyzw, r9.xyzw, t0.xyzw
+ 309:       add r3.xyzw, r3.xyzw, r9.yxwz
+ 310:       mov x1[0].xy, r3.xyxx
+ 311:       mov x1[8].xy, r3.zwzz
+ 312:     endif
+ 313:   else
+ 314:     mov r3.y, vThreadGroupID.z
+ 315:     mov r3.xzw, l(1024, 0, 0, 1025)
+ 316:     ld_indexable(texture2d)(float,float,float,float) r9.xyzw, r3.yxzz, t0.xyzw
+ 317:     ld_indexable(texture2d)(float,float,float,float) r10.xyzw, r3.ywzz, t0.xyzw
+ 318:     mov r3.x, vThreadIDInGroup.x
+ 319:     ld_indexable(texture2d)(float,float,float,float) r11.xyzw, r3.yxzz, t0.xyzw
+ 320:     iadd r3.w, vThreadIDInGroup.x, l(128)
+ 321:     ld_indexable(texture2d)(float,float,float,float) r4.xyzw, r3.ywzz, t0.zxyw
+ 322:     iadd r3.x, r3.w, l(128)
+ 323:     ld_indexable(texture2d)(float,float,float,float) r5.xyzw, r3.yxzz, t0.zxyw
+ 324:     or r3.w, r3.x, l(384)
+ 325:     ld_indexable(texture2d)(float,float,float,float) r6.xyzw, r3.ywzz, t0.zxyw
+ 326:     iadd r3.x, r3.w, l(128)
+ 327:     ld_indexable(texture2d)(float,float,float,float) r12.xyzw, r3.yxzz, t0.xyzw
+ 328:     ieq r0.z, r3.x, l(512)
+ 329:     add r10.xyzw, r10.yxwz, r12.xyzw
+ 330:     movc r2.xyzw, r0.zzzz, r10.zxyw, r12.zxyw
+ 331:     or r3.w, r3.x, l(640)
+ 332:     ld_indexable(texture2d)(float,float,float,float) r7.xyzw, r3.ywzz, t0.zxyw
+ 333:     iadd r3.x, r3.w, l(128)
+ 334:     ld_indexable(texture2d)(float,float,float,float) r8.xyzw, r3.yxzz, t0.zxyw
+ 335:     or r3.w, r3.x, l(896)
+ 336:     ld_indexable(texture2d)(float,float,float,float) r1.xyzw, r3.ywzz, t0.zxyw
+ 337:     add r3.xyzw, r9.yxwz, r11.xyzw
+ 338:     movc r3.xyzw, vThreadIDInGroup.xxxx, r11.xyzw, r3.xyzw
+ 339:     mov x1[0].xy, r3.xyxx
+ 340:     mov x1[8].xy, r3.zwzz
+ 341:   endif
+ 342:   mov r0.zw, x1[0].xxxy
+ 343:   mov r3.xy, x1[8].xyxx
+ 344:   store_structured g0.x, vThreadIDInGroup.x, l(0), r0.w
+ 345:   iadd r3.z, vThreadIDInGroup.x, l(128)
+ 346:   store_structured g0.x, r3.z, l(0), r4.z
+ 347:   iadd r3.w, r3.z, l(128)
+ 348:   store_structured g0.x, r3.w, l(0), r5.z
+ 349:   or r9.x, r3.w, l(384)
+ 350:   store_structured g0.x, r9.x, l(0), r6.z
+ 351:   iadd r9.y, r9.x, l(128)
+ 352:   store_structured g0.x, r9.y, l(0), r2.z
+ 353:   or r9.z, r9.y, l(640)
+ 354:   store_structured g0.x, r9.z, l(0), r7.z
+ 355:   iadd r9.w, r9.z, l(128)
+ 356:   store_structured g0.x, r9.w, l(0), r8.z
+ 357:   or r10.x, r9.w, l(896)
+ 358:   store_structured g0.x, r10.x, l(0), r1.z
+ 359:   sync_g_t
+ 360:   ult r10.y, l(0), vThreadIDInGroup.x
+ 361:   iadd r10.z, -vThreadIDInGroup.x, l(1024)
+ 362:   and r10.y, r10.z, r10.y
+ 363:   ld_structured r10.z, r10.y, l(0), g0.xxxx
+ 364:   add r11.x, r0.z, r10.z
+ 365:   iadd r10.z, -r3.z, l(1024)
+ 366:   ld_structured r10.w, r10.z, l(0), g0.xxxx
+ 367:   add r12.x, r4.y, r10.w
+ 368:   iadd r10.w, -r3.w, l(1024)
+ 369:   ld_structured r11.z, r10.w, l(0), g0.xxxx
+ 370:   add r13.x, r5.y, r11.z
+ 371:   iadd r11.z, -r9.x, l(1024)
+ 372:   ld_structured r11.w, r11.z, l(0), g0.xxxx
+ 373:   add r14.x, r6.y, r11.w
+ 374:   iadd r11.w, -r9.y, l(1024)
+ 375:   ld_structured r12.z, r11.w, l(0), g0.xxxx
+ 376:   ult r12.w, l(512), r9.y
+ 377:   movc r13.z, r12.w, l(-1.000000), l(1.000000)
+ 378:   mad r15.y, r12.z, r13.z, r2.y
+ 379:   iadd r12.z, -r9.z, l(1024)
+ 380:   ld_structured r13.w, r12.z, l(0), g0.xxxx
+ 381:   add r16.y, r7.y, -r13.w
+ 382:   iadd r14.zw, -r9.wwww, l(0, 0, 1024, 896)
+ 383:   ld_structured r13.w, r14.z, l(0), g0.xxxx
+ 384:   add r17.y, r8.y, -r13.w
+ 385:   ld_structured r13.w, r14.w, l(0), g0.xxxx
+ 386:   add r18.y, r1.y, -r13.w
+ 387:   ld_structured r19.y, l(0), l(0), g0.xxxx
+ 388:   ld_structured r20.y, l(512), l(0), g0.xxxx
+ 389:   sync_g_t
+ 390:   store_structured g0.x, vThreadIDInGroup.x, l(0), r0.z
+ 391:   store_structured g0.x, r3.z, l(0), r4.y
+ 392:   store_structured g0.x, r3.w, l(0), r5.y
+ 393:   store_structured g0.x, r9.x, l(0), r6.y
+ 394:   store_structured g0.x, r9.y, l(0), r2.y
+ 395:   store_structured g0.x, r9.z, l(0), r7.y
+ 396:   store_structured g0.x, r9.w, l(0), r8.y
+ 397:   store_structured g0.x, r10.x, l(0), r1.y
+ 398:   sync_g_t
+ 399:   ld_structured r19.x, l(0), l(0), g0.xxxx
+ 400:   ld_structured r20.x, l(512), l(0), g0.xxxx
+ 401:   ld_structured r0.z, r10.y, l(0), g0.xxxx
+ 402:   add r11.y, r0.z, r0.w
+ 403:   ld_structured r0.z, r10.z, l(0), g0.xxxx
+ 404:   add r12.y, r0.z, r4.z
+ 405:   ld_structured r0.z, r10.w, l(0), g0.xxxx
+ 406:   add r13.y, r0.z, r5.z
+ 407:   ld_structured r0.z, r11.z, l(0), g0.xxxx
+ 408:   add r14.y, r0.z, r6.z
+ 409:   ld_structured r0.z, r11.w, l(0), g0.xxxx
+ 410:   mad r15.z, r0.z, r13.z, r2.z
+ 411:   ld_structured r0.z, r12.z, l(0), g0.xxxx
+ 412:   add r0.z, -r0.z, r7.z
+ 413:   ld_structured r0.w, r14.z, l(0), g0.xxxx
+ 414:   add r0.w, -r0.w, r8.z
+ 415:   ld_structured r1.y, r14.w, l(0), g0.xxxx
+ 416:   add r1.y, -r1.y, r1.z
+ 417:   mov r15.x, -r15.z
+ 418:   movc r2.yz, r12.wwww, r15.xxyx, r15.yyzy
+ 419:   ieq r1.z, r9.y, l(512)
+ 420:   movc r2.yz, r1.zzzz, r20.xxyx, r2.yyzy
+ 421:   mov r16.x, -r0.z
+ 422:   mov r17.x, -r0.w
+ 423:   mov r18.x, -r1.y
+ 424:   movc r0.zw, vThreadIDInGroup.xxxx, r11.xxxy, r19.xxxy
+ 425:   sync_g_t
+ 426:   store_structured g0.x, vThreadIDInGroup.x, l(0), r3.y
+ 427:   store_structured g0.x, r3.z, l(0), r4.w
+ 428:   store_structured g0.x, r3.w, l(0), r5.w
+ 429:   store_structured g0.x, r9.x, l(0), r6.w
+ 430:   store_structured g0.x, r9.y, l(0), r2.w
+ 431:   store_structured g0.x, r9.z, l(0), r7.w
+ 432:   store_structured g0.x, r9.w, l(0), r8.w
+ 433:   store_structured g0.x, r10.x, l(0), r1.w
+ 434:   sync_g_t
+ 435:   ld_structured r1.y, r10.y, l(0), g0.xxxx
+ 436:   add r11.x, r1.y, r3.x
+ 437:   ld_structured r1.y, r10.z, l(0), g0.xxxx
+ 438:   add r15.x, r1.y, r4.x
+ 439:   ld_structured r1.y, r10.w, l(0), g0.xxxx
+ 440:   add r19.x, r1.y, r5.x
+ 441:   ld_structured r1.y, r11.z, l(0), g0.xxxx
+ 442:   add r20.x, r1.y, r6.x
+ 443:   ld_structured r1.y, r11.w, l(0), g0.xxxx
+ 444:   mad r21.y, r1.y, r13.z, r2.x
+ 445:   ld_structured r1.y, r12.z, l(0), g0.xxxx
+ 446:   add r22.y, -r1.y, r7.x
+ 447:   ld_structured r1.y, r14.z, l(0), g0.xxxx
+ 448:   add r23.y, -r1.y, r8.x
+ 449:   ld_structured r1.y, r14.w, l(0), g0.xxxx
+ 450:   add r24.y, -r1.y, r1.x
+ 451:   ld_structured r25.y, l(0), l(0), g0.xxxx
+ 452:   ld_structured r26.y, l(512), l(0), g0.xxxx
+ 453:   sync_g_t
+ 454:   store_structured g0.x, vThreadIDInGroup.x, l(0), r3.x
+ 455:   store_structured g0.x, r3.z, l(0), r4.x
+ 456:   store_structured g0.x, r3.w, l(0), r5.x
+ 457:   store_structured g0.x, r9.x, l(0), r6.x
+ 458:   store_structured g0.x, r9.y, l(0), r2.x
+ 459:   store_structured g0.x, r9.z, l(0), r7.x
+ 460:   store_structured g0.x, r9.w, l(0), r8.x
+ 461:   store_structured g0.x, r10.x, l(0), r1.x
+ 462:   sync_g_t
+ 463:   ld_structured r25.x, l(0), l(0), g0.xxxx
+ 464:   ld_structured r26.x, l(512), l(0), g0.xxxx
+ 465:   ld_structured r1.x, r10.y, l(0), g0.xxxx
+ 466:   add r11.y, r1.x, r3.y
+ 467:   ld_structured r1.x, r10.z, l(0), g0.xxxx
+ 468:   add r15.y, r1.x, r4.w
+ 469:   ld_structured r1.x, r10.w, l(0), g0.xxxx
+ 470:   add r19.y, r1.x, r5.w
+ 471:   ld_structured r1.x, r11.z, l(0), g0.xxxx
+ 472:   add r20.y, r1.x, r6.w
+ 473:   ld_structured r1.x, r11.w, l(0), g0.xxxx
+ 474:   mad r21.z, r1.x, r13.z, r2.w
+ 475:   ld_structured r1.x, r12.z, l(0), g0.xxxx
+ 476:   add r1.x, -r1.x, r7.w
+ 477:   ld_structured r1.y, r14.z, l(0), g0.xxxx
+ 478:   add r1.y, -r1.y, r8.w
+ 479:   ld_structured r2.x, r14.w, l(0), g0.xxxx
+ 480:   add r1.w, r1.w, -r2.x
+ 481:   mov r21.x, -r21.z
+ 482:   movc r2.xw, r12.wwww, r21.xxxy, r21.yyyz
+ 483:   movc r2.xw, r1.zzzz, r26.xxxy, r2.xxxw
+ 484:   mov r22.x, -r1.x
+ 485:   mov r23.x, -r1.y
+ 486:   mov r24.x, -r1.w
+ 487:   movc r1.xy, vThreadIDInGroup.xxxx, r11.xyxx, r25.xyxx
+ 488:   sync_g_t
+ 489:   mov x0[0].xy, r0.zwzz
+ 490:   mov x0[1].xy, r12.xyxx
+ 491:   mov x0[2].xy, r13.xyxx
+ 492:   mov x0[3].xy, r14.xyxx
+ 493:   mov x0[4].xy, r2.yzyy
+ 494:   mov x0[5].xy, r16.xyxx
+ 495:   mov x0[6].xy, r17.xyxx
+ 496:   mov x0[7].xy, r18.xyxx
+ 497:   mov x0[8].xy, r1.xyxx
+ 498:   mov x0[9].xy, r15.xyxx
+ 499:   mov x0[10].xy, r19.xyxx
+ 500:   mov x0[11].xy, r20.xyxx
+ 501:   mov x0[12].xy, r2.xwxx
+ 502:   mov x0[13].xy, r22.xyxx
+ 503:   mov x0[14].xy, r23.xyxx
+ 504:   mov x0[15].xy, r24.xyxx
+ 505: endif
+ 506: mov r0.zw, x0[0].xxxy
+ 507: mov r1.xy, x0[1].xyxx
+ 508: mov r1.zw, x0[2].xxxy
+ 509: mov r2.xy, x0[3].xyxx
+ 510: mov r2.zw, x0[4].xxxy
+ 511: mov r3.xy, x0[5].xyxx
+ 512: mov r3.zw, x0[6].xxxy
+ 513: mov r4.xy, x0[7].xyxx
+ 514: mov r4.zw, x0[8].xxxy
+ 515: mov r5.xy, x0[9].xyxx
+ 516: mov r5.zw, x0[10].xxxy
+ 517: mov r6.xy, x0[11].xyxx
+ 518: mov r6.zw, x0[12].xxxy
+ 519: mov r7.xy, x0[13].xyxx
+ 520: mov r7.zw, x0[14].xxxy
+ 521: mov r8.xy, x0[15].xyxx
+ 522: if_z r0.y
+ 523:   mul r0.zw, r0.zzzw, l(0.000000, 0.000000, 0.000977, 0.000977)
+ 524:   mul r1.xyzw, r1.xyzw, l(0.000977, 0.000977, 0.000977, 0.000977)
+ 525:   mul r2.xyzw, r2.xyzw, l(0.000977, 0.000977, 0.000977, 0.000977)
+ 526:   mul r3.xyzw, r3.xyzw, l(0.000977, 0.000977, 0.000977, 0.000977)
+ 527:   mul r4.xyzw, r4.xyzw, l(0.000977, 0.000977, 0.000977, 0.000977)
+ 528:   mul r5.xyzw, r5.xyzw, l(0.000977, 0.000977, 0.000977, 0.000977)
+ 529:   mul r6.xyzw, r6.xyzw, l(0.000977, 0.000977, 0.000977, 0.000977)
+ 530:   mul r7.xyzw, r7.xyzw, l(0.000977, 0.000977, 0.000977, 0.000977)
+ 531:   mul r8.xy, r8.xyxx, l(0.000977, 0.000977, 0.000000, 0.000000)
+ 532: endif
+ 533: ishl r8.z, vThreadIDInGroup.x, l(3)
+ 534: add r9.xy, r2.zwzz, r0.zwzz
+ 535: add r0.zw, -r2.zzzw, r0.zzzw
+ 536: add r2.zw, r3.zzzw, r1.zzzw
+ 537: add r10.xy, -r3.zwzz, r1.zwzz
+ 538: mov r10.zw, -r10.yyyx
+ 539: movc r1.zw, r0.yyyy, r10.zzzx, r10.yyyw
+ 540: add r3.zw, r2.zzzw, r9.xxxy
+ 541: add r9.zw, r0.zzzw, r1.zzzw
+ 542: add r0.zw, r0.zzzw, -r1.zzzw
+ 543: add r1.zw, -r2.zzzw, r9.xxxy
+ 544: add r2.zw, r3.xxxy, r1.xxxy
+ 545: add r1.xy, -r3.yxyy, r1.yxyy
+ 546: add r3.xy, r4.xyxx, r2.xyxx
+ 547: add r10.xy, -r4.xyxx, r2.xyxx
+ 548: mov r10.zw, -r10.yyyx
+ 549: movc r2.xy, r0.yyyy, r10.xzxx, r10.wyww
+ 550: add r4.xy, r2.zwzz, r3.xyxx
+ 551: add r9.xy, r1.xyxx, r2.xyxx
+ 552: add r1.xy, r1.xyxx, -r2.xyxx
+ 553: add r2.xy, r2.zwzz, -r3.xyxx
+ 554: movc r2.z, r0.y, l(0.707107), l(-0.707107)
+ 555: mul r3.xy, r9.xyxx, r2.zzzz
+ 556: mad r10.x, r9.y, l(0.707107), -r3.x
+ 557: mad r10.y, r9.x, l(0.707107), r3.y
+ 558: add r3.xy, r3.zwzz, r4.xyxx
+ 559: add r3.zw, r3.zzzw, -r4.xxxy
+ 560: add r4.xy, r9.zwzz, r10.xyxx
+ 561: add r9.xy, r9.zwzz, -r10.xyxx
+ 562: add r10.zw, r1.wwwz, r2.xxxy
+ 563: add r10.xy, r1.zwzz, -r2.yxyy
+ 564: swapc r2.xy, r10.xy, r0.yyyy, r10.xzxx, r10.wyww
+ 565: mul r1.zw, r1.xxxy, r2.zzzz
+ 566: mad r11.x, r1.y, l(-0.707107), -r1.z
+ 567: mad r11.y, r1.x, l(-0.707107), r1.w
+ 568: add r1.xy, r0.zwzz, r11.xyxx
+ 569: add r0.zw, r0.zzzw, -r11.xxxy
+ 570: ubfe r1.z, l(27), l(2), vThreadIDInGroup.x
+ 571: iadd r1.z, r1.z, r8.z
+ 572: store_structured g0.x, r1.z, l(0), r3.x
+ 573: bfi r11.xy, l(29, 7, 0, 0), l(3, 0, 0, 0), vThreadIDInGroup.xxxx, l(1, 128, 0, 0)
+ 574: ushr r8.zw, r11.xxxy, l(0, 0, 5, 5)
+ 575: iadd r9.zw, r8.zzzw, r11.xxxy
+ 576: store_structured g0.x, r9.z, l(0), r4.x
+ 577: iadd r12.xy, r11.xyxx, l(1, 128, 0, 0)
+ 578: ushr r10.zw, r12.xxxy, l(0, 0, 5, 5)
+ 579: iadd r13.xy, r10.zwzz, r12.xyxx
+ 580: store_structured g0.x, r13.x, l(0), r10.x
+ 581: or r14.xy, r12.xyxx, l(3, 384, 0, 0)
+ 582: iadd r1.w, r10.z, r14.x
+ 583: store_structured g0.x, r1.w, l(0), r1.x
+ 584: iadd r15.xy, r14.xyxx, l(1, 128, 0, 0)
+ 585: ushr r10.xz, r15.xxyx, l(5, 0, 5, 0)
+ 586: iadd r13.zw, r10.xxxz, r15.xxxy
+ 587: store_structured g0.x, r13.z, l(0), r3.z
+ 588: or r16.xy, r15.xyxx, l(5, 640, 0, 0)
+ 589: iadd r1.x, r10.x, r16.x
+ 590: store_structured g0.x, r1.x, l(0), r9.x
+ 591: iadd r17.xy, r16.xyxx, l(1, 128, 0, 0)
+ 592: ushr r3.xz, r17.xxyx, l(5, 0, 5, 0)
+ 593: iadd r18.xy, r3.xzxx, r17.xyxx
+ 594: store_structured g0.x, r18.x, l(0), r2.x
+ 595: or r19.xy, r17.xyxx, l(7, 896, 0, 0)
+ 596: iadd r2.x, r3.x, r19.x
+ 597: store_structured g0.x, r2.x, l(0), r0.z
+ 598: sync_g_t
+ 599: ushr r0.z, vThreadIDInGroup.x, l(5)
+ 600: iadd r2.w, r0.z, vThreadIDInGroup.x
+ 601: ld_structured r20.x, r2.w, l(0), g0.xxxx
+ 602: ld_structured r21.x, r9.w, l(0), g0.xxxx
+ 603: ld_structured r22.x, r13.y, l(0), g0.xxxx
+ 604: ushr r3.x, r14.y, l(5)
+ 605: iadd r4.x, r3.x, r14.y
+ 606: ld_structured r23.x, r4.x, l(0), g0.xxxx
+ 607: ld_structured r24.x, r13.w, l(0), g0.xxxx
+ 608: ushr r8.z, r16.y, l(5)
+ 609: iadd r9.x, r8.z, r16.y
+ 610: ld_structured r25.x, r9.x, l(0), g0.xxxx
+ 611: ld_structured r26.x, r18.y, l(0), g0.xxxx
+ 612: ushr r10.x, r19.y, l(5)
+ 613: iadd r11.x, r10.x, r19.y
+ 614: ld_structured r27.x, r11.x, l(0), g0.xxxx
+ 615: sync_g_t
+ 616: store_structured g0.x, r1.z, l(0), r3.y
+ 617: store_structured g0.x, r9.z, l(0), r4.y
+ 618: store_structured g0.x, r13.x, l(0), r10.y
+ 619: store_structured g0.x, r1.w, l(0), r1.y
+ 620: store_structured g0.x, r13.z, l(0), r3.w
+ 621: store_structured g0.x, r1.x, l(0), r9.y
+ 622: store_structured g0.x, r18.x, l(0), r2.y
+ 623: store_structured g0.x, r2.x, l(0), r0.w
+ 624: sync_g_t
+ 625: ld_structured r20.y, r2.w, l(0), g0.xxxx
+ 626: ld_structured r21.y, r9.w, l(0), g0.xxxx
+ 627: ld_structured r22.y, r13.y, l(0), g0.xxxx
+ 628: ld_structured r23.y, r4.x, l(0), g0.xxxx
+ 629: ld_structured r24.y, r13.w, l(0), g0.xxxx
+ 630: ld_structured r25.y, r9.x, l(0), g0.xxxx
+ 631: ld_structured r26.y, r18.y, l(0), g0.xxxx
+ 632: ld_structured r27.y, r11.x, l(0), g0.xxxx
+ 633: mov x2[0].xy, r20.xyxx
+ 634: mov x2[1].xy, r21.xyxx
+ 635: mov x2[2].xy, r22.xyxx
+ 636: mov x2[3].xy, r23.xyxx
+ 637: mov x2[4].xy, r24.xyxx
+ 638: mov x2[5].xy, r25.xyxx
+ 639: mov x2[6].xy, r26.xyxx
+ 640: mov x2[7].xy, r27.xyxx
+ 641: ishl r0.z, r0.z, l(3)
+ 642: iadd r0.z, r0.z, vThreadIDInGroup.x
+ 643: ishl r0.w, r8.w, l(3)
+ 644: iadd r0.w, r0.w, r11.y
+ 645: ishl r1.y, r10.w, l(3)
+ 646: iadd r1.y, r1.y, r12.y
+ 647: ishl r2.y, r3.x, l(3)
+ 648: iadd r2.y, r2.y, r14.y
+ 649: ishl r3.xw, r10.zzzx, l(3, 0, 0, 3)
+ 650: iadd r3.x, r3.x, r15.y
+ 651: ishl r3.y, r8.z, l(3)
+ 652: iadd r3.y, r3.y, r16.y
+ 653: ishl r3.z, r3.z, l(3)
+ 654: iadd r3.z, r3.z, r17.y
+ 655: iadd r3.w, r3.w, r19.y
+ 656: mov r4.y, l(8)
+ 657: loop
+ 658:   uge r8.z, r4.y, l(128)
+ 659:   breakc_nz r8.z
+ 660:   mov r8.zw, x2[0].xxxy
+ 661:   mov r10.xy, x2[1].xyxx
+ 662:   mov r10.zw, x2[2].xxxy
+ 663:   mov r18.zw, x2[3].xxxy
+ 664:   mov r20.xy, x2[4].xyxx
+ 665:   mov r20.zw, x2[5].xxxy
+ 666:   mov r21.xy, x2[6].xyxx
+ 667:   mov r21.zw, x2[7].xxxy
+ 668:   udiv r12.x, r14.x, vThreadIDInGroup.x, r4.y
+ 669:   utof r9.y, r14.x
+ 670:   mul r9.y, r9.y, l(6.283185)
+ 671:   ishl r15.x, r4.y, l(3)
+ 672:   utof r16.x, r15.x
+ 673:   div r9.y, r9.y, r16.x
+ 674:   movc r9.y, r0.y, r9.y, -r9.y
+ 675:   sincos r16.x, r17.x, r9.y
+ 676:   mul r22.xy, r10.yxyy, r16.xxxx
+ 677:   mad r23.y, r17.x, r10.x, -r22.x
+ 678:   mad r23.x, r17.x, r10.y, r22.y
+ 679:   mul r9.y, r16.x, r16.x
+ 680:   mad r9.y, r17.x, r17.x, -r9.y
+ 681:   dp2 r10.x, r17.xxxx, r16.xxxx
+ 682:   mul r22.xy, r10.wzww, r10.xxxx
+ 683:   mad r24.x, r9.y, r10.z, -r22.x
+ 684:   mad r24.y, r9.y, r10.w, r22.y
+ 685:   mul r10.y, r16.x, r10.x
+ 686:   mad r10.y, r9.y, r17.x, -r10.y
+ 687:   mul r10.x, r10.x, r17.x
+ 688:   mad r9.y, r9.y, r16.x, r10.x
+ 689:   mul r10.xz, r18.wwzw, r9.yyyy
+ 690:   mad r22.x, r10.y, r18.z, -r10.x
+ 691:   mad r22.y, r10.y, r18.w, r10.z
+ 692:   mul r10.x, r16.x, r9.y
+ 693:   mad r10.x, r10.y, r17.x, -r10.x
+ 694:   mul r9.y, r9.y, r17.x
+ 695:   mad r9.y, r10.y, r16.x, r9.y
+ 696:   mul r10.yz, r20.yyxy, r9.yyyy
+ 697:   mad r25.x, r10.x, r20.x, -r10.y
+ 698:   mad r25.y, r10.x, r20.y, r10.z
+ 699:   mul r10.y, r16.x, r9.y
+ 700:   mad r10.y, r10.x, r17.x, -r10.y
+ 701:   mul r9.y, r9.y, r17.x
+ 702:   mad r9.y, r10.x, r16.x, r9.y
+ 703:   mul r10.xz, r20.wwzw, r9.yyyy
+ 704:   mad r20.y, r10.y, r20.z, -r10.x
+ 705:   mad r20.x, r10.y, r20.w, r10.z
+ 706:   mul r10.x, r16.x, r9.y
+ 707:   mad r10.x, r10.y, r17.x, -r10.x
+ 708:   mul r9.y, r9.y, r17.x
+ 709:   mad r9.y, r10.y, r16.x, r9.y
+ 710:   mul r10.yz, r21.yyxy, r9.yyyy
+ 711:   mad r26.x, r10.x, r21.x, -r10.y
+ 712:   mad r26.y, r10.x, r21.y, r10.z
+ 713:   mul r10.y, r16.x, r9.y
+ 714:   mad r10.y, r10.x, r17.x, -r10.y
+ 715:   mul r9.y, r9.y, r17.x
+ 716:   mad r9.y, r10.x, r16.x, r9.y
+ 717:   mul r10.xz, r21.wwzw, r9.yyyy
+ 718:   mad r21.x, r10.y, r21.z, -r10.x
+ 719:   mad r21.y, r10.y, r21.w, r10.z
+ 720:   imul null, r9.y, r4.y, r12.x
+ 721:   ishl r9.y, r9.y, l(3)
+ 722:   iadd r9.y, r14.x, r9.y
+ 723:   add r10.xy, r8.zwzz, r25.xyxx
+ 724:   add r8.zw, r8.zzzw, -r25.xxxy
+ 725:   add r10.zw, r24.xxxy, r26.xxxy
+ 726:   add r24.xy, r24.xyxx, -r26.xyxx
+ 727:   mov r24.zw, -r24.yyyx
+ 728:   movc r18.zw, r0.yyyy, r24.zzzx, r24.yyyw
+ 729:   add r20.zw, r10.zzzw, r10.xxxy
+ 730:   add r21.zw, r8.zzzw, r18.zzzw
+ 731:   add r8.zw, r8.zzzw, -r18.zzzw
+ 732:   add r10.xy, -r10.zwzz, r10.xyxx
+ 733:   add r10.zw, r20.yyyx, r23.yyyx
+ 734:   add r18.zw, -r20.xxxy, r23.xxxy
+ 735:   add r20.xy, r21.xyxx, r22.xyxx
+ 736:   add r22.xy, -r21.xyxx, r22.xyxx
+ 737:   mov r22.zw, -r22.yyyx
+ 738:   movc r21.xy, r0.yyyy, r22.xzxx, r22.wyww
+ 739:   add r22.xy, r10.zwzz, r20.xyxx
+ 740:   add r22.zw, r18.zzzw, r21.xxxy
+ 741:   add r18.zw, r18.zzzw, -r21.xxxy
+ 742:   add r10.zw, r10.zzzw, -r20.xxxy
+ 743:   mul r20.xy, r2.zzzz, r22.zwzz
+ 744:   mad r21.x, r22.w, l(0.707107), -r20.x
+ 745:   mad r21.y, r22.z, l(0.707107), r20.y
+ 746:   add r20.xy, r20.zwzz, r22.xyxx
+ 747:   add r20.zw, r20.zzzw, -r22.xxxy
+ 748:   add r22.xy, r21.xyxx, r21.zwzz
+ 749:   add r21.xy, -r21.xyxx, r21.zwzz
+ 750:   add r23.zw, r10.zzzw, r10.yyyx
+ 751:   add r23.xy, -r10.wzww, r10.xyxx
+ 752:   swapc r10.xy, r23.xy, r0.yyyy, r23.xzxx, r23.wyww
+ 753:   mul r10.zw, r2.zzzz, r18.zzzw
+ 754:   mad r24.x, r18.w, l(-0.707107), -r10.z
+ 755:   mad r24.y, r18.z, l(-0.707107), r10.w
+ 756:   add r10.zw, r8.zzzw, r24.xxxy
+ 757:   add r8.zw, r8.zzzw, -r24.xxxy
+ 758:   sync_g_t
+ 759:   ushr r12.x, r9.y, l(5)
+ 760:   ishl r12.x, r12.x, l(3)
+ 761:   iadd r12.x, r9.y, r12.x
+ 762:   store_structured g0.x, r12.x, l(0), r20.x
+ 763:   iadd r9.y, r4.y, r9.y
+ 764:   ushr r14.x, r9.y, l(5)
+ 765:   ishl r14.x, r14.x, l(3)
+ 766:   iadd r14.x, r9.y, r14.x
+ 767:   store_structured g0.x, r14.x, l(0), r22.x
+ 768:   iadd r9.y, r4.y, r9.y
+ 769:   ushr r16.x, r9.y, l(5)
+ 770:   ishl r16.x, r16.x, l(3)
+ 771:   iadd r16.x, r9.y, r16.x
+ 772:   store_structured g0.x, r16.x, l(0), r23.x
+ 773:   iadd r9.y, r4.y, r9.y
+ 774:   ushr r17.x, r9.y, l(5)
+ 775:   ishl r17.x, r17.x, l(3)
+ 776:   iadd r17.x, r9.y, r17.x
+ 777:   store_structured g0.x, r17.x, l(0), r10.z
+ 778:   iadd r9.y, r4.y, r9.y
+ 779:   ushr r10.z, r9.y, l(5)
+ 780:   ishl r10.z, r10.z, l(3)
+ 781:   iadd r10.z, r9.y, r10.z
+ 782:   store_structured g0.x, r10.z, l(0), r20.z
+ 783:   iadd r9.y, r4.y, r9.y
+ 784:   ushr r18.z, r9.y, l(5)
+ 785:   ishl r18.z, r18.z, l(3)
+ 786:   iadd r18.z, r9.y, r18.z
+ 787:   store_structured g0.x, r18.z, l(0), r21.x
+ 788:   iadd r9.y, r4.y, r9.y
+ 789:   ushr r18.w, r9.y, l(5)
+ 790:   ishl r18.w, r18.w, l(3)
+ 791:   iadd r18.w, r9.y, r18.w
+ 792:   store_structured g0.x, r18.w, l(0), r10.x
+ 793:   iadd r9.y, r4.y, r9.y
+ 794:   ushr r10.x, r9.y, l(5)
+ 795:   ishl r10.x, r10.x, l(3)
+ 796:   iadd r9.y, r9.y, r10.x
+ 797:   store_structured g0.x, r9.y, l(0), r8.z
+ 798:   sync_g_t
+ 799:   ld_structured r24.x, r0.z, l(0), g0.xxxx
+ 800:   ld_structured r25.x, r0.w, l(0), g0.xxxx
+ 801:   ld_structured r26.x, r1.y, l(0), g0.xxxx
+ 802:   ld_structured r27.x, r2.y, l(0), g0.xxxx
+ 803:   ld_structured r28.x, r3.x, l(0), g0.xxxx
+ 804:   ld_structured r29.x, r3.y, l(0), g0.xxxx
+ 805:   ld_structured r30.x, r3.z, l(0), g0.xxxx
+ 806:   ld_structured r31.x, r3.w, l(0), g0.xxxx
+ 807:   sync_g_t
+ 808:   store_structured g0.x, r12.x, l(0), r20.y
+ 809:   store_structured g0.x, r14.x, l(0), r22.y
+ 810:   store_structured g0.x, r16.x, l(0), r23.y
+ 811:   store_structured g0.x, r17.x, l(0), r10.w
+ 812:   store_structured g0.x, r10.z, l(0), r20.w
+ 813:   store_structured g0.x, r18.z, l(0), r21.y
+ 814:   store_structured g0.x, r18.w, l(0), r10.y
+ 815:   store_structured g0.x, r9.y, l(0), r8.w
+ 816:   sync_g_t
+ 817:   ld_structured r24.y, r0.z, l(0), g0.xxxx
+ 818:   ld_structured r25.y, r0.w, l(0), g0.xxxx
+ 819:   ld_structured r26.y, r1.y, l(0), g0.xxxx
+ 820:   ld_structured r27.y, r2.y, l(0), g0.xxxx
+ 821:   ld_structured r28.y, r3.x, l(0), g0.xxxx
+ 822:   ld_structured r29.y, r3.y, l(0), g0.xxxx
+ 823:   ld_structured r30.y, r3.z, l(0), g0.xxxx
+ 824:   ld_structured r31.y, r3.w, l(0), g0.xxxx
+ 825:   mov x2[0].xy, r24.xyxx
+ 826:   mov x2[1].xy, r25.xyxx
+ 827:   mov x2[2].xy, r26.xyxx
+ 828:   mov x2[3].xy, r27.xyxx
+ 829:   mov x2[4].xy, r28.xyxx
+ 830:   mov x2[5].xy, r29.xyxx
+ 831:   mov x2[6].xy, r30.xyxx
+ 832:   mov x2[7].xy, r31.xyxx
+ 833:   mov r4.y, r15.x
+ 834: endloop
+ 835: mov r8.zw, x2[0].xxxy
+ 836: mov r10.xy, x2[1].xyxx
+ 837: mov r10.zw, x2[2].xxxy
+ 838: mov r18.zw, x2[3].xxxy
+ 839: mov r20.xy, x2[4].xyxx
+ 840: mov r20.zw, x2[5].xxxy
+ 841: mov r21.xy, x2[6].xyxx
+ 842: mov r21.zw, x2[7].xxxy
+ 843: utof r4.y, vThreadIDInGroup.x
+ 844: mul r22.xy, r4.yyyy, l(0.006136, -0.006136, 0.000000, 0.000000)
+ 845: movc r4.y, r0.y, r22.x, r22.y
+ 846: sincos r12.x, r14.x, r4.y
+ 847: mul r22.xy, r20.yxyy, r12.xxxx
+ 848: mad r23.x, r14.x, r20.x, -r22.x
+ 849: mad r23.y, r14.x, r20.y, r22.y
+ 850: mul r4.y, r2.z, r12.x
+ 851: mad r4.y, r14.x, l(0.707107), -r4.y
+ 852: mul r9.y, r12.x, l(0.707107)
+ 853: mad r9.y, r14.x, r2.z, r9.y
+ 854: mul r20.xy, r20.wzww, r9.yyyy
+ 855: mad r22.x, r4.y, r20.z, -r20.x
+ 856: mad r22.y, r4.y, r20.w, r20.y
+ 857: mul r15.x, r2.z, r9.y
+ 858: mad r15.x, r4.y, l(0.707107), -r15.x
+ 859: mul r16.x, r9.y, l(0.707107)
+ 860: mad r16.x, r4.y, r2.z, r16.x
+ 861: mul r20.xy, r21.yxyy, r16.xxxx
+ 862: mad r24.x, r15.x, r21.x, -r20.x
+ 863: mad r24.y, r15.x, r21.y, r20.y
+ 864: mul r17.x, r2.z, r16.x
+ 865: mad r17.x, r15.x, l(0.707107), -r17.x
+ 866: mul r19.x, r16.x, l(0.707107)
+ 867: mad r19.x, r15.x, r2.z, r19.x
+ 868: mul r20.xy, r21.wzww, r19.xxxx
+ 869: mad r21.x, r17.x, r21.z, -r20.x
+ 870: mad r21.y, r17.x, r21.w, r20.y
+ 871: add r20.xy, r8.zwzz, r23.xyxx
+ 872: add r8.zw, r8.zzzw, -r23.xxxy
+ 873: add r20.zw, r10.xxxy, r22.xxxy
+ 874: add r10.xy, r10.xyxx, -r22.xyxx
+ 875: add r21.zw, r10.zzzw, r24.xxxy
+ 876: add r10.zw, r10.zzzw, -r24.xxxy
+ 877: add r22.xy, r18.zwzz, r21.xyxx
+ 878: add r18.zw, r18.zzzw, -r21.xxxy
+ 879: sync_g_t
+ 880: add r21.xy, r6.zwzz, r4.zwzz
+ 881: add r4.zw, -r6.zzzw, r4.zzzw
+ 882: add r6.zw, r7.zzzw, r5.zzzw
+ 883: add r23.xy, -r7.zwzz, r5.zwzz
+ 884: mov r23.zw, -r23.yyyx
+ 885: movc r5.zw, r0.yyyy, r23.zzzx, r23.yyyw
+ 886: add r7.zw, r6.zzzw, r21.xxxy
+ 887: add r22.zw, r4.zzzw, r5.zzzw
+ 888: add r4.zw, r4.zzzw, -r5.zzzw
+ 889: add r5.zw, -r6.zzzw, r21.xxxy
+ 890: add r6.zw, r7.xxxy, r5.xxxy
+ 891: add r5.xy, -r7.yxyy, r5.yxyy
+ 892: add r7.xy, r8.xyxx, r6.xyxx
+ 893: add r23.xy, -r8.xyxx, r6.xyxx
+ 894: mov r23.zw, -r23.yyyx
+ 895: movc r6.xy, r0.yyyy, r23.xzxx, r23.wyww
+ 896: add r8.xy, r6.zwzz, r7.xyxx
+ 897: add r21.xy, r5.xyxx, r6.xyxx
+ 898: add r5.xy, r5.xyxx, -r6.xyxx
+ 899: add r6.xy, r6.zwzz, -r7.xyxx
+ 900: mul r6.zw, r2.zzzz, r21.xxxy
+ 901: mad r7.x, r21.y, l(0.707107), -r6.z
+ 902: mad r7.y, r21.x, l(0.707107), r6.w
+ 903: add r6.zw, r7.zzzw, r8.xxxy
+ 904: add r7.zw, r7.zzzw, -r8.xxxy
+ 905: add r8.xy, r7.xyxx, r22.zwzz
+ 906: add r7.xy, -r7.xyxx, r22.zwzz
+ 907: add r23.zw, r5.wwwz, r6.xxxy
+ 908: add r23.xy, r5.zwzz, -r6.yxyy
+ 909: swapc r6.xy, r21.xy, r0.yyyy, r23.xzxx, r23.wyww
+ 910: mul r5.zw, r2.zzzz, r5.xxxy
+ 911: mad r23.x, r5.y, l(-0.707107), -r5.z
+ 912: mad r23.y, r5.x, l(-0.707107), r5.w
+ 913: add r5.xy, r4.zwzz, r23.xyxx
+ 914: add r4.zw, r4.zzzw, -r23.xxxy
+ 915: store_structured g0.x, r1.z, l(0), r6.z
+ 916: store_structured g0.x, r9.z, l(0), r8.x
+ 917: store_structured g0.x, r13.x, l(0), r21.x
+ 918: store_structured g0.x, r1.w, l(0), r5.x
+ 919: store_structured g0.x, r13.z, l(0), r7.z
+ 920: store_structured g0.x, r1.x, l(0), r7.x
+ 921: store_structured g0.x, r18.x, l(0), r6.x
+ 922: store_structured g0.x, r2.x, l(0), r4.z
+ 923: sync_g_t
+ 924: ld_structured r23.x, r2.w, l(0), g0.xxxx
+ 925: ld_structured r24.x, r9.w, l(0), g0.xxxx
+ 926: ld_structured r25.x, r13.y, l(0), g0.xxxx
+ 927: ld_structured r26.x, r4.x, l(0), g0.xxxx
+ 928: ld_structured r27.x, r13.w, l(0), g0.xxxx
+ 929: ld_structured r28.x, r9.x, l(0), g0.xxxx
+ 930: ld_structured r29.x, r18.y, l(0), g0.xxxx
+ 931: ld_structured r30.x, r11.x, l(0), g0.xxxx
+ 932: sync_g_t
+ 933: store_structured g0.x, r1.z, l(0), r6.w
+ 934: store_structured g0.x, r9.z, l(0), r8.y
+ 935: store_structured g0.x, r13.x, l(0), r21.y
+ 936: store_structured g0.x, r1.w, l(0), r5.y
+ 937: store_structured g0.x, r13.z, l(0), r7.w
+ 938: store_structured g0.x, r1.x, l(0), r7.y
+ 939: store_structured g0.x, r18.x, l(0), r6.y
+ 940: store_structured g0.x, r2.x, l(0), r4.w
+ 941: sync_g_t
+ 942: ld_structured r23.y, r2.w, l(0), g0.xxxx
+ 943: ld_structured r24.y, r9.w, l(0), g0.xxxx
+ 944: ld_structured r25.y, r13.y, l(0), g0.xxxx
+ 945: ld_structured r26.y, r4.x, l(0), g0.xxxx
+ 946: ld_structured r27.y, r13.w, l(0), g0.xxxx
+ 947: ld_structured r28.y, r9.x, l(0), g0.xxxx
+ 948: ld_structured r29.y, r18.y, l(0), g0.xxxx
+ 949: ld_structured r30.y, r11.x, l(0), g0.xxxx
+ 950: mov x3[0].xy, r23.xyxx
+ 951: mov x3[1].xy, r24.xyxx
+ 952: mov x3[2].xy, r25.xyxx
+ 953: mov x3[3].xy, r26.xyxx
+ 954: mov x3[4].xy, r27.xyxx
+ 955: mov x3[5].xy, r28.xyxx
+ 956: mov x3[6].xy, r29.xyxx
+ 957: mov x3[7].xy, r30.xyxx
+ 958: mov r1.x, l(8)
+ 959: loop
+ 960:   uge r1.z, r1.x, l(128)
+ 961:   breakc_nz r1.z
+ 962:   mov r1.zw, x3[0].xxxy
+ 963:   mov r2.xw, x3[1].xxxy
+ 964:   mov r4.xz, x3[2].xxyx
+ 965:   mov r5.xy, x3[3].xyxx
+ 966:   mov r5.zw, x3[4].xxxy
+ 967:   mov r6.xy, x3[5].xyxx
+ 968:   mov r6.zw, x3[6].xxxy
+ 969:   mov r7.xy, x3[7].xyxx
+ 970:   udiv r8.x, r9.x, vThreadIDInGroup.x, r1.x
+ 971:   utof r4.w, r9.x
+ 972:   mul r4.w, r4.w, l(6.283185)
+ 973:   ishl r7.z, r1.x, l(3)
+ 974:   utof r7.w, r7.z
+ 975:   div r4.w, r4.w, r7.w
+ 976:   movc r4.w, r0.y, r4.w, -r4.w
+ 977:   sincos r11.x, r13.x, r4.w
+ 978:   mul r9.zw, r2.wwwx, r11.xxxx
+ 979:   mad r18.y, r13.x, r2.x, -r9.z
+ 980:   mad r18.x, r13.x, r2.w, r9.w
+ 981:   mul r2.x, r11.x, r11.x
+ 982:   mad r2.x, r13.x, r13.x, -r2.x
+ 983:   dp2 r2.w, r13.xxxx, r11.xxxx
+ 984:   mul r9.zw, r4.zzzx, r2.wwww
+ 985:   mad r21.x, r2.x, r4.x, -r9.z
+ 986:   mad r21.y, r2.x, r4.z, r9.w
+ 987:   mul r4.x, r11.x, r2.w
+ 988:   mad r4.x, r2.x, r13.x, -r4.x
+ 989:   mul r2.w, r2.w, r13.x
+ 990:   mad r2.x, r2.x, r11.x, r2.w
+ 991:   mul r4.zw, r5.yyyx, r2.xxxx
+ 992:   mad r23.x, r4.x, r5.x, -r4.z
+ 993:   mad r23.y, r4.x, r5.y, r4.w
+ 994:   mul r2.w, r11.x, r2.x
+ 995:   mad r2.w, r4.x, r13.x, -r2.w
+ 996:   mul r2.x, r2.x, r13.x
+ 997:   mad r2.x, r4.x, r11.x, r2.x
+ 998:   mul r4.xz, r5.wwzw, r2.xxxx
+ 999:   mad r5.x, r2.w, r5.z, -r4.x
+1000:   mad r5.y, r2.w, r5.w, r4.z
+1001:   mul r4.x, r11.x, r2.x
+1002:   mad r4.x, r2.w, r13.x, -r4.x
+1003:   mul r2.x, r2.x, r13.x
+1004:   mad r2.x, r2.w, r11.x, r2.x
+1005:   mul r4.zw, r6.yyyx, r2.xxxx
+1006:   mad r24.y, r4.x, r6.x, -r4.z
+1007:   mad r24.x, r4.x, r6.y, r4.w
+1008:   mul r2.w, r11.x, r2.x
+1009:   mad r2.w, r4.x, r13.x, -r2.w
+1010:   mul r2.x, r2.x, r13.x
+1011:   mad r2.x, r4.x, r11.x, r2.x
+1012:   mul r4.xz, r6.wwzw, r2.xxxx
+1013:   mad r6.x, r2.w, r6.z, -r4.x
+1014:   mad r6.y, r2.w, r6.w, r4.z
+1015:   mul r4.x, r11.x, r2.x
+1016:   mad r4.x, r2.w, r13.x, -r4.x
+1017:   mul r2.x, r2.x, r13.x
+1018:   mad r2.x, r2.w, r11.x, r2.x
+1019:   mul r2.xw, r7.yyyx, r2.xxxx
+1020:   mad r13.x, r4.x, r7.x, -r2.x
+1021:   mad r13.y, r4.x, r7.y, r2.w
+1022:   imul null, r2.x, r1.x, r8.x
+1023:   ishl r2.x, r2.x, l(3)
+1024:   iadd r2.x, r9.x, r2.x
+1025:   add r4.xz, r1.zzwz, r5.xxyx
+1026:   add r1.zw, r1.zzzw, -r5.xxxy
+1027:   add r5.xy, r6.xyxx, r21.xyxx
+1028:   add r6.xy, -r6.xyxx, r21.xyxx
+1029:   mov r6.zw, -r6.yyyx
+1030:   movc r5.zw, r0.yyyy, r6.zzzx, r6.yyyw
+1031:   add r6.xy, r4.xzxx, r5.xyxx
+1032:   add r6.zw, r1.zzzw, r5.zzzw
+1033:   add r1.zw, r1.zzzw, -r5.zzzw
+1034:   add r4.xz, r4.xxzx, -r5.xxyx
+1035:   add r5.xy, r18.yxyy, r24.yxyy
+1036:   add r5.zw, r18.xxxy, -r24.xxxy
+1037:   add r7.xy, r13.xyxx, r23.xyxx
+1038:   add r13.xy, -r13.xyxx, r23.xyxx
+1039:   mov r13.zw, -r13.yyyx
+1040:   movc r8.xy, r0.yyyy, r13.xzxx, r13.wyww
+1041:   add r9.xz, r5.xxyx, r7.xxyx
+1042:   add r13.xy, r5.zwzz, r8.xyxx
+1043:   add r5.zw, r5.zzzw, -r8.xxxy
+1044:   add r5.xy, r5.xyxx, -r7.xyxx
+1045:   mul r7.xy, r2.zzzz, r13.xyxx
+1046:   mad r8.x, r13.y, l(0.707107), -r7.x
+1047:   mad r8.y, r13.x, l(0.707107), r7.y
+1048:   add r7.xy, r6.xyxx, r9.xzxx
+1049:   add r6.xy, r6.xyxx, -r9.xzxx
+1050:   add r9.xz, r6.zzwz, r8.xxyx
+1051:   add r6.zw, r6.zzzw, -r8.xxxy
+1052:   add r13.zw, r4.zzzx, r5.xxxy
+1053:   add r13.xy, r4.xzxx, -r5.yxyy
+1054:   swapc r5.xy, r8.xy, r0.yyyy, r13.xzxx, r13.wyww
+1055:   mul r4.xz, r2.zzzz, r5.zzwz
+1056:   mad r13.x, r5.w, l(-0.707107), -r4.x
+1057:   mad r13.y, r5.z, l(-0.707107), r4.z
+1058:   add r4.xz, r1.zzwz, r13.xxyx
+1059:   add r1.zw, r1.zzzw, -r13.xxxy
+1060:   sync_g_t
+1061:   ushr r2.w, r2.x, l(5)
+1062:   ishl r2.w, r2.w, l(3)
+1063:   iadd r2.w, r2.w, r2.x
+1064:   store_structured g0.x, r2.w, l(0), r7.x
+1065:   iadd r2.x, r1.x, r2.x
+1066:   ushr r4.w, r2.x, l(5)
+1067:   ishl r4.w, r4.w, l(3)
+1068:   iadd r4.w, r2.x, r4.w
+1069:   store_structured g0.x, r4.w, l(0), r9.x
+1070:   iadd r2.x, r1.x, r2.x
+1071:   ushr r5.z, r2.x, l(5)
+1072:   ishl r5.z, r5.z, l(3)
+1073:   iadd r5.z, r2.x, r5.z
+1074:   store_structured g0.x, r5.z, l(0), r8.x
+1075:   iadd r2.x, r1.x, r2.x
+1076:   ushr r5.w, r2.x, l(5)
+1077:   ishl r5.w, r5.w, l(3)
+1078:   iadd r5.w, r2.x, r5.w
+1079:   store_structured g0.x, r5.w, l(0), r4.x
+1080:   iadd r2.x, r1.x, r2.x
+1081:   ushr r4.x, r2.x, l(5)
+1082:   ishl r4.x, r4.x, l(3)
+1083:   iadd r4.x, r2.x, r4.x
+1084:   store_structured g0.x, r4.x, l(0), r6.x
+1085:   iadd r2.x, r1.x, r2.x
+1086:   ushr r6.x, r2.x, l(5)
+1087:   ishl r6.x, r6.x, l(3)
+1088:   iadd r6.x, r2.x, r6.x
+1089:   store_structured g0.x, r6.x, l(0), r6.z
+1090:   iadd r2.x, r1.x, r2.x
+1091:   ushr r6.z, r2.x, l(5)
+1092:   ishl r6.z, r6.z, l(3)
+1093:   iadd r6.z, r2.x, r6.z
+1094:   store_structured g0.x, r6.z, l(0), r5.x
+1095:   iadd r2.x, r1.x, r2.x
+1096:   ushr r5.x, r2.x, l(5)
+1097:   ishl r5.x, r5.x, l(3)
+1098:   iadd r2.x, r2.x, r5.x
+1099:   store_structured g0.x, r2.x, l(0), r1.z
+1100:   sync_g_t
+1101:   ld_structured r13.x, r0.z, l(0), g0.xxxx
+1102:   ld_structured r18.x, r0.w, l(0), g0.xxxx
+1103:   ld_structured r21.x, r1.y, l(0), g0.xxxx
+1104:   ld_structured r23.x, r2.y, l(0), g0.xxxx
+1105:   ld_structured r24.x, r3.x, l(0), g0.xxxx
+1106:   ld_structured r25.x, r3.y, l(0), g0.xxxx
+1107:   ld_structured r26.x, r3.z, l(0), g0.xxxx
+1108:   ld_structured r27.x, r3.w, l(0), g0.xxxx
+1109:   sync_g_t
+1110:   store_structured g0.x, r2.w, l(0), r7.y
+1111:   store_structured g0.x, r4.w, l(0), r9.z
+1112:   store_structured g0.x, r5.z, l(0), r8.y
+1113:   store_structured g0.x, r5.w, l(0), r4.z
+1114:   store_structured g0.x, r4.x, l(0), r6.y
+1115:   store_structured g0.x, r6.x, l(0), r6.w
+1116:   store_structured g0.x, r6.z, l(0), r5.y
+1117:   store_structured g0.x, r2.x, l(0), r1.w
+1118:   sync_g_t
+1119:   ld_structured r13.y, r0.z, l(0), g0.xxxx
+1120:   ld_structured r18.y, r0.w, l(0), g0.xxxx
+1121:   ld_structured r21.y, r1.y, l(0), g0.xxxx
+1122:   ld_structured r23.y, r2.y, l(0), g0.xxxx
+1123:   ld_structured r24.y, r3.x, l(0), g0.xxxx
+1124:   ld_structured r25.y, r3.y, l(0), g0.xxxx
+1125:   ld_structured r26.y, r3.z, l(0), g0.xxxx
+1126:   ld_structured r27.y, r3.w, l(0), g0.xxxx
+1127:   mov x3[0].xy, r13.xyxx
+1128:   mov x3[1].xy, r18.xyxx
+1129:   mov x3[2].xy, r21.xyxx
+1130:   mov x3[3].xy, r23.xyxx
+1131:   mov x3[4].xy, r24.xyxx
+1132:   mov x3[5].xy, r25.xyxx
+1133:   mov x3[6].xy, r26.xyxx
+1134:   mov x3[7].xy, r27.xyxx
+1135:   mov r1.x, r7.z
+1136: endloop
+1137: mov r0.zw, x3[0].xxxy
+1138: mov r1.xy, x3[1].xyxx
+1139: mov r1.zw, x3[2].xxxy
+1140: mov r2.xy, x3[3].xyxx
+1141: mov r2.zw, x3[4].xxxy
+1142: mov r3.xy, x3[5].xyxx
+1143: mov r3.zw, x3[6].xxxy
+1144: mov r4.xz, x3[7].xxyx
+1145: mul r5.xy, r2.wzww, r12.xxxx
+1146: mad r5.z, r14.x, r2.z, -r5.x
+1147: mad r5.w, r14.x, r2.w, r5.y
+1148: mul r2.zw, r3.yyyx, r9.yyyy
+1149: mad r6.z, r4.y, r3.x, -r2.z
+1150: mad r6.w, r4.y, r3.y, r2.w
+1151: mul r2.zw, r3.wwwz, r16.xxxx
+1152: mad r7.z, r15.x, r3.z, -r2.z
+1153: mad r7.w, r15.x, r3.w, r2.w
+1154: mul r2.zw, r4.zzzx, r19.xxxx
+1155: mad r3.z, r17.x, r4.x, -r2.z
+1156: mad r3.w, r17.x, r4.z, r2.w
+1157: add r2.zw, r0.zzzw, r5.zzzw
+1158: add r0.zw, r0.zzzw, -r5.zzzw
+1159: add r3.xy, r1.xyxx, r6.zwzz
+1160: add r1.xy, r1.xyxx, -r6.zwzz
+1161: add r4.xy, r1.zwzz, r7.zwzz
+1162: add r1.zw, r1.zzzw, -r7.zzzw
+1163: add r4.zw, r2.xxxy, r3.zzzw
+1164: add r2.xy, r2.xyxx, -r3.zwzz
+1165: if_nz r0.y
+1166:   sync_g_t
+1167:   store_structured g0.x, vThreadIDInGroup.x, l(0), r20.x
+1168:   store_structured g0.x, r11.y, l(0), r20.z
+1169:   store_structured g0.x, r12.y, l(0), r21.z
+1170:   store_structured g0.x, r14.y, l(0), r22.x
+1171:   store_structured g0.x, r15.y, l(0), r8.z
+1172:   store_structured g0.x, r16.y, l(0), r10.x
+1173:   store_structured g0.x, r17.y, l(0), r10.z
+1174:   store_structured g0.x, r19.y, l(0), r18.z
+1175:   sync_g_t
+1176:   ult r0.y, l(0), vThreadIDInGroup.x
+1177:   iadd r3.z, -vThreadIDInGroup.x, l(1024)
+1178:   and r0.y, r0.y, r3.z
+1179:   ld_structured r3.z, r0.y, l(0), g0.xxxx
+1180:   add r3.z, r3.z, r20.x
+1181:   iadd r3.w, -r11.y, l(1024)
+1182:   ld_structured r5.x, r3.w, l(0), g0.xxxx
+1183:   add r5.x, r5.x, r20.z
+1184:   iadd r5.z, -r12.y, l(1024)
+1185:   ld_structured r5.w, r5.z, l(0), g0.xxxx
+1186:   add r6.x, r5.w, r21.z
+1187:   iadd r5.w, -r14.y, l(1024)
+1188:   ld_structured r6.z, r5.w, l(0), g0.xxxx
+1189:   add r7.x, r6.z, r22.x
+1190:   iadd r6.z, -r15.y, l(1024)
+1191:   ld_structured r6.w, r6.z, l(0), g0.xxxx
+1192:   ult r7.z, l(512), r15.y
+1193:   movc r7.w, r7.z, l(-1.000000), l(1.000000)
+1194:   mad r8.y, r6.w, r7.w, r8.z
+1195:   iadd r6.w, -r16.y, l(1024)
+1196:   ld_structured r9.x, r6.w, l(0), g0.xxxx
+1197:   iadd r9.yz, -r17.yyyy, l(0, 1024, 896, 0)
+1198:   ld_structured r9.w, r9.y, l(0), g0.xxxx
+1199:   add r9.xw, -r9.xxxw, r10.xxxz
+1200:   ld_structured r11.x, r9.z, l(0), g0.xxxx
+1201:   add r11.x, -r11.x, r18.z
+1202:   ld_structured r12.x, l(0), l(0), g0.xxxx
+1203:   add r12.x, r12.x, r12.x
+1204:   movc r13.x, vThreadIDInGroup.x, r3.z, r12.x
+1205:   sync_g_t
+1206:   store_structured g0.x, vThreadIDInGroup.x, l(0), r20.y
+1207:   store_structured g0.x, r11.y, l(0), r20.w
+1208:   store_structured g0.x, r12.y, l(0), r21.w
+1209:   store_structured g0.x, r14.y, l(0), r22.y
+1210:   store_structured g0.x, r15.y, l(0), r8.w
+1211:   store_structured g0.x, r16.y, l(0), r10.y
+1212:   store_structured g0.x, r17.y, l(0), r10.w
+1213:   store_structured g0.x, r19.y, l(0), r18.w
+1214:   sync_g_t
+1215:   ld_structured r3.z, r0.y, l(0), g0.xxxx
+1216:   add r3.z, -r3.z, r20.y
+1217:   ld_structured r12.x, r3.w, l(0), g0.xxxx
+1218:   add r5.y, -r12.x, r20.w
+1219:   ld_structured r12.x, r5.z, l(0), g0.xxxx
+1220:   add r6.y, -r12.x, r21.w
+1221:   ld_structured r12.x, r5.w, l(0), g0.xxxx
+1222:   add r7.y, -r12.x, r22.y
+1223:   ld_structured r12.x, r6.z, l(0), g0.xxxx
+1224:   add r8.x, r8.w, r12.x
+1225:   ld_structured r12.x, r6.w, l(0), g0.xxxx
+1226:   add r12.x, r10.y, r12.x
+1227:   ld_structured r13.z, r9.y, l(0), g0.xxxx
+1228:   add r13.z, r10.w, r13.z
+1229:   ld_structured r13.w, r9.z, l(0), g0.xxxx
+1230:   add r13.w, r13.w, r18.w
+1231:   ld_structured r14.x, l(0), l(0), g0.xxxx
+1232:   add r14.x, r14.x, r14.x
+1233:   movc r13.y, vThreadIDInGroup.x, r3.z, r14.x
+1234:   mul r23.xy, r13.yxyy, l(0.500000, 0.500000, 0.000000, 0.000000)
+1235:   mul r24.xy, r5.xyxx, l(0.500000, 0.500000, 0.000000, 0.000000)
+1236:   mul r25.xy, r6.xyxx, l(0.500000, 0.500000, 0.000000, 0.000000)
+1237:   mul r26.xy, r7.xyxx, l(0.500000, 0.500000, 0.000000, 0.000000)
+1238:   mul r27.xyzw, r8.yxxy, l(0.500000, 0.500000, 0.500000, -0.500000)
+1239:   movc r27.xy, r7.zzzz, r27.wzww, r27.yxyy
+1240:   mul r3.z, r12.x, l(-0.500000)
+1241:   mov r28.x, -r3.z
+1242:   mul r28.y, r9.x, l(-0.500000)
+1243:   mul r3.z, r13.z, l(-0.500000)
+1244:   mov r29.x, -r3.z
+1245:   mul r29.y, r9.w, l(-0.500000)
+1246:   mul r3.z, r13.w, l(-0.500000)
+1247:   mov r13.x, -r3.z
+1248:   mul r13.y, r11.x, l(-0.500000)
+1249:   sync_g_t
+1250:   store_structured g0.x, vThreadIDInGroup.x, l(0), r2.z
+1251:   store_structured g0.x, r11.y, l(0), r3.x
+1252:   store_structured g0.x, r12.y, l(0), r4.x
+1253:   store_structured g0.x, r14.y, l(0), r4.z
+1254:   store_structured g0.x, r15.y, l(0), r0.z
+1255:   store_structured g0.x, r16.y, l(0), r1.x
+1256:   store_structured g0.x, r17.y, l(0), r1.z
+1257:   store_structured g0.x, r19.y, l(0), r2.x
+1258:   sync_g_t
+1259:   ld_structured r3.z, r0.y, l(0), g0.xxxx
+1260:   add r3.z, r2.z, r3.z
+1261:   ld_structured r5.x, r3.w, l(0), g0.xxxx
+1262:   add r22.z, r3.x, r5.x
+1263:   ld_structured r5.x, r5.z, l(0), g0.xxxx
+1264:   add r30.z, r4.x, r5.x
+1265:   ld_structured r5.x, r5.w, l(0), g0.xxxx
+1266:   add r31.z, r4.z, r5.x
+1267:   ld_structured r5.x, r6.z, l(0), g0.xxxx
+1268:   mad r32.w, r5.x, r7.w, r0.z
+1269:   ld_structured r5.x, r6.w, l(0), g0.xxxx
+1270:   ld_structured r5.y, r9.y, l(0), g0.xxxx
+1271:   add r5.xy, r1.xzxx, -r5.xyxx
+1272:   ld_structured r6.x, r9.z, l(0), g0.xxxx
+1273:   add r6.x, r2.x, -r6.x
+1274:   ld_structured r6.y, l(0), l(0), g0.xxxx
+1275:   add r6.y, r6.y, r6.y
+1276:   movc r33.z, vThreadIDInGroup.x, r3.z, r6.y
+1277:   sync_g_t
+1278:   store_structured g0.x, vThreadIDInGroup.x, l(0), r2.w
+1279:   store_structured g0.x, r11.y, l(0), r3.y
+1280:   store_structured g0.x, r12.y, l(0), r4.y
+1281:   store_structured g0.x, r14.y, l(0), r4.w
+1282:   store_structured g0.x, r15.y, l(0), r0.w
+1283:   store_structured g0.x, r16.y, l(0), r1.y
+1284:   store_structured g0.x, r17.y, l(0), r1.w
+1285:   store_structured g0.x, r19.y, l(0), r2.y
+1286:   sync_g_t
+1287:   ld_structured r0.y, r0.y, l(0), g0.xxxx
+1288:   add r0.y, -r0.y, r2.w
+1289:   ld_structured r3.z, r3.w, l(0), g0.xxxx
+1290:   add r22.w, -r3.z, r3.y
+1291:   ld_structured r3.z, r5.z, l(0), g0.xxxx
+1292:   add r30.w, -r3.z, r4.y
+1293:   ld_structured r3.z, r5.w, l(0), g0.xxxx
+1294:   add r31.w, -r3.z, r4.w
+1295:   ld_structured r3.z, r6.z, l(0), g0.xxxx
+1296:   add r32.z, r0.w, r3.z
+1297:   ld_structured r3.z, r6.w, l(0), g0.xxxx
+1298:   ld_structured r3.w, r9.y, l(0), g0.xxxx
+1299:   add r3.zw, r1.yyyw, r3.zzzw
+1300:   ld_structured r5.z, r9.z, l(0), g0.xxxx
+1301:   add r5.z, r2.y, r5.z
+1302:   ld_structured r5.w, l(0), l(0), g0.xxxx
+1303:   add r5.w, r5.w, r5.w
+1304:   movc r33.w, vThreadIDInGroup.x, r0.y, r5.w
+1305:   mul r23.zw, r33.wwwz, l(0.000000, 0.000000, 0.500000, 0.500000)
+1306:   mul r24.zw, r22.zzzw, l(0.000000, 0.000000, 0.500000, 0.500000)
+1307:   mul r25.zw, r30.zzzw, l(0.000000, 0.000000, 0.500000, 0.500000)
+1308:   mul r26.zw, r31.zzzw, l(0.000000, 0.000000, 0.500000, 0.500000)
+1309:   mul r6.yz, r32.wwzw, l(0.000000, 0.500000, 0.500000, 0.000000)
+1310:   mul r7.xy, r32.zwzz, l(0.500000, -0.500000, 0.000000, 0.000000)
+1311:   movc r27.zw, r7.zzzz, r7.yyyx, r6.zzzy
+1312:   mul r0.y, r3.z, l(-0.500000)
+1313:   mov r28.z, -r0.y
+1314:   mul r28.w, r5.x, l(-0.500000)
+1315:   mul r0.y, r3.w, l(-0.500000)
+1316:   mov r29.z, -r0.y
+1317:   mul r29.w, r5.y, l(-0.500000)
+1318:   mul r0.y, r5.z, l(-0.500000)
+1319:   mov r13.z, -r0.y
+1320:   mul r13.w, r6.x, l(-0.500000)
+1321:   if_nz r0.x
+1322:     mov r5.x, vThreadIDInGroup.x
+1323:     mov r5.yzw, vThreadGroupID.zzzz
+1324:     store_uav_typed u0.xyzw, r5.xyzw, r23.yxwz
+1325:     mov r11.z, vThreadGroupID.z
+1326:     store_uav_typed u0.xyzw, r11.yzzz, r24.xyzw
+1327:     mov r12.z, vThreadGroupID.z
+1328:     store_uav_typed u0.xyzw, r12.yzzz, r25.xyzw
+1329:     mov r14.z, vThreadGroupID.z
+1330:     store_uav_typed u0.xyzw, r14.yzzz, r26.xyzw
+1331:     mov r15.z, vThreadGroupID.z
+1332:     store_uav_typed u0.xyzw, r15.yzzz, r27.yxwz
+1333:     ieq r0.y, r15.y, l(512)
+1334:     if_nz r0.y
+1335:       mov r5.x, l(512)
+1336:       mov r5.yzw, vThreadGroupID.zzzz
+1337:       mov r6.xz, r27.yywy
+1338:       mov r6.yw, l(0, 0, 0, 0)
+1339:       store_uav_typed u0.xyzw, r5.xyzw, r6.xyzw
+1340:       mov r5.x, l(1025)
+1341:       mov r5.yzw, vThreadGroupID.zzzz
+1342:       mov r27.yw, l(0, 0, 0, 0)
+1343:       store_uav_typed u0.xyzw, r5.xyzw, r27.xyzw
+1344:     endif
+1345:     mov r16.z, vThreadGroupID.z
+1346:     store_uav_typed u0.xyzw, r16.yzzz, r28.xyzw
+1347:     mov r17.z, vThreadGroupID.z
+1348:     store_uav_typed u0.xyzw, r17.yzzz, r29.xyzw
+1349:     mov r19.z, vThreadGroupID.z
+1350:     store_uav_typed u0.xyzw, r19.yzzz, r13.xyzw
+1351:     if_z vThreadIDInGroup.x
+1352:       mov r5.x, l(0)
+1353:       mov r5.yzw, vThreadGroupID.zzzz
+1354:       mov r6.xz, r23.yywy
+1355:       mov r6.yw, l(0, 0, 0, 0)
+1356:       store_uav_typed u0.xyzw, r5.xyzw, r6.xyzw
+1357:       mov r5.x, l(1024)
+1358:       mov r5.yzw, vThreadGroupID.zzzz
+1359:       mov r23.yw, l(0, 0, 0, 0)
+1360:       store_uav_typed u0.xyzw, r5.xyzw, r23.xyzw
+1361:     endif
+1362:   else
+1363:     mov r5.x, vThreadGroupID.z
+1364:     mov r5.yzw, vThreadIDInGroup.xxxx
+1365:     store_uav_typed u0.xyzw, r5.xyzw, r23.yxwz
+1366:     mov r11.w, vThreadGroupID.z
+1367:     store_uav_typed u0.xyzw, r11.wyyy, r24.xyzw
+1368:     mov r12.w, vThreadGroupID.z
+1369:     store_uav_typed u0.xyzw, r12.wyyy, r25.xyzw
+1370:     mov r14.w, vThreadGroupID.z
+1371:     store_uav_typed u0.xyzw, r14.wyyy, r26.xyzw
+1372:     mov r15.w, vThreadGroupID.z
+1373:     store_uav_typed u0.xyzw, r15.wyyy, r27.yxwz
+1374:     ieq r0.y, r15.y, l(512)
+1375:     if_nz r0.y
+1376:       mov r5.x, vThreadGroupID.z
+1377:       mov r5.yzw, l(0, 512, 512, 512)
+1378:       mov r6.xz, r27.yywy
+1379:       mov r6.yw, l(0, 0, 0, 0)
+1380:       store_uav_typed u0.xyzw, r5.xyzw, r6.xyzw
+1381:       mov r5.x, vThreadGroupID.z
+1382:       mov r5.yzw, l(0, 1025, 1025, 1025)
+1383:       mov r27.yw, l(0, 0, 0, 0)
+1384:       store_uav_typed u0.xyzw, r5.xyzw, r27.xyzw
+1385:     endif
+1386:     mov r16.w, vThreadGroupID.z
+1387:     store_uav_typed u0.xyzw, r16.wyyy, r28.xyzw
+1388:     mov r17.w, vThreadGroupID.z
+1389:     store_uav_typed u0.xyzw, r17.wyyy, r29.xyzw
+1390:     mov r19.w, vThreadGroupID.z
+1391:     store_uav_typed u0.xyzw, r19.wyyy, r13.xyzw
+1392:     if_z vThreadIDInGroup.x
+1393:       mov r5.x, vThreadGroupID.z
+1394:       mov r5.yzw, l(0, 0, 0, 0)
+1395:       mov r6.xz, r23.yywy
+1396:       mov r6.yw, l(0, 0, 0, 0)
+1397:       store_uav_typed u0.xyzw, r5.xyzw, r6.xyzw
+1398:       mov r5.x, vThreadGroupID.z
+1399:       mov r5.yzw, l(0, 1024, 1024, 1024)
+1400:       mov r23.yw, l(0, 0, 0, 0)
+1401:       store_uav_typed u0.xyzw, r5.xyzw, r23.xyzw
+1402:     endif
+1403:   endif
+1404: else
+1405:   min r3.zw, -r20.xxxy, l(0, 0, 0, 0)
+1406:   min r5.xy, -r20.zwzz, l(0, 0, 0, 0)
+1407:   min r3.xy, -r3.xyxx, l(0, 0, 0, 0)
+1408:   min r5.zw, -r21.zzzw, l(0, 0, 0, 0)
+1409:   min r6.xy, -r22.xyxx, l(0, 0, 0, 0)
+1410:   min r4.xyzw, -r4.xyzw, l(0, 0, 0, 0)
+1411:   min r6.zw, -r8.zzzw, l(0, 0, 0, 0)
+1412:   min r0.yz, -r0.zzwz, l(0, 0, 0, 0)
+1413:   min r7.xyzw, -r10.xyzw, l(0, 0, 0, 0)
+1414:   min r1.xyzw, -r1.xyzw, l(0, 0, 0, 0)
+1415:   min r8.xy, -r18.zwzz, l(0, 0, 0, 0)
+1416:   min r2.xyzw, -r2.xyzw, l(0, 0, 0, 0)
+1417:   ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) r9.xy, l(0), l(0), t1.xyxx
+1418:   ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) r9.z, l(0), l(12), t1.xxxx
+1419:   mul r10.xy, -r3.zwzz, r9.xyxx
+1420:   mul r10.zw, -r2.zzzw, r9.xxxz
+1421:   mul r11.xy, -r5.xyxx, r9.xyxx
+1422:   mul r11.zw, -r3.xxxy, r9.xxxz
+1423:   mul r3.xy, -r5.zwzz, r9.xyxx
+1424:   mul r3.zw, -r4.xxxy, r9.xxxz
+1425:   mul r5.xy, -r6.xyxx, r9.xyxx
+1426:   mul r5.zw, -r4.zzzw, r9.xxxz
+1427:   mul r4.xy, -r6.zwzz, r9.xyxx
+1428:   mul r4.zw, -r0.yyyz, r9.xxxz
+1429:   mul r6.xy, -r7.xyxx, r9.xyxx
+1430:   mul r6.zw, -r1.xxxy, r9.xxxz
+1431:   mul r7.xy, -r7.zwzz, r9.xyxx
+1432:   mul r7.zw, -r1.zzzw, r9.xxxz
+1433:   mul r1.xy, -r8.xyxx, r9.xyxx
+1434:   mul r1.zw, -r2.xxxy, r9.xxxz
+1435:   if_nz r0.x
+1436:     iadd r0.w, vThreadIDInGroup.x, cb0[2].x
+1437:     iadd r0.y, vThreadGroupID.z, cb0[2].y
+1438:     ult r2.x, r0.w, cb0[2].z
+1439:     if_nz r2.x
+1440:       store_uav_typed u0.xyzw, r0.wyyy, r10.xyzw
+1441:       iadd r0.z, r0.w, l(128)
+1442:     else
+1443:       mov r0.z, r0.w
+1444:     endif
+1445:     ult r0.w, r0.z, cb0[2].z
+1446:     and r0.w, r0.w, r2.x
+1447:     if_nz r0.w
+1448:       store_uav_typed u0.xyzw, r0.zyyy, r11.xyzw
+1449:       iadd r0.x, r0.z, l(128)
+1450:     else
+1451:       mov r0.x, r0.z
+1452:     endif
+1453:     ult r0.z, r0.x, cb0[2].z
+1454:     and r0.z, r0.z, r0.w
+1455:     if_nz r0.z
+1456:       store_uav_typed u0.xyzw, r0.xyyy, r3.xyzw
+1457:       iadd r0.x, r0.x, l(128)
+1458:     endif
+1459:     ult r0.w, r0.x, cb0[2].z
+1460:     and r0.z, r0.w, r0.z
+1461:     if_nz r0.z
+1462:       store_uav_typed u0.xyzw, r0.xyyy, r5.xyzw
+1463:       iadd r0.x, r0.x, l(128)
+1464:     endif
+1465:     ult r0.w, r0.x, cb0[2].z
+1466:     and r0.z, r0.w, r0.z
+1467:     if_nz r0.z
+1468:       store_uav_typed u0.xyzw, r0.xyyy, r4.xyzw
+1469:       iadd r0.x, r0.x, l(128)
+1470:     endif
+1471:     ult r0.w, r0.x, cb0[2].z
+1472:     and r0.z, r0.w, r0.z
+1473:     if_nz r0.z
+1474:       store_uav_typed u0.xyzw, r0.xyyy, r6.xyzw
+1475:       iadd r0.x, r0.x, l(128)
+1476:     endif
+1477:     ult r0.w, r0.x, cb0[2].z
+1478:     and r0.z, r0.w, r0.z
+1479:     if_nz r0.z
+1480:       store_uav_typed u0.xyzw, r0.xyyy, r7.xyzw
+1481:       iadd r0.x, r0.x, l(128)
+1482:     endif
+1483:     ult r0.w, r0.x, cb0[2].z
+1484:     and r0.z, r0.w, r0.z
+1485:     if_nz r0.z
+1486:       store_uav_typed u0.xyzw, r0.xyyy, r1.xyzw
+1487:     endif
+1488:   else
+1489:     iadd r0.y, vThreadGroupID.z, cb0[2].x
+1490:     iadd r0.x, vThreadIDInGroup.x, cb0[2].y
+1491:     ult r2.x, r0.x, cb0[2].w
+1492:     if_nz r2.x
+1493:       store_uav_typed u0.xyzw, r0.yxxx, r10.xyzw
+1494:       iadd r0.z, r0.x, l(128)
+1495:     else
+1496:       mov r0.z, r0.x
+1497:     endif
+1498:     ult r2.y, r0.z, cb0[2].w
+1499:     and r2.x, r2.y, r2.x
+1500:     if_nz r2.x
+1501:       store_uav_typed u0.xyzw, r0.yzzz, r11.xyzw
+1502:       iadd r0.w, r0.z, l(128)
+1503:     else
+1504:       mov r0.w, r0.z
+1505:     endif
+1506:     ult r0.z, r0.w, cb0[2].w
+1507:     and r0.z, r0.z, r2.x
+1508:     if_nz r0.z
+1509:       store_uav_typed u0.xyzw, r0.ywww, r3.xyzw
+1510:       iadd r0.x, r0.w, l(128)
+1511:     else
+1512:       mov r0.x, r0.w
+1513:     endif
+1514:     ult r0.w, r0.x, cb0[2].w
+1515:     and r0.z, r0.w, r0.z
+1516:     if_nz r0.z
+1517:       store_uav_typed u0.xyzw, r0.yxxx, r5.xyzw
+1518:       iadd r0.x, r0.x, l(128)
+1519:     endif
+1520:     ult r0.w, r0.x, cb0[2].w
+1521:     and r0.z, r0.w, r0.z
+1522:     if_nz r0.z
+1523:       store_uav_typed u0.xyzw, r0.yxxx, r4.xyzw
+1524:       iadd r0.x, r0.x, l(128)
+1525:     endif
+1526:     ult r0.w, r0.x, cb0[2].w
+1527:     and r0.z, r0.w, r0.z
+1528:     if_nz r0.z
+1529:       store_uav_typed u0.xyzw, r0.yxxx, r6.xyzw
+1530:       iadd r0.x, r0.x, l(128)
+1531:     endif
+1532:     ult r0.w, r0.x, cb0[2].w
+1533:     and r0.z, r0.w, r0.z
+1534:     if_nz r0.z
+1535:       store_uav_typed u0.xyzw, r0.yxxx, r7.xyzw
+1536:       iadd r0.x, r0.x, l(128)
+1537:     endif
+1538:     ult r0.w, r0.x, cb0[2].w
+1539:     and r0.z, r0.w, r0.z
+1540:     if_nz r0.z
+1541:       store_uav_typed u0.xyzw, r0.yxxx, r1.xyzw
+1542:     endif
+1543:   endif
+1544: endif
+1545: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

@@ -1,0 +1,140 @@
+{
+ "index": 424,
+ "kind": "draw",
+ "events": [
+  18459,
+  18459
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "%s"
+ ],
+ "first": "ID3D11DeviceContext::DrawIndexed()",
+ "last": "ID3D11DeviceContext::DrawIndexed()",
+ "shaders": {
+  "vs": [
+   "shaders/vs_8896.txt"
+  ],
+  "ps": [
+   "shaders/ps_8897.txt"
+  ]
+ },
+ "constants": {
+  "ps": {
+   "ResourceId::8897": [
+    {
+     "block": "cbuffer0",
+     "bytes": 48,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.454545,
+        0.0,
+        0.09,
+        0.5
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "ps": {
+   "ResourceId::8897": [
+    {
+     "id": "ResourceId::231",
+     "name": "2D Texture 231",
+     "w": 1,
+     "h": 1,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R8G8B8A8_TYPELESS",
+     "samples": 1,
+     "binding": "texture0"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 18459,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::8896",
+   "ps": "ResourceId::8897"
+  }
+ ],
+ "outputs": [
+  {
+   "id": "ResourceId::690",
+   "name": "Swapchain Image 690",
+   "w": 1920,
+   "h": 1080,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R10G10B10A2_UNORM",
+   "samples": 1
+  }
+ ],
+ "images": [
+  {
+   "file": "images/0424_out0.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "max": [
+    0.9648093581199646,
+    1.0,
+    0.5190615653991699,
+    1.0
+   ],
+   "target": {
+    "id": "ResourceId::690",
+    "name": "Swapchain Image 690",
+    "w": 1920,
+    "h": 1080,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R10G10B10A2_UNORM",
+    "samples": 1
+   }
+  }
+ ]
+}

@@ -1,0 +1,555 @@
+{
+ "index": 402,
+ "kind": "dispatch",
+ "events": [
+  18158,
+  18158
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "PostProcessing",
+  "MotionBlur",
+  "MotionBlur FullResFilter(BlurDirections=%d MaxSamples=%d%s%s%s) %dx%d",
+  "MotionBlur Filter(%s)"
+ ],
+ "first": "DispatchIndirect(<49, 1, 1>)",
+ "last": "DispatchIndirect(<49, 1, 1>)",
+ "shaders": {
+  "cs": [
+   "shaders/cs_9525.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::9525": [
+    {
+     "block": "cbuffer0",
+     "bytes": 496,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1440.0,
+        1080.0,
+        0.000694,
+        0.000926
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        720.0,
+        -540.0,
+        720.0,
+        540.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1440.0,
+        1080.0,
+        0.000694,
+        0.000926
+       ]
+      },
+      {
+       "name": "cb0_v4",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v5",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v6",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.000347,
+        0.000463,
+        0.999653,
+        0.999537
+       ]
+      },
+      {
+       "name": "cb0_v7",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1344.0,
+        756.0,
+        0.000744,
+        0.001323
+       ]
+      },
+      {
+       "name": "cb0_v8",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        504.0,
+        -378.0,
+        504.0,
+        378.0
+       ]
+      },
+      {
+       "name": "cb0_v9",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v10",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1008.0,
+        756.0,
+        0.000992,
+        0.001323
+       ]
+      },
+      {
+       "name": "cb0_v11",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.75,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v12",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.75,
+        1.0,
+        1.333333,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v13",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.000372,
+        0.000661,
+        0.749628,
+        0.999339
+       ]
+      },
+      {
+       "name": "cb0_v14",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        63.0,
+        48.0,
+        0.015873,
+        0.020833
+       ]
+      },
+      {
+       "name": "cb0_v15",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        31.5,
+        -24.0,
+        31.5,
+        24.0
+       ]
+      },
+      {
+       "name": "cb0_v16",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v17",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        63.0,
+        48.0,
+        0.015873,
+        0.020833
+       ]
+      },
+      {
+       "name": "cb0_v18",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v19",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v20",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.007937,
+        0.010417,
+        0.992063,
+        0.989583
+       ]
+      },
+      {
+       "name": "cb0_v21",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.75,
+        1.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v22",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v23",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.1301223943278437e+34,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v24",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.1308611969432892e+34,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v25",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.2284227690629693e+18,
+        0.0,
+        1.2284227690629693e+18,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v26",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.2284227690629693e+18,
+        0.0,
+        1.2284227690629693e+18,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v27",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        3.8986406971588253e+31,
+        0.0,
+        1.2284227690629693e+18,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v28",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        1.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v29",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v30",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::9525": [
+    {
+     "id": "ResourceId::49107",
+     "name": "Lumen.Radiosity.CardTiles",
+     "binding": "structuredbuffer0"
+    },
+    {
+     "id": "ResourceId::19709",
+     "name": "2D Texture 19709",
+     "w": 1440,
+     "h": 1080,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R16G16B16A16_FLOAT",
+     "samples": 1,
+     "binding": "texture1"
+    },
+    {
+     "id": "ResourceId::48025",
+     "name": "2D Render Target 48025",
+     "w": 63,
+     "h": 48,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R16G16B16A16_FLOAT",
+     "samples": 1,
+     "binding": "texture2"
+    },
+    {
+     "id": "ResourceId::712",
+     "name": "2D Texture 712",
+     "w": 1,
+     "h": 1,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "B8G8R8A8_TYPELESS",
+     "samples": 1,
+     "binding": "texture3"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 18158,
+   "name": "DispatchIndirect(<49, 1, 1>)",
+   "cs": "ResourceId::9525"
+  }
+ ],
+ "outputs": [
+  {
+   "id": "ResourceId::48034",
+   "name": "2D Texture 48034",
+   "w": 1440,
+   "h": 1080,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R11G11B10_FLOAT",
+   "samples": 1
+  },
+  {
+   "id": "ResourceId::48037",
+   "name": "2D Texture 48037",
+   "w": 720,
+   "h": 540,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R11G11B10_FLOAT",
+   "samples": 1
+  },
+  {
+   "id": "ResourceId::48040",
+   "name": "2D Texture 48040",
+   "w": 1,
+   "h": 1,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R11G11B10_FLOAT",
+   "samples": 1
+  }
+ ],
+ "images": [
+  {
+   "file": "images/0402_out0.jpg",
+   "black": 0.0,
+   "white": 1.328125,
+   "min": [
+    0.0009765625,
+    0.0008087158203125,
+    0.0,
+    1.0
+   ],
+   "max": [
+    1.328125,
+    1.109375,
+    0.115234375,
+    1.0
+   ],
+   "target": {
+    "id": "ResourceId::48034",
+    "name": "2D Texture 48034",
+    "w": 1440,
+    "h": 1080,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R11G11B10_FLOAT",
+    "samples": 1
+   }
+  },
+  {
+   "file": "images/0402_out1.jpg",
+   "black": 0.0,
+   "white": 1.328125,
+   "min": [
+    0.0011138916015625,
+    0.0009613037109375,
+    0.00025177001953125,
+    1.0
+   ],
+   "max": [
+    1.328125,
+    1.109375,
+    0.115234375,
+    1.0
+   ],
+   "target": {
+    "id": "ResourceId::48037",
+    "name": "2D Texture 48037",
+    "w": 720,
+    "h": 540,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R11G11B10_FLOAT",
+    "samples": 1
+   }
+  }
+ ]
+}

@@ -1,0 +1,53 @@
+{
+ "index": 34,
+ "kind": "dispatch",
+ "events": [
+  1373,
+  1373
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "UpdateGlobalDistanceField",
+  "Clipmap:%d CacheType:%s",
+  "ReturnToPageFreeList"
+ ],
+ "first": "DispatchIndirect(<0, 1, 1>)",
+ "last": "DispatchIndirect(<0, 1, 1>)",
+ "shaders": {
+  "cs": [
+   "shaders/cs_7752.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::7752": []
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::7752": [
+    {
+     "id": "ResourceId::51999",
+     "name": "InstanceCulling.CompactionBlockDataIndices",
+     "binding": "structuredbuffer0"
+    },
+    {
+     "id": "ResourceId::73171",
+     "name": "GlobalDistanceField.PageFreeListReturn",
+     "binding": "structuredbuffer1"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 1373,
+   "name": "DispatchIndirect(<0, 1, 1>)",
+   "cs": "ResourceId::7752"
+  }
+ ],
+ "outputs": [],
+ "images": []
+}

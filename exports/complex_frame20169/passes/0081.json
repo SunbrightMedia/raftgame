@@ -1,0 +1,267 @@
+{
+ "index": 81,
+ "kind": "dispatch",
+ "events": [
+  12909,
+  12909
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "LumenSceneUpdate: %u card captures %.3fM texels",
+  "BuildRenderingCommands(Culling=%s)",
+  "CullInstances(%s)"
+ ],
+ "first": "ID3D11DeviceContext::Dispatch()",
+ "last": "ID3D11DeviceContext::Dispatch()",
+ "shaders": {
+  "cs": [
+   "shaders/cs_7776.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::7776": [
+    {
+     "block": "cbuffer0",
+     "bytes": 256,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        16.83934,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v4",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        16.859619,
+        0.0,
+        16.859711,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v5",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        16.839981,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v6",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        16.844452,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v7",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v8",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v9",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        16.857391,
+        0.0,
+        16.842987,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v10",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        16.857269,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v11",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        16.841949,
+        0.0,
+        16.840729,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v12",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        16.841309,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v13",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v14",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v15",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.000488,
+        0.0625,
+        0.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::7776": [
+    {
+     "id": "ResourceId::18674",
+     "name": "InstanceCulling.PayloadData",
+     "binding": "structuredbuffer0"
+    },
+    {
+     "id": "ResourceId::6696",
+     "name": "InstanceCullingLoadBalancer.Batches",
+     "binding": "structuredbuffer1"
+    },
+    {
+     "id": "ResourceId::51997",
+     "name": "InstanceCullingLoadBalancer.Items",
+     "binding": "structuredbuffer2"
+    },
+    {
+     "id": "ResourceId::6715",
+     "name": "InstanceCulling.InstanceIdOffsetBuffer",
+     "binding": "texture3"
+    },
+    {
+     "id": "ResourceId::6514",
+     "name": "DefaultStructuredBuffer",
+     "binding": "structuredbuffer4"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 12909,
+   "name": "ID3D11DeviceContext::Dispatch()",
+   "cs": "ResourceId::7776"
+  }
+ ],
+ "outputs": [],
+ "images": []
+}

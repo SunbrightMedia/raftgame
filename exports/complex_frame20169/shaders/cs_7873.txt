@@ -1,0 +1,118 @@
+shader ResourceId::7873, stage cs, name "Compute Shader 7873"
+entry point: main
+constant block 0 "cbuffer0" (320 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+    +80    float4 cb0_v5 1x4
+    +96    float4 cb0_v6 1x4
+    +112   float4 cb0_v7 1x4
+    +128   float4 cb0_v8 1x4
+    +144   float4 cb0_v9 1x4
+    +160   float4 cb0_v10 1x4
+    +176   float4 cb0_v11 1x4
+    +192   float4 cb0_v12 1x4
+    +208   float4 cb0_v13 1x4
+    +224   float4 cb0_v14 1x4
+    +240   float4 cb0_v15 1x4
+    +256   float4 cb0_v16 1x4
+    +272   float4 cb0_v17 1x4
+    +288   float4 cb0_v18 1x4
+    +304   float4 cb0_v19 1x4
+read  0 "texture0" (TextureType.Texture2D)
+read  1 "structuredbuffer1" (TextureType.Buffer)
+read  2 "texture2" (TextureType.Texture2D)
+write 0 "uav0" (TextureType.Buffer)
+write 1 "uav1" (TextureType.Buffer)
+in  vThreadIDInGroup0
+in  vThreadID0
+
+==================== disassembly: DXBC ====================
+
+Shader hash 859b5b9b-1fb278fa-ce007641-02512f26
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[20], immediateIndexed
+      dcl_resource_texture2d (uint,uint,uint,uint) t0
+      dcl_resource_structured t1, 4
+      dcl_resource_texture2d (uint,uint,uint,uint) t2
+      dcl_uav_structured u0, 4
+      dcl_uav_structured u1, 8
+      dcl_input vThreadIDInGroup.xy
+      dcl_input vThreadID.xy
+      dcl_temps 3
+      dcl_tgsm_raw g0, 4
+      dcl_tgsm_raw g1, 4
+      dcl_tgsm_structured g2, 8, 64
+      dcl_thread_group 8, 8, 1
+   0: store_raw g0.x, l(0), l(0)
+   1: sync_g_t
+   2: udiv r0.xy, null, vThreadID.xyxx, cb0[0].xxxx
+   3: imad r1.xy, -r0.xyxx, cb0[0].xxxx, vThreadID.xyxx
+   4: imad r1.z, r0.y, cb0[2].x, r0.x
+   5: ld_structured_indexable(structured_buffer, stride=4)(mixed,mixed,mixed,mixed) r1.w, l(0), l(0), t1.xxxx
+   6: umin r1.w, r1.w, cb0[6].x
+   7: iadd r1.w, r1.w, cb0[5].w
+   8: ult r1.w, r1.z, r1.w
+   9: ult r2.x, r0.x, cb0[2].x
+  10: and r1.w, r1.w, r2.x
+  11: uge r2.xy, cb0[0].xxxx, r1.xyxx
+  12: and r2.x, r2.y, r2.x
+  13: and r1.w, r1.w, r2.x
+  14: if_nz r1.w
+  15:   mov r0.zw, l(0, 0, 0, 0)
+  16:   ld_indexable(texture2d)(uint,uint,uint,uint) r0.z, r0.xyzw, t0.yzxw
+  17:   imad r2.xy, r0.xyxx, cb0[0].xxxx, r1.xyxx
+  18:   mov r2.zw, l(0, 0, 0, 0)
+  19:   ld_indexable(texture2d)(uint,uint,uint,uint) r0.x, r2.xyzw, t2.xyzw
+  20:   and r0.xy, r0.xxxx, l(2.000000, 2.000000, 0.000000, 0.000000)
+  21:   utof r0.y, r0.y
+  22:   mul r2.y, r0.y, l(10.000000)
+  23:   lt r0.y, l(0), r0.z
+  24:   ieq r0.x, r0.x, l(0)
+  25:   and r0.x, r0.x, r0.y
+  26:   ieq r0.y, l(0), cb0[19].x
+  27:   lt r0.z, r0.z, cb0[19].y
+  28:   or r0.y, r0.z, r0.y
+  29:   and r0.x, r0.y, r0.x
+  30:   lt r0.y, r2.y, cb0[19].z
+  31:   and r0.x, r0.y, r0.x
+  32:   if_nz r0.x
+  33:     imm_atomic_iadd r0.x, g0, l(0), l(1)
+  34:     bfi r0.yz, l(0, 5, 5, 0), l(0, 20, 25, 0), r1.xxyx, l(0, 0, 0, 0)
+  35:     bfi r0.y, l(20), l(0), r1.z, r0.y
+  36:     iadd r2.x, r0.z, r0.y
+  37:     store_structured g2.xy, r0.x, l(0), r2.xyxx
+  38:   endif
+  39: endif
+  40: sync_g_t
+  41: imad r0.x, vThreadIDInGroup.y, l(8), vThreadIDInGroup.x
+  42: if_z r0.x
+  43:   ld_raw r0.y, l(0), g0.xxxx
+  44:   imm_atomic_iadd r1.x, u0, l(0, 0, 0, 0), r0.y
+  45:   store_raw g1.x, l(0), r1.x
+  46: endif
+  47: sync_g_t
+  48: ld_raw r0.y, l(0), g0.xxxx
+  49: ult r0.y, r0.x, r0.y
+  50: if_nz r0.y
+  51:   ld_raw r0.y, l(0), g1.xxxx
+  52:   iadd r0.y, r0.x, r0.y
+  53:   ld_structured r0.xz, r0.x, l(0), g2.xxyx
+  54:   store_structured u1.xy, r0.y, l(0), r0.xzxx
+  55: endif
+  56: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA
