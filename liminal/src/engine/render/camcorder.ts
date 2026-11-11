@@ -39,6 +39,8 @@ export interface CamcorderParams {
   aeRate: number;
   /** Scene contrast before the tone curve, round mid grey (1 = as is; under 1 flatter, as Blender's Filmic view). */
   contrast: number;
+  /** How wide the sharpening rims are, in thousandths of the picture (1 = the capture's). */
+  sharpenRadius: number;
   tintR: number; tintG: number; tintB: number;
   glow: number;
   /** Scales the glow's three widths (1 = the capture's). */
@@ -338,14 +340,14 @@ export class CamcorderPost {
   });
 
   private sharp = pass(/* glsl */ `
-    uniform sampler2D src; uniform float amount; varying vec2 vUv;
+    uniform sampler2D src; uniform float amount; uniform float radius; varying vec2 vUv;
     void main() {
       vec3 c = texture2D(src, vUv).rgb;
-      vec3 n = texture2D(src, vUv + vec2(0.0, 0.001)).rgb + texture2D(src, vUv - vec2(0.0, 0.001)).rgb
-             + texture2D(src, vUv + vec2(0.001, 0.0)).rgb + texture2D(src, vUv - vec2(0.001, 0.0)).rgb;
+      vec3 n = texture2D(src, vUv + vec2(0.0, radius)).rgb + texture2D(src, vUv - vec2(0.0, radius)).rgb
+             + texture2D(src, vUv + vec2(radius, 0.0)).rgb + texture2D(src, vUv - vec2(radius, 0.0)).rgb;
       vec3 d = (c - n * 0.25) * amount;
       gl_FragColor = vec4(max(c + dot(d, vec3(0.3, 0.59, 0.11)), 0.0), 1.0);
-    }`, { src: { value: null }, amount: { value: 7 } });
+    }`, { src: { value: null }, amount: { value: 7 }, radius: { value: 0.001 } });
 
   private finish = pass(/* glsl */ `
     uniform sampler2D src; uniform sampler2D grainTex; uniform sampler2D streakTex;
@@ -531,7 +533,7 @@ export class CamcorderPost {
     this.draw(gl, this.tone, this.outA);
     if (this.debugStage === 'tone' || t.dbg.value > 0) return this.show(gl, this.outA!);
     // sharpen
-    this.sharp.u.src.value = this.outA!.texture; this.sharp.u.amount.value = p.sharpen;
+    this.sharp.u.src.value = this.outA!.texture; this.sharp.u.amount.value = p.sharpen; this.sharp.u.radius.value = 0.001 * (p.sharpenRadius ?? 1);
     this.draw(gl, this.sharp, this.outB);
     if (this.debugStage === 'sharp') return this.show(gl, this.outB!);
     // banding, grain, tape

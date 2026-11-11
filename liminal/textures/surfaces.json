@@ -26,6 +26,7 @@
     "house6/counter": {"roughness": 0.45, "f0": 0.04, "gloss": 0.6},
     "house6/dark": {"roughness": 0.85, "f0": 0.04, "gloss": 0.3},
     "house6/window": {"roughness": 0.35, "f0": 0.04, "gloss": 0.5},
+    "house6/trim_white": {"roughness": 0.3, "f0": 0.04, "gloss": 1},
     "house6/soot": {"roughness": 1, "gloss": 0}
   }
 }

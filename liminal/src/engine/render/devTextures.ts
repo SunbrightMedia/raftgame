@@ -592,6 +592,24 @@ const DEFS: Record<string, Def> = {
     emissive: { kelvin: 3000, luminance: 9000, castsLight: false },
     paint: (g, w, h) => { g.fillStyle = '#f4efe4'; g.fillRect(0, 0, w, h); },
   },
+  // A flush light's lens brightest in the middle (where the bulbs are) and dimmer to its rim: a frosted
+  // dome seen from below. Three rings of these, so a blown-out lamp blooms into a soft blob, not a disc:
+  // only the core is far over white; the rim sits just under it, as the video's lamps do.
+  'fixture/dome_core': {
+    px: [32, 32], world: [12, 12], material: 'glass',
+    emissive: { kelvin: 3000, luminance: 30000, castsLight: false },
+    paint: (g, w, h) => { g.fillStyle = '#f4efe4'; g.fillRect(0, 0, w, h); },
+  },
+  'fixture/dome_mid': {
+    px: [32, 32], world: [12, 12], material: 'glass',
+    emissive: { kelvin: 3000, luminance: 400, castsLight: false },
+    paint: (g, w, h) => { g.fillStyle = '#f4efe4'; g.fillRect(0, 0, w, h); },
+  },
+  'fixture/dome_rim': {
+    px: [32, 32], world: [12, 12], material: 'glass',
+    emissive: { kelvin: 3000, luminance: 90, castsLight: false },
+    paint: (g, w, h) => { g.fillStyle = '#f4efe4'; g.fillRect(0, 0, w, h); },
+  },
   // Flush dome lens for the house look: a real one is ~4800 cd/m² (1600 lm × 0.8 out of a 13" disc), but the
   // video's lamps read as soft blobs that only just reach white; at 1500 the camera's glow makes that shape.
   'fixture/dome_soft': {
@@ -599,10 +617,10 @@ const DEFS: Record<string, Def> = {
     emissive: { kelvin: 2700, luminance: 1500, castsLight: false },
     paint: (g, w, h) => { g.fillStyle = '#f4efe4'; g.fillRect(0, 0, w, h); },
   },
-  // Wall sconce shade (frosted glass): its luminance goes with a 450 lm bulb, not a ceiling dome's.
+  // Wall sconce shade (frosted glass): blown out on camera, as the video's.
   'fixture/sconce': {
     px: [32, 32], world: [12, 12], material: 'glass',
-    emissive: { kelvin: 2700, luminance: 2500, castsLight: false },
+    emissive: { kelvin: 2700, luminance: 1500, castsLight: false },
     paint: (g, w, h) => { g.fillStyle = '#f4efe4'; g.fillRect(0, 0, w, h); },
   },
   missing: {

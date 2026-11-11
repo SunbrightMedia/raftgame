@@ -226,6 +226,7 @@ export const SETTINGS = {
       vignette: num('Vignette', 0.4, 0, 2, 0.01, 'cos⁴ falloff: corners 0.57 at 0.4.'),
       soften: num('Upscaler softness', 0.7, 0, 4, 0.05, 'Blur before everything else, σ in output pixels: the game draws at 70% and its upscaler (TSR) leaves edges softer than ours. 0.7 matches the capture\'s edges across x; along y, frames differ with the camera\'s motion.', 'px'),
       sharpen: num('Sharpen', 7, 0, 15, 0.1, 'Luma sharpening over a 1 px cross: thin bright and dark rims on edges.'),
+      sharpenRadius: num('Sharpen radius', 1, 0.5, 6, 0.1, 'How wide the sharpening rims are, in thousandths of the picture. 1 = the capture (about a pixel); a consumer camcorder\'s edge enhancement is 2-3: wide light and dark rims on every edge of a soft picture.'),
       posterize: num('Colour steps', 24, 0, 256, 1, 'Steps per channel (banding). 0 = off.'),
       grain: num('Grain', 0.2, 0, 1, 0.01, 'Fine, slightly blue specks, new every frame.'),
       lift: num('Black lift', 0.018, 0, 0.2, 0.001, 'Where black sits.'),
