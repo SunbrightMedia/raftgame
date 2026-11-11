@@ -249,9 +249,9 @@
     },
     {
       "name": "house6/carpet_brown",
-      "from": "house/carpet_worn",
+      "from": "acg/carpet_plush",
       "color": "#675d4d",
-      "contrast": 1
+      "contrast": 0.45
     },
     {
       "name": "house6/soot",
@@ -273,9 +273,9 @@
     },
     {
       "name": "house6/brick",
-      "from": "house/brick_smooth",
+      "from": "acg/brick_smooth_orange",
       "color": "#5e3b1e",
-      "contrast": 1,
+      "contrast": 0.6,
       "keepHue": true
     },
     {

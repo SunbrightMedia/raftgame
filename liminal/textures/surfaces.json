@@ -27,6 +27,7 @@
     "house6/dark": {"roughness": 0.85, "f0": 0.04, "gloss": 0.3},
     "house6/window": {"roughness": 0.35, "f0": 0.04, "gloss": 0.5},
     "house6/trim_white": {"roughness": 0.3, "f0": 0.04, "gloss": 1},
+    "house6/ceiling_paint": {"roughness": 0.5, "f0": 0.04, "gloss": 0.6},
     "house6/door_white": {"roughness": 0.3, "f0": 0.04, "gloss": 1, "luxel": 0.4},
     "house6/brick": {"roughness": 0.45, "gloss": 0.7, "bump": 0.15, "relief": 0.5},
     "house6/carpet_brown": {"roughness": 1, "bump": 0.03, "relief": 0.3, "gloss": 0},

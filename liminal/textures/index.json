@@ -303,6 +303,30 @@
    "license": "CC0 1.0"
   },
   {
+   "name": "acg/carpet_plush",
+   "file": "src/acg__carpet_plush.jpg",
+   "size": [
+    72,
+    72
+   ],
+   "material": "carpet",
+   "credit": "Carpet012 from ambientCG.com",
+   "url": "https://ambientcg.com/a/Carpet012",
+   "license": "CC0 1.0"
+  },
+  {
+   "name": "acg/brick_smooth_orange",
+   "file": "src/acg__brick_smooth_orange.jpg",
+   "size": [
+    64,
+    64
+   ],
+   "material": "concrete",
+   "credit": "Bricks080A from ambientCG.com",
+   "url": "https://ambientcg.com/a/Bricks080A",
+   "license": "CC0 1.0"
+  },
+  {
    "name": "freedoom/AASTINKY",
    "file": "freedoom/walls/AASTINKY.png",
    "size": [

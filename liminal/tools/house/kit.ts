@@ -49,6 +49,8 @@ function rotated(x: number, y: number, yaw: number, u0: number, v0: number, u1: 
 }
 
 export class HouseKit {
+  /** The domes' glow up and sideways, as a fraction of their peak (lighting.ts "dome" `up`); undefined = its default. */
+  domeUp: number | undefined = undefined;
   constructor(readonly m: MapBuilder, readonly H: number, readonly t: HouseTex) {}
 
   // ---- placement in a wall's terms
@@ -212,14 +214,15 @@ export class HouseKit {
 
   // ---- lamps
   /** A flush ceiling light: a frosted lens `d` across (default 15") in a thin ring, and its light (two 60 W bulbs' worth). */
-  dome(x: number, y: number, lumens = 1600, kelvin = 2700, o: { n?: number; d?: number } = {}): void {
+  dome(x: number, y: number, lumens = 1600, kelvin = 2700, o: { n?: number; d?: number; up?: number } = {}): void {
     const r = (o.d ?? 15) / 2;
     this.m.prism(circle(x, y, r + 0.75, 40), this.H - 1, this.H, this.t.trim, { solid: false });
     // the lens: bright in the middle, dimmer to the rim (a frosted dome), so it blooms into a soft blob
     this.m.prism(circle(x, y, r, 40), this.H - 2.2, this.H - 1, 'fixture/dome_rim', { solid: false });
     this.m.prism(circle(x, y, r * 0.72, 40), this.H - 2.8, this.H - 2.2, 'fixture/dome_mid', { solid: false });
     this.m.prism(circle(x, y, r * 0.45, 32), this.H - 3.1, this.H - 2.8, 'fixture/dome_core', { solid: false });
-    this.m.light([x, y, this.H - 3.5], { type: 'dome', lumens, kelvin, ...(o.n !== undefined ? { n: o.n } : {}) });
+    const up = o.up ?? this.domeUp;
+    this.m.light([x, y, this.H - 3.5], { type: 'dome', lumens, kelvin, ...(o.n !== undefined ? { n: o.n } : {}), ...(up !== undefined ? { up } : {}) });
   }
   /** A wall sconce: a frosted shade on a small back plate, with a bulb's light in it. */
   sconce(axis: Axis, face: number, dir: Dir, u: number, z: number, lumens = 450, kelvin = 2700): void {

@@ -36,6 +36,9 @@ export interface BakeLight {
   softDeg?: number;
   /** Fraction of the beam that spills past the cutoff (reflector, trim). */
   spill?: number;
+  /** A downward light's glow in every direction, as a fraction of its peak (a flush mount's glass sends ~6 % of its
+   * peak intensity up and sideways, ~12 % of its light: what lights the ceiling round it). */
+  iso?: number;
   /**
    * Direct light from this light is drawn per pixel by the shader (exact beam
    * edges, e.g. a can's scallop), so the lightmap stores only its bounce and
@@ -173,7 +176,8 @@ const MIN_LUX = 0.02;
 export function intensityToward(l: BakeLight, ux: number, uy: number, uz: number): number {
   if (!l.dir) return l.I0;
   const c = ux * l.dir[0] + uy * l.dir[1] + uz * l.dir[2];
-  if (c <= 0) return 0;
+  const iso = l.iso ? l.I0 * l.iso : 0;
+  if (c <= 0) return iso;
   let I = l.I0 * Math.pow(c, l.n ?? 1);
   if (l.cutoffDeg !== undefined) {
     const ang = (Math.acos(Math.min(1, c)) * 180) / Math.PI;
@@ -182,7 +186,7 @@ export function intensityToward(l: BakeLight, ux: number, uy: number, uz: number
     const sp = l.spill ?? 0;
     I *= sp + (1 - sp) * t * t * (3 - 2 * t);
   }
-  return I;
+  return I + iso;
 }
 
 /** Distance (world units) beyond which a light gives less than MIN_LUX. */

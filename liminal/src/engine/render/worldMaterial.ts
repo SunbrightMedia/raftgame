@@ -41,6 +41,8 @@ export const worldUniforms = {
   dynBeam: { value: Array.from({ length: 32 }, () => new THREE.Vector4()) },
   /** Each per-pixel light's shadow-mask channel (0..3) in lightmapMask. */
   dynChan: { value: new Array<number>(32).fill(0) },
+  /** A downward light's glow in every direction, as a fraction of its peak (BakeLight.iso). */
+  dynIso: { value: new Array<number>(32).fill(0) },
   lightmapMask: { value: null as THREE.Texture | null },
   lightScale: { value: 1 },
   // Reflections.
@@ -166,6 +168,7 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
       uniform vec3 dynColor[32];
       uniform vec4 dynBeam[32];
       uniform float dynChan[32];
+      uniform float dynIso[32];
       uniform sampler2D lightmapMask;
       uniform float lightScale;
       uniform float specScale;
@@ -371,9 +374,12 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
               float I = 1.0;
               if (bm.x < -0.5) {
                 float c = u.z; // cosine between the downward beam and the direction to this point
-                if (c <= 0.0) continue;
-                float spill = -bm.x - 1.0;
-                I = pow(c, bm.y) * (spill + (1.0 - spill) * smoothstep(bm.w, bm.z, c));
+                float iso = dynIso[i];
+                if (c <= 0.0) { if (iso <= 0.0) continue; I = iso; }   // above the light: only its glow (a dome's glass lights the ceiling)
+                else {
+                  float spill = -bm.x - 1.0;
+                  I = pow(c, bm.y) * (spill + (1.0 - spill) * smoothstep(bm.w, bm.z, c)) + iso;
+                }
               }
               float dm = d * 0.0254;
               float ch = dynChan[i];

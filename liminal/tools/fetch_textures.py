@@ -1,7 +1,7 @@
 """
 Fetch the CC0 photo textures listed in tools/textures.sources.json from
 ambientCG, keep only the colour map, and store it as a 256px "source" JPEG
-in textures/src/. The game crushes these at runtime (resolution, palette,
+(or the entry's `px`) in textures/src/. The game crushes these at runtime (resolution, palette,
 contrast...) using the Texture settings in the tweak panel, so these files
 stay the clean originals.
 
@@ -37,7 +37,8 @@ for e in entries:
         if not color:
             print('no colour map in', aid, z.namelist()); continue
         im = Image.open(io.BytesIO(z.read(color[0]))).convert('RGB')
-        im = im.resize((SIZE, SIZE), Image.LANCZOS)
+        px = e.get('px', SIZE)   # most are crushed small; a texture seen up close and large (a carpet, a chimney) keeps more
+        im = im.resize((px, px), Image.LANCZOS)
         im.save(path, quality=92)
         print('fetched', e['name'], '<-', aid)
     index.append({

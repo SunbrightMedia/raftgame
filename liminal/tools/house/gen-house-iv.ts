@@ -32,6 +32,8 @@ import { HouseKit, type HouseTex } from './kit';
 import { HOUSE_IV_ROOMS } from './rooms';
 
 const T = 5;
+/** The domes' glass glow round them (share of their peak, every way): the ceiling patch the camera blows out. */
+const DOME_UP = Number(process.env.DOME_UP ?? 0.3);
 const TEX: HouseTex = {
   paint: 'house6/paint_ivory', carpet: 'house6/carpet_brown', ceiling: 'house6/ceiling_paint', trim: 'house6/trim_white',
   brass: 'pmp/brass', dome: 'fixture/dome', chrome: 'fixture/chrome', brick: 'house6/brick', soot: 'house6/soot',
@@ -42,7 +44,7 @@ const m = new MapBuilder();
 
 // ---------------------------------------------------------------- K: the kitchenette room (camera at 0, 0)
 {
-  const k = new HouseKit(m, 101, TEX);
+  const k = new HouseKit(m, 101, TEX); k.domeUp = DOME_UP;
   const W = -200, S = -150, N = 189, E = 380, NE = 115;   // the north wall: y 189 west of the block, 115 east of the pilaster
   const bx0 = 90, bx1 = 165, px1 = 177, pz = 94;          // the block (x 90-165, y 115-189) and the pilaster (x 165-177 to y 94)
   k.slabs(W, S, E, N);
@@ -83,7 +85,7 @@ const m = new MapBuilder();
 
 // ---------------------------------------------------------------- F: the fireplace room (camera at 1000, 0)
 {
-  const ox = 1000, k = new HouseKit(m, 115.5, TEX);
+  const ox = 1000, k = new HouseKit(m, 115.5, TEX); k.domeUp = DOME_UP;
   const W = ox - 118, E = ox + 70, N = 239, S0 = 120, S1 = 131;  // the room: x W..E, y S0..N (S1 east of the passage)
   const PW = ox - 66, PE = ox + 51, PS = -100;                    // the passage the camera stands in
   k.slabs(W, PS, E, N);
@@ -122,7 +124,7 @@ const m = new MapBuilder();
 
 // ---------------------------------------------------------------- D: the hall of doors (camera at 2000, 0)
 {
-  const ox = 2000, k = new HouseKit(m, 115, TEX);
+  const ox = 2000, k = new HouseKit(m, 115, TEX); k.domeUp = DOME_UP;
   const W0 = ox - 112, W1 = ox - 90, JOG = 142, N = 312, E = ox + 40, S = -80;
   k.slabs(W0, S, E, N);
   // west wall, near part, with two doors
@@ -170,8 +172,9 @@ m.write('house_iv', HOUSE_IV_ROOMS, {
   // blown out with a wide bloom.
   camcorder: {
     exposure: 0.012, whiteBalance: 2950, autoExposure: true, aeKey: 0.11, aeRange: 3, aeRate: 1.5,
-    // the lamps: soft warm blobs with a white core, no disc edge (the glow mostly in its middle width)
-    tintR: 1, tintG: 1, tintB: 1, glow: 0.35, glowSize: 0.8, glowNear: 0.3, glowMid: 0.6, glowFar: 0.1, glowThreshold: 2, contrast: 0.75, dirt: 0, fringe: 0.15,
+    // the lamps: the bright patch round each is the ceiling lit by the fixture's glass (lighting.ts "dome"), not bloom;
+    // bloom stays small, as in the reference projects (Unity HDRP 0.13, Blender 0.125)
+    tintR: 1, tintG: 1, tintB: 1, glow: 0.15, glowSize: 0.8, glowNear: 0.3, glowMid: 0.6, glowFar: 0.1, glowThreshold: 2, contrast: 0.75, dirt: 0, fringe: 0.15,
     vignette: 0.15, soften: 1.8, sharpen: 0.5, sharpenRadius: 2.0, posterize: 0, grain: 0, lift: 0.02, lineChroma: 0, hueWobble: 0, streaks: 0, lens: 0, bars: true,
     // The video signal, fitted to the frames (scratchpad meas/metrics.py): brightness edges 3-4 px wide at 960 with no
     // halo, colour edges ~11 px, little fine texture but colour blotches in flat areas.

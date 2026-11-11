@@ -101,6 +101,7 @@ export class Game {
       // x: -(1 + spill) for a downward beam, 0 for a bare bulb.
       u.dynBeam.value[i].set(l.dir ? -(1 + (l.spill ?? 0)) : 0, l.n ?? 1, cos(c - sd), cos(c + sd));
       u.dynChan.value[i] = l.channel ?? 0;
+      u.dynIso.value[i] = l.iso ?? 0;
     });
   }
 

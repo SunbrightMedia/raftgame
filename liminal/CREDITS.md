@@ -12,10 +12,11 @@ Procedural textures (`dev/*`, `house/wallpaper_*`, `house/paneling`, `office/vin
 | [Bricks059 from ambientCG.com](https://ambientcg.com/a/Bricks059) | CC0 1.0 | `ind/brick_red` |
 | [Bricks060 from ambientCG.com](https://ambientcg.com/a/Bricks060) | CC0 1.0 | `ind/brick_painted` |
 | [Bricks066 from ambientCG.com](https://ambientcg.com/a/Bricks066) | CC0 1.0 | `ind/cinderblock` |
+| [Bricks080A from ambientCG.com](https://ambientcg.com/a/Bricks080A) | CC0 1.0 | `acg/brick_smooth_orange` |
 | [Carpet005 from ambientCG.com](https://ambientcg.com/a/Carpet005) | CC0 1.0 | `office/carpet_pattern` |
 | [Carpet008 from ambientCG.com](https://ambientcg.com/a/Carpet008) | CC0 1.0 | `office/carpet_beige` |
 | [Carpet011 from ambientCG.com](https://ambientcg.com/a/Carpet011) | CC0 1.0 | `office/carpet_yellow` |
-| [Carpet012 from ambientCG.com](https://ambientcg.com/a/Carpet012) | CC0 1.0 | `office/carpet_blue` |
+| [Carpet012 from ambientCG.com](https://ambientcg.com/a/Carpet012) | CC0 1.0 | `acg/carpet_plush`, `office/carpet_blue` |
 | [Ceiling tile texture by para](https://opengameart.org/content/ceiling-tile-texture) | CC0 1.0 | `office/ceiling_speckle` |
 | [Concrete008 from ambientCG.com](https://ambientcg.com/a/Concrete008) | CC0 1.0 | `ind/concrete_wall` |
 | [Concrete031 from ambientCG.com](https://ambientcg.com/a/Concrete031) | CC0 1.0 | `ind/concrete_forms` |

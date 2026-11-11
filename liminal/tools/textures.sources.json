@@ -150,6 +150,20 @@
       "ambientcg": "Grass004",
       "size": 96,
       "material": "grass"
+    },
+    {
+      "name": "acg/carpet_plush",
+      "ambientcg": "Carpet012",
+      "size": 72,
+      "material": "carpet",
+      "px": 512
+    },
+    {
+      "name": "acg/brick_smooth_orange",
+      "ambientcg": "Bricks080A",
+      "size": 64,
+      "material": "concrete",
+      "px": 512
     }
   ]
 }

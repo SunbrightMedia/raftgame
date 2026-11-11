@@ -525,8 +525,8 @@ type Props = Record<string, unknown>;
  *           "bulb" — bare bulb, equal in every direction: I = lm / 4π
  *           "down" / "up" — flat Lambertian emitter facing down/up: I0 = lm / π
  *           "dome" — flush-mount frosted dome on the ceiling: wide downward
- *                    cos^0.6 lobe, nothing upward, so the ceiling above it
- *                    doesn't get the hot spot a bare bulb throws
+ *                    cos^0.6 lobe plus a glow of 6% of its peak every way
+ *                    (`up`), so the ceiling round it is lit as a real one's
  *           "spot" — a downward spot with a smooth cone: cos^n lobe (n 2.2 by
  *                    default: an engine spot of 87° outer, 0° inner angle, as
  *                    the reference capture's ceiling panels), cut off at
@@ -558,8 +558,11 @@ export function lightFromEntity(origin: [number, number, number], p: Props): Bak
     return { pos: origin, color: col, I0: cd > 0 ? cd : cosNPeak(lm, n), dir: [0, 0, -1], n, cutoffDeg: num('cutoff', 87), softDeg: 3, spill: 0, ...(num('shadows', 1) === 0 ? { shadows: false } : {}) };
   }
   if (type === 'dome') {
-    const n = num('n', 0.6), lm = num('lumens', 800) * 0.8; // ~80% gets out through the glass
-    return { pos: origin, color, I0: cosNPeak(lm, n), dir: [0, 0, -1], n, cutoffDeg: 88, softDeg: 2, spill: 0 };
+    // ~80% gets out through the glass. Most goes down in a wide cos^n lobe; the glass also glows sideways and up at
+    // ~6% of the peak (flush-mount photometry: 10-15% of the light above the horizon), which lights the ceiling round
+    // the fixture: the bright patch a camera sees round a ceiling lamp. `up` changes that share.
+    const n = num('n', 0.6), lm = num('lumens', 800) * 0.8;
+    return { pos: origin, color, I0: cosNPeak(lm, n), dir: [0, 0, -1], n, cutoffDeg: 88, softDeg: 2, spill: 0, iso: num('up', 0.06) };
   }
   if (type === 'down' || type === 'up') {
     return { pos: origin, color, I0: num('lumens', 400) / Math.PI, dir: [0, 0, type === 'down' ? -1 : 1], n: 1 };
