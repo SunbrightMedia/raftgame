@@ -335,6 +335,31 @@ Map: `laquinta`. Plan in `tools/gen-laquinta.ts`'s header.
   (3) **The camera**: 4:3 with black bars, low resolution, soft focus,
   a warm cast (white balance set for daylight under bulbs), ceiling lamps
   blown to white with a glow, compression, a handheld tilt.
+- **(user)** "This type of realism for every world, but we should model it
+  off of the video." Stay with the indoor house style until the realism is
+  right.
+- The artist: YouTube "Cassette" (@kassettte), "3D blender artist!! 2D
+  artist!!"; 20 videos, mostly Backrooms and empty-house found footage
+  ("Someone used to live here" is the same realism). Nothing published on
+  how they work, no files, no other accounts found (research, Nov 2026).
+  Guess: Blender, Cycles (full bounced light), a camcorder finish on top.
+- Measured on the three frames (sRGB 0..1, inside the 4:3 picture):
+  darkest 1% at 0.14-0.21 (lifted, never black; one frame 0.02); 95% at
+  0.48-0.64; almost nothing clips but the lamps (0-0.2%); median 0.32-0.42;
+  mid-tones warm, red : green : blue = 1.11-1.14 : 1 : 0.76-0.79; soft
+  (very little edge detail).
+
+## Reference 7: The Complex: Expedition (Steam, pgWave, 2025)
+
+- **(user)** "It gets the type of realism I'm looking for perfect."
+- Every screenshot is 4:3 (pillarboxed). Soft, fine grain, vignette, wide
+  lens, lamps blown out with bloom, one main colour per room (cream,
+  yellow, teal, peach). Light pools under each ceiling light and fades to
+  dark rooms; soft dark corners. Real details everywhere: skirting boards,
+  ceiling-tile grid, trim, vents, plain true-sized furniture.
+- Runs on a GTX 760 (minimum), GTX 1060 (recommended): this realism does
+  not need a strong graphics card. Engine not stated by the developer
+  (one player says Unreal Engine 5). No devlogs on the look, no tools.
 
 ---
 
