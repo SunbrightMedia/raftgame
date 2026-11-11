@@ -177,6 +177,11 @@ function renderSide(): void {
         el('p', { text: 'Note: click "Note", then click the map and write.' }),
         el('p', { text: '1 tile = one 2 ft ceiling tile. The walls come from the outline of all floors, so parts merge where they meet.' }),
       ),
+      ...(state.edits.notes.length ? [el('h2', { text: 'Notes' })] : []),
+      ...state.edits.notes.map((n, i) => el('div', { class: 'note-row' },
+        el('span', { text: n.text }),
+        el('button', { class: 'small', text: 'Remove', onclick: () => commit(() => { state.edits.notes.splice(i, 1); }) }),
+      )),
       el('h2', { text: 'Legend' }),
       el('div', { class: 'muted' },
         el('p', { text: 'Dashed wall: stops short of the ceiling (or an arch overhead). Dotted dark line: bars. Blue double line: windows.' }),
@@ -316,9 +321,22 @@ canvas.addEventListener('pointerdown', (e) => {
   const x = e.clientX - r.left, y = e.clientY - r.top;
   const wp = toWorldPt(x, y);
   if (noteMode) {
-    const text = window.prompt('Note:');
-    if (text) commit(() => state.edits.notes.push({ x: wp.x, y: wp.y, text }));
     setNoteMode(false);
+    const box = el('input', { type: 'text', id: 'note-input', placeholder: 'Write a note, then Enter' }) as HTMLInputElement;
+    box.style.left = `${Math.min(x, view.w - 230)}px`;
+    box.style.top = `${y}px`;
+    main.append(box);
+    box.focus();
+    let done = false;
+    const finish = (keep: boolean) => {
+      if (done) return;
+      done = true;
+      const text = box.value.trim();
+      box.remove();
+      if (keep && text) commit(() => state.edits.notes.push({ x: wp.x, y: wp.y, text }));
+    };
+    box.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') finish(true); if (ev.key === 'Escape') finish(false); ev.stopPropagation(); });
+    box.addEventListener('blur', () => finish(true));
     return;
   }
   const z = hit(wp);
@@ -419,7 +437,34 @@ function doUndo(): void { const s = undoStack.pop(); if (!s) return; redoStack.p
 function doRedo(): void { const s = redoStack.pop(); if (!s) return; undoStack.push(snap()); restore(s); regenerate(); save(); }
 
 // ------------------------------------------------------------------ export
-function download(name: string, blob: Blob): void {
+const toastEl = el('div', { id: 'toast', hidden: true });
+main.append(toastEl);
+let toastTimer = 0;
+function toast(text: string): void {
+  toastEl.textContent = text;
+  toastEl.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(() => { toastEl.hidden = true; }, 3500);
+}
+type Downloads = { save(r: { filename: string; data: Blob | string }): Promise<{ status: string }> };
+type ClaudeWin = { claude?: { use(name: string): Promise<unknown> } };
+/** In claude.ai the viewer saves the file (it asks first); anywhere else, a normal download. */
+async function download(name: string, blob: Blob): Promise<void> {
+  const c = (window as unknown as ClaudeWin).claude;
+  if (c?.use) {
+    const dl = (await c.use('downloads').catch(() => null)) as Downloads | null;
+    if (!dl) { toast('Saving files is not available here.'); return; }
+    try {
+      const r = await dl.save({ filename: name, data: blob });
+      if (r.status === 'saved') toast(`Saved ${name}`);
+    } catch (err) {
+      const code = (err as { code?: string }).code;
+      if (code === 'declined') toast('Not saved.');
+      else if (code === 'rate_limited') toast('Another save is still open. Try again in a moment.');
+      else toast(`Could not save ${name}.`);
+    }
+    return;
+  }
   const a = el('a', { href: URL.createObjectURL(blob), download: name });
   document.body.append(a);
   a.click();
@@ -463,7 +508,7 @@ function importJson(): void {
       const d = JSON.parse(await f.text());
       if (!d.params) throw new Error('no params');
       commit(() => { state.params = { ...DEFAULT_PARAMS, ...d.params }; state.edits = { ...emptyEdits(), ...d.edits }; }, true);
-    } catch (err) { window.alert(`Could not open that file: ${(err as Error).message}`); }
+    } catch (err) { toast(`Could not open that file: ${(err as Error).message}`); }
   });
   inp.click();
 }

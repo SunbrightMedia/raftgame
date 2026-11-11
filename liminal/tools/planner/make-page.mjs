@@ -11,6 +11,6 @@ const pick = (re) => [...html.matchAll(re)].map((m) => m[0]).join('\n');
 const styles = pick(/<style[^>]*>[\s\S]*?<\/style>/g);
 const scripts = pick(/<script[^>]*>[\s\S]*?<\/script>/g);
 const body = html.match(/<body[^>]*>([\s\S]*?)<\/body>/)[1].replace(/<script[^>]*>[\s\S]*?<\/script>/g, '').trim();
-const page = `<title>Backrooms Planner</title>\n<style>:root{color-scheme:dark}body{background:#2b2b2b}</style>\n${styles}\n${body}\n${scripts}\n`;
+const page = `<title>Backrooms Planner</title>\n<meta name="claude:viewport-fit-sides" content="cover">\n<style>:root{color-scheme:dark}html,body{height:100%}body{background:#2b2b2b}</style>\n${styles}\n${body}\n${scripts}\n`;
 writeFileSync(out, page);
 console.log(`wrote ${out} (${(page.length / 1024).toFixed(0)} KB)`);
