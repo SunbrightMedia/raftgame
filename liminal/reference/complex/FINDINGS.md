@@ -147,12 +147,15 @@ capture. Going through the frame's own buffers taught more than the picture:
   0.31: the panel is only ~7× the wall, colour (1, 0.85, 0.55). (The 115 and
   40 peaks of the scene pictures are a few hot pixels elsewhere.) A real LED
   panel would be ~40× and glow 5× too much around itself; this was the main
-  error of the first rebuild.
+  error of the first rebuild. Same in every frame that shows a panel (8 of
+  10): its brightest pixels end at about 0.96 / 0.95 / 0.93 in the final
+  picture and never clip (at most 0.0025% of pixels reach 0.98).
 - **The room's lights cast no shadows.** The frame draws its 14 lights as
   "BatchedLights" and has no shadow-map passes at all, so light passes through
   the soffit onto the wall under it and the alcove's face. Lumen shadows only
   its own bounce light (the 95 "Non raytraced shadows" dispatches of its
-  surface cache). Our `spot` lights take `shadows: 0` for this.
+  surface cache). Our `spot` lights take `shadows: 0` for this. Same in all
+  10 frames: 14 to 73 lights, all batched, no shadow passes.
 - **Lumen's bounce is weak and even.** Pass 363 (bounce light only, before
   the direct light is added) divided by the base colour gives about 0.15–0.21
   on every surface: walls, floor and ceiling alike, about 0.75× the direct
@@ -198,6 +201,22 @@ Result (mean colour of each region, 0–1 display values):
 game's lens-dirt smudges (round soft blobs on the right wall and the alcove
 face; we do not copy their dirt), the far left wall 8% bright, its motion
 blur, its finer noise, and a few edges (baseboards, the ceiling grid).
+
+General or fitted to this frame?
+- General (read from the game's own data, or checked on other frames): the
+  unshadowed lights, the dim panels, the light colour, the materials' sheen,
+  blue 0.75 (three frames, two of them through the bench with the game's own
+  scene), fog and depth of field.
+- Measured on this frame only: the softness (0.7 px); its cause (the
+  upscaler) is general, its amount is one frame's.
+- Fitted to this frame: the exposure (one number links our light units to
+  the game's), the carpet and ceiling stand-in colours (they stand in for
+  the game's weaker, even bounce; a different room shape would need other
+  values, so the real fix is a bounce that behaves like the game's), the
+  alcove's depth and slope and its lamp (the alcove is mostly hidden), and the
+  smoother carpet and ceiling textures (chosen by eye). The clock only syncs
+  the tape wobble for the comparison.
+- The test: rebuild a second frame with nothing retuned.
 
 ## What this means for us
 
