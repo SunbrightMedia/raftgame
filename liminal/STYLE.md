@@ -315,6 +315,27 @@ Map: `laquinta`. Plan in `tools/gen-laquinta.ts`'s header.
 - Upper corridor lit by a single **blown wall sconce**. Ceiling dim (91, 82, 75).
 - Camera: from the upper balcony, looking down and across, ~25' up the scene.
 
+## Reference 6: "Infinite house" (Cassette, YouTube qs5LrOkvVKM) — THE target
+
+- **(user)** "This level of realism is incredible. Realistically, this is
+  where I'd want to get our game. It is more aligned with our goal than any
+  piece of media I've shown you."
+- Claude could not play the video (YouTube asked to sign in); what follows
+  is from four still frames only. **(claude, unconfirmed)**
+- What it shows: a finished basement / suburban house that goes on and on.
+  Cream drywall, beige carpet, white six-panel doors with brass knobs,
+  baseboards, crown moulding, a red-brick fireplace, white kitchen cabinets
+  with a dark counter, an empty dark-wood bookshelf, white plastic chairs,
+  a grey armchair. Long walls with too many doors.
+- Why it reads as real: the shapes are simple (boxes and panels). The
+  realism is in three things. (1) **Bounced light**: the walls light each
+  other, corners are soft, there are no hard shadows, and light fades to
+  near-black down a hall with no lamp. (2) **Plain, true-sized things**:
+  8' ceilings, standard doors, trim; nothing designed for a game.
+  (3) **The camera**: 4:3 with black bars, low resolution, soft focus,
+  a warm cast (white balance set for daylight under bulbs), ceiling lamps
+  blown to white with a glow, compression, a handheld tilt.
+
 ---
 
 ## World: industrial v2 (modern Aperture back-of-house; `src/world/industrial/`)
