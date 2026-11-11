@@ -175,6 +175,10 @@ export class Game {
     this.renderer.internalHeight = Math.round(s.render.internalHeight);
     this.renderer.upscale = s.render.upscale as 'nearest' | 'linear';
     this.renderer.msaa = s.render.msaa;
+    this.renderer.targetFps = s.render.targetFps;
+    this.renderer.minHeight = s.render.minHeight;
+    this.renderer.depthFirst = s.render.depthFirst;
+    this.renderer.cameraOver = s.camera.over;
     this.renderer.camera_ = s.camera;
     const C = s.camera;
     // Source's non-HDR path: fixed brightness (scale 1 unless set), no bloom, plain 2.2 gamma.

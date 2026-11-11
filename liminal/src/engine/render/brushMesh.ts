@@ -6,6 +6,7 @@ import { applySourceBlend } from './sourceMaterial';
 import { makeSourceWorldMaterial } from './sourceWorldMaterial';
 import { emitterColor } from '../light/units';
 import { surfaceFor } from './surfaces';
+import { OCCLUDER_LAYER } from './renderer';
 
 interface Batch { pos: number[]; nrm: number[]; uv: number[]; lm: number[]; lmoff: number[]; shade: number[]; gu: number[]; gv: number[]; idx: number[] }
 
@@ -109,6 +110,9 @@ export function buildFaceMeshes(faces: Face[], textures: TextureRegistry, layout
     batchIndex++;
     const mesh = new THREE.Mesh(geo, mat);
     mesh.name = `tex:${tex}`;
+    // An opaque surface with no holes hides what is behind it: drawn first, depth only (renderer.ts).
+    const alphaMode = (mat as THREE.ShaderMaterial).uniforms?.alphaMode?.value as number | undefined;
+    if (!mat.transparent && (alphaMode === undefined || alphaMode === 0)) mesh.layers.enable(OCCLUDER_LAYER);
     group.add(mesh);
   }
   return group;

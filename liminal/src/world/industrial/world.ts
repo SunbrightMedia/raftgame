@@ -607,7 +607,7 @@ function fitOut(ctx: Ctx, p: { x0: number; y0: number; x1: number; y1: number; D
       [0, 0, 1, z + LEVEL], [0, 0, -1, -z],
       [dx, dy, 0, dot2([dx, dy], at(3 * TILE + TILE / 2, 0))],
       [lx, ly, 0, dot2([lx, ly], at(0, w / 2))], [-lx, -ly, 0, -dot2([lx, ly], at(0, -w / 2))],
-    ], NODRAW);
+    ], NODRAW, { group: 'clip' });   // for the feet only: it hides nothing (the steps lie inside it)
   }
   for (const [lo, hi] of cut.ribs) steel(lo, hi, p.D.steel);
   const face = [p.x1, p.y1, p.x0, p.y0];
@@ -1072,14 +1072,16 @@ function trestles(ctx: Ctx): void {
       for (const o of [-60, 60]) { const b = slab(c, s.dir, u - 8, u + 8, o - 8, o + 8, ctx.deep, zTop - 20); steel(b[0], b[1], D.steel); }
       for (const z of zs) { const b = slab(c, s.dir, u - 6, u + 6, -68, 68, z - 36, z - 20); steel(b[0], b[1], D.steel); }
       ctx.trestle.set(`${s.tiles[i][0]},${s.tiles[i][1]}`, zTop);
-      // On every other bent one column goes on up as a post, with a small amber lamp on it: a line of them across the hall.
+      // On every other bent the two columns go on up and carry a beam over the top deck, with a bell lamp under it:
+      // the same frame that stands over the catwalks in the streets. A deck with another one level above it has
+      // its lamp under that deck's beam.
       if (((i - first) / 3) % 2 === 0) {
-        const post = slab(c, s.dir, u - 3, u + 3, 57, 63, zTop - 20, zTop + 104);
-        steel(post[0], post[1], D.steel);
-        const top: V3 = [(post[0][0] + post[1][0]) / 2, (post[0][1] + post[1][1]) / 2, zTop + 104];
-        ctx.m.prop('props_bts/cage_light', [top[0], top[1], top[2] + 10], [0, 0, 0], { solid: false });
-        ctx.m.lamp([top[0], top[1], top[2] + 10], LAMP.amber, 1, 80, 480, { open: true });
-        ctx.m.glow([top[0], top[1], top[2] + 10], LAMP.amber, 44, 1.6);
+        for (const o of [-60, 60]) { const b = slab(c, s.dir, u - 8, u + 8, o - 8, o + 8, zTop - 20, zTop + 236); steel(b[0], b[1], D.steel); }
+        const beam = slab(c, s.dir, u - 8, u + 8, -68, 68, zTop + 216, zTop + 236);
+        steel(beam[0], beam[1], D.steel);
+        const mid = (z: number): V3 => [c[0] + DX[s.dir] * u, c[1] + DY[s.dir] * u, z];
+        bellLamp(ctx.m, mid(zTop + 216), LAMP.warm, 1.6, 560);
+        for (const z of zs) if (z !== zTop && zs.includes(z + LEVEL)) bellLamp(ctx.m, mid(z + LEVEL - 36), LAMP.warm, 1.6, 560);
       }
     }
     ctx.notes.push({ kind: 'bridge', at: [c[0] + DX[s.dir] * first * TILE, c[1] + DY[s.dir] * first * TILE, zs[0]], yaw: s.dir * 90 });
@@ -1146,8 +1148,8 @@ function shelter(ctx: Ctx, r: Rng, c: V3, open: Dir): void {
 
 /**
  * At some dead ends the catwalk widens into a landing to stand and look out
- * from, with a small amber lamp on a post at its far corner: seen from a way
- * off it looks like somewhere to go.
+ * from. A post at its far corner carries an arm over the deck with a bell
+ * lamp under it: seen from a way off it looks like somewhere to go.
  */
 function lookoutLanding(ctx: Ctx, c: V3, open: Dir): void {
   const { m, steel } = ctx;
@@ -1155,14 +1157,12 @@ function lookoutLanding(ctx: Ctx, c: V3, open: Dir): void {
   const yaw = away * 90 - 90;   // the landing's own +y points away from the way in
   m.prop('props_bts/hanging_walkway_end_b', c, [0, yaw, 0]);
   const a = (yaw * Math.PI) / 180;
+  const at = (px: number, py: number, z: number): V3 => [c[0] + px * Math.cos(a) - py * Math.sin(a), c[1] + px * Math.sin(a) + py * Math.cos(a), z];
   // Its far corner (the landing spans x −70..40, y −40..70 in its own frame), just outside the rail.
-  const px = -74, py = 74;
-  const x = c[0] + px * Math.cos(a) - py * Math.sin(a), y = c[1] + px * Math.sin(a) + py * Math.cos(a);
-  steel([x - 3, y - 3, c[2] - 4], [x + 3, y + 3, c[2] + 104]);
-  const top: V3 = [x, y, c[2] + 114];
-  m.prop('props_bts/cage_light', top, [0, 0, 0], { solid: false });
-  m.lamp(top, LAMP.amber, 1, 80, 460, { open: true });
-  m.glow(top, LAMP.amber, 44, 1.6);
+  const post = at(-74, 74, 0);
+  steel([post[0] - 4, post[1] - 4, c[2] - 4], [post[0] + 4, post[1] + 4, c[2] + 228]);
+  m.bar(at(-74, 74, c[2] + 222), at(-34, 34, c[2] + 222), 6, 8, T.steel, { group: 'func_detail', lightmapscale: 64, scale: 0.25 });
+  bellLamp(m, at(-38, 38, c[2] + 218), LAMP.warm, 1.5, 520);
   ctx.notes.push({ kind: 'landing', at: [c[0] + DX[open] * 200, c[1] + DY[open] * 200, c[2]], yaw: away * 90 });
 }
 
@@ -1189,14 +1189,18 @@ export const GEOMETRY_SETTINGS = {
   camera: { model: 'source', sourceHdr: true, autoExposure: true, sourceBloom: 0.7, sourceExposureMin: 0.7, sourceExposureMax: 1.8 },
   light: { enabled: false, lampAmbient: 14, lampAmbientColor: '#9db0c4', lampAmbientUp: 0.35, lampScale: 1 },
   // Small things are not drawn past 70 times their own size: by then the fog has all but hidden them.
-  render: { internalHeight: 0, textureFilter: 'linear', faceShade: 0.75, detailDistance: 70 },
+  // The picture is as tall as the window where the machine can hold 50 frames a second, and smaller where it cannot.
+  render: { internalHeight: 0, targetFps: 50, minHeight: 432, textureFilter: 'linear', faceShade: 0.75, detailDistance: 70 },
+  hud: { fps: true },
   surface: { reflections: 0 },
+  // Under the ground: there is no daylight anywhere. The air near by holds a little of the plant's own light; with
+  // distance, with height and with depth it goes to black. (Colours near Portal 2's own dark fogs, docs/P2_STUDY.md.)
   fog: {
-    enabled: true, source: true, color: '#8f979f', near: 300, far: 9000, maxDensity: 1,
-    layers: true, d1: 1600, a1: 0.18, c1: '#65717d', d2: 4200, a2: 0.62, c2: '#788693', d3: 8500, a3: 1, c3: '#8d9aa6',
-    lowOn: true, lowTop: -600, lowDepth: 3600, lowThicken: 0.8, lowTint: 0.9, lowColor: '#1f262e',
-    highOn: true, highBase: 900, highRise: 3000, highThicken: 0.5, highTint: 0.7, highColor: '#aab5bf',
-    blur: 4, blurStart: 1200, blurEnd: 6500,
+    enabled: true, source: true, color: '#12171c', near: 300, far: 7000, maxDensity: 1,
+    layers: true, d1: 1400, a1: 0.22, c1: '#27313a', d2: 3600, a2: 0.7, c2: '#19212a', d3: 7000, a3: 1, c3: '#0a0e12',
+    lowOn: true, lowTop: -600, lowDepth: 3600, lowThicken: 0.8, lowTint: 0.95, lowColor: '#020304',
+    highOn: true, highBase: 900, highRise: 3000, highThicken: 0.5, highTint: 0.85, highColor: '#05070a',
+    blur: 4, blurStart: 1200, blurEnd: 5500,
   },
   // The Portal 2 kit is made for Source's player: 32 wide, 72 tall, eyes at 64.
   hull: { hullWidth: 32, standHeight: 72, duckHeight: 36, eyeHeight: 64, duckEyeHeight: 28, voidZ: -2600 },

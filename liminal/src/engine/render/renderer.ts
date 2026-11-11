@@ -5,6 +5,9 @@ import { SourcePost, type SourcePostParams } from './sourcePost';
 THREE.ColorManagement.enabled = false;
 THREE.Object3D.DEFAULT_UP.set(0, 0, 1);
 
+/** Meshes on this layer (as well as layer 0) are big opaque surfaces: they are drawn first, depth only (LowResRenderer.depthFirst). */
+export const OCCLUDER_LAYER = 1;
+
 /**
  * Renders the scene at a low internal resolution into an offscreen target,
  * then upscales it to the window with nearest or linear filtering. That
@@ -38,6 +41,38 @@ export class LowResRenderer {
    * begins and where it is full. Null = off.
    */
   distanceBlur: { radius: number; start: number; end: number } | null = null;
+  /**
+   * Depth first: the big opaque surfaces (meshes on OCCLUDER_LAYER) are drawn
+   * once with no colour, so that in the real pass a pixel is shaded only for
+   * the surface in front. Lighting a wall costs many texture reads; without
+   * this, every wall behind another wall pays it too.
+   */
+  depthFirst = true;
+  private depthOnly = new THREE.MeshBasicMaterial({ colorWrite: false, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 2 });
+  /**
+   * Hold the frame rate by drawing fewer lines when frames run long, and more
+   * again when there is time to spare (the picture is scaled up to the window
+   * either way). 0 = off: always `internalHeight` lines.
+   */
+  targetFps = 0;
+  /** With targetFps: never fewer lines than this. */
+  minHeight = 360;
+  /** The share of the full height being drawn now (1 = all of it). */
+  private scale = 1;
+  private frameMs = 16;       // a running mean of the time between frames
+  private steady = 0;         // seconds since the size last changed
+  private holdUp = 4;         // seconds to wait before trying a bigger picture (doubles each time a try fails)
+  private triedUp = false;
+  private lowAA = false;      // antialiasing given up to hold the frame rate
+  /** Last frame: draw calls and triangles, the mean time between frames, the antialiasing in use, and the graphics card's name: for the HUD. */
+  readonly stats = { calls: 0, triangles: 0, frameMs: 16, aa: 0, gpu: '' };
+  /**
+   * With the Source camera: its finished picture is then recorded by the old
+   * camera (`camera_`) at a fixed exposure: that camera's softness, colour
+   * bleed, fringes and grain, laid over the picture as it is.
+   */
+  cameraOver = false;
+  private overTarget: THREE.WebGLRenderTarget | null = null;
   private blurTarget: THREE.WebGLRenderTarget | null = null;
   private blurScene = new THREE.Scene();
   private blurMat = new THREE.ShaderMaterial({
@@ -60,9 +95,9 @@ export class LowResRenderer {
         float r = a0 * blur.x;
         vec3 sum = c0.rgb;
         float wsum = 1.0;
-        for (int i = 1; i <= 20; i++) {
+        for (int i = 1; i <= 12; i++) {
           float fi = float(i);
-          vec2 uv = vUv + vec2(cos(fi * 2.39996323), sin(fi * 2.39996323)) * (r * sqrt(fi / 20.0)) * texel;
+          vec2 uv = vUv + vec2(cos(fi * 2.39996323), sin(fi * 2.39996323)) * (r * sqrt(fi / 12.0)) * texel;
           float w = amount(uv);
           w = w * w + 0.002;
           sum += texture2D(src, uv).rgb * w;
@@ -81,6 +116,12 @@ export class LowResRenderer {
     this.gl = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance', premultipliedAlpha: false });
     this.gl.outputColorSpace = THREE.LinearSRGBColorSpace;
     this.gl.setPixelRatio(1);
+    try {
+      // The graphics card in use, for the HUD (a slow frame rate means one thing on a laptop's built-in chip and another on a software renderer).
+      const c = this.gl.getContext(), ext = c.getExtension('WEBGL_debug_renderer_info');
+      const name = String(ext ? c.getParameter(ext.UNMASKED_RENDERER_WEBGL) : c.getParameter(c.RENDERER));
+      this.stats.gpu = (/^ANGLE \([^,]*, (.+?)(?: Direct3D.*| \(0x.*|, .*)?\)?$/.exec(name)?.[1] ?? name).slice(0, 64);
+    } catch { /* not told */ }
     this.camera = new THREE.PerspectiveCamera(74, 16 / 9, 2, 65536);
     this.blitMat = new THREE.MeshBasicMaterial({ depthTest: false, depthWrite: false });
     this.blitScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.blitMat));
@@ -132,11 +173,38 @@ export class LowResRenderer {
 
     // Always render through the offscreen target, even at native size, so
     // MSAA applies everywhere.
-    const ih = this.internalHeight > 0 ? Math.min(this.internalHeight, h) : h;
+    const now0 = performance.now(), gap = Math.min(250, now0 - this.lastFrame);
+    this.frameMs += (gap - this.frameMs) * (1 - Math.exp(-gap / 200));   // the mean of about the last fifth of a second
+    this.stats.frameMs = this.frameMs;
+    const full = this.internalHeight > 0 ? Math.min(this.internalHeight, h) : h;
+    const msaa = Math.max(0, Math.round(this.msaa));
+    if (this.targetFps > 0) {
+      // Too slow for a third of a second: a cheaper picture at once. Time to spare for a while: try a dearer one;
+      // if that try turns out too slow, go back and wait twice as long before the next try.
+      // The steps, from dear to cheap: all the lines; three quarters of them; then no antialiasing; then fewer lines still.
+      const want = 1000 / this.targetFps, floor = Math.min(1, this.minHeight / full), mid = Math.max(0.75, floor);
+      this.steady += gap / 1000;
+      if (this.frameMs > want * 1.2 && this.steady > 0.35 && (this.scale > floor + 0.005 || (!this.lowAA && msaa > 0))) {
+        if (this.triedUp) this.holdUp = Math.min(120, this.holdUp * 2);
+        const f = Math.max(0.6, Math.min(0.92, want / this.frameMs));
+        if (this.scale > mid + 0.005) this.scale = Math.max(mid, this.scale * f);
+        else if (!this.lowAA && msaa > 0) this.lowAA = true;
+        else this.scale = Math.max(floor, this.scale * f);
+        this.steady = 0; this.triedUp = false;
+      } else if (this.frameMs < want * 1.06 && this.steady > this.holdUp && (this.scale < 1 || this.lowAA)) {
+        if (this.scale < mid - 0.005) this.scale = Math.min(mid, this.scale * 1.12);
+        else if (this.lowAA) this.lowAA = false;
+        else this.scale = Math.min(1, this.scale * 1.12);
+        this.steady = 0; this.triedUp = true;
+      } else if (this.triedUp && this.steady > 2) { this.triedUp = false; this.holdUp = 4; }
+    } else { this.scale = 1; this.lowAA = false; }
+    // In steps of 16 lines, so the buffers are not remade for every small change.
+    const ih = Math.max(1, Math.min(full, Math.round((full * this.scale) / 16) * 16 || full));
     const iw = Math.max(1, Math.round(ih * aspect));
     this.renderSize.set(iw, ih);
     const filter = this.upscale === 'nearest' ? THREE.NearestFilter : THREE.LinearFilter;
-    const samples = Math.max(0, Math.round(this.msaa));
+    const samples = this.lowAA ? 0 : msaa;
+    this.stats.aa = samples;
     const wantDepth = this.distanceBlur !== null;
     if (!this.target || this.target.width !== iw || this.target.height !== ih || this.target.texture.magFilter !== filter || this.target.samples !== samples || (this.target.depthTexture !== null) !== wantDepth) {
       this.target?.depthTexture?.dispose();
@@ -151,7 +219,21 @@ export class LowResRenderer {
       this.blurTarget = wantDepth ? new THREE.WebGLRenderTarget(iw, ih, { depthBuffer: false, colorSpace: THREE.NoColorSpace, magFilter: filter, minFilter: filter, generateMipmaps: false, type: THREE.HalfFloatType }) : null;
     }
     this.gl.setRenderTarget(this.target);
-    this.gl.render(scene, this.camera);
+    this.gl.info.autoReset = false;
+    this.gl.info.reset();
+    if (this.depthFirst) {
+      this.gl.autoClear = false;
+      this.gl.clear();
+      this.camera.layers.set(OCCLUDER_LAYER);
+      scene.overrideMaterial = this.depthOnly;
+      this.gl.render(scene, this.camera);
+      scene.overrideMaterial = null;
+      this.camera.layers.set(0);
+      this.gl.render(scene, this.camera);
+      this.gl.autoClear = true;
+    } else this.gl.render(scene, this.camera);
+    this.stats.calls = this.gl.info.render.calls;
+    this.stats.triangles = this.gl.info.render.triangles;
     let frame = this.target;
     if (this.distanceBlur && this.blurTarget && this.target.depthTexture) {
       const u = this.blurMat.uniforms, b = this.distanceBlur;
@@ -169,7 +251,15 @@ export class LowResRenderer {
     const now = performance.now(), dt = Math.min(0.25, (now - this.lastFrame) / 1000);
     this.lastFrame = now;
     if (this.sourceCamera) {
-      this.sourcePost.render(this.gl, frame, null, this.sourceUnit, this.sourceCamera, dt);
+      if (this.cameraOver && this.camera_) {
+        if (!this.overTarget || this.overTarget.width !== iw || this.overTarget.height !== ih) {
+          this.overTarget?.dispose();
+          this.overTarget = new THREE.WebGLRenderTarget(iw, ih, { depthBuffer: false, colorSpace: THREE.NoColorSpace, magFilter: THREE.LinearFilter, minFilter: THREE.LinearFilter, generateMipmaps: false, type: THREE.HalfFloatType });
+        }
+        this.sourcePost.render(this.gl, frame, this.overTarget, this.sourceUnit, this.sourceCamera, dt, true);
+        // The picture's colours and brightness are already as they should be: this camera adds no cast of its own.
+        this.digicam.render(this.gl, this.overTarget, null, { ...this.camera_, whiteBalanceK: 6600, tint: 0, brightness: 0 }, this.camera_.clip);
+      } else this.sourcePost.render(this.gl, frame, null, this.sourceUnit, this.sourceCamera, dt);
       return;
     }
     if (this.camera_) {

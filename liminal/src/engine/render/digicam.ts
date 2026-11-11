@@ -386,8 +386,13 @@ export class Digicam {
     this.exposure = Math.exp(Math.log(this.exposure) + (Math.log(this.target) - Math.log(this.exposure)) * k);
   }
 
-  render(gl: THREE.WebGLRenderer, src: THREE.WebGLRenderTarget, out: THREE.WebGLRenderTarget | null, p: CameraParams): void {
-    this.autoExpose(gl, src, p);
+  /**
+   * `fixedGain`: no metering; the picture is exposed by exactly this much. (Laid over another camera's finished
+   * picture, where 1 is already white: the gain is then this camera's clip level.)
+   */
+  render(gl: THREE.WebGLRenderer, src: THREE.WebGLRenderTarget, out: THREE.WebGLRenderTarget | null, p: CameraParams, fixedGain?: number): void {
+    if (fixedGain !== undefined) this.exposure = this.target = fixedGain;
+    else this.autoExpose(gl, src, p);
     const w = kelvinToLinear(p.whiteBalanceK);
     const wb = new THREE.Vector3(1 / w[0], 1 / w[1], 1 / w[2]);
     // Tint: the green–magenta axis of white balance (+ = magenta, − = green).

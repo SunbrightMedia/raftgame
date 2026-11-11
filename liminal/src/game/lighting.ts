@@ -175,6 +175,8 @@ export class Lighting {
   private keyFor(level: Level, s: Settings, textures: TextureRegistry): string {
     const { filter: _f, ...bakeSettings } = s.light; // filtering doesn't need a re-bake
     void _f;
+    // Nor do the lamps of worlds lit with no bake (engine/render/lightGrid.ts).
+    for (const k of ['lampAmbient', 'lampAmbientColor', 'lampAmbientUp', 'lampScale']) delete (bakeSettings as Record<string, unknown>)[k];
     // Indoors (no sky), the sky's colours don't affect the bake.
     if (!(bakeSettings.skyLuminance > 0)) {
       const b = bakeSettings as Record<string, unknown>;

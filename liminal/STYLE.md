@@ -358,6 +358,19 @@ for every pass of this world, and the first two for every world.
   beams out of the wall and hangs by a rod from the wall above. No white
   pipes in rooms (they read as bright models).
 - Every change to the generator must still pass `npm run world:walk`.
+- **Stairs are for the eye, a ramp for the feet.** The unseen ramp over a
+  flight of steps is a clip brush (`group: 'clip'`): a brush with no drawn
+  face hides nothing, so the steps inside it still show. (A plain NODRAW
+  solid there once hid every step.)
+- **The game is for laptops and desktops, as its own program** (the user;
+  Steam perhaps). A browser's limits are not the design's limits; but it
+  must be fast. The picture holds 50 frames a second by itself: fewer
+  lines, then no antialiasing, when the machine is slow
+  (`render.targetFps`). The HUD's first lines show the frame rate, the
+  picture's size and the graphics card.
+- **P** lays the old camera's look (softness, colour bleed, fringes, grain)
+  over the Source camera's picture, at a fixed exposure and with no colour
+  cast of its own (`camera.over`).
 - **Light without a bake.** The world is made in the page, so nothing can be
   baked. Lamps are worked out per pixel (`engine/render/lightGrid.ts`): no
   shadows, so each lamp inside a mass is shut in the box of the corridor,
@@ -366,16 +379,22 @@ for every pass of this world, and the first two for every world.
   dark shape against the fog, each lamp makes a warm pool. Fixtures: bell
   lamps under the catwalk beams, in rooms and shafts; caged tube lights on
   corridor ceilings, stair hall walls and over every doorway (doors show
-  from far off); small amber lamps on posts along the bridges and up the
-  corners of some masses; tube lights in the gaps of some chamber stacks.
+  from far off); small amber marker lamps **only up the corners of the big
+  masses** (the user: they look good only there; not on bridges or
+  landings); a bridge has the streets' own frame over it with a bell lamp,
+  a look-out landing a post with an arm and a bell lamp; tube lights in the
+  gaps of some chamber stacks.
   About one tunnel in eight has very few lamps; a look-out room is always
   dark; every plain corner and crossing inside a mass has a lamp of its own
   (a place where the way divides must be readable). With no bounced light,
   a lamp shut in a room also gives a faint even fill through its reach.
 - **Fog** (the user asked for layers, more intense further back, and blur):
-  three layers by distance, each with its own density and colour (thin and
-  dark near, thick and pale far); the depths under the lowest catwalks go
-  dark, the heights go pale; far things are a little soft (distance blur).
+  three layers by distance, each with its own density and colour. **The
+  fog is dark: this is an endless plant under the ground, and nothing far
+  off may look like daylight** (the user). The air near by holds a little
+  of the plant's own light; with distance, with height and with depth it
+  goes to black, so far lamps are points in the dark. Far things are a
+  little soft (distance blur).
   Inside a mass the air is thin and dark (a fog volume). All of it is in
   the tweak panel under Fog; the world's own values are in
   `GEOMETRY_SETTINGS` and `INSIDE_FOG` (`src/world/industrial/world.ts`).

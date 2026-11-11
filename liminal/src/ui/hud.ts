@@ -19,7 +19,7 @@ export class Hud {
     this.prompt.innerHTML = 'click to play<br><span>WASD move · Space jump · C crouch · Shift sprint · Alt walk · V noclip · R respawn · ` tweak panel</span>';
   }
 
-  update(dt: number, s: Settings, p: Player, locked: boolean, panelOpen: boolean, renderSize: { x: number; y: number }, tickRate: number): void {
+  update(dt: number, s: Settings, p: Player, locked: boolean, panelOpen: boolean, renderSize: { x: number; y: number }, tickRate: number, stats?: { calls: number; triangles: number; frameMs: number; aa: number; gpu: string }): void {
     this.fpsAcc += dt; this.fpsFrames++;
     if (this.fpsAcc >= 0.5) { this.fps = this.fpsFrames / this.fpsAcc; this.fpsAcc = 0; this.fpsFrames = 0; }
 
@@ -35,7 +35,10 @@ export class Hud {
     this.prompt.style.display = locked || panelOpen ? 'none' : '';
 
     const lines: string[] = [];
-    if (s.hud.fps) lines.push(`${this.fps.toFixed(0)} fps · ${renderSize.x}×${renderSize.y} · ${tickRate} Hz`);
+    if (s.hud.fps) {
+      lines.push(`${this.fps.toFixed(0)} fps · ${renderSize.x}×${renderSize.y} · ${tickRate} Hz${stats ? ` · ${stats.frameMs.toFixed(1)} ms · AA ${stats.aa} · ${(stats.triangles / 1e6).toFixed(2)} M tris · ${stats.calls} draws` : ''}`);
+      if (stats?.gpu) lines.push(stats.gpu);
+    }
     if (s.hud.position) {
       const o = p.state.origin, st = p.state;
       lines.push(

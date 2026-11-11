@@ -66,7 +66,8 @@ it *feels* right; that's the user's call.
     stair and corridor). Look at it with the studio and
     `tools/world/spots.ts` / `tour.ts` poses (pose z = the feet, not the eyes).
   - The private page makes the world from a seed (map path
-    `world:industrial:<seed>`; N and B change it), lit by lamps with no bake
+    `world:industrial:<seed>`; N and B change it; P lays the old camera's
+    look over the picture), lit by lamps with no bake
     (`engine/render/lightGrid.ts`). Build and stage it with
     `tools/world/publish-prep.sh x <dir>`, publish to
     https://claude.ai/artifact/39h7z8LBGcPg3DgeNXLd2c (send new files, null

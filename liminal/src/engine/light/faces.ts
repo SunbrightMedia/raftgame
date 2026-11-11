@@ -121,7 +121,12 @@ export function insideSolid(s: SolidPlanes, p: Axis, eps = 1e-3): boolean {
  * see them, and they'd waste lightmap space and bake time.
  */
 export function buildFaces(brushes: BrushDef[]): Face[] {
-  const solids = brushes.filter((b) => b.solid !== false).map((b) => ({ b, s: solidPlanes(b) }));
+  const ownOf = (b: BrushDef) => (b.type === 'box' ? boxFaces(b) : b.type === 'convex' ? convexFaces(b) : prismFaces(b));
+  const drawn = (f: Face, b: BrushDef) => !(f.tex.startsWith('tools/') || b.group === 'clip');
+  const all = brushes.map((b) => ({ b, own: ownOf(b) }));
+  // What can hide a face: a solid brush that is itself seen. A brush with no drawn face at all (a clip brush, an
+  // unseen ramp over a flight of steps) is not there to the eye, so what lies inside it still shows.
+  const solids = all.filter(({ b, own }) => b.solid !== false && own.some((f) => drawn(f, b))).map(({ b }) => ({ b, s: solidPlanes(b) }));
   // Spatial hash of the solids, so a face only checks the brushes near it
   // (every face against every brush took ~9 s on a 6000-brush map).
   const CELL = 128, grid = new Map<string, typeof solids>();
@@ -132,11 +137,10 @@ export function buildFaces(brushes: BrushDef[]): Face[] {
   };
   for (const x of solids) cells(x.s.min, x.s.max, (k) => { const l = grid.get(k); if (l) l.push(x); else grid.set(k, [x]); });
   const faces: Face[] = [];
-  for (const b of brushes) {
-    const own = b.type === 'box' ? boxFaces(b) : b.type === 'convex' ? convexFaces(b) : prismFaces(b);
+  for (const { b, own } of all) {
     for (const f of own) {
       // Tool faces (Source's nodraw, clip, skybox...) and clip brushes are never drawn or lit; they stay solid.
-      if (f.tex.startsWith('tools/') || b.group === 'clip') continue;
+      if (!drawn(f, b)) continue;
       const a = facePoint(f, 0, 0, 0.5), c = facePoint(f, f.width, f.height, 0.5);
       const lo: Axis = [Math.min(a[0], c[0]) - 1, Math.min(a[1], c[1]) - 1, Math.min(a[2], c[2]) - 1];
       const hi: Axis = [Math.max(a[0], c[0]) + 1, Math.max(a[1], c[1]) + 1, Math.max(a[2], c[2]) + 1];

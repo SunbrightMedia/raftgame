@@ -87,6 +87,11 @@ async function boot(): Promise<void> {
   };
   window.addEventListener('keydown', (e) => {
     if (e.code === 'Tab') { e.preventDefault(); toast('The editor arrives in Milestone 2: Tab will switch between edit and play.'); }
+    // P lays the old camera's look over the Source camera's picture, and takes it off again.
+    if (e.code === 'KeyP' && !e.repeat && !panel.open && config.values.camera.model === 'source') {
+      config.set('camera', 'over', !config.values.camera.over);
+      toast(`Old camera look: ${config.values.camera.over ? 'on' : 'off'}  ·  P`);
+    }
     // In a generated world, N and B make the next and the previous world (seed + 1, seed − 1).
     const world = /^world:([a-z]+):(\d+)$/.exec(game.mapPath);
     if (world && (e.code === 'KeyN' || e.code === 'KeyB') && !e.repeat && !panel.open) {
@@ -101,7 +106,7 @@ async function boot(): Promise<void> {
     toast(`World ${game.mapPath.split(':')[2]}  ·  N next, B back`);
     // The keys list under "click to play" gains the two for changing worlds.
     const keys = document.querySelector('.hud-prompt span');
-    if (keys) keys.textContent += ' · N next world · B world before';
+    if (keys) keys.textContent += ' · N next world · B world before · P old camera look';
   }
 
   window.addEventListener('dragover', (e) => e.preventDefault());
@@ -111,7 +116,7 @@ async function boot(): Promise<void> {
     if (f) void loadDropped(f);
   });
 
-  game.onFrame = (dt) => hud.update(dt, config.values, game.player, game.input.locked, panel.open, game.renderer.renderSize, config.values.sim.tickRate);
+  game.onFrame = (dt) => hud.update(dt, config.values, game.player, game.input.locked, panel.open, game.renderer.renderSize, config.values.sim.tickRate, game.renderer.stats);
   game.start();
   requestAnimationFrame(() => requestAnimationFrame(() => mark('first frames drawn')));
 

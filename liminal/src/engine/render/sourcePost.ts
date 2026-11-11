@@ -51,6 +51,7 @@ export class SourcePost {
   /** Current tonemap scale. */
   scale = 1;
   private goal = 1;
+  private frames = 0;
   private cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
   private ldr: THREE.WebGLRenderTarget | null = null;
   private small0: THREE.WebGLRenderTarget | null = null;
@@ -97,10 +98,17 @@ export class SourcePost {
       gl_FragColor = vec4(c * amount, 1.0);
     }`, { src: { value: null }, dir: { value: new THREE.Vector2() }, amount: { value: 1 } });
   // Engine_Post: frame + bloom, in gamma space.
+  // `linear` = 1: the picture goes on to another camera (the old one, laid over this), so it is given as linear light
+  // again (1 = white; a lamp with its bloom may pass 1), with the frame's own alpha (which marks the light sources).
   private composite = pass(/* glsl */ `
-    uniform sampler2D frame; uniform sampler2D bloom; uniform float bloomOn; varying vec2 vUv;
-    void main() { gl_FragColor = vec4(texture2D(frame, vUv).rgb + bloomOn * texture2D(bloom, vUv).rgb, 1.0); }`,
-  { frame: { value: null }, bloom: { value: null }, bloomOn: { value: 1 } });
+    uniform sampler2D frame; uniform sampler2D bloom; uniform float bloomOn; uniform float linear; uniform float g22; varying vec2 vUv;
+    vec3 toLinear(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }
+    void main() {
+      vec4 f = texture2D(frame, vUv);
+      vec3 c = max(f.rgb + bloomOn * texture2D(bloom, vUv).rgb, 0.0);
+      gl_FragColor = linear > 0.5 ? vec4(g22 > 0.5 ? pow(c, vec3(2.2)) : toLinear(c), f.a) : vec4(c, 1.0);
+    }`,
+  { frame: { value: null }, bloom: { value: null }, bloomOn: { value: 1 }, linear: { value: 0 }, g22: { value: 0 } });
 
   private ensure(w: number, h: number): void {
     if (this.ldr && this.ldr.width === w && this.ldr.height === h) return;
@@ -159,7 +167,8 @@ export class SourcePost {
     return Math.max(0.001, target * this.scale);
   }
 
-  render(gl: THREE.WebGLRenderer, src: THREE.WebGLRenderTarget, out: THREE.WebGLRenderTarget | null, sourceUnit: number, p: SourcePostParams, dt: number): void {
+  /** `linearOut`: write linear light (for a camera pass that follows) and not the finished gamma picture. */
+  render(gl: THREE.WebGLRenderer, src: THREE.WebGLRenderTarget, out: THREE.WebGLRenderTarget | null, sourceUnit: number, p: SourcePostParams, dt: number, linearOut = false): void {
     this.ensure(src.width, src.height);
     const tm = this.tonemap.mat.uniforms;
     tm.src.value = src.texture;
@@ -176,9 +185,10 @@ export class SourcePost {
       }
       draw();
     } else {
-      // Play: meter this frame, ease towards the goal (seen from the next frame on).
+      // Play: meter the frame, ease towards the goal (seen from the next frame on). The meter is read back from the
+      // graphics card, which makes the program wait for it: so only every fourth frame (exposure moves slowly anyway).
       draw();
-      this.goal = Math.min(p.max, Math.max(p.min, this.meterGoal(gl, p)));
+      if (this.frames++ % 4 === 0) this.goal = Math.min(p.max, Math.max(p.min, this.meterGoal(gl, p)));
       this.scale += (this.goal - this.scale) * Math.min(1, p.rate * dt);
     }
     const s0 = this.small0!, s1 = this.small1!;
@@ -195,6 +205,7 @@ export class SourcePost {
     }
     const c = this.composite.mat.uniforms;
     c.frame.value = this.ldr!.texture; c.bloom.value = s0.texture; c.bloomOn.value = bloomOn ? 1 : 0;
+    c.linear.value = linearOut ? 1 : 0; c.g22.value = p.gamma22 ? 1 : 0;
     this.draw(gl, this.composite, out);
   }
 }

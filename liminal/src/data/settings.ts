@@ -72,6 +72,9 @@ export const SETTINGS = {
     help: 'The full look panel (grading, grain, bloom) arrives in Milestone 3.',
     defs: {
       internalHeight: num('Internal resolution (lines)', 540, 0, 2160, 1, 'The game renders this many lines tall and upscales. 0 = native.', 'px'),
+      targetFps: num('Hold this frame rate', 0, 0, 240, 1, 'When frames run long, draw fewer lines (the picture is scaled up to the window), and more again when there is time to spare. 0 = off: always the resolution above.', 'fps'),
+      minHeight: num('...but never fewer lines than', 360, 120, 2160, 8, undefined, 'px'),
+      depthFirst: bool('Depth first', true, 'Draw the big opaque surfaces once with no colour first, so a pixel is lit only for the surface in front. Faster wherever walls stand behind walls.'),
       msaa: num('Antialiasing (MSAA)', 4, 0, 8, 1, 'Multisample antialiasing on the internal render: smooths jagged geometry edges. 0 = off (crunchier), 4 = smooth.', 'x'),
       upscale: select('Upscale filter', 'linear', ['nearest', 'linear'] as const, 'nearest = crunchy pixels, linear = soft CRT-ish.'),
       faceShade: num('Fullbright face shading', 0.6, 0, 1, 0.01, 'Fake per-face shading used only when baked lighting is off. 0 = flat, 1 = strong.'),
@@ -151,6 +154,7 @@ export const SETTINGS = {
       sourceExposureMax: num('Source: exposure max', 2, 0.1, 8, 0.01, 'Highest tonemap scale (2 by default).'),
       sourceScale: num('Source: manual exposure', 1, 0.05, 8, 0.01, 'Tonemap scale when auto exposure is off.'),
       sourceBloom: num('Source: bloom', 1, 0, 4, 0.01, 'Bloom scale (mat_bloomscale / env_tonemap_controller).'),
+      over: bool('Source: old camera on top (key P)', false, 'With the Source camera: its finished picture is then recorded by the camera below, at a fixed exposure: softness, colour bleed, fringes at blown lamps, grain. The P key turns this on and off.'),
       autoExposure: bool('Auto exposure', true, 'Meter the scene like a point-and-shoot (centre-weighted average) and expose for it. Why lamps blow out while the room stays readable.'),
       brightness: num('Brightness', -0.18, -1.5, 1.5, 0.01, 'Picture brightness (midtones), applied after auto exposure so it stays put. 0 = neutral.'),
       contrast: num('Contrast', 0.95, 0.5, 3, 0.01, 'Camera contrast: an S-curve around mid-grey. 1 = flat (as before); consumer digicams pushed this hard.'),
