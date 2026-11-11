@@ -1,0 +1,34 @@
+shader ResourceId::7782, stage ps, name "Pixel Shader 7782"
+entry point: main
+read  0 "texture0" (TextureType.Texture2D)
+sampler 0 "sampler0"
+in  SV_POSITION0
+in  TEXCOORD0
+out SV_Target0
+
+==================== disassembly: DXBC ====================
+
+Shader hash 913a8c7d-040d21c1-8ee290a0-2cf1f9b8
+
+ps_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_sampler s0, mode_default
+      dcl_resource_texture2d (float,float,float,float) t0
+      dcl_input_ps linear v1.xy
+      dcl_output o0.xyzw
+      dcl_temps 1
+   0: sample_l(texture2d)(float,float,float,float) r0.x, v1.xyxx, t0.wxyz, s0, l(0)
+   1: mov o0.x, r0.x
+   2: mov o0.yzw, l(0, 0, 0, 0)
+   3: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

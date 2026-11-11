@@ -1,0 +1,100 @@
+{
+ "index": 83,
+ "kind": "draw",
+ "events": [
+  12807,
+  12807
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "LumenSceneUpdate: %u card captures %.3fM texels",
+  "CopyCardsToSurfaceCache",
+  "CopyToSurfaceCache %s"
+ ],
+ "first": "ID3D11DeviceContext::DrawInstanced()",
+ "last": "ID3D11DeviceContext::DrawInstanced()",
+ "shaders": {
+  "vs": [
+   "shaders/vs_7779.txt"
+  ],
+  "ps": [
+   "shaders/ps_7781.txt"
+  ]
+ },
+ "constants": {
+  "ps": {
+   "ResourceId::7781": []
+  }
+ },
+ "reads": {
+  "ps": {
+   "ResourceId::7781": [
+    {
+     "id": "ResourceId::45625",
+     "name": "2D Render Target 45625",
+     "w": 512,
+     "h": 512,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R8G8B8A8_TYPELESS",
+     "samples": 1,
+     "binding": "texture0"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 12807,
+   "name": "ID3D11DeviceContext::DrawInstanced()",
+   "vs": "ResourceId::7779",
+   "ps": "ResourceId::7781"
+  }
+ ],
+ "outputs": [
+  {
+   "id": "ResourceId::6847",
+   "name": "2D Render Target 6847",
+   "w": 4096,
+   "h": 4096,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R8G8B8A8_TYPELESS",
+   "samples": 1
+  }
+ ],
+ "images": [
+  {
+   "file": "images/0083_out0.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "max": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "target": {
+    "id": "ResourceId::6847",
+    "name": "2D Render Target 6847",
+    "w": 4096,
+    "h": 4096,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R8G8B8A8_TYPELESS",
+    "samples": 1
+   }
+  }
+ ]
+}

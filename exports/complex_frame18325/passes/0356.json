@@ -1,0 +1,240 @@
+{
+ "index": 356,
+ "kind": "dispatch",
+ "events": [
+  15665,
+  15665
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "DiffuseIndirectAndAO",
+  "LumenScreenProbeGather",
+  "ScreenProbeConvertToIrradiance Format:%d"
+ ],
+ "first": "DispatchIndirect(<32, 28, 1>)",
+ "last": "DispatchIndirect(<32, 28, 1>)",
+ "shaders": {
+  "cs": [
+   "shaders/cs_71201.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::71201": [
+    {
+     "block": "cbuffer0",
+     "bytes": 160,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        12.242355,
+        0.0,
+        12.238464,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        0.0,
+        1.495870968074831e+20,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v4",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v5",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v6",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.005,
+        2.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v7",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.021164,
+        0.024691,
+        0.001323,
+        0.001543
+       ]
+      },
+      {
+       "name": "cb0_v8",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.02381,
+        0.027778,
+        7.076489135224685e+34,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v9",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.027778,
+        7.076489135224685e+34,
+        0.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::71201": [
+    {
+     "id": "ResourceId::71212",
+     "name": "2D Texture 71212",
+     "w": 42,
+     "h": 36,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R32_UINT",
+     "samples": 1,
+     "binding": "texture0"
+    },
+    {
+     "id": "ResourceId::51999",
+     "name": "InstanceCulling.CompactionBlockDataIndices",
+     "binding": "structuredbuffer1"
+    },
+    {
+     "id": "ResourceId::71153",
+     "name": "2D Texture 71153",
+     "w": 672,
+     "h": 576,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R11G11B10_FLOAT",
+     "samples": 1,
+     "binding": "texture2"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 15665,
+   "name": "DispatchIndirect(<32, 28, 1>)",
+   "cs": "ResourceId::71201"
+  }
+ ],
+ "outputs": [
+  {
+   "id": "ResourceId::71170",
+   "name": "2D Texture 71170",
+   "w": 336,
+   "h": 288,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R11G11B10_FLOAT",
+   "samples": 1
+  }
+ ],
+ "images": [
+  {
+   "file": "images/0356_out0.jpg",
+   "black": 0.0,
+   "white": 5.25,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "max": [
+    5.25,
+    3.78125,
+    4.375,
+    1.0
+   ],
+   "target": {
+    "id": "ResourceId::71170",
+    "name": "2D Texture 71170",
+    "w": 336,
+    "h": 288,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R11G11B10_FLOAT",
+    "samples": 1
+   }
+  }
+ ]
+}

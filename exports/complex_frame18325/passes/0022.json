@@ -1,0 +1,23 @@
+{
+ "index": 22,
+ "kind": "clear",
+ "events": [
+  1191,
+  1191
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "UpdateDistanceFieldObjectBuffers",
+  "ScatterUpload[%d] (Resource: %s, Offset: %u, GroupSize: %u)"
+ ],
+ "first": "ID3D11DeviceContext::ClearUnorderedAccessViewUint()",
+ "last": "ID3D11DeviceContext::ClearUnorderedAccessViewUint()",
+ "shaders": {},
+ "constants": {},
+ "reads": {},
+ "draws": [],
+ "outputs": [],
+ "images": []
+}

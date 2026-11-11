@@ -1,0 +1,205 @@
+{
+ "index": 375,
+ "kind": "draw",
+ "events": [
+  16995,
+  16995
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "FilterTranslucentVolume %dx%dx%d Cascades:%d",
+  "Cascade%d"
+ ],
+ "first": "ID3D11DeviceContext::DrawInstanced()",
+ "last": "ID3D11DeviceContext::DrawInstanced()",
+ "shaders": {
+  "vs": [
+   "shaders/vs_7906.txt"
+  ],
+  "ps": [
+   "shaders/ps_7914.txt"
+  ]
+ },
+ "constants": {
+  "ps": {
+   "ResourceId::7914": [
+    {
+     "block": "cbuffer0",
+     "bytes": 64,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        0.0,
+        -0.729096,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.228409574923436e+18,
+        0.0,
+        1.228409574923436e+18,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.015625,
+        0.0,
+        0.7,
+        0.5
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "ps": {
+   "ResourceId::7914": [
+    {
+     "id": "ResourceId::45856",
+     "name": "3D Render Target 45856",
+     "w": 64,
+     "h": 64,
+     "depth": 64,
+     "mips": 1,
+     "array": 1,
+     "format": "R16G16B16A16_FLOAT",
+     "samples": 1,
+     "binding": "texture0"
+    },
+    {
+     "id": "ResourceId::45852",
+     "name": "3D Render Target 45852",
+     "w": 64,
+     "h": 64,
+     "depth": 64,
+     "mips": 1,
+     "array": 1,
+     "format": "R16G16B16A16_FLOAT",
+     "samples": 1,
+     "binding": "texture1"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 16995,
+   "name": "ID3D11DeviceContext::DrawInstanced()",
+   "vs": "ResourceId::7906",
+   "ps": "ResourceId::7914"
+  }
+ ],
+ "outputs": [
+  {
+   "id": "ResourceId::45833",
+   "name": "3D Render Target 45833",
+   "w": 64,
+   "h": 64,
+   "depth": 64,
+   "mips": 1,
+   "array": 1,
+   "format": "R16G16B16A16_FLOAT",
+   "samples": 1
+  },
+  {
+   "id": "ResourceId::45829",
+   "name": "3D Render Target 45829",
+   "w": 64,
+   "h": 64,
+   "depth": 64,
+   "mips": 1,
+   "array": 1,
+   "format": "R16G16B16A16_FLOAT",
+   "samples": 1
+  }
+ ],
+ "images": [
+  {
+   "file": "images/0375_out0.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "max": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "target": {
+    "id": "ResourceId::45833",
+    "name": "3D Render Target 45833",
+    "w": 64,
+    "h": 64,
+    "depth": 64,
+    "mips": 1,
+    "array": 1,
+    "format": "R16G16B16A16_FLOAT",
+    "samples": 1
+   }
+  },
+  {
+   "file": "images/0375_out1.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "max": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "target": {
+    "id": "ResourceId::45829",
+    "name": "3D Render Target 45829",
+    "w": 64,
+    "h": 64,
+    "depth": 64,
+    "mips": 1,
+    "array": 1,
+    "format": "R16G16B16A16_FLOAT",
+    "samples": 1
+   }
+  }
+ ]
+}

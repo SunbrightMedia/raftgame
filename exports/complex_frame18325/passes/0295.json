@@ -1,0 +1,58 @@
+{
+ "index": 295,
+ "kind": "dispatch",
+ "events": [
+  14447,
+  14447
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "LumenSceneLighting%s",
+  "Radiosity",
+  "SpliceCardPagesIntoTiles"
+ ],
+ "first": "DispatchIndirect(<58040, 1, 1>)",
+ "last": "DispatchIndirect(<58040, 1, 1>)",
+ "shaders": {
+  "cs": [
+   "shaders/cs_7793.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::7793": []
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::7793": [
+    {
+     "id": "ResourceId::49096",
+     "name": "Lumen.PageBuffer",
+     "binding": "structuredbuffer0"
+    },
+    {
+     "id": "ResourceId::6495",
+     "name": "Lumen.CardPageLastUsedBuffer",
+     "binding": "structuredbuffer1"
+    },
+    {
+     "id": "ResourceId::49102",
+     "name": "Lumen.IndirectLightingCardPageIndexData",
+     "binding": "structuredbuffer2"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 14447,
+   "name": "DispatchIndirect(<58040, 1, 1>)",
+   "cs": "ResourceId::7793"
+  }
+ ],
+ "outputs": [],
+ "images": []
+}

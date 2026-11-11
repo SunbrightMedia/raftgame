@@ -1,0 +1,94 @@
+shader ResourceId::8846, stage vs, name "Vertex Shader 8846"
+entry point: main
+constant block 0 "cbuffer0" (32 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+read  0 "structuredbuffer0" (TextureType.Buffer)
+in  SV_VertexID0
+in  SV_InstanceID0
+out TEXCOORD0
+out TEXCOORD1
+out TEXCOORD2
+out TEXCOORD3
+out TEXCOORD4
+out TEXCOORD5
+out TEXCOORD6
+out SV_POSITION0
+
+==================== disassembly: DXBC ====================
+
+Shader hash fde52065-161542fc-02e15839-bc0d3629
+
+vs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[2], immediateIndexed
+      dcl_resource_structured t0, 16
+      dcl_input_sgv v0.x, vertexid
+      dcl_input_sgv v1.x, instanceid
+      dcl_output o0.xy
+      dcl_output o1.xyzw
+      dcl_output o2.xyzw
+      dcl_output o3.xyzw
+      dcl_output o4.xyzw
+      dcl_output o5.xyzw
+      dcl_output o6.xyzw
+      dcl_output_siv o7.xyzw, position
+      dcl_temps 5
+   0: ushr r0.x, v0.x, l(2)
+   1: ishl r0.y, v1.x, l(4)
+   2: iadd r0.x, r0.x, r0.y
+   3: imul null, r0.y, r0.x, l(5)
+   4: imad r1.xyzw, l(5, 5, 5, 5), r0.xxxx, l(1, 2, 3, 4)
+   5: ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) r0.xy, r0.y, l(0), t0.xyxx
+   6: mul r0.xy, r0.xyxx, cb0[1].yyyy
+   7: mov o0.xy, r0.xyxx
+   8: ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) r2.xyzw, r1.x, l(0), t0.xyzw
+   9: mov o1.xyzw, r2.xyzw
+  10: ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) r3.xyzw, r1.y, l(0), t0.xyzw
+  11: mov o2.xyzw, r3.xyzw
+  12: ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) r4.xyzw, r1.z, l(0), t0.xyzw
+  13: ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) r1.xyzw, r1.w, l(0), t0.xyzw
+  14: mov o3.xyzw, r4.xyzw
+  15: mov o4.xyzw, r1.xyzw
+  16: rcp r0.z, r2.w
+  17: mul o5.x, r0.z, l(-0.500000)
+  18: rcp r0.z, r3.w
+  19: mul o5.z, r0.z, l(-0.500000)
+  20: mad o5.y, r2.w, l(0.500000), l(0.500000)
+  21: max r0.z, r2.w, r3.w
+  22: mad o5.w, r3.w, l(0.500000), l(0.500000)
+  23: max r0.z, r4.w, r0.z
+  24: max r0.z, r1.w, r0.z
+  25: mul r1.y, r0.z, cb0[1].x
+  26: rcp r0.z, r4.w
+  27: mad o6.y, r4.w, l(0.500000), l(0.500000)
+  28: mul o6.x, r0.z, l(-0.500000)
+  29: rcp r0.z, r1.w
+  30: mad o6.w, r1.w, l(0.500000), l(0.500000)
+  31: mul o6.z, r0.z, l(-0.500000)
+  32: mul r1.x, r1.y, cb0[1].w
+  33: add r0.zw, r1.xxxy, l(0.000000, 0.000000, 1.000000, 1.000000)
+  34: and r1.x, v0.x, l(-4)
+  35: iadd r1.x, -r1.x, v0.x
+  36: and r1.y, r1.x, l(1)
+  37: ushr r1.x, r1.x, l(1)
+  38: utof r2.xy, r1.yxyy
+  39: mad r1.xy, r2.xyxx, l(2.000000, 2.000000, 0.000000, 0.000000), l(-1.000000, -1.000000, 0.000000, 0.000000)
+  40: mad r0.xy, r0.zwzz, r1.xyxx, r0.xyxx
+  41: add r0.xy, r0.xyxx, l(0.500000, 0.500000, 0.000000, 0.000000)
+  42: mul r0.xy, r0.xyxx, cb0[0].zwzz
+  43: mad o7.x, r0.x, l(2.000000), l(-1.000000)
+  44: mad o7.y, -r0.y, l(2.000000), l(1.000000)
+  45: mov o7.zw, l(0.000000, 0.000000, 0.000000, 1.000000)
+  46: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

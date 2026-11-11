@@ -1,0 +1,339 @@
+shader ResourceId::7800, stage cs, name "Compute Shader 7800"
+entry point: main
+constant block 0 "cbuffer0" (176 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+    +80    float4 cb0_v5 1x4
+    +96    float4 cb0_v6 1x4
+    +112   float4 cb0_v7 1x4
+    +128   float4 cb0_v8 1x4
+    +144   float4 cb0_v9 1x4
+    +160   float4 cb0_v10 1x4
+constant block 1 "cbuffer1" (1232 bytes)
+    +0     float4 cb1_v0 1x4
+    +16    float4 cb1_v1 1x4
+    +32    float4 cb1_v2 1x4
+    +48    float4 cb1_v3 1x4
+    +64    float4 cb1_v4 1x4
+    +80    float4 cb1_v5 1x4
+    +96    float4 cb1_v6 1x4
+    +112   float4 cb1_v7 1x4
+    +128   float4 cb1_v8 1x4
+    +144   float4 cb1_v9 1x4
+    +160   float4 cb1_v10 1x4
+    +176   float4 cb1_v11 1x4
+    +192   float4 cb1_v12 1x4
+    +208   float4 cb1_v13 1x4
+    +224   float4 cb1_v14 1x4
+    +240   float4 cb1_v15 1x4
+    +256   float4 cb1_v16 1x4
+    +272   float4 cb1_v17 1x4
+    +288   float4 cb1_v18 1x4
+    +304   float4 cb1_v19 1x4
+    +320   float4 cb1_v20 1x4
+    +336   float4 cb1_v21 1x4
+    +352   float4 cb1_v22 1x4
+    +368   float4 cb1_v23 1x4
+    +384   float4 cb1_v24 1x4
+    +400   float4 cb1_v25 1x4
+    +416   float4 cb1_v26 1x4
+    +432   float4 cb1_v27 1x4
+    +448   float4 cb1_v28 1x4
+    +464   float4 cb1_v29 1x4
+    +480   float4 cb1_v30 1x4
+    +496   float4 cb1_v31 1x4
+    +512   float4 cb1_v32 1x4
+    +528   float4 cb1_v33 1x4
+    +544   float4 cb1_v34 1x4
+    +560   float4 cb1_v35 1x4
+    +576   float4 cb1_v36 1x4
+    +592   float4 cb1_v37 1x4
+    +608   float4 cb1_v38 1x4
+    +624   float4 cb1_v39 1x4
+    +640   float4 cb1_v40 1x4
+    +656   float4 cb1_v41 1x4
+    +672   float4 cb1_v42 1x4
+    +688   float4 cb1_v43 1x4
+    +704   float4 cb1_v44 1x4
+    +720   float4 cb1_v45 1x4
+    +736   float4 cb1_v46 1x4
+    +752   float4 cb1_v47 1x4
+    +768   float4 cb1_v48 1x4
+    +784   float4 cb1_v49 1x4
+    +800   float4 cb1_v50 1x4
+    +816   float4 cb1_v51 1x4
+    +832   float4 cb1_v52 1x4
+    +848   float4 cb1_v53 1x4
+    +864   float4 cb1_v54 1x4
+    +880   float4 cb1_v55 1x4
+    +896   float4 cb1_v56 1x4
+    +912   float4 cb1_v57 1x4
+    +928   float4 cb1_v58 1x4
+    +944   float4 cb1_v59 1x4
+    +960   float4 cb1_v60 1x4
+    +976   float4 cb1_v61 1x4
+    +992   float4 cb1_v62 1x4
+    +1008  float4 cb1_v63 1x4
+    +1024  float4 cb1_v64 1x4
+    +1040  float4 cb1_v65 1x4
+    +1056  float4 cb1_v66 1x4
+    +1072  float4 cb1_v67 1x4
+    +1088  float4 cb1_v68 1x4
+    +1104  float4 cb1_v69 1x4
+    +1120  float4 cb1_v70 1x4
+    +1136  float4 cb1_v71 1x4
+    +1152  float4 cb1_v72 1x4
+    +1168  float4 cb1_v73 1x4
+    +1184  float4 cb1_v74 1x4
+    +1200  float4 cb1_v75 1x4
+    +1216  float4 cb1_v76 1x4
+constant block 2 "cbuffer2" (48 bytes)
+    +0     float4 cb2_v0 1x4
+    +16    float4 cb2_v1 1x4
+    +32    float4 cb2_v2 1x4
+constant block 3 "cbuffer3" (160 bytes)
+    +0     float4 cb3_v0 1x4
+    +16    float4 cb3_v1 1x4
+    +32    float4 cb3_v2 1x4
+    +48    float4 cb3_v3 1x4
+    +64    float4 cb3_v4 1x4
+    +80    float4 cb3_v5 1x4
+    +96    float4 cb3_v6 1x4
+    +112   float4 cb3_v7 1x4
+    +128   float4 cb3_v8 1x4
+    +144   float4 cb3_v9 1x4
+read  0 "texture0" (TextureType.Texture2DArray)
+read  1 "structuredbuffer1" (TextureType.Buffer)
+read  2 "structuredbuffer2" (TextureType.Buffer)
+read  3 "texture3" (TextureType.Texture2D)
+read  4 "texture4" (TextureType.Texture2D)
+read  5 "structuredbuffer5" (TextureType.Buffer)
+read  6 "structuredbuffer6" (TextureType.Buffer)
+write 0 "uav0" (TextureType.Buffer)
+sampler 0 "sampler0"
+sampler 1 "sampler1"
+in  vThreadGroupID0
+in  vThreadIDInGroup0
+
+==================== disassembly: DXBC ====================
+
+Shader hash 2662ac14-1b048ba7-04b41273-f21625ba
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[11], immediateIndexed
+      dcl_constantbuffer cb1[77], immediateIndexed
+      dcl_constantbuffer cb2[3], immediateIndexed
+      dcl_constantbuffer cb3[10], immediateIndexed
+      dcl_sampler s0, mode_default
+      dcl_sampler s1, mode_default
+      dcl_resource_texture2darray (float,float,float,float) t0
+      dcl_resource_structured t1, 16
+      dcl_resource_structured t2, 16
+      dcl_resource_texture2d (float,float,float,float) t3
+      dcl_resource_texture2d (float,float,float,float) t4
+      dcl_resource_structured t5, 8
+      dcl_resource_structured t6, 4
+      dcl_uav_structured u0, 4
+      dcl_input vThreadGroupID.x
+      dcl_input vThreadIDInGroup.xy
+      dcl_temps 8
+      dcl_tgsm_structured g0, 4, 16
+      dcl_thread_group 8, 8, 1
+   0: imad r0.x, vThreadIDInGroup.y, l(8), vThreadIDInGroup.x
+   1: ult r0.y, r0.x, l(16)
+   2: if_nz r0.y
+   3:   store_structured g0.x, r0.x, l(0), l(0)
+   4: endif
+   5: sync_g_t
+   6: imad r0.z, cb0[9].y, cb0[9].w, cb0[9].z
+   7: ld_structured_indexable(structured_buffer, stride=4)(mixed,mixed,mixed,mixed) r0.z, r0.z, l(0), t6.xxxx
+   8: iadd r0.z, r0.z, vThreadGroupID.x
+   9: ld_structured_indexable(structured_buffer, stride=8)(mixed,mixed,mixed,mixed) r0.w, r0.z, l(4), t5.xxxx
+  10: and r1.x, r0.w, l(0.000000)
+  11: ubfe r2.x, l(4), l(24), r0.w
+  12: ushr r2.y, r0.w, l(28)
+  13: imad r1.yz, r2.xxyx, l(0, 8, 8, 0), vThreadIDInGroup.xxyx
+  14: iadd r0.w, r1.x, cb0[10].x
+  15: imul null, r1.x, r0.w, l(5)
+  16: imad r1.w, r0.w, l(5), l(2)
+  17: ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) r2.xy, r1.w, l(0), t2.xyxx
+  18: utof r1.yz, r1.yyzy
+  19: add r1.yz, r1.yyzy, l(0.000000, 0.500000, 0.500000, 0.000000)
+  20: mad r2.xy, cb2[2].xyxx, r1.yzyy, r2.xyxx
+  21: sample_l(texture2d)(float,float,float,float) r1.w, r2.xyxx, t4.yzwx, s0, l(0)
+  22: lt r2.z, r1.w, l(1.000000)
+  23: if_nz r2.z
+  24:   sample_l(texture2d)(float,float,float,float) r2.xy, r2.xyxx, t3.xyzw, s0, l(0)
+  25:   ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) r1.x, r1.x, l(0), t2.xxxx
+  26:   imad r2.zw, r0.wwww, l(0, 0, 5, 5), l(0, 0, 1, 3)
+  27:   ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) r3.xy, r2.z, l(0), t2.xyxx
+  28:   ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) r2.zw, r2.w, l(0), t2.xxxy
+  29:   mad r3.xy, r2.zwzz, r1.yzyy, r3.xyxx
+  30:   imul null, r0.w, r1.x, l(9)
+  31:   ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) r4.xyzw, r0.w, l(0), t1.xyzw
+  32:   imad r1.xyz, r1.xxxx, l(9, 9, 9, 0), l(1, 2, 3, 0)
+  33:   ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) r5.xyzw, r1.x, l(0), t1.xyzw
+  34:   ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) r6.xyzw, r1.y, l(0), t1.xywz
+  35:   ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) r1.xyz, r1.z, l(0), t1.xyzx
+  36:   mad r2.xy, r2.xyxx, l(2.000000, 2.000000, 0.000000, 0.000000), l(-1.000000, -1.000000, 0.000000, 0.000000)
+  37:   dp2 r0.w, r2.xyxx, r2.xyxx
+  38:   add r0.w, -r0.w, l(1.000000)
+  39:   max r0.w, r0.w, l(0.000100)
+  40:   sqrt r2.z, r0.w
+  41:   dp3 r7.x, r4.xyzx, r2.xyzx
+  42:   dp3 r7.y, r5.xyzx, r2.xyzx
+  43:   dp3 r7.z, r6.xywx, r2.xyzx
+  44:   dp3 r0.w, r7.xyzx, r7.xyzx
+  45:   rsq r0.w, r0.w
+  46:   mul r2.xyz, r0.wwww, r7.xyzx
+  47:   add r3.zw, -r3.xxxx, l(0.000000, 0.000000, 1.000000, 1.000000)
+  48:   add r3.xy, r3.wyww, r3.zyzz
+  49:   add r3.xy, -r3.xyxx, l(1.000000, 1.000000, 0.000000, 0.000000)
+  50:   mul r3.xy, abs(r1.xyxx), r3.xyxx
+  51:   mad r0.w, r1.w, l(2.000000), l(-1.000000)
+  52:   mul r3.z, abs(r1.z), -r0.w
+  53:   dp3 r1.x, r4.xyzx, r3.xyzx
+  54:   dp3 r1.y, r5.xyzx, r3.xyzx
+  55:   dp3 r1.z, r6.xywx, r3.xyzx
+  56:   mov r6.x, r4.w
+  57:   mov r6.y, r5.w
+  58:   add r1.xyz, r1.xyzx, r6.xyzx
+  59:   eq r0.w, cb3[4].w, l(0)
+  60:   mad r3.xyz, cb1[64].xyzx, l(-2097152.000000, -2097152.000000, -2097152.000000, 0.000000), cb1[76].xyzx
+  61:   add r1.xyz, r1.xyzx, r3.xyzx
+  62:   add r1.xyz, -r1.xyzx, cb3[3].xyzx
+  63:   dp3 r1.w, r1.xyzx, r1.xyzx
+  64:   rsq r2.w, r1.w
+  65:   mul r3.xyz, r1.xyzx, r2.wwww
+  66:   mul r2.w, cb3[3].w, cb3[3].w
+  67:   mul r1.w, r1.w, r2.w
+  68:   mad r1.w, -r1.w, r1.w, l(1.000000)
+  69:   max r1.w, r1.w, l(0)
+  70:   mul r1.w, r1.w, r1.w
+  71:   mul r4.xyz, r1.xyzx, cb3[3].wwww
+  72:   dp3 r2.w, r4.xyzx, r4.xyzx
+  73:   min r2.w, r2.w, l(1.000000)
+  74:   add r2.w, -r2.w, l(1.000000)
+  75:   log r2.w, r2.w
+  76:   mul r2.w, r2.w, cb3[4].w
+  77:   exp r2.w, r2.w
+  78:   movc r1.w, r0.w, r1.w, r2.w
+  79:   mul r2.w, cb3[7].w, l(0.500000)
+  80:   mad r4.xyz, -r2.wwww, cb3[6].xyzx, r1.xyzx
+  81:   lt r3.w, l(0), cb3[7].w
+  82:   if_nz r3.w
+  83:     mad r1.xyz, r2.wwww, cb3[6].xyzx, r1.xyzx
+  84:     dp3 r2.w, r4.xyzx, r4.xyzx
+  85:     dp3 r3.w, r1.xyzx, r1.xyzx
+  86:     rsq r2.w, r2.w
+  87:     rsq r3.w, r3.w
+  88:     mul r2.w, r2.w, r3.w
+  89:     dp3 r1.x, r4.xyzx, r1.xyzx
+  90:     mul r1.x, r2.w, r1.x
+  91:     mad r1.x, r1.x, l(0.500000), l(0.500000)
+  92:     div r1.x, r2.w, r1.x
+  93:   else
+  94:     dp3 r1.y, r4.xyzx, r4.xyzx
+  95:     rcp r1.x, r1.y
+  96:   endif
+  97:   movc r0.w, r0.w, r1.x, l(1.000000)
+  98:   mul r0.w, r1.w, r0.w
+  99:   dp3_sat r1.x, r2.xyzx, r3.xyzx
+ 100:   mul r0.w, r0.w, r1.x
+ 101:   lt r0.w, l(0), r0.w
+ 102:   if_nz r0.w
+ 103:     ge r0.w, cb3[9].w, l(0)
+ 104:     if_nz r0.w
+ 105:       mul r1.xyz, -cb3[5].yzxy, cb3[6].zxyz
+ 106:       mad r1.xyz, cb3[6].yzxy, -cb3[5].zxyz, -r1.xyzx
+ 107:       dp3 r0.w, r1.xyzx, r1.xyzx
+ 108:       rsq r0.w, r0.w
+ 109:       mul r1.xyz, r0.wwww, r1.xyzx
+ 110:       dp3 r0.w, r3.xyzx, r1.xyzx
+ 111:       dp3 r1.x, r3.xyzx, cb3[6].xyzx
+ 112:       dp3 r1.y, r3.xyzx, -cb3[5].xyzx
+ 113:       add r1.z, -abs(r1.y), l(1.000000)
+ 114:       sqrt r1.z, r1.z
+ 115:       mad r1.w, abs(r1.y), l(-0.018729), l(0.074261)
+ 116:       mad r1.w, r1.w, abs(r1.y), l(-0.212114)
+ 117:       mad r1.w, r1.w, abs(r1.y), l(1.570729)
+ 118:       mul r2.x, r1.z, r1.w
+ 119:       mad r2.x, r2.x, l(-2.000000), l(3.141593)
+ 120:       lt r1.y, r1.y, -r1.y
+ 121:       and r1.y, r1.y, r2.x
+ 122:       mad r1.y, r1.w, r1.z, r1.y
+ 123:       add r1.y, -r1.y, l(1.570796)
+ 124:       mad r2.x, r1.y, l(0.318310), l(0.500000)
+ 125:       min r1.y, abs(r0.w), abs(r1.x)
+ 126:       max r1.z, abs(r0.w), abs(r1.x)
+ 127:       div r1.z, l(1.000000, 1.000000, 1.000000, 1.000000), r1.z
+ 128:       mul r1.y, r1.z, r1.y
+ 129:       mul r1.z, r1.y, r1.y
+ 130:       mad r1.w, r1.z, l(0.020835), l(-0.085133)
+ 131:       mad r1.w, r1.z, r1.w, l(0.180141)
+ 132:       mad r1.w, r1.z, r1.w, l(-0.330299)
+ 133:       mad r1.z, r1.z, r1.w, l(0.999866)
+ 134:       mul r1.w, r1.z, r1.y
+ 135:       lt r2.w, abs(r0.w), abs(r1.x)
+ 136:       mad r1.w, r1.w, l(-2.000000), l(1.570796)
+ 137:       and r1.w, r2.w, r1.w
+ 138:       mad r1.y, r1.y, r1.z, r1.w
+ 139:       lt r1.z, -r0.w, r0.w
+ 140:       and r1.z, r1.z, l(-3.141593)
+ 141:       add r1.y, r1.z, r1.y
+ 142:       min r1.z, -r0.w, -r1.x
+ 143:       max r0.w, -r0.w, -r1.x
+ 144:       lt r1.x, r1.z, -r1.z
+ 145:       ge r0.w, r0.w, -r0.w
+ 146:       and r0.w, r0.w, r1.x
+ 147:       movc r0.w, r0.w, -r1.y, r1.y
+ 148:       mad r2.y, r0.w, l(0.159155), l(0.500000)
+ 149:       mov r2.z, cb3[9].w
+ 150:       sample_l(texture2darray)(float,float,float,float) r0.w, r2.xyzx, t0.yzwx, s1, l(0)
+ 151:       lt r1.x, r0.w, l(0.010000)
+ 152:     else
+ 153:       mov r0.w, l(1.000000)
+ 154:       mov r1.x, l(0)
+ 155:     endif
+ 156:   else
+ 157:     mov r0.w, l(0)
+ 158:     mov r1.x, l(-1)
+ 159:   endif
+ 160: else
+ 161:   mov r0.w, l(0)
+ 162:   mov r1.x, l(-1)
+ 163: endif
+ 164: mul r0.w, r0.w, l(127.000000)
+ 165: ftou r0.w, r0.w
+ 166: or r1.y, r0.w, l(128)
+ 167: movc r0.w, r1.x, r1.y, r0.w
+ 168: if_nz r0.w
+ 169:   ubfe r1.x, l(27), l(2), r0.x
+ 170:   bfi r1.z, l(2), l(3), r0.x, l(0)
+ 171:   ishl r0.w, r0.w, r1.z
+ 172:   mov r1.y, l(0)
+ 173:   atomic_or g0, r1.xyxx, r0.w
+ 174: endif
+ 175: sync_g_t
+ 176: if_nz r0.y
+ 177:   ishl r0.y, r0.z, l(4)
+ 178:   iadd r0.y, r0.x, r0.y
+ 179:   ld_structured r0.x, r0.x, l(0), g0.xxxx
+ 180:   store_structured u0.x, r0.y, l(0), r0.x
+ 181: endif
+ 182: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

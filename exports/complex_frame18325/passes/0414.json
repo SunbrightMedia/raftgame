@@ -1,0 +1,64 @@
+{
+ "index": 414,
+ "kind": "clear",
+ "events": [
+  17504,
+  17504
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "PostProcessing",
+  "Tonemap %dx%d (PS GammaOnly=%d)"
+ ],
+ "first": "ID3D11DeviceContext::ClearRenderTargetView()",
+ "last": "ID3D11DeviceContext::ClearRenderTargetView()",
+ "shaders": {},
+ "constants": {},
+ "reads": {},
+ "draws": [],
+ "outputs": [
+  {
+   "id": "ResourceId::47207",
+   "name": "2D Render Target 47207",
+   "w": 1440,
+   "h": 1080,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R10G10B10A2_UNORM",
+   "samples": 1
+  }
+ ],
+ "images": [
+  {
+   "file": "images/0414_out0.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "max": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "target": {
+    "id": "ResourceId::47207",
+    "name": "2D Render Target 47207",
+    "w": 1440,
+    "h": 1080,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R10G10B10A2_UNORM",
+    "samples": 1
+   }
+  }
+ ]
+}
