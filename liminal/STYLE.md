@@ -348,6 +348,30 @@ Map: `laquinta`. Plan in `tools/gen-laquinta.ts`'s header.
   0.48-0.64; almost nothing clips but the lamps (0-0.2%); median 0.32-0.42;
   mid-tones warm, red : green : blue = 1.11-1.14 : 1 : 0.76-0.79; soft
   (very little edge detail).
+- **Sharper frames (Nov 2026).** YouTube keeps three frames it picks itself
+  (about 25 / 50 / 75 % into a video) as public 1280×720 pictures:
+  `https://i.ytimg.com/vi/<video id>/maxres1.jpg` (also `maxres2`,
+  `maxres3`). "Infinite house": a kitchenette with white cabinets and a grey
+  counter, a six-panel door, a white plastic chair and a wooden plaque on a
+  pale wall, a wall sconce glowing down a hall (1); a living room with a
+  red-brick fireplace, an empty dark bookshelf, a grey armchair, a dark
+  basement window well, two round flush ceiling lamps blown to white (2); a
+  hall of white six-panel and louvred doors, brass knobs, baseboards, crown
+  moulding (3). The same three frames of 16 more of the channel's videos
+  show the same method: "Someone used to live here" (wood floors, a stair,
+  half walls, sun through windows), "Pillar", "The noises", "Record your
+  dreams", "empty yellow office", "Hospitality", "Birthdays", "Backrooms -
+  Hunted". Search again found nothing on how the artist works.
+- Measured on the 1280×720 frames: median 0.30-0.39; lamps peak at
+  0.95-0.98 and never clip flat; mean colour 0.36-0.47 / 0.32-0.41 /
+  0.24-0.29 (blue about 0.6-0.65 of red); low saturation (mean chroma
+  0.13-0.18). **Very soft**: the strongest edges are 0.012-0.039 across x
+  and 0.035-0.043 across y (The Complex 0.043 / 0.031, our camcorder
+  0.055 / 0.078 before softening): a soft lens plus motion blur from a
+  turning, hand-held camera. **Wide glow**: a lamp's halo falls to half at
+  about 6 % of the picture's height and fades out by about 12 % (The
+  Complex's glow is about ten times tighter). Grain could not be measured:
+  YouTube's compression removed it.
 
 ## Reference 7: The Complex: Expedition (Steam, pgWave, 2025)
 
