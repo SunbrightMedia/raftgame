@@ -1,0 +1,250 @@
+{
+ "index": 301,
+ "kind": "dispatch",
+ "events": [
+  8376,
+  8376
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "LumenSceneLighting%s",
+  "Radiosity",
+  "BuildRadiosityTiles"
+ ],
+ "first": "DispatchIndirect(<68152, 1, 1>)",
+ "last": "DispatchIndirect(<68152, 1, 1>)",
+ "shaders": {
+  "cs": [
+   "shaders/cs_8812.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::8812": [
+    {
+     "block": "cbuffer0",
+     "bytes": 240,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        28.075745,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        28.062164,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v4",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v5",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.197446,
+        -0.151522,
+        0.0,
+        -0.965022
+       ]
+      },
+      {
+       "name": "cb0_v6",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.842856,
+        -0.02712,
+        0.0,
+        -0.226298
+       ]
+      },
+      {
+       "name": "cb0_v7",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.00617,
+        1.143951,
+        0.0,
+        -0.132373
+       ]
+      },
+      {
+       "name": "cb0_v8",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        612.53772,
+        -631.733704,
+        0.163065,
+        -3614.695801
+       ]
+      },
+      {
+       "name": "cb0_v9",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.5,
+        0.8,
+        0.0,
+        0.5
+       ]
+      },
+      {
+       "name": "cb0_v10",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v11",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v12",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v13",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        3719.601562,
+        144.196686,
+        -56.139473,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v14",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::8812": [
+    {
+     "id": "ResourceId::48613",
+     "name": "Lumen.Cards",
+     "binding": "structuredbuffer0"
+    },
+    {
+     "id": "ResourceId::49096",
+     "name": "Lumen.PageBuffer",
+     "binding": "structuredbuffer1"
+    },
+    {
+     "id": "ResourceId::6495",
+     "name": "Lumen.CardPageLastUsedBuffer",
+     "binding": "structuredbuffer2"
+    },
+    {
+     "id": "ResourceId::49102",
+     "name": "Lumen.IndirectLightingCardPageIndexData",
+     "binding": "structuredbuffer3"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 8376,
+   "name": "DispatchIndirect(<68152, 1, 1>)",
+   "cs": "ResourceId::8812"
+  }
+ ],
+ "outputs": [],
+ "images": []
+}

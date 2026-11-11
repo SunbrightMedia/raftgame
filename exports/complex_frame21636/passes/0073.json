@@ -1,0 +1,5283 @@
+{
+ "index": 73,
+ "kind": "draw",
+ "events": [
+  1805,
+  5997
+ ],
+ "count": 1049,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "BeginOcclusionTests"
+ ],
+ "first": "ID3D11DeviceContext::DrawIndexed()",
+ "last": "ID3D11DeviceContext::DrawIndexed()",
+ "shaders": {
+  "vs": [
+   "shaders/vs_7765.txt"
+  ]
+ },
+ "constants": {},
+ "reads": {},
+ "draws": [
+  {
+   "event": 1805,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1809,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1813,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1817,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1821,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1825,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1829,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1833,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1837,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1841,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1845,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1849,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1853,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1857,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1861,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1865,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1869,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1873,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1877,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1881,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1885,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1889,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1893,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1897,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1901,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1905,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1909,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1913,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1917,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1921,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1925,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1929,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1933,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1937,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1941,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1945,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1949,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1953,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1957,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1961,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1965,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1969,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1973,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1977,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1981,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1985,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1989,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1993,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 1997,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2001,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2005,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2009,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2013,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2017,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2021,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2025,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2029,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2033,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2037,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2041,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2045,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2049,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2053,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2057,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2061,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2065,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2069,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2073,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2077,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2081,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2085,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2089,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2093,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2097,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2101,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2105,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2109,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2113,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2117,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2121,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2125,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2129,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2133,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2137,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2141,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2145,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2149,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2153,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2157,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2161,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2165,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2169,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2173,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2177,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2181,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2185,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2189,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2193,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2197,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2201,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2205,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2209,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2213,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2217,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2221,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2225,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2229,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2233,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2237,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2241,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2245,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2249,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2253,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2257,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2261,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2265,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2269,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2273,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2277,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2281,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2285,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2289,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2293,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2297,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2301,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2305,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2309,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2313,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2317,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2321,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2325,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2329,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2333,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2337,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2341,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2345,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2349,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2353,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2357,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2361,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2365,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2369,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2373,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2377,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2381,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2385,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2389,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2393,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2397,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2401,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2405,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2409,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2413,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2417,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2421,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2425,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2429,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2433,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2437,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2441,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2445,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2449,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2453,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2457,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2461,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2465,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2469,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2473,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2477,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2481,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2485,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2489,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2493,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2497,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2501,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2505,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2509,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2513,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2517,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2521,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2525,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2529,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2533,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2537,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2541,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2545,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2549,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2553,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2557,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2561,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2565,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2569,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2573,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2577,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2581,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2585,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2589,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2593,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2597,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2601,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2605,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2609,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2613,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2617,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2621,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2625,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2629,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2633,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2637,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2641,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2645,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2649,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2653,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2657,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2661,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2665,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2669,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2673,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2677,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2681,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2685,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2689,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2693,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2697,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2701,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2705,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2709,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2713,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2717,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2721,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2725,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2729,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2733,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2737,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2741,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2745,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2749,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2753,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2757,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2761,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2765,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2769,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2773,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2777,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2781,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2785,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2789,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2793,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2797,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2801,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2805,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2809,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2813,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2817,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2821,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2825,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2829,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2833,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2837,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2841,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2845,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2849,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2853,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2857,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2861,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2865,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2869,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2873,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2877,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2881,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2885,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2889,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2893,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2897,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2901,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2905,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2909,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2913,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2917,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2921,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2925,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2929,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2933,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2937,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2941,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2945,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2949,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2953,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2957,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2961,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2965,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2969,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2973,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2977,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2981,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2985,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2989,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2993,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 2997,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3001,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3005,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3009,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3013,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3017,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3021,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3025,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3029,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3033,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3037,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3041,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3045,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3049,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3053,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3057,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3061,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3065,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3069,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3073,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3077,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3081,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3085,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3089,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3093,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3097,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3101,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3105,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3109,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3113,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3117,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3121,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3125,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3129,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3133,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3137,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3141,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3145,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3149,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3153,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3157,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3161,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3165,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3169,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3173,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3177,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3181,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3185,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3189,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3193,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3197,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3201,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3205,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3209,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3213,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3217,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3221,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3225,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3229,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3233,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3237,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3241,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3245,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3249,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3253,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3257,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3261,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3265,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3269,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3273,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3277,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3281,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3285,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3289,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3293,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3297,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3301,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3305,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3309,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3313,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3317,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3321,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3325,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3329,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3333,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3337,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3341,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3345,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3349,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3353,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3357,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3361,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3365,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3369,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3373,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3377,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3381,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3385,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3389,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3393,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3397,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3401,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3405,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3409,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3413,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3417,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3421,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3425,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3429,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3433,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3437,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3441,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3445,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3449,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3453,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3457,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3461,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3465,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3469,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3473,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3477,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3481,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3485,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3489,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3493,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3497,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3501,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3505,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3509,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3513,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3517,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3521,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3525,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3529,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3533,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3537,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3541,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3545,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3549,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3553,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3557,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3561,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3565,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3569,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3573,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3577,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3581,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3585,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3589,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3593,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3597,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3601,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3605,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3609,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3613,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3617,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3621,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3625,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3629,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3633,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3637,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3641,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3645,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3649,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3653,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3657,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3661,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3665,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3669,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3673,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3677,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3681,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3685,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3689,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3693,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3697,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3701,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3705,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3709,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3713,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3717,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3721,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3725,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3729,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3733,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3737,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3741,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3745,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3749,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3753,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3757,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3761,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3765,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3769,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3773,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3777,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3781,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3785,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3789,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3793,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3797,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3801,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3805,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3809,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3813,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3817,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3821,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3825,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3829,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3833,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3837,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3841,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3845,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3849,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3853,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3857,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3861,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3865,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3869,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3873,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3877,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3881,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3885,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3889,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3893,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3897,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3901,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3905,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3909,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3913,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3917,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3921,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3925,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3929,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3933,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3937,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3941,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3945,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3949,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3953,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3957,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3961,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3965,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3969,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3973,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3977,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3981,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3985,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3989,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3993,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 3997,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4001,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4005,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4009,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4013,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4017,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4021,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4025,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4029,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4033,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4037,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4041,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4045,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4049,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4053,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4057,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4061,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4065,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4069,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4073,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4077,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4081,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4085,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4089,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4093,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4097,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4101,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4105,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4109,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4113,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4117,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4121,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4125,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4129,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4133,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4137,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4141,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4145,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4149,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4153,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4157,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4161,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4165,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4169,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4173,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4177,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4181,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4185,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4189,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4193,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4197,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4201,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4205,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4209,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4213,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4217,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4221,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4225,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4229,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4233,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4237,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4241,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4245,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4249,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4253,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4257,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4261,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4265,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4269,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4273,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4277,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4281,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4285,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4289,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4293,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4297,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4301,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4305,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4309,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4313,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4317,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4321,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4325,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4329,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4333,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4337,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4341,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4345,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4349,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4353,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4357,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4361,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4365,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4369,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4373,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4377,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4381,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4385,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4389,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4393,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4397,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4401,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4405,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4409,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4413,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4417,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4421,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4425,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4429,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4433,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4437,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4441,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4445,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4449,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4453,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4457,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4461,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4465,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4469,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4473,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4477,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4481,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4485,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4489,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4493,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4497,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4501,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4505,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4509,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4513,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4517,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4521,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4525,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4529,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4533,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4537,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4541,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4545,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4549,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4553,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4557,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4561,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4565,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4569,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4573,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4577,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4581,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4585,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4589,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4593,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4597,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4601,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4605,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4609,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4613,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4617,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4621,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4625,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4629,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4633,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4637,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4641,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4645,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4649,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4653,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4657,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4661,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4665,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4669,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4673,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4677,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4681,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4685,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4689,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4693,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4697,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4701,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4705,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4709,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4713,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4717,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4721,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4725,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4729,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4733,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4737,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4741,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4745,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4749,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4753,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4757,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4761,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4765,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4769,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4773,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4777,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4781,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4785,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4789,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4793,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4797,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4801,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4805,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4809,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4813,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4817,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4821,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4825,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4829,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4833,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4837,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4841,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4845,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4849,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4853,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4857,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4861,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4865,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4869,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4873,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4877,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4881,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4885,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4889,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4893,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4897,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4901,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4905,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4909,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4913,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4917,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4921,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4925,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4929,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4933,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4937,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4941,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4945,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4949,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4953,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4957,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4961,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4965,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4969,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4973,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4977,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4981,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4985,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4989,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4993,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 4997,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5001,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5005,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5009,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5013,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5017,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5021,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5025,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5029,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5033,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5037,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5041,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5045,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5049,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5053,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5057,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5061,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5065,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5069,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5073,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5077,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5081,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5085,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5089,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5093,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5097,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5101,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5105,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5109,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5113,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5117,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5121,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5125,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5129,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5133,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5137,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5141,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5145,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5149,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5153,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5157,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5161,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5165,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5169,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5173,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5177,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5181,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5185,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5189,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5193,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5197,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5201,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5205,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5209,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5213,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5217,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5221,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5225,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5229,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5233,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5237,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5241,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5245,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5249,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5253,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5257,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5261,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5265,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5269,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5273,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5277,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5281,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5285,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5289,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5293,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5297,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5301,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5305,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5309,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5313,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5317,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5321,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5325,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5329,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5333,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5337,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5341,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5345,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5349,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5353,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5357,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5361,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5365,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5369,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5373,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5377,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5381,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5385,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5389,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5393,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5397,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5401,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5405,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5409,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5413,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5417,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5421,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5425,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5429,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5433,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5437,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5441,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5445,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5449,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5453,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5457,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5461,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5465,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5469,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5473,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5477,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5481,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5485,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5489,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5493,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5497,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5501,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5505,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5509,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5513,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5517,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5521,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5525,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5529,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5533,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5537,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5541,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5545,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5549,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5553,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5557,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5561,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5565,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5569,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5573,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5577,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5581,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5585,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5589,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5593,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5597,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5601,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5605,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5609,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5613,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5617,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5621,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5625,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5629,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5633,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5637,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5641,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5645,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5649,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5653,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5657,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5661,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5665,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5669,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5673,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5677,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5681,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5685,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5689,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5693,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5697,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5701,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5705,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5709,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5713,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5717,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5721,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5725,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5729,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5733,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5737,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5741,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5745,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5749,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5753,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5757,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5761,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5765,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5769,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5773,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5777,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5781,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5785,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5789,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5793,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5797,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5801,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5805,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5809,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5813,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5817,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5821,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5825,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5829,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5833,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5837,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5841,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5845,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5849,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5853,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5857,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5861,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5865,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5869,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5873,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5877,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5881,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5885,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5889,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5893,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5897,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5901,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5905,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5909,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5913,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5917,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5921,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5925,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5929,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5933,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5937,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5941,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5945,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5949,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5953,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5957,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5961,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5965,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5969,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5973,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5977,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5981,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5985,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5989,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5993,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  },
+  {
+   "event": 5997,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::7765"
+  }
+ ],
+ "outputs": [],
+ "depth": {
+  "id": "ResourceId::19356",
+  "name": "2D Depth Target 19356",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "mips": 1,
+  "array": 1,
+  "format": "D32S8_TYPELESS",
+  "samples": 1
+ },
+ "images": []
+}

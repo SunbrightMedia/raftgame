@@ -1,0 +1,28 @@
+{
+ "index": 25,
+ "kind": "copy",
+ "events": [
+  1079,
+  1079
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "UpdateDistanceFieldAtlas",
+  "DistanceFieldAssetReadback"
+ ],
+ "first": "ID3D11DeviceContext::CopySubresourceRegion()",
+ "last": "ID3D11DeviceContext::CopySubresourceRegion()",
+ "shaders": {},
+ "constants": {},
+ "reads": {},
+ "draws": [],
+ "outputs": [
+  {
+   "id": "ResourceId::46451",
+   "name": "Buffer 46451"
+  }
+ ],
+ "images": []
+}

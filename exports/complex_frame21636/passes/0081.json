@@ -1,0 +1,120 @@
+{
+ "index": 81,
+ "kind": "dispatch",
+ "events": [
+  6107,
+  6107
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "LumenSceneUpdate: %u card captures %.3fM texels",
+  "UpdateCardSceneBuffer",
+  "ScatterUpload[%d] (Resource: %s, Offset: %u, GroupSize: %u)"
+ ],
+ "first": "ID3D11DeviceContext::Dispatch()",
+ "last": "ID3D11DeviceContext::Dispatch()",
+ "shaders": {
+  "cs": [
+   "shaders/cs_7741.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::7741": [
+    {
+     "block": "cbuffer0",
+     "bytes": 80,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        13932953600.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        -0.730206,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v4",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::7741": [
+    {
+     "id": "ResourceId::90691",
+     "name": "Lumen.SceneInstanceIndexToMeshCardsIndexUploadBuffer",
+     "binding": "bytebuffer0"
+    },
+    {
+     "id": "ResourceId::90692",
+     "name": "Lumen.SceneInstanceIndexToMeshCardsIndexUploadBuffer",
+     "binding": "bytebuffer1"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 6107,
+   "name": "ID3D11DeviceContext::Dispatch()",
+   "cs": "ResourceId::7741"
+  }
+ ],
+ "outputs": [],
+ "images": []
+}

@@ -1,0 +1,65 @@
+{
+ "index": 423,
+ "kind": "clear",
+ "events": [
+  10882,
+  10882
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "PostProcessing",
+  "PostProcessMaterial %dx%d Material=%s",
+  "\u35e0\u755f\u0192"
+ ],
+ "first": "ID3D11DeviceContext::ClearRenderTargetView()",
+ "last": "ID3D11DeviceContext::ClearRenderTargetView()",
+ "shaders": {},
+ "constants": {},
+ "reads": {},
+ "draws": [],
+ "outputs": [
+  {
+   "id": "ResourceId::690",
+   "name": "Swapchain Image 690",
+   "w": 1920,
+   "h": 1080,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R10G10B10A2_UNORM",
+   "samples": 1
+  }
+ ],
+ "images": [
+  {
+   "file": "images/0423_out0.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "max": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "target": {
+    "id": "ResourceId::690",
+    "name": "Swapchain Image 690",
+    "w": 1920,
+    "h": 1080,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R10G10B10A2_UNORM",
+    "samples": 1
+   }
+  }
+ ]
+}

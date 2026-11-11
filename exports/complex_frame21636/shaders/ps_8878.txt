@@ -1,0 +1,317 @@
+shader ResourceId::8878, stage ps, name "Pixel Shader 8878"
+entry point: main
+constant block 0 "cbuffer0" (784 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+    +80    float4 cb0_v5 1x4
+    +96    float4 cb0_v6 1x4
+    +112   float4 cb0_v7 1x4
+    +128   float4 cb0_v8 1x4
+    +144   float4 cb0_v9 1x4
+    +160   float4 cb0_v10 1x4
+    +176   float4 cb0_v11 1x4
+    +192   float4 cb0_v12 1x4
+    +208   float4 cb0_v13 1x4
+    +224   float4 cb0_v14 1x4
+    +240   float4 cb0_v15 1x4
+    +256   float4 cb0_v16 1x4
+    +272   float4 cb0_v17 1x4
+    +288   float4 cb0_v18 1x4
+    +304   float4 cb0_v19 1x4
+    +320   float4 cb0_v20 1x4
+    +336   float4 cb0_v21 1x4
+    +352   float4 cb0_v22 1x4
+    +368   float4 cb0_v23 1x4
+    +384   float4 cb0_v24 1x4
+    +400   float4 cb0_v25 1x4
+    +416   float4 cb0_v26 1x4
+    +432   float4 cb0_v27 1x4
+    +448   float4 cb0_v28 1x4
+    +464   float4 cb0_v29 1x4
+    +480   float4 cb0_v30 1x4
+    +496   float4 cb0_v31 1x4
+    +512   float4 cb0_v32 1x4
+    +528   float4 cb0_v33 1x4
+    +544   float4 cb0_v34 1x4
+    +560   float4 cb0_v35 1x4
+    +576   float4 cb0_v36 1x4
+    +592   float4 cb0_v37 1x4
+    +608   float4 cb0_v38 1x4
+    +624   float4 cb0_v39 1x4
+    +640   float4 cb0_v40 1x4
+    +656   float4 cb0_v41 1x4
+    +672   float4 cb0_v42 1x4
+    +688   float4 cb0_v43 1x4
+    +704   float4 cb0_v44 1x4
+    +720   float4 cb0_v45 1x4
+    +736   float4 cb0_v46 1x4
+    +752   float4 cb0_v47 1x4
+    +768   float4 cb0_v48 1x4
+constant block 1 "cbuffer1" (2192 bytes)
+    +0     float4 cb1_v0 1x4
+    +16    float4 cb1_v1 1x4
+    +32    float4 cb1_v2 1x4
+    +48    float4 cb1_v3 1x4
+    +64    float4 cb1_v4 1x4
+    +80    float4 cb1_v5 1x4
+    +96    float4 cb1_v6 1x4
+    +112   float4 cb1_v7 1x4
+    +128   float4 cb1_v8 1x4
+    +144   float4 cb1_v9 1x4
+    +160   float4 cb1_v10 1x4
+    +176   float4 cb1_v11 1x4
+    +192   float4 cb1_v12 1x4
+    +208   float4 cb1_v13 1x4
+    +224   float4 cb1_v14 1x4
+    +240   float4 cb1_v15 1x4
+    +256   float4 cb1_v16 1x4
+    +272   float4 cb1_v17 1x4
+    +288   float4 cb1_v18 1x4
+    +304   float4 cb1_v19 1x4
+    +320   float4 cb1_v20 1x4
+    +336   float4 cb1_v21 1x4
+    +352   float4 cb1_v22 1x4
+    +368   float4 cb1_v23 1x4
+    +384   float4 cb1_v24 1x4
+    +400   float4 cb1_v25 1x4
+    +416   float4 cb1_v26 1x4
+    +432   float4 cb1_v27 1x4
+    +448   float4 cb1_v28 1x4
+    +464   float4 cb1_v29 1x4
+    +480   float4 cb1_v30 1x4
+    +496   float4 cb1_v31 1x4
+    +512   float4 cb1_v32 1x4
+    +528   float4 cb1_v33 1x4
+    +544   float4 cb1_v34 1x4
+    +560   float4 cb1_v35 1x4
+    +576   float4 cb1_v36 1x4
+    +592   float4 cb1_v37 1x4
+    +608   float4 cb1_v38 1x4
+    +624   float4 cb1_v39 1x4
+    +640   float4 cb1_v40 1x4
+    +656   float4 cb1_v41 1x4
+    +672   float4 cb1_v42 1x4
+    +688   float4 cb1_v43 1x4
+    +704   float4 cb1_v44 1x4
+    +720   float4 cb1_v45 1x4
+    +736   float4 cb1_v46 1x4
+    +752   float4 cb1_v47 1x4
+    +768   float4 cb1_v48 1x4
+    +784   float4 cb1_v49 1x4
+    +800   float4 cb1_v50 1x4
+    +816   float4 cb1_v51 1x4
+    +832   float4 cb1_v52 1x4
+    +848   float4 cb1_v53 1x4
+    +864   float4 cb1_v54 1x4
+    +880   float4 cb1_v55 1x4
+    +896   float4 cb1_v56 1x4
+    +912   float4 cb1_v57 1x4
+    +928   float4 cb1_v58 1x4
+    +944   float4 cb1_v59 1x4
+    +960   float4 cb1_v60 1x4
+    +976   float4 cb1_v61 1x4
+    +992   float4 cb1_v62 1x4
+    +1008  float4 cb1_v63 1x4
+    +1024  float4 cb1_v64 1x4
+    +1040  float4 cb1_v65 1x4
+    +1056  float4 cb1_v66 1x4
+    +1072  float4 cb1_v67 1x4
+    +1088  float4 cb1_v68 1x4
+    +1104  float4 cb1_v69 1x4
+    +1120  float4 cb1_v70 1x4
+    +1136  float4 cb1_v71 1x4
+    +1152  float4 cb1_v72 1x4
+    +1168  float4 cb1_v73 1x4
+    +1184  float4 cb1_v74 1x4
+    +1200  float4 cb1_v75 1x4
+    +1216  float4 cb1_v76 1x4
+    +1232  float4 cb1_v77 1x4
+    +1248  float4 cb1_v78 1x4
+    +1264  float4 cb1_v79 1x4
+    +1280  float4 cb1_v80 1x4
+    +1296  float4 cb1_v81 1x4
+    +1312  float4 cb1_v82 1x4
+    +1328  float4 cb1_v83 1x4
+    +1344  float4 cb1_v84 1x4
+    +1360  float4 cb1_v85 1x4
+    +1376  float4 cb1_v86 1x4
+    +1392  float4 cb1_v87 1x4
+    +1408  float4 cb1_v88 1x4
+    +1424  float4 cb1_v89 1x4
+    +1440  float4 cb1_v90 1x4
+    +1456  float4 cb1_v91 1x4
+    +1472  float4 cb1_v92 1x4
+    +1488  float4 cb1_v93 1x4
+    +1504  float4 cb1_v94 1x4
+    +1520  float4 cb1_v95 1x4
+    +1536  float4 cb1_v96 1x4
+    +1552  float4 cb1_v97 1x4
+    +1568  float4 cb1_v98 1x4
+    +1584  float4 cb1_v99 1x4
+    +1600  float4 cb1_v100 1x4
+    +1616  float4 cb1_v101 1x4
+    +1632  float4 cb1_v102 1x4
+    +1648  float4 cb1_v103 1x4
+    +1664  float4 cb1_v104 1x4
+    +1680  float4 cb1_v105 1x4
+    +1696  float4 cb1_v106 1x4
+    +1712  float4 cb1_v107 1x4
+    +1728  float4 cb1_v108 1x4
+    +1744  float4 cb1_v109 1x4
+    +1760  float4 cb1_v110 1x4
+    +1776  float4 cb1_v111 1x4
+    +1792  float4 cb1_v112 1x4
+    +1808  float4 cb1_v113 1x4
+    +1824  float4 cb1_v114 1x4
+    +1840  float4 cb1_v115 1x4
+    +1856  float4 cb1_v116 1x4
+    +1872  float4 cb1_v117 1x4
+    +1888  float4 cb1_v118 1x4
+    +1904  float4 cb1_v119 1x4
+    +1920  float4 cb1_v120 1x4
+    +1936  float4 cb1_v121 1x4
+    +1952  float4 cb1_v122 1x4
+    +1968  float4 cb1_v123 1x4
+    +1984  float4 cb1_v124 1x4
+    +2000  float4 cb1_v125 1x4
+    +2016  float4 cb1_v126 1x4
+    +2032  float4 cb1_v127 1x4
+    +2048  float4 cb1_v128 1x4
+    +2064  float4 cb1_v129 1x4
+    +2080  float4 cb1_v130 1x4
+    +2096  float4 cb1_v131 1x4
+    +2112  float4 cb1_v132 1x4
+    +2128  float4 cb1_v133 1x4
+    +2144  float4 cb1_v134 1x4
+    +2160  float4 cb1_v135 1x4
+    +2176  float4 cb1_v136 1x4
+read  0 "structuredbuffer0" (TextureType.Buffer)
+read  1 "texture1" (TextureType.Texture2D)
+read  2 "texture2" (TextureType.Texture2D)
+read  3 "structuredbuffer3" (TextureType.Buffer)
+read  4 "texture4" (TextureType.Texture2D)
+read  5 "texture5" (TextureType.Texture3D)
+sampler 0 "sampler0"
+sampler 1 "sampler1"
+sampler 2 "sampler2"
+sampler 3 "sampler3"
+in  TEXCOORD0
+in  TEXCOORD1
+in  TEXCOORD2
+in  TEXCOORD3
+in  TEXCOORD4
+in  SV_POSITION0
+out SV_Target0
+
+==================== disassembly: DXBC ====================
+
+Shader hash 09363a4b-32ee76c4-12d2f08b-e37ccacb
+
+ps_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[49], immediateIndexed
+      dcl_constantbuffer cb1[137], immediateIndexed
+      dcl_sampler s0, mode_default
+      dcl_sampler s1, mode_default
+      dcl_sampler s2, mode_default
+      dcl_sampler s3, mode_default
+      dcl_resource_structured t0, 16
+      dcl_resource_texture2d (float,float,float,float) t1
+      dcl_resource_texture2d (float,float,float,float) t2
+      dcl_resource_structured t3, 16
+      dcl_resource_texture2d (float,float,float,float) t4
+      dcl_resource_texture3d (float,float,float,float) t5
+      dcl_input_ps linear noperspective v0.xy
+      dcl_input_ps linear noperspective v0.zw
+      dcl_input_ps linear noperspective v1.zw
+      dcl_input_ps linear noperspective v2.xy
+      dcl_output o0.xyzw
+      dcl_temps 4
+   0: mad r0.xy, v2.xyxx, cb0[45].zwzz, cb0[45].xyxx
+   1: lt r1.xyzw, l(0, 0, 0, 0), r0.xyxy
+   2: lt r2.xyzw, r0.xyxy, l(0, 0, 0, 0)
+   3: iadd r1.xyzw, -r1.xyzw, r2.xyzw
+   4: itof r1.xyzw, r1.xyzw
+   5: add_sat r2.xyzw, abs(r0.xyxy), -cb0[43].zzzz
+   6: mul r1.xyzw, r1.xyzw, r2.xyzw
+   7: mad r1.xyzw, -r1.xyzw, cb0[43].xxyy, r0.xyxy
+   8: mad r1.xyzw, r1.xyzw, cb0[46].zwzw, cb0[46].xyxy
+   9: mad r1.xyzw, r1.xyzw, cb0[10].xyxy, cb0[10].zwzw
+  10: mul r1.xyzw, r1.xyzw, cb0[9].zwzw
+  11: max r1.xyzw, r1.xyzw, cb0[15].xyxy
+  12: min r1.xyzw, r1.xyzw, cb0[15].zwzw
+  13: sample_indexable(texture2d)(float,float,float,float) r2.x, r1.xyxx, t1.xyzw, s0
+  14: sample_indexable(texture2d)(float,float,float,float) r2.y, r1.zwzz, t1.xyzw, s0
+  15: max r0.zw, v0.xxxy, cb0[15].xxxy
+  16: min r0.zw, r0.zzzw, cb0[15].zzzw
+  17: sample_indexable(texture2d)(float,float,float,float) r2.z, r0.zwzz, t1.xyzw, s0
+  18: mul r1.xyz, r2.xyzx, cb1[136].zzzz
+  19: ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) r0.z, l(0), l(0), t0.xxxx
+  20: mul r1.xyz, r1.xyzx, cb0[41].xyzx
+  21: ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) r2.xyz, l(0), l(0), t3.xyzx
+  22: mad r3.xy, v0.xyxx, cb0[33].xyxx, cb0[33].zwzz
+  23: max r3.xy, r3.xyxx, cb0[34].xyxx
+  24: min r3.xy, r3.xyxx, cb0[34].zwzz
+  25: sample_indexable(texture2d)(float,float,float,float) r3.xyz, r3.xyxx, t2.xyzw, s1
+  26: mul r3.xyz, r3.xyzx, cb1[136].zzzz
+  27: mad r0.xy, r0.xyxx, l(0.500000, -0.500000, 0.000000, 0.000000), l(0.500000, 0.500000, 0.000000, 0.000000)
+  28: sample_indexable(texture2d)(float,float,float,float) r0.xyw, r0.xyxx, t4.xywz, s2
+  29: mad r0.xyw, r0.xyxw, cb0[42].xyxz, l(1.000000, 1.000000, 0.000000, 1.000000)
+  30: mul r0.xyw, r0.xyxw, r3.xyxz
+  31: mad r0.xyw, r1.xyxz, r2.xyxz, r0.xyxw
+  32: mul r0.xyz, r0.zzzz, r0.xywx
+  33: mul r1.xy, v0.zwzz, cb0[44].xxxx
+  34: dp2 r0.w, r1.xyxx, r1.xyxx
+  35: add r0.w, r0.w, l(1.000000)
+  36: rcp r0.w, r0.w
+  37: mul r0.w, r0.w, r0.w
+  38: mad r0.xyz, r0.xyzx, r0.wwww, l(0.002668, 0.002668, 0.002668, 0.000000)
+  39: log r0.xyz, r0.xyzx
+  40: mad_sat r0.xyz, r0.xyzx, l(0.071429, 0.071429, 0.071429, 0.000000), l(0.610727, 0.610727, 0.610727, 0.000000)
+  41: mad r0.xyz, r0.xyzx, cb0[47].zzzz, cb0[47].wwww
+  42: sample_indexable(texture3d)(float,float,float,float) r0.xyz, r0.xyzx, t5.xyzw, s3
+  43: mad r0.w, v1.w, l(543.309998), v1.z
+  44: sincos r0.w, null, r0.w
+  45: mul r0.w, r0.w, l(493013.000000)
+  46: frc r0.w, r0.w
+  47: mad r0.w, r0.w, l(0.003906), l(-0.001953)
+  48: mad r0.xyz, r0.xyzx, l(1.050000, 1.050000, 1.050000, 0.000000), r0.wwww
+  49: if_nz cb0[48].y
+  50:   log r1.xyz, r0.xyzx
+  51:   mul r1.xyz, r1.xyzx, l(0.012683, 0.012683, 0.012683, 0.000000)
+  52:   exp r1.xyz, r1.xyzx
+  53:   add r2.xyz, r1.xyzx, l(-0.835938, -0.835938, -0.835938, 0.000000)
+  54:   max r2.xyz, r2.xyzx, l(0, 0, 0, 0)
+  55:   mad r1.xyz, -r1.xyzx, l(18.687500, 18.687500, 18.687500, 0.000000), l(18.851563, 18.851563, 18.851563, 0.000000)
+  56:   div r1.xyz, r2.xyzx, r1.xyzx
+  57:   log r1.xyz, r1.xyzx
+  58:   mul r1.xyz, r1.xyzx, l(6.277395, 6.277395, 6.277395, 0.000000)
+  59:   exp r1.xyz, r1.xyzx
+  60:   mul r1.xyz, r1.xyzx, l(10000.000000, 10000.000000, 10000.000000, 0.000000)
+  61:   div r1.xyz, r1.xyzx, cb0[48].xxxx
+  62:   max r1.xyz, r1.xyzx, l(0.000061, 0.000061, 0.000061, 0.000000)
+  63:   mul r2.xyz, r1.xyzx, l(12.920000, 12.920000, 12.920000, 0.000000)
+  64:   max r1.xyz, r1.xyzx, l(0.003131, 0.003131, 0.003131, 0.000000)
+  65:   log r1.xyz, r1.xyzx
+  66:   mul r1.xyz, r1.xyzx, l(0.416667, 0.416667, 0.416667, 0.000000)
+  67:   exp r1.xyz, r1.xyzx
+  68:   mad r1.xyz, r1.xyzx, l(1.055000, 1.055000, 1.055000, 0.000000), l(-0.055000, -0.055000, -0.055000, 0.000000)
+  69:   min r0.xyz, r1.xyzx, r2.xyzx
+  70: endif
+  71: mov o0.xyz, r0.xyzx
+  72: mov o0.w, l(0)
+  73: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

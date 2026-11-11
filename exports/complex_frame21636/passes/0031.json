@@ -1,0 +1,226 @@
+{
+ "index": 31,
+ "kind": "dispatch",
+ "events": [
+  1143,
+  1143
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "UpdateGlobalDistanceField",
+  "Clipmap:%d CacheType:%s",
+  "CullObjectsToGrid"
+ ],
+ "first": "DispatchIndirect(<3, 1, 1>)",
+ "last": "DispatchIndirect(<3, 1, 1>)",
+ "shaders": {
+  "cs": [
+   "shaders/cs_7749.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::7749": [
+    {
+     "block": "cbuffer0",
+     "bytes": 208,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        329718956032.0,
+        0.0,
+        329721053184.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        329723150336.0,
+        0.0,
+        329481977856.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        329725247488.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        329726820352.0,
+        0.0,
+        329728393216.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v4",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        329652895744.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v5",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v6",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v7",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v8",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        555.555542,
+        555.555542,
+        555.555542,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v9",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -2222.222168,
+        -2222.222168,
+        -2222.222168,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v10",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        317.460327,
+        317.460327,
+        317.460327,
+        6298.816406
+       ]
+      },
+      {
+       "name": "cb0_v11",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v12",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        3750.0,
+        138.888885,
+        0.0,
+        0.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::7749": [
+    {
+     "id": "ResourceId::44860",
+     "name": "DistanceFields.DFObjectBounds",
+     "binding": "structuredbuffer0"
+    },
+    {
+     "id": "ResourceId::6495",
+     "name": "Lumen.CardPageLastUsedBuffer",
+     "binding": "structuredbuffer1"
+    },
+    {
+     "id": "ResourceId::51999",
+     "name": "InstanceCulling.CompactionBlockDataIndices",
+     "binding": "structuredbuffer2"
+    },
+    {
+     "id": "ResourceId::6679",
+     "name": "InstanceCullingLoadBalancer.Batches",
+     "binding": "structuredbuffer3"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 1143,
+   "name": "DispatchIndirect(<3, 1, 1>)",
+   "cs": "ResourceId::7749"
+  }
+ ],
+ "outputs": [],
+ "images": []
+}

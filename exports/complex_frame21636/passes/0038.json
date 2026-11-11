@@ -1,0 +1,212 @@
+{
+ "index": 38,
+ "kind": "dispatch",
+ "events": [
+  1245,
+  1245
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "UpdateGlobalDistanceField",
+  "Clipmap:%d CacheType:%s",
+  "Coarse Clipmap",
+  "Propagate step %d"
+ ],
+ "first": "ID3D11DeviceContext::Dispatch()",
+ "last": "ID3D11DeviceContext::Dispatch()",
+ "shaders": {
+  "cs": [
+   "shaders/cs_7758.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::7758": [
+    {
+     "block": "cbuffer0",
+     "bytes": 128,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        330225942528.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        329110257664.0,
+        0.0,
+        329080373248.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.2299049107372114e+18,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.000977,
+        0.000977,
+        0.017857,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v4",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.015873,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v5",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v6",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.777778,
+        -0.083333,
+        0.0,
+        0.25
+       ]
+      },
+      {
+       "name": "cb0_v7",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.375,
+        0.0,
+        0.0,
+        0.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::7758": [
+    {
+     "id": "ResourceId::6370",
+     "name": "3D Texture 6370",
+     "w": 36,
+     "h": 36,
+     "depth": 144,
+     "mips": 1,
+     "array": 1,
+     "format": "R32_UINT",
+     "samples": 1,
+     "binding": "texture0"
+    },
+    {
+     "id": "ResourceId::6364",
+     "name": "3D Texture 6364",
+     "w": 1024,
+     "h": 1024,
+     "depth": 56,
+     "mips": 1,
+     "array": 1,
+     "format": "R8_UNORM",
+     "samples": 1,
+     "binding": "texture1"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 1245,
+   "name": "ID3D11DeviceContext::Dispatch()",
+   "cs": "ResourceId::7758"
+  }
+ ],
+ "outputs": [
+  {
+   "id": "ResourceId::6373",
+   "name": "3D Texture 6373",
+   "w": 63,
+   "h": 63,
+   "depth": 252,
+   "mips": 1,
+   "array": 1,
+   "format": "R8_UNORM",
+   "samples": 1
+  }
+ ],
+ "images": [
+  {
+   "file": "images/0038_out0.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    1.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "max": [
+    1.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "target": {
+    "id": "ResourceId::6373",
+    "name": "3D Texture 6373",
+    "w": 63,
+    "h": 63,
+    "depth": 252,
+    "mips": 1,
+    "array": 1,
+    "format": "R8_UNORM",
+    "samples": 1
+   }
+  }
+ ]
+}

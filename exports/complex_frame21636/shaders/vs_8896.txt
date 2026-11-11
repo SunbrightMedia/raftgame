@@ -1,0 +1,59 @@
+shader ResourceId::8896, stage vs, name "Vertex Shader 8896"
+entry point: main
+constant block 0 "cbuffer0" (80 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+in  ATTRIBUTE0
+in  ATTRIBUTE1
+in  ATTRIBUTE2
+in  ATTRIBUTE3
+in  ATTRIBUTE4
+out TEXCOORD0
+out TEXCOORD1
+out TEXCOORD2
+out SV_POSITION0
+
+==================== disassembly: DXBC ====================
+
+Shader hash 70780494-67f8ac68-1f8a933d-b6a80851
+
+vs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[5], immediateIndexed
+      dcl_input v0.xyzw
+      dcl_input v1.xyzw
+      dcl_input v2.xy
+      dcl_input v3.xyzw
+      dcl_input v4.xyzw
+      dcl_output o0.xy
+      dcl_output o1.xyzw
+      dcl_output o2.xyzw
+      dcl_output_siv o3.xyzw, position
+      dcl_temps 2
+   0: mov o0.xy, v2.xyxx
+   1: mov o1.xyzw, v3.xyzw
+   2: mov o2.xyzw, v4.xyzw
+   3: add r0.xyz, v1.xyzx, -cb0[4].xyzx
+   4: mov r0.w, v1.w
+   5: mad r0.xyzw, r0.xyzw, l(2097152.000000, 2097152.000000, 2097152.000000, 2097152.000000), v0.xyzw
+   6: mul r1.xyzw, r0.yyyy, cb0[1].xyzw
+   7: mad r1.xyzw, r0.xxxx, cb0[0].xyzw, r1.xyzw
+   8: mad r1.xyzw, r0.zzzz, cb0[2].xyzw, r1.xyzw
+   9: mad r0.xyzw, r0.wwww, cb0[3].xyzw, r1.xyzw
+  10: max o3.z, r0.z, l(0)
+  11: mov o3.xyw, r0.xyxw
+  12: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

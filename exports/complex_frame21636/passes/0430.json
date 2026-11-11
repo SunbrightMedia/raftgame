@@ -1,0 +1,20 @@
+{
+ "index": 430,
+ "kind": "present",
+ "events": [
+  11047,
+  11047
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME"
+ ],
+ "first": "Present(ResourceId::690)",
+ "last": "Present(ResourceId::690)",
+ "shaders": {},
+ "constants": {},
+ "reads": {},
+ "draws": [],
+ "outputs": [],
+ "images": []
+}

@@ -1,0 +1,178 @@
+{
+ "index": 385,
+ "kind": "dispatch",
+ "events": [
+  10413,
+  10413
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "PostProcessing",
+  "DOF(Alpha=%s)",
+  "DOF DilateCoc(1/16 %s radius=%d step=%d) %dx%d"
+ ],
+ "first": "ID3D11DeviceContext::Dispatch()",
+ "last": "ID3D11DeviceContext::Dispatch()",
+ "shaders": {
+  "cs": [
+   "shaders/cs_19314.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::19314": [
+    {
+     "block": "cbuffer0",
+     "bytes": 32,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        1.0,
+        0.855556,
+        1.168831
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::19314": [
+    {
+     "id": "ResourceId::47160",
+     "name": "2D Texture 47160",
+     "w": 90,
+     "h": 68,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R16G16_FLOAT",
+     "samples": 1,
+     "binding": "texture0"
+    },
+    {
+     "id": "ResourceId::47163",
+     "name": "2D Texture 47163",
+     "w": 90,
+     "h": 68,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R16G16B16A16_FLOAT",
+     "samples": 1,
+     "binding": "texture1"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 10413,
+   "name": "ID3D11DeviceContext::Dispatch()",
+   "cs": "ResourceId::19314"
+  }
+ ],
+ "outputs": [
+  {
+   "id": "ResourceId::47152",
+   "name": "2D Texture 47152",
+   "w": 90,
+   "h": 68,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R16G16_FLOAT",
+   "samples": 1
+  },
+  {
+   "id": "ResourceId::47155",
+   "name": "2D Texture 47155",
+   "w": 90,
+   "h": 68,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R16G16B16A16_FLOAT",
+   "samples": 1
+  }
+ ],
+ "images": [
+  {
+   "file": "images/0385_out0.jpg",
+   "black": -4.0,
+   "white": 1.0,
+   "min": [
+    -4.0,
+    -3.71484375,
+    0.0,
+    1.0
+   ],
+   "max": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "target": {
+    "id": "ResourceId::47152",
+    "name": "2D Texture 47152",
+    "w": 90,
+    "h": 68,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R16G16_FLOAT",
+    "samples": 1
+   }
+  },
+  {
+   "file": "images/0385_out1.jpg",
+   "black": 0.0,
+   "white": 16384.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "max": [
+    0.58984375,
+    0.58056640625,
+    16384.0,
+    0.58056640625
+   ],
+   "target": {
+    "id": "ResourceId::47155",
+    "name": "2D Texture 47155",
+    "w": 90,
+    "h": 68,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R16G16B16A16_FLOAT",
+    "samples": 1
+   }
+  }
+ ]
+}

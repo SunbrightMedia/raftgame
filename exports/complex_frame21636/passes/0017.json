@@ -1,0 +1,24 @@
+{
+ "index": 17,
+ "kind": "clear",
+ "events": [
+  986,
+  986
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "GPUScene.Update",
+  "UpdateGPUScene NumPrimitiveDataUploads %u",
+  "ScatterUpload[%d] (Resource: %s, Offset: %u)"
+ ],
+ "first": "ID3D11DeviceContext::ClearUnorderedAccessViewUint()",
+ "last": "ID3D11DeviceContext::ClearUnorderedAccessViewUint()",
+ "shaders": {},
+ "constants": {},
+ "reads": {},
+ "draws": [],
+ "outputs": [],
+ "images": []
+}

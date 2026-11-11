@@ -1,0 +1,99 @@
+shader ResourceId::7868, stage cs, name "Compute Shader 7868"
+entry point: main
+constant block 0 "cbuffer0" (496 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+    +80    float4 cb0_v5 1x4
+    +96    float4 cb0_v6 1x4
+    +112   float4 cb0_v7 1x4
+    +128   float4 cb0_v8 1x4
+    +144   float4 cb0_v9 1x4
+    +160   float4 cb0_v10 1x4
+    +176   float4 cb0_v11 1x4
+    +192   float4 cb0_v12 1x4
+    +208   float4 cb0_v13 1x4
+    +224   float4 cb0_v14 1x4
+    +240   float4 cb0_v15 1x4
+    +256   float4 cb0_v16 1x4
+    +272   float4 cb0_v17 1x4
+    +288   float4 cb0_v18 1x4
+    +304   float4 cb0_v19 1x4
+    +320   float4 cb0_v20 1x4
+    +336   float4 cb0_v21 1x4
+    +352   float4 cb0_v22 1x4
+    +368   float4 cb0_v23 1x4
+    +384   float4 cb0_v24 1x4
+    +400   float4 cb0_v25 1x4
+    +416   float4 cb0_v26 1x4
+    +432   float4 cb0_v27 1x4
+    +448   float4 cb0_v28 1x4
+    +464   float4 cb0_v29 1x4
+    +480   float4 cb0_v30 1x4
+read  0 "texture0" (TextureType.Buffer)
+read  1 "texture1" (TextureType.Texture2D)
+write 0 "uav0" (TextureType.Texture2D)
+in  vThreadID0
+
+==================== disassembly: DXBC ====================
+
+Shader hash a0d49da1-6e4a8fb8-b1c41431-6add56c0
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[31], immediateIndexed
+      dcl_resource_buffer (float,float,float,float) t0
+      dcl_resource_texture2d (float,float,float,float) t1
+      dcl_uav_typed_texture2d (float,float,float,float) u0
+      dcl_input vThreadID.xyz
+      dcl_temps 4
+      dcl_thread_group 8, 8, 1
+   0: ult r0.xy, vThreadID.xyxx, cb0[5].yyyy
+   1: and r0.x, r0.y, r0.x
+   2: if_nz r0.x
+   3:   ld_indexable(buffer)(float,float,float,float) r0.x, vThreadID.zzzz, t0.wxyz
+   4:   and r0.x, r0.x, l(0.000000)
+   5:   and r1.x, r0.x, cb0[30].x
+   6:   ushr r1.yzw, r0.xxxx, cb0[30].yyyy
+   7:   ishl r0.xy, l(1, 2, 0, 0), cb0[5].zzzz
+   8:   ult r0.z, vThreadID.x, r0.x
+   9:   iadd r0.y, r0.y, l(-1)
+  10:   iadd r0.w, l(-1), cb0[5].y
+  11:   iadd r2.xy, r0.ywyy, -vThreadID.xyxx
+  12:   movc r2.xy, r0.zzzz, r2.xyxx, vThreadID.xyxx
+  13:   iadd r0.z, -r0.x, cb0[5].y
+  14:   uge r2.z, r2.x, r0.z
+  15:   iadd r2.w, r0.z, l(-1)
+  16:   iadd r3.x, r2.w, -r2.x
+  17:   iadd r3.x, r0.z, r3.x
+  18:   iadd r3.y, r0.w, -r2.y
+  19:   movc r2.xy, r2.zzzz, r3.xyxx, r2.xyxx
+  20:   ult r2.z, r2.y, r0.x
+  21:   iadd r3.xy, r0.wyww, -r2.xyxx
+  22:   movc r2.xy, r2.zzzz, r3.xyxx, r2.xyxx
+  23:   uge r0.y, r2.y, r0.z
+  24:   iadd r2.z, r2.w, -r2.y
+  25:   iadd r3.y, r0.z, r2.z
+  26:   iadd r3.x, r0.w, -r2.x
+  27:   movc r0.yz, r0.yyyy, r3.xxyx, r2.xxyx
+  28:   iadd r0.xy, -r0.xxxx, r0.yzyy
+  29:   imad r0.xy, cb0[5].xxxx, r1.xwxx, r0.xyxx
+  30:   mov r0.zw, l(0, 0, 0, 0)
+  31:   ld_indexable(texture2d)(float,float,float,float) r0.xyz, r0.xyzw, t1.xyzw
+  32:   imad r1.xyzw, cb0[5].yyyy, r1.xyzw, vThreadID.xyyy
+  33:   store_uav_typed u0.xyzw, r1.xyzw, r0.xyzx
+  34: endif
+  35: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

@@ -1,0 +1,168 @@
+shader ResourceId::7869, stage cs, name "Compute Shader 7869"
+entry point: main
+constant block 0 "cbuffer0" (496 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+    +80    float4 cb0_v5 1x4
+    +96    float4 cb0_v6 1x4
+    +112   float4 cb0_v7 1x4
+    +128   float4 cb0_v8 1x4
+    +144   float4 cb0_v9 1x4
+    +160   float4 cb0_v10 1x4
+    +176   float4 cb0_v11 1x4
+    +192   float4 cb0_v12 1x4
+    +208   float4 cb0_v13 1x4
+    +224   float4 cb0_v14 1x4
+    +240   float4 cb0_v15 1x4
+    +256   float4 cb0_v16 1x4
+    +272   float4 cb0_v17 1x4
+    +288   float4 cb0_v18 1x4
+    +304   float4 cb0_v19 1x4
+    +320   float4 cb0_v20 1x4
+    +336   float4 cb0_v21 1x4
+    +352   float4 cb0_v22 1x4
+    +368   float4 cb0_v23 1x4
+    +384   float4 cb0_v24 1x4
+    +400   float4 cb0_v25 1x4
+    +416   float4 cb0_v26 1x4
+    +432   float4 cb0_v27 1x4
+    +448   float4 cb0_v28 1x4
+    +464   float4 cb0_v29 1x4
+    +480   float4 cb0_v30 1x4
+read  0 "texture0" (TextureType.Buffer)
+read  1 "texture1" (TextureType.Texture2D)
+write 0 "uav0" (TextureType.Texture2D)
+write 1 "uav1" (TextureType.Texture2D)
+write 2 "uav2" (TextureType.Texture2D)
+in  vThreadGroupID0
+in  vThreadIDInGroup0
+in  vThreadID0
+
+==================== disassembly: DXBC ====================
+
+Shader hash 96c0f7aa-6c9fccc2-f11fe81f-500a1150
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[31], immediateIndexed
+      dcl_resource_buffer (float,float,float,float) t0
+      dcl_resource_texture2d (float,float,float,float) t1
+      dcl_uav_typed_texture2d (float,float,float,float) u0
+      dcl_uav_typed_texture2d (float,float,float,float) u1
+      dcl_uav_typed_texture2d (float,float,float,float) u2
+      dcl_input vThreadGroupID.xy
+      dcl_input vThreadIDInGroup.xy
+      dcl_input vThreadID.xyz
+      dcl_temps 6
+      dcl_tgsm_structured g0, 96, 8
+      dcl_tgsm_structured g1, 48, 4
+      dcl_thread_group 8, 8, 1
+   0: ld_indexable(buffer)(float,float,float,float) r0.x, vThreadID.zzzz, t0.wxyz
+   1: and r0.x, r0.x, l(0.000000)
+   2: and r1.x, r0.x, cb0[30].x
+   3: ushr r1.yzw, r0.xxxx, cb0[30].yyyy
+   4: ult r0.xy, vThreadID.xyxx, cb0[5].yyyy
+   5: and r0.x, r0.y, r0.x
+   6: if_nz r0.x
+   7:   ishl r0.xy, l(1, 2, 0, 0), cb0[5].zzzz
+   8:   ult r0.z, vThreadID.x, r0.x
+   9:   iadd r0.y, r0.y, l(-1)
+  10:   iadd r0.w, l(-1), cb0[5].y
+  11:   iadd r2.xy, r0.ywyy, -vThreadID.xyxx
+  12:   movc r2.xy, r0.zzzz, r2.xyxx, vThreadID.xyxx
+  13:   iadd r0.z, -r0.x, cb0[5].y
+  14:   uge r2.z, r2.x, r0.z
+  15:   iadd r2.w, r0.z, l(-1)
+  16:   iadd r3.x, r2.w, -r2.x
+  17:   iadd r3.x, r0.z, r3.x
+  18:   iadd r3.y, r0.w, -r2.y
+  19:   movc r2.xy, r2.zzzz, r3.xyxx, r2.xyxx
+  20:   ult r2.z, r2.y, r0.x
+  21:   iadd r3.xy, r0.wyww, -r2.xyxx
+  22:   movc r2.xy, r2.zzzz, r3.xyxx, r2.xyxx
+  23:   uge r0.y, r2.y, r0.z
+  24:   iadd r2.z, r2.w, -r2.y
+  25:   iadd r3.y, r0.z, r2.z
+  26:   iadd r3.x, r0.w, -r2.x
+  27:   movc r0.yz, r0.yyyy, r3.xxyx, r2.xxyx
+  28:   iadd r0.xy, -r0.xxxx, r0.yzyy
+  29:   imad r0.xy, cb0[5].xxxx, r1.xwxx, r0.xyxx
+  30:   mov r0.zw, l(0, 0, 0, 0)
+  31:   ld_indexable(texture2d)(float,float,float,float) r0.xyz, r0.xyzw, t1.xyzw
+  32:   imad r2.xyzw, cb0[5].yyyy, r1.xwww, vThreadID.xyyy
+  33:   store_uav_typed u0.xyzw, r2.xyzw, r0.xyzx
+  34:   imul null, r0.w, vThreadIDInGroup.x, l(12)
+  35:   store_structured g0.xyz, vThreadIDInGroup.y, r0.w, r0.xyzx
+  36: endif
+  37: ult r0.x, l(1), cb0[5].z
+  38: if_nz cb0[5].z
+  39:   sync_g_t
+  40:   ushr r0.y, cb0[5].y, l(1)
+  41:   ishl r2.xyzw, vThreadGroupID.xyyy, l(2, 2, 2, 2)
+  42:   iadd r2.xyzw, r2.xyzw, vThreadIDInGroup.xyyy
+  43:   ult r0.zw, vThreadIDInGroup.xxxy, l(0, 0, 4, 4)
+  44:   ult r3.xy, r2.xwxx, r0.yyyy
+  45:   and r0.zw, r0.zzzw, r3.xxxy
+  46:   and r0.z, r0.w, r0.z
+  47:   if_nz r0.z
+  48:     ishl r0.z, vThreadIDInGroup.y, l(1)
+  49:     imul null, r3.xy, vThreadIDInGroup.xxxx, l(24, 12, 0, 0)
+  50:     ld_structured r4.x, r0.z, r3.x, g0.xxxx
+  51:     imad r0.w, vThreadIDInGroup.x, l(24), l(4)
+  52:     ld_structured r4.y, r0.z, r0.w, g0.xxxx
+  53:     imad r3.zw, vThreadIDInGroup.xxxx, l(0, 0, 24, 24), l(0, 0, 8, 16)
+  54:     ld_structured r5.xyzw, r0.z, r3.z, g0.xyzw
+  55:     mov r4.z, r5.x
+  56:     add r4.xyzw, r4.xyzx, r5.yzwy
+  57:     imad r0.z, vThreadIDInGroup.y, l(2), l(1)
+  58:     ld_structured r5.xyzw, r0.z, r3.x, g0.xywz
+  59:     add r4.xyzw, r4.xyzw, r5.xywx
+  60:     ld_structured r5.xy, r0.z, r3.w, g0.xyxx
+  61:     add r4.xyzw, r4.xyzw, r5.zxyz
+  62:     mul r4.xyzw, r4.xyzw, l(0.250000, 0.250000, 0.250000, 0.250000)
+  63:     store_structured g1.xyz, vThreadIDInGroup.y, r3.y, r4.wyzw
+  64:     imad r2.xyzw, r0.yyyy, r1.xwww, r2.xyzw
+  65:     store_uav_typed u1.xyzw, r2.xyzw, r4.xyzw
+  66:   endif
+  67: endif
+  68: if_nz r0.x
+  69:   sync_g_t
+  70:   ushr r0.x, cb0[5].y, l(2)
+  71:   ishl r2.xyzw, vThreadGroupID.xyyy, l(1, 1, 1, 1)
+  72:   iadd r2.xyzw, r2.xyzw, vThreadIDInGroup.xyyy
+  73:   ult r0.yz, vThreadIDInGroup.xxyx, l(0, 2, 2, 0)
+  74:   ult r3.xy, r2.xwxx, r0.xxxx
+  75:   and r0.yz, r0.yyzy, r3.xxyx
+  76:   and r0.y, r0.z, r0.y
+  77:   if_nz r0.y
+  78:     ishl r0.y, vThreadIDInGroup.y, l(1)
+  79:     imul null, r0.z, vThreadIDInGroup.x, l(24)
+  80:     ld_structured r3.xyz, r0.y, r0.z, g1.xyzx
+  81:     imad r0.w, vThreadIDInGroup.x, l(24), l(12)
+  82:     ld_structured r4.xyz, r0.y, r0.w, g1.xyzx
+  83:     add r3.xyzw, r3.xyzx, r4.xyzx
+  84:     imad r0.y, vThreadIDInGroup.y, l(2), l(1)
+  85:     ld_structured r4.xyz, r0.y, r0.z, g1.xyzx
+  86:     add r3.xyzw, r3.xyzw, r4.xyzx
+  87:     ld_structured r0.yzw, r0.y, r0.w, g1.xxyz
+  88:     add r3.xyzw, r0.yzwy, r3.xyzw
+  89:     imad r0.xyzw, r0.xxxx, r1.xyzw, r2.xyzw
+  90:     mul r1.xyzw, r3.xyzw, l(0.250000, 0.250000, 0.250000, 0.250000)
+  91:     store_uav_typed u2.xyzw, r0.xyzw, r1.xyzw
+  92:   endif
+  93: endif
+  94: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

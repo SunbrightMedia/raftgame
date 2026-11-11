@@ -1,0 +1,24 @@
+{
+ "index": 30,
+ "kind": "clear",
+ "events": [
+  1126,
+  1127
+ ],
+ "count": 2,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "UpdateGlobalDistanceField",
+  "Clipmap:%d CacheType:%s",
+  "BuildPageUpdateTiles %d"
+ ],
+ "first": "ID3D11DeviceContext::ClearUnorderedAccessViewUint()",
+ "last": "ID3D11DeviceContext::ClearUnorderedAccessViewUint()",
+ "shaders": {},
+ "constants": {},
+ "reads": {},
+ "draws": [],
+ "outputs": [],
+ "images": []
+}

@@ -1,0 +1,76 @@
+{
+ "index": 399,
+ "kind": "clear",
+ "events": [
+  10579,
+  10579
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "PostProcessing",
+  "MotionBlur",
+  "VelocityTileScatter %dx%d"
+ ],
+ "first": "ID3D11DeviceContext::ClearDepthStencilView()",
+ "last": "ID3D11DeviceContext::ClearDepthStencilView()",
+ "shaders": {},
+ "constants": {},
+ "reads": {},
+ "draws": [],
+ "outputs": [
+  {
+   "id": "ResourceId::48025",
+   "name": "2D Render Target 48025",
+   "w": 63,
+   "h": 48,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R16G16B16A16_FLOAT",
+   "samples": 1
+  }
+ ],
+ "depth": {
+  "id": "ResourceId::48028",
+  "name": "2D Depth Target 48028",
+  "w": 63,
+  "h": 48,
+  "depth": 1,
+  "mips": 1,
+  "array": 1,
+  "format": "R16_TYPELESS",
+  "samples": 1
+ },
+ "images": [
+  {
+   "file": "images/0399_out0.jpg",
+   "black": -22.15625,
+   "white": 17.375,
+   "min": [
+    -16.3125,
+    -6.4765625,
+    -22.15625,
+    -7.4609375
+   ],
+   "max": [
+    11.375,
+    17.375,
+    12.875,
+    19.296875
+   ],
+   "target": {
+    "id": "ResourceId::48025",
+    "name": "2D Render Target 48025",
+    "w": 63,
+    "h": 48,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R16G16B16A16_FLOAT",
+    "samples": 1
+   }
+  }
+ ]
+}
