@@ -1,0 +1,61 @@
+{
+ "index": 72,
+ "kind": "dispatch",
+ "events": [
+  2320,
+  2320
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "LumenSceneUpdate: %u card captures %.3fM texels",
+  "BuildRenderingCommands(Culling=%s)",
+  "ClearIndirectArgInstanceCount"
+ ],
+ "first": "ID3D11DeviceContext::Dispatch()",
+ "last": "ID3D11DeviceContext::Dispatch()",
+ "shaders": {
+  "cs": [
+   "shaders/cs_7739.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::7739": [
+    {
+     "block": "cbuffer0",
+     "bytes": 16,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.175894484516397e+32,
+        0.0,
+        0.0,
+        0.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::7739": []
+  }
+ },
+ "draws": [
+  {
+   "event": 2320,
+   "name": "ID3D11DeviceContext::Dispatch()",
+   "cs": "ResourceId::7739"
+  }
+ ],
+ "outputs": [],
+ "images": []
+}

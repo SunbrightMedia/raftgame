@@ -1,0 +1,59 @@
+{
+ "index": 57,
+ "kind": "draw",
+ "events": [
+  1389,
+  1407
+ ],
+ "count": 4,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "PrePass %s %s",
+  "DepthPassParallel"
+ ],
+ "first": "ID3D11DeviceContext::DrawIndexedInstanced()",
+ "last": "ID3D11DeviceContext::DrawIndexedInstanced()",
+ "shaders": {
+  "vs": [
+   "shaders/vs_6064.txt"
+  ]
+ },
+ "constants": {},
+ "reads": {},
+ "draws": [
+  {
+   "event": 1389,
+   "name": "ID3D11DeviceContext::DrawIndexedInstanced()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1393,
+   "name": "ID3D11DeviceContext::DrawIndexedInstanced()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1404,
+   "name": "ID3D11DeviceContext::DrawIndexedInstanced()",
+   "vs": "ResourceId::6064"
+  },
+  {
+   "event": 1407,
+   "name": "ID3D11DeviceContext::DrawIndexedInstanced()",
+   "vs": "ResourceId::6064"
+  }
+ ],
+ "outputs": [],
+ "depth": {
+  "id": "ResourceId::19356",
+  "name": "2D Depth Target 19356",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "mips": 1,
+  "array": 1,
+  "format": "D32S8_TYPELESS",
+  "samples": 1
+ },
+ "images": []
+}

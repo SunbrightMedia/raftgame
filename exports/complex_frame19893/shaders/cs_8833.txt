@@ -1,0 +1,117 @@
+shader ResourceId::8833, stage cs, name "Compute Shader 8833"
+entry point: main
+constant block 0 "cbuffer0" (160 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+    +80    float4 cb0_v5 1x4
+    +96    float4 cb0_v6 1x4
+    +112   float4 cb0_v7 1x4
+    +128   float4 cb0_v8 1x4
+    +144   float4 cb0_v9 1x4
+read  0 "texture0" (TextureType.Texture2D)
+read  1 "structuredbuffer1" (TextureType.Buffer)
+read  2 "texture2" (TextureType.Texture2D)
+write 0 "uav0" (TextureType.Texture2D)
+in  vThreadGroupID0
+in  vThreadIDInGroup0
+
+==================== disassembly: DXBC ====================
+
+Shader hash a43a6c0c-d08a5e20-0c33ad90-78f9d8d3
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[10], immediateIndexed
+      dcl_resource_texture2d (uint,uint,uint,uint) t0
+      dcl_resource_structured t1, 4
+      dcl_resource_texture2d (float,float,float,float) t2
+      dcl_uav_typed_texture2d (unorm,unorm,unorm,unorm) u0
+      dcl_input vThreadGroupID.xy
+      dcl_input vThreadIDInGroup.xy
+      dcl_temps 3
+      dcl_tgsm_structured g0, 4, 1024
+      dcl_thread_group 16, 16, 1
+   0: imad r0.x, vThreadGroupID.y, cb0[5].x, vThreadGroupID.x
+   1: ld_structured_indexable(structured_buffer, stride=4)(mixed,mixed,mixed,mixed) r0.y, l(0), l(0), t1.xxxx
+   2: umin r0.y, r0.y, cb0[9].x
+   3: iadd r0.y, r0.y, cb0[8].w
+   4: ult r0.x, r0.x, r0.y
+   5: ult r0.y, vThreadGroupID.x, cb0[5].x
+   6: and r0.x, r0.y, r0.x
+   7: if_nz r0.x
+   8:   mov r0.xy, vThreadGroupID.xyxx
+   9:   mov r0.zw, l(0, 0, 0, 0)
+  10:   ld_indexable(texture2d)(uint,uint,uint,uint) r0.x, r0.xyzw, t0.xyzw
+  11:   lt r0.x, l(0), r0.x
+  12:   if_nz r0.x
+  13:     imad r0.x, vThreadIDInGroup.y, cb0[3].z, vThreadIDInGroup.x
+  14:     imul null, r0.y, cb0[3].z, cb0[3].z
+  15:     ult r0.z, r0.x, r0.y
+  16:     if_nz r0.z
+  17:       imad r1.xy, vThreadGroupID.xyxx, cb0[3].zzzz, vThreadIDInGroup.xyxx
+  18:       mov r1.zw, l(0, 0, 0, 0)
+  19:       ld_indexable(texture2d)(float,float,float,float) r0.z, r1.xyzw, t2.yzxw
+  20:       store_structured g0.x, r0.x, l(0), r0.z
+  21:     endif
+  22:     sync_g_t
+  23:     ishl r0.z, r0.x, l(2)
+  24:     bfi r1.xyz, l(30, 30, 30, 0), l(2, 2, 2, 0), r0.xxxx, l(1, 2, 3, 0)
+  25:     mov r0.w, r0.y
+  26:     mov r1.w, l(0)
+  27:     loop
+  28:       uge r2.x, l(1), r0.w
+  29:       breakc_nz r2.x
+  30:       ult r2.x, r0.z, r0.w
+  31:       if_nz r2.x
+  32:         iadd r2.x, r0.z, r1.w
+  33:         ld_structured r2.x, r2.x, l(0), g0.xxxx
+  34:         ult r2.yzw, r1.xxyz, r0.wwww
+  35:         if_nz r2.y
+  36:           iadd r2.y, r1.w, r1.x
+  37:           ld_structured r2.y, r2.y, l(0), g0.xxxx
+  38:           add r2.x, r2.y, r2.x
+  39:         endif
+  40:         if_nz r2.z
+  41:           iadd r2.y, r1.w, r1.y
+  42:           ld_structured r2.y, r2.y, l(0), g0.xxxx
+  43:           add r2.x, r2.y, r2.x
+  44:         endif
+  45:         if_nz r2.w
+  46:           iadd r2.y, r1.w, r1.z
+  47:           ld_structured r2.y, r2.y, l(0), g0.xxxx
+  48:           add r2.x, r2.y, r2.x
+  49:         endif
+  50:         iadd r2.y, r0.x, r1.w
+  51:         iadd r2.y, r0.w, r2.y
+  52:         store_structured g0.x, r2.y, l(0), r2.x
+  53:       endif
+  54:       iadd r1.w, r0.w, r1.w
+  55:       iadd r2.x, r0.w, l(3)
+  56:       ushr r0.w, r2.x, l(2)
+  57:       sync_g_t
+  58:     endloop
+  59:     if_z r0.x
+  60:       ld_structured r0.x, r1.w, l(0), g0.xxxx
+  61:       utof r0.y, r0.y
+  62:       div r0.x, r0.x, r0.y
+  63:       lt r0.y, l(0), cb0[1].x
+  64:       movc r0.x, r0.y, l(1.000000), r0.x
+  65:       store_uav_typed u0.xyzw, vThreadGroupID.xyyy, r0.xxxx
+  66:     endif
+  67:   endif
+  68: endif
+  69: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

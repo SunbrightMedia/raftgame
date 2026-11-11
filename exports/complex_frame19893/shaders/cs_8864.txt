@@ -1,0 +1,48 @@
+shader ResourceId::8864, stage cs, name "Compute Shader 8864"
+entry point: main
+constant block 0 "cbuffer0" (16 bytes)
+    +0     float4 cb0_v0 1x4
+read  0 "structuredbuffer0" (TextureType.Buffer)
+write 0 "uav0" (TextureType.Buffer)
+write 1 "uav1" (TextureType.Buffer)
+
+==================== disassembly: DXBC ====================
+
+Shader hash b9b423ce-388e9bcd-f4a009ec-6ebe4253
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[1], immediateIndexed
+      dcl_resource_structured t0, 64
+      dcl_uav_structured u0, 16
+      dcl_uav_structured u1, 16
+      dcl_temps 4
+      dcl_thread_group 1, 1, 1
+   0: ld_structured_indexable(structured_buffer, stride=64)(mixed,mixed,mixed,mixed) r0.xyzw, l(0), l(0), t0.xyzw
+   1: ld_structured_indexable(structured_buffer, stride=64)(mixed,mixed,mixed,mixed) r1.xyzw, l(0), l(16), t0.xyzw
+   2: add r2.xyzw, r0.xyzw, r1.xyzw
+   3: add r0.xyz, r0.xyzx, r1.xyzx
+   4: mad r3.xyzw, -r1.xyzw, cb0[0].xxxx, r2.xyzw
+   5: mul r1.xyzw, r1.xyzw, cb0[0].xxxx
+   6: div_sat r1.xyzw, r1.xyzw, r2.xyzw
+   7: div_sat r2.xyzw, r3.xyzw, r2.xyzw
+   8: max r0.w, r0.z, r0.y
+   9: max r0.w, r0.w, r0.x
+  10: div_sat r0.xyz, r0.xyzx, r0.wwww
+  11: mov r0.w, l(1.000000)
+  12: mul r2.xyzw, r2.xyzw, r0.xyzw
+  13: mul r0.xyzw, r1.xyzw, r0.xyzw
+  14: store_structured u1.xyzw, l(0), l(0), r0.xyzw
+  15: store_structured u0.xyzw, l(0), l(0), r2.xyzw
+  16: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

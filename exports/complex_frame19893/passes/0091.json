@@ -1,0 +1,80 @@
+{
+ "index": 91,
+ "kind": "dispatch",
+ "events": [
+  3074,
+  3074
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "LumenSceneLighting%s",
+  "DirectLighting",
+  "CullTiles %d lights",
+  "ComputeLightTileOffsetsPerLight"
+ ],
+ "first": "ID3D11DeviceContext::Dispatch()",
+ "last": "ID3D11DeviceContext::Dispatch()",
+ "shaders": {
+  "cs": [
+   "shaders/cs_7796.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::7796": [
+    {
+     "block": "cbuffer0",
+     "bytes": 32,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        4.397905783565242e+31,
+        0.0,
+        4.397936732066224e+31,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::7796": [
+    {
+     "id": "ResourceId::56930",
+     "name": "InstanceCulling.CompactionBlockDataIndices",
+     "binding": "structuredbuffer0"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 3074,
+   "name": "ID3D11DeviceContext::Dispatch()",
+   "cs": "ResourceId::7796"
+  }
+ ],
+ "outputs": [],
+ "images": []
+}

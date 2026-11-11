@@ -1,0 +1,165 @@
+shader ResourceId::7748, stage cs, name "Compute Shader 7748"
+entry point: main
+constant block 0 "cbuffer0" (176 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+    +80    float4 cb0_v5 1x4
+    +96    float4 cb0_v6 1x4
+    +112   float4 cb0_v7 1x4
+    +128   float4 cb0_v8 1x4
+    +144   float4 cb0_v9 1x4
+    +160   float4 cb0_v10 1x4
+read  0 "texture0" (TextureType.Buffer)
+write 0 "uav0" (TextureType.Buffer)
+write 1 "uav1" (TextureType.Buffer)
+write 2 "uav2" (TextureType.Buffer)
+write 3 "uav3" (TextureType.Buffer)
+in  vThreadGroupID0
+in  vThreadIDInGroup0
+in  vThreadID0
+
+==================== disassembly: DXBC ====================
+
+Shader hash 8073d3ef-d58a80ec-83acfd85-874a48e6
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[11], immediateIndexed
+      dcl_resource_buffer (float,float,float,float) t0
+      dcl_uav_structured u0, 4
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u1
+      dcl_uav_structured u2, 4
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u3
+      dcl_input vThreadGroupID.xyz
+      dcl_input vThreadIDInGroup.xyz
+      dcl_input vThreadID.xyz
+      dcl_temps 4
+      dcl_tgsm_structured g0, 4, 511
+      dcl_tgsm_raw g1, 4
+      dcl_tgsm_structured g2, 4, 2
+      dcl_thread_group 4, 4, 4
+   0: ishl r0.x, vThreadIDInGroup.z, l(4)
+   1: imad r0.x, vThreadIDInGroup.y, l(4), r0.x
+   2: iadd r0.x, r0.x, vThreadIDInGroup.x
+   3: ieq r0.yzw, vThreadIDInGroup.xxyz, l(0, 0, 0, 0)
+   4: and r0.y, r0.z, r0.y
+   5: and r0.y, r0.w, r0.y
+   6: if_nz r0.y
+   7:   store_structured g2.x, l(0), l(0), l(0)
+   8:   store_structured g2.x, l(1), l(0), l(0)
+   9:   store_raw g1.x, l(0), l(0)
+  10: endif
+  11: sync_g_t
+  12: ult r1.xyz, vThreadGroupID.xyzx, cb0[7].xyzx
+  13: and r0.z, r1.y, r1.x
+  14: and r0.z, r1.z, r0.z
+  15: if_nz r0.z
+  16:   utof r1.xyz, vThreadGroupID.xyzx
+  17:   mad r1.xyz, r1.xyzx, cb0[8].xyzx, cb0[9].xyzx
+  18:   mov r0.z, r0.x
+  19:   loop
+  20:     uge r0.w, r0.z, cb0[2].z
+  21:     breakc_nz r0.w
+  22:     ishl r0.w, r0.z, l(1)
+  23:     ld_indexable(buffer)(float,float,float,float) r2.xyzw, r0.wwww, t0.xyzw
+  24:     bfi r0.w, l(31), l(1), r0.z, l(1)
+  25:     ld_indexable(buffer)(float,float,float,float) r3.xyz, r0.wwww, t0.xyzw
+  26:     lt r0.w, l(0), r2.w
+  27:     and r0.w, r0.w, cb0[2].w
+  28:     add r2.xyz, r1.xyzx, -r2.xyzx
+  29:     add r3.xyz, r3.xyzx, cb0[10].xyzx
+  30:     add r2.xyz, abs(r2.xyzx), -r3.xyzx
+  31:     max r2.xyz, r2.xyzx, l(0, 0, 0, 0)
+  32:     dp3 r1.w, r2.xyzx, r2.xyzx
+  33:     ge r0.w, r0.w, r1.w
+  34:     if_nz r0.w
+  35:       imm_atomic_iadd r2.x, g1, l(0), l(1)
+  36:       ult r0.w, r2.x, l(511)
+  37:       if_nz r0.w
+  38:         store_structured g0.x, r2.x, l(0), r0.z
+  39:       endif
+  40:     endif
+  41:     iadd r0.z, r0.z, l(4)
+  42:   endloop
+  43: endif
+  44: sync_g_t
+  45: ult r1.xyz, vThreadID.xyzx, cb0[3].xyzx
+  46: and r0.z, r1.y, r1.x
+  47: and r0.z, r1.z, r0.z
+  48: if_nz r0.z
+  49:   utof r1.xyz, vThreadID.xyzx
+  50:   mad r1.xyz, r1.xyzx, cb0[4].xyzx, cb0[5].xyzx
+  51:   ld_raw r0.z, l(0), g1.xxxx
+  52:   uge r0.w, r0.x, l(32)
+  53:   ishl r1.w, l(1), r0.x
+  54:   mov r2.x, l(0)
+  55:   loop
+  56:     uge r2.y, r2.x, r0.z
+  57:     breakc_nz r2.y
+  58:     ld_structured r2.y, r2.x, l(0), g0.xxxx
+  59:     ishl r2.z, r2.y, l(1)
+  60:     ld_indexable(buffer)(float,float,float,float) r3.xyzw, r2.zzzz, t0.xyzw
+  61:     bfi r2.y, l(31), l(1), r2.y, l(1)
+  62:     ld_indexable(buffer)(float,float,float,float) r2.yzw, r2.yyyy, t0.wxyz
+  63:     lt r3.w, l(0), r3.w
+  64:     and r3.w, r3.w, cb0[2].w
+  65:     add r3.xyz, r1.xyzx, -r3.xyzx
+  66:     add r2.yzw, r2.yyzw, cb0[6].xxyz
+  67:     add r2.yzw, -r2.yyzw, abs(r3.xxyz)
+  68:     max r2.yzw, r2.yyzw, l(0, 0, 0, 0)
+  69:     dp3 r2.y, r2.yzwy, r2.yzwy
+  70:     ge r2.y, r3.w, r2.y
+  71:     if_nz r2.y
+  72:       if_nz r0.w
+  73:         atomic_or g2, l(1, 0, 0, 0), r1.w
+  74:       else
+  75:         atomic_or g2, l(0, 0, 0, 0), r1.w
+  76:       endif
+  77:       break
+  78:     endif
+  79:     iadd r2.x, r2.x, l(1)
+  80:   endloop
+  81: endif
+  82: sync_g_t
+  83: if_nz r0.y
+  84:   ld_structured r0.y, l(0), l(0), g2.xxxx
+  85:   ld_structured r0.z, l(1), l(0), g2.xxxx
+  86:   or r0.y, r0.z, r0.y
+  87:   if_nz r0.y
+  88:     imm_atomic_iadd r1.x, u3, l(0), l(1)
+  89:     ishl r0.yz, vThreadGroupID.yyzy, l(0, 8, 16, 0)
+  90:     or r0.y, r0.y, vThreadGroupID.x
+  91:     or r0.y, r0.z, r0.y
+  92:     store_structured u2.x, r1.x, l(0), r0.y
+  93:   endif
+  94: endif
+  95: uge r0.y, r0.x, l(32)
+  96: ld_structured r0.z, l(1), l(0), g2.xxxx
+  97: ishl r0.x, l(1), r0.x
+  98: and r0.z, r0.x, r0.z
+  99: ld_structured r0.w, l(0), l(0), g2.xxxx
+ 100: and r0.x, r0.x, r0.w
+ 101: ine r0.xz, r0.xxzx, l(0, 0, 0, 0)
+ 102: movc r0.x, r0.y, r0.z, r0.x
+ 103: if_nz r0.x
+ 104:   imm_atomic_iadd r0.x, u1, l(0), l(1)
+ 105:   ishl r0.yz, vThreadID.yyzy, l(0, 8, 16, 0)
+ 106:   or r0.y, r0.y, vThreadID.x
+ 107:   or r0.y, r0.z, r0.y
+ 108:   store_structured u0.x, r0.x, l(0), r0.y
+ 109: endif
+ 110: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

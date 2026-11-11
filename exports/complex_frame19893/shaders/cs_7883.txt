@@ -1,0 +1,106 @@
+shader ResourceId::7883, stage cs, name "Compute Shader 7883"
+entry point: main
+constant block 0 "cbuffer0" (80 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+read  0 "texture0" (TextureType.Texture2D)
+write 0 "uav0" (TextureType.Buffer)
+write 1 "uav1" (TextureType.Buffer)
+in  vThreadGroupID0
+in  vThreadIDInGroup0
+
+==================== disassembly: DXBC ====================
+
+Shader hash 4bb5d908-529ad2db-ca8ca0db-2d914d21
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[5], immediateIndexed
+      dcl_resource_texture2d (uint,uint,uint,uint) t0
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u0
+      dcl_uav_structured u1, 4
+      dcl_input vThreadGroupID.xy
+      dcl_input vThreadIDInGroup.x
+      dcl_temps 4
+      dcl_tgsm_structured g0, 4, 3
+      dcl_tgsm_structured g1, 4, 192
+      dcl_tgsm_structured g2, 4, 3
+      dcl_thread_group 64, 1, 1
+   0: if_z vThreadIDInGroup.x
+   1:   store_structured g0.x, l(0), l(0), l(0)
+   2:   store_structured g0.x, l(1), l(0), l(0)
+   3:   store_structured g0.x, l(2), l(0), l(0)
+   4:   mov r0.zw, l(0, 0, 0, 0)
+   5:   mov r1.x, l(0)
+   6:   loop
+   7:     uge r1.y, r1.x, l(64)
+   8:     breakc_nz r1.y
+   9:     ubfe r1.y, l(1), l(1), r1.x
+  10:     ushr r2.xyzw, r1.xxxx, l(2, 3, 4, 5)
+  11:     bfi r3.xyzw, l(1, 1, 1, 1), l(1, 1, 2, 2), r2.xyzw, l(0, 0, 0, 0)
+  12:     bfi r1.z, l(1), l(0), r1.x, r3.x
+  13:     iadd r1.y, r1.y, r3.y
+  14:     iadd r2.xy, r3.zwzz, r1.zyzz
+  15:     imad r0.xy, vThreadGroupID.xyxx, l(8, 8, 0, 0), r2.xyxx
+  16:     ult r1.zw, r0.xxxy, cb0[4].xxxy
+  17:     and r1.z, r1.w, r1.z
+  18:     if_nz r1.z
+  19:       ld_indexable(texture2d)(uint,uint,uint,uint) r0.y, r0.xyzw, t0.yxzw
+  20:       ine r1.z, r0.y, l(255)
+  21:       if_nz r1.z
+  22:         ld_structured r1.z, r0.y, l(0), g0.xxxx
+  23:         ishl r1.w, r0.y, l(6)
+  24:         iadd r1.w, r1.z, r1.w
+  25:         bfi r2.x, l(1), l(18), r2.w, l(0)
+  26:         imad r1.y, r1.y, l(0x00010000), r2.x
+  27:         imad r1.y, vThreadGroupID.y, l(0x00080000), r1.y
+  28:         or r0.x, r0.x, r1.y
+  29:         store_structured g1.x, r1.w, l(0), r0.x
+  30:         iadd r0.x, r1.z, l(1)
+  31:         store_structured g0.x, r0.y, l(0), r0.x
+  32:       endif
+  33:     endif
+  34:     iadd r1.x, r1.x, l(1)
+  35:   endloop
+  36: endif
+  37: sync_g_t
+  38: ult r0.x, vThreadIDInGroup.x, l(3)
+  39: if_nz r0.x
+  40:   imul null, r0.x, vThreadIDInGroup.x, l(3)
+  41:   ld_structured r0.y, vThreadIDInGroup.x, l(0), g0.xxxx
+  42:   imm_atomic_iadd r0.x, u0, r0.x, r0.y
+  43:   store_structured g2.x, vThreadIDInGroup.x, l(0), r0.x
+  44: endif
+  45: sync_g_t
+  46: imul null, r0.x, cb0[4].w, cb0[4].z
+  47: mov r0.y, l(0)
+  48: loop
+  49:   uge r0.z, r0.y, l(3)
+  50:   breakc_nz r0.z
+  51:   ld_structured r0.z, r0.y, l(0), g0.xxxx
+  52:   ult r0.z, vThreadIDInGroup.x, r0.z
+  53:   if_nz r0.z
+  54:     ld_structured r0.z, r0.y, l(0), g2.xxxx
+  55:     imad r0.z, r0.x, r0.y, r0.z
+  56:     iadd r0.z, r0.z, vThreadIDInGroup.x
+  57:     imad r0.w, r0.y, l(64), vThreadIDInGroup.x
+  58:     ld_structured r0.w, r0.w, l(0), g1.xxxx
+  59:     store_structured u1.x, r0.z, l(0), r0.w
+  60:   endif
+  61:   iadd r0.y, r0.y, l(1)
+  62: endloop
+  63: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

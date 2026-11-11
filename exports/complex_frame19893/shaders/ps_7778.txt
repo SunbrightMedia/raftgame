@@ -1,0 +1,30 @@
+shader ResourceId::7778, stage ps, name "Pixel Shader 7778"
+entry point: main
+out SV_Target0
+out SV_Target1
+out SV_Target2
+
+==================== disassembly: DXBC ====================
+
+Shader hash 3fa6eb6f-d09b51d4-b1bdf4f9-ed166776
+
+ps_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_output o0.xyzw
+      dcl_output o1.xyzw
+      dcl_output o2.xyzw
+   0: mov o0.xyzw, l(0, 0, 0, 0)
+   1: mov o1.xyzw, l(0.500000, 0.500000, 0.000000, 0.000000)
+   2: mov o2.xyzw, l(0, 0, 0, 0)
+   3: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

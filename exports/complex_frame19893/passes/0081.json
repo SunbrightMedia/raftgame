@@ -1,0 +1,42 @@
+{
+ "index": 81,
+ "kind": "dispatch",
+ "events": [
+  2942,
+  2942
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "LumenSceneLighting%s",
+  "BuildCardUpdateContext",
+  "ClearCardUpdateContext"
+ ],
+ "first": "ID3D11DeviceContext::Dispatch()",
+ "last": "ID3D11DeviceContext::Dispatch()",
+ "shaders": {
+  "cs": [
+   "shaders/cs_7788.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::7788": []
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::7788": []
+  }
+ },
+ "draws": [
+  {
+   "event": 2942,
+   "name": "ID3D11DeviceContext::Dispatch()",
+   "cs": "ResourceId::7788"
+  }
+ ],
+ "outputs": [],
+ "images": []
+}

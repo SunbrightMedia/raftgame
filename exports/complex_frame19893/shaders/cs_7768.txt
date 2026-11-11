@@ -1,0 +1,115 @@
+shader ResourceId::7768, stage cs, name "Compute Shader 7768"
+entry point: main
+constant block 0 "cbuffer0" (48 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+read  0 "texture0" (TextureType.Texture2D)
+write 0 "uav0" (TextureType.Texture2D)
+write 1 "uav1" (TextureType.Texture2D)
+write 2 "uav2" (TextureType.Texture2D)
+write 3 "uav3" (TextureType.Texture2D)
+sampler 0 "sampler0"
+in  vThreadIDInGroupFlattened0
+in  vThreadGroupID0
+
+==================== disassembly: DXBC ====================
+
+Shader hash a5de20e9-1c84983a-e884e034-68816771
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[3], immediateIndexed
+      dcl_sampler s0, mode_default
+      dcl_resource_texture2d (float,float,float,float) t0
+      dcl_uav_typed_texture2d (float,float,float,float) u0
+      dcl_uav_typed_texture2d (float,float,float,float) u1
+      dcl_uav_typed_texture2d (float,float,float,float) u2
+      dcl_uav_typed_texture2d (float,float,float,float) u3
+      dcl_input vThreadIDInGroupFlattened
+      dcl_input vThreadGroupID.xy
+      dcl_temps 3
+      dcl_tgsm_structured g0, 4, 64
+      dcl_thread_group 8, 8, 1
+   0: bfi r0.x, l(1), l(2), vThreadIDInGroupFlattened.x, l(0)
+   1: ishl r0.y, vThreadIDInGroupFlattened.x, l(1)
+   2: and r0.y, r0.y, l(4)
+   3: ushr r1.xyz, vThreadIDInGroupFlattened.xxxx, l(1, 2, 5, 0)
+   4: and r0.zw, r1.xxxy, l(0, 0, 2, 2)
+   5: iadd r0.xy, r0.xyxx, r0.zwzz
+   6: ubfe r0.z, l(1), l(4), vThreadIDInGroupFlattened.x
+   7: iadd r1.x, r0.x, r0.z
+   8: iadd r1.y, r0.y, r1.z
+   9: imad r0.xy, vThreadGroupID.xyxx, l(8, 8, 0, 0), r1.xyxx
+  10: utof r0.zw, r0.xxxy
+  11: add r0.zw, r0.zzzw, l(0.000000, 0.000000, 0.500000, 0.500000)
+  12: mad r0.zw, r0.zzzw, cb0[0].xxxy, cb0[0].zzzw
+  13: mad r0.zw, cb0[2].zzzw, l(0.000000, 0.000000, -0.250000, -0.250000), r0.zzzw
+  14: add r1.xy, -cb0[2].zwzz, cb0[2].xyxx
+  15: min r0.zw, r0.zzzw, r1.xxxy
+  16: gather4(texture2d)(float,float,float,float) r1.xyzw, r0.zwzz, t0.xyzw, s0.x
+  17: max r0.z, r1.z, r1.y
+  18: max r0.z, r0.z, r1.x
+  19: max r0.z, r1.w, r0.z
+  20: f32tof16 r0.w, r0.z
+  21: iadd r0.w, r0.w, l(1)
+  22: f16tof32 r0.w, r0.w
+  23: store_uav_typed u0.xyzw, r0.xyyy, r0.wwww
+  24: store_structured g0.x, vThreadIDInGroupFlattened.x, l(0), r0.z
+  25: sync_g_t
+  26: ult r1.xyz, vThreadIDInGroupFlattened.xxxx, l(16, 4, 1, 0)
+  27: if_nz r1.x
+  28:   iadd r2.xyz, vThreadIDInGroupFlattened.xxxx, l(16, 32, 48, 0)
+  29:   ld_structured r0.w, r2.x, l(0), g0.xxxx
+  30:   ld_structured r1.x, r2.y, l(0), g0.xxxx
+  31:   ld_structured r1.w, r2.z, l(0), g0.xxxx
+  32:   max r0.w, r0.w, r1.x
+  33:   max r0.w, r0.w, r0.z
+  34:   max r0.z, r1.w, r0.w
+  35:   ushr r0.xy, r0.xyxx, l(1, 1, 0, 0)
+  36:   f32tof16 r0.w, r0.z
+  37:   iadd r0.w, r0.w, l(1)
+  38:   f16tof32 r0.w, r0.w
+  39:   store_uav_typed u1.xyzw, r0.xyyy, r0.wwww
+  40:   store_structured g0.x, vThreadIDInGroupFlattened.x, l(0), r0.z
+  41: endif
+  42: if_nz r1.y
+  43:   iadd r1.xyw, vThreadIDInGroupFlattened.xxxx, l(4, 8, 0, 12)
+  44:   ld_structured r0.w, r1.x, l(0), g0.xxxx
+  45:   ld_structured r1.x, r1.y, l(0), g0.xxxx
+  46:   ld_structured r1.y, r1.w, l(0), g0.xxxx
+  47:   max r0.w, r0.w, r1.x
+  48:   max r0.w, r0.w, r0.z
+  49:   max r0.z, r1.y, r0.w
+  50:   ushr r0.xy, r0.xyxx, l(1, 1, 0, 0)
+  51:   f32tof16 r0.w, r0.z
+  52:   iadd r0.w, r0.w, l(1)
+  53:   f16tof32 r0.w, r0.w
+  54:   store_uav_typed u2.xyzw, r0.xyyy, r0.wwww
+  55:   store_structured g0.x, vThreadIDInGroupFlattened.x, l(0), r0.z
+  56: endif
+  57: if_nz r1.z
+  58:   ld_structured r0.w, l(1), l(0), g0.xxxx
+  59:   ld_structured r1.x, l(2), l(0), g0.xxxx
+  60:   ld_structured r1.y, l(3), l(0), g0.xxxx
+  61:   max r0.w, r0.w, r1.x
+  62:   max r0.z, r0.w, r0.z
+  63:   max r0.z, r1.y, r0.z
+  64:   ushr r1.xyzw, r0.xyyy, l(1, 1, 1, 1)
+  65:   f32tof16 r0.x, r0.z
+  66:   iadd r0.x, r0.x, l(1)
+  67:   f16tof32 r0.x, r0.x
+  68:   store_uav_typed u3.xyzw, r1.xyzw, r0.xxxx
+  69: endif
+  70: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

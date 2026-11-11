@@ -1,0 +1,61 @@
+shader ResourceId::8853, stage cs, name "Compute Shader 8853"
+entry point: main
+constant block 0 "cbuffer0" (272 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+    +80    float4 cb0_v5 1x4
+    +96    float4 cb0_v6 1x4
+    +112   float4 cb0_v7 1x4
+    +128   float4 cb0_v8 1x4
+    +144   float4 cb0_v9 1x4
+    +160   float4 cb0_v10 1x4
+    +176   float4 cb0_v11 1x4
+    +192   float4 cb0_v12 1x4
+    +208   float4 cb0_v13 1x4
+    +224   float4 cb0_v14 1x4
+    +240   float4 cb0_v15 1x4
+    +256   float4 cb0_v16 1x4
+read  0 "texture0" (TextureType.Texture2D)
+write 0 "uav0" (TextureType.Texture2D)
+sampler 0 "sampler0"
+in  vThreadID0
+
+==================== disassembly: DXBC ====================
+
+Shader hash e8600d12-174d93c6-72bfd3d5-8206be8f
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[17], immediateIndexed
+      dcl_sampler s0, mode_default
+      dcl_resource_texture2d (float,float,float,float) t0
+      dcl_uav_typed_texture2d (float,float,float,float) u0
+      dcl_input vThreadID.xy
+      dcl_temps 2
+      dcl_thread_group 8, 8, 1
+   0: iadd r0.xyzw, vThreadID.xyyy, cb0[10].xyyy
+   1: ult r1.xy, r0.xwxx, cb0[10].zwzz
+   2: and r1.x, r1.y, r1.x
+   3: if_nz r1.x
+   4:   utof r1.xy, vThreadID.xyxx
+   5:   mad r1.xy, r1.xyxx, cb0[16].xyxx, cb0[16].zwzz
+   6:   max r1.xy, r1.xyxx, cb0[7].xyxx
+   7:   min r1.xy, r1.xyxx, cb0[7].zwzz
+   8:   sample_l(texture2d)(float,float,float,float) r1.xyzw, r1.xyxx, t0.xyzw, s0, l(0)
+   9:   store_uav_typed u0.xyzw, r0.xyzw, r1.xyzw
+  10: endif
+  11: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA
