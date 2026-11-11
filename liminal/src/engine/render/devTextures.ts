@@ -459,6 +459,16 @@ const DEFS: Record<string, Def> = {
       g.putImageData(img, 0, 0);
     },
   },
+  // A 2×2 ft LED panel with a flat white diffuser (as in the reference capture's ceilings).
+  // The capture's panels are dim: at the tone curve's input (pass 394) a panel is 3.0 / 2.55 / 1.66
+  // against 0.42 / 0.31 on the lit right wall, so about 7× the wall, colour (1, 0.85, 0.55). A real
+  // panel (~3600 lm over 0.33 m², ≈ 3500 cd/m²) would be ~40× and glow far too much. The light on
+  // the room is a "spot" entity.
+  'cx/ledpanel': {
+    px: [64, 64], world: [24, 24], material: 'glass',
+    emissive: { kelvin: 4000, color: '#ffecc5', luminance: 540, castsLight: false },
+    paint: (g, w, h) => { g.fillStyle = '#fbfbf7'; g.fillRect(0, 0, w, h); g.fillStyle = '#d8d8d2'; g.fillRect(0, 0, w, 2); g.fillRect(0, h - 2, w, 2); g.fillRect(0, 0, 2, h); g.fillRect(w - 2, 0, 2, h); },
+  },
   // 2×4 troffer with a flat diffuser, cool-white tubes (4100 K) in a thin dark frame.
   'mall/troffer': {
     px: [64, 128], world: [24, 48], material: 'glass',

@@ -27,6 +27,8 @@ export interface CamcorderParams {
   dirt: number;
   fringe: number;
   vignette: number;
+  /** Gaussian blur of the picture before everything else, σ in output pixels (the game's upscaler softness). */
+  soften: number;
   sharpen: number;
   posterize: number;
   grain: number;
@@ -218,13 +220,20 @@ export class CamcorderPost {
   private glowRt: THREE.WebGLRenderTarget[] = [];
   private outA: THREE.WebGLRenderTarget | null = null;
   private outB: THREE.WebGLRenderTarget | null = null;
+  private softA: THREE.WebGLRenderTarget | null = null;
+  private softB: THREE.WebGLRenderTarget | null = null;
   private dirt = makeDirt();
   private grainTex = makeGrain();
   private streakTex = makeStreak();
   private time = 0;
   private frame = 0;
-  /** Tests: show this stage instead of the finished picture (no lens, no bars). */
-  debugStage: 'tone' | 'sharp' | 'finish' | null = null;
+  /**
+   * Tests: show this stage instead of the finished picture (no lens, no bars).
+   * 'scene' and 'glow' show the tone pass's inputs, untinted, as sqrt(x / 40)
+   * and sqrt(glow / 1.28) (glow before the lens dirt): the ranges of the
+   * reference capture's own pictures, so the two can be compared number for number.
+   */
+  debugStage: 'scene' | 'glow' | 'tone' | 'sharp' | 'finish' | null = null;
   /** Tests: a fixed clock for the tape pass (seconds), or null for real time. */
   debugTime: number | null = null;
 
@@ -263,6 +272,7 @@ export class CamcorderPost {
   private tone = pass(/* glsl */ `
     uniform sampler2D src; uniform sampler2D g1; uniform sampler2D g2; uniform sampler2D g3; uniform sampler2D dirtTex;
     uniform vec3 scale; uniform vec3 glowW; uniform float dirt; uniform vec2 fringe; uniform float vignette; uniform float aspect; uniform float seed;
+    uniform float dbg; uniform vec3 tint;
     varying vec2 vUv;
     ${TONE}
     void main() {
@@ -272,6 +282,7 @@ export class CamcorderPost {
       sc.g = texture2D(src, (p * (1.0 - fringe.y)) * 0.5 + 0.5).g;
       sc.b = texture2D(src, vUv).b;
       vec3 glow = texture2D(g1, vUv).rgb * glowW.x + texture2D(g2, vUv).rgb * glowW.y + texture2D(g3, vUv).rgb * glowW.z;
+      if (dbg > 0.5) { gl_FragColor = vec4(sqrt(max(dbg < 1.5 ? sc * scale / tint / 40.0 : glow / tint / 1.28, 0.0)), 1.0); return; }
       glow *= 1.0 + dirt * texture2D(dirtTex, vUv).r;
       vec3 x = sc * scale + glow;
       vec2 v = vec2(p.x, p.y / aspect) * (1.41421356 / sqrt(1.0 + 1.0 / (aspect * aspect))) * vignette;
@@ -283,7 +294,7 @@ export class CamcorderPost {
     }`, {
     src: { value: null }, g1: { value: null }, g2: { value: null }, g3: { value: null }, dirtTex: { value: null },
     scale: { value: new THREE.Vector3(1, 1, 1) }, glowW: { value: new THREE.Vector3() }, dirt: { value: 0 }, fringe: { value: new THREE.Vector2() },
-    vignette: { value: 0.4 }, aspect: { value: 4 / 3 }, seed: { value: 0 },
+    vignette: { value: 0.4 }, aspect: { value: 4 / 3 }, seed: { value: 0 }, dbg: { value: 0 }, tint: { value: new THREE.Vector3(1, 1, 1) },
   });
 
   private sharp = pass(/* glsl */ `
@@ -396,6 +407,15 @@ export class CamcorderPost {
     if (oh > ch) { oh = ch; ow = Math.round(ch * aspect); }
     this.ensure(src.width, src.height, ow, oh);
     const scale = new THREE.Vector3(p.tintR, p.tintG, p.tintB).multiplyScalar(p.exposure);
+    // the upscaler's softness: blur the picture first (glow and tone both read it)
+    if (p.soften > 0) {
+      if (!this.softA || this.softA.width !== src.width || this.softA.height !== src.height) {
+        this.softA?.dispose(); this.softB?.dispose();
+        this.softA = rt(src.width, src.height); this.softB = rt(src.width, src.height);
+      }
+      this.gauss(gl, src, this.softA, this.softB!, (p.soften * src.width) / ow);
+      src = this.softB!;
+    }
     // glow chain
     const pr = this.prep.u;
     pr.src.value = src.texture; (pr.texel.value as THREE.Vector2).set(1 / src.width, 1 / src.height); (pr.scale.value as THREE.Vector3).copy(scale);
@@ -419,8 +439,10 @@ export class CamcorderPost {
     t.vignette.value = p.vignette;
     t.aspect.value = aspect;
     t.seed.value = (this.frame * 7.31) % 1000;
+    t.dbg.value = this.debugStage === 'scene' ? 1 : this.debugStage === 'glow' ? 2 : 0;
+    (t.tint.value as THREE.Vector3).set(p.tintR, p.tintG, p.tintB);
     this.draw(gl, this.tone, this.outA);
-    if (this.debugStage === 'tone') return this.show(gl, this.outA!);
+    if (this.debugStage === 'tone' || t.dbg.value > 0) return this.show(gl, this.outA!);
     // sharpen
     this.sharp.u.src.value = this.outA!.texture; this.sharp.u.amount.value = p.sharpen;
     this.draw(gl, this.sharp, this.outB);

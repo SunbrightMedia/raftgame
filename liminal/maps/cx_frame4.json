@@ -1,0 +1,34 @@
+{
+  "format": "liminal-map",
+  "version": 1,
+  "name": "cx_frame4",
+  "settings": {"camera":{"model":"camcorder","flash":false},"view":{"fov":98.2,"viewBob":0},"render":{"internalHeight":756},"fog":{"enabled":false},"camcorder":{"exposure":0.0047}},
+  "brushes": [
+    {"id":1,"type":"box","min":[-108.6,-40.2,-6],"max":[234.4,156,0],"tex":"cx/carpet_dim"},
+    {"id":2,"type":"box","min":[-108.6,-40.2,95],"max":[234.4,156,101],"tex":"cx/ceiling_dim"},
+    {"id":3,"type":"box","min":[-108.6,-40.2,0],"max":[234.4,-34.2,95],"tex":"cx/paint_yellow"},
+    {"id":4,"type":"box","min":[228.4,-34.2,0],"max":[234.4,156,95],"tex":"cx/paint_yellow"},
+    {"id":5,"type":"box","min":[112.6,60.3,0],"max":[228.4,66.3,95],"tex":"cx/paint_yellow"},
+    {"id":6,"type":"box","min":[112.6,60.3,0],"max":[118.6,150,95],"tex":"cx/paint_yellow"},
+    {"id":7,"type":"box","min":[-108.6,150,0],"max":[118.6,156,95],"tex":"cx/paint_yellow"},
+    {"id":8,"type":"box","min":[-108.6,-34.2,0],"max":[-102.6,150,95],"tex":"cx/paint_yellow"},
+    {"id":9,"type":"box","min":[-102.6,38.1,64.9],"max":[228.4,60.3,95],"tex":"cx/paint_yellow"},
+    {"id":10,"type":"prism","axis":"x","points":[[60.3,64.9],[110,95],[60.3,95]],"z0":-102.6,"z1":112.6,"tex":"cx/paint_yellow"},
+    {"id":11,"type":"box","min":[-102.6,-34.2,0],"max":[228.4,-33.6,4],"tex":"cx/paint_yellow"},
+    {"id":12,"type":"box","min":[227.8,-34.2,0],"max":[228.4,60.3,4],"tex":"cx/paint_yellow"},
+    {"id":13,"type":"box","min":[112.6,59.699999999999996,0],"max":[228.4,60.3,4],"tex":"cx/paint_yellow"},
+    {"id":14,"type":"box","min":[112,60.3,0],"max":[112.6,150,4],"tex":"cx/paint_yellow"},
+    {"id":15,"type":"box","min":[-102.6,149.4,0],"max":[112.6,150,4],"tex":"cx/paint_yellow"},
+    {"id":16,"type":"box","min":[-24,0,94.75],"max":[0,24,95],"tex":"cx/ceiling_dim","faces":{"nz":{"tex":"cx/ledpanel"}}},
+    {"id":17,"type":"box","min":[72,0,94.75],"max":[96,24,95],"tex":"cx/ceiling_dim","faces":{"nz":{"tex":"cx/ledpanel"}}},
+    {"id":18,"type":"box","min":[168,0,94.75],"max":[192,24,95],"tex":"cx/ceiling_dim","faces":{"nz":{"tex":"cx/ledpanel"}}},
+    {"id":19,"type":"box","min":[72,120,94.75],"max":[96,144,95],"tex":"cx/ceiling_dim","faces":{"nz":{"tex":"cx/ledpanel"}}}
+  ],
+  "entities": [
+    {"id":1,"class":"player_start","origin":[17.4,16.8,0],"angles":[1.07,-3.56,0]},
+    {"id":1001,"class":"light","origin":[-12,12,94],"props":{"type":"spot","lumens":3000,"color":"#fff0a7","n":2.2,"cutoff":87,"shadows":0}},
+    {"id":1002,"class":"light","origin":[84,12,94],"props":{"type":"spot","lumens":3000,"color":"#fff0a7","n":2.2,"cutoff":87,"shadows":0}},
+    {"id":1003,"class":"light","origin":[180,12,94],"props":{"type":"spot","lumens":3000,"color":"#fff0a7","n":2.2,"cutoff":87,"shadows":0}},
+    {"id":1004,"class":"light","origin":[84,132,94],"props":{"type":"spot","lumens":3000,"color":"#fff0a7","n":2.2,"cutoff":87,"shadows":0}}
+  ]
+}

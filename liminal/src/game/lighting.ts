@@ -482,6 +482,12 @@ type Props = Record<string, unknown>;
  *           "dome" — flush-mount frosted dome on the ceiling: wide downward
  *                    cos^0.6 lobe, nothing upward, so the ceiling above it
  *                    doesn't get the hot spot a bare bulb throws
+ *           "spot" — a downward spot with a smooth cone: cos^n lobe (n 2.2 by
+ *                    default: an engine spot of 87° outer, 0° inner angle, as
+ *                    the reference capture's ceiling panels), cut off at
+ *                    `cutoff` degrees; `color` (sRGB hex) instead of kelvin;
+ *                    `shadows: 0` = its direct light ignores geometry, as the
+ *                    capture's unshadowed engine lights (its bounce stays shadowed)
  * Units and sources: see engine/light/units.ts.
  */
 export function lightFromEntity(origin: [number, number, number], p: Props): BakeLight {
@@ -499,6 +505,11 @@ export function lightFromEntity(origin: [number, number, number], p: Props): Bak
     const dir: [number, number, number] = [Math.cos(pr) * Math.cos(yr), Math.cos(pr) * Math.sin(yr), Math.sin(pr)];
     const D = 4e6; // inches (~100 km)
     return { pos: [origin[0] - dir[0] * D, origin[1] - dir[1] * D, origin[2] - dir[2] * D], color, I0: num('lux', 90000) * (D * INCH) ** 2 };
+  }
+  if (type === 'spot') {
+    const n = num('n', 2.2), lm = num('lumens', 3000);
+    const col = typeof p.color === 'string' ? emitterColor({ kelvin: num('kelvin', 4000), color: p.color }) : color;
+    return { pos: origin, color: col, I0: cosNPeak(lm, n), dir: [0, 0, -1], n, cutoffDeg: num('cutoff', 87), softDeg: 3, spill: 0, ...(num('shadows', 1) === 0 ? { shadows: false } : {}) };
   }
   if (type === 'dome') {
     const n = 0.6, lm = num('lumens', 800) * 0.8; // ~80% gets out through the glass
@@ -523,7 +534,7 @@ export function mapLights(level: Level): BakeLight[] {
   const lights = level.map.entities.filter((e) => e.class === 'light').map((e) => {
     const l = lightFromEntity(e.origin, e.props ?? {});
     const t = (e.props ?? {}).type ?? 'bulb';
-    if ((t === 'can' || t === 'bulb' || t === 'dome') && dyn < MAX_DYNAMIC) { l.dynamic = true; dyn++; }
+    if ((t === 'can' || t === 'bulb' || t === 'dome' || t === 'spot') && dyn < MAX_DYNAMIC) { l.dynamic = true; dyn++; }
     return l;
   });
   // Shadow-mask channels: each light takes the channel whose nearest light is

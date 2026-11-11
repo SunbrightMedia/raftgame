@@ -246,6 +246,24 @@
       "from": "house/carpet_plush",
       "color": "#8b7b63",
       "contrast": 0.9
+    },
+    {
+      "name": "cx/paint_yellow",
+      "from": "office/plaster",
+      "color": "#f0ec81",
+      "contrast": 0.35
+    },
+    {
+      "name": "cx/ceiling_dim",
+      "from": "office/ceiling_speckle",
+      "color": "#767357",
+      "contrast": 0.3
+    },
+    {
+      "name": "cx/carpet_dim",
+      "from": "liminal/backrooms_carpet",
+      "color": "#897f37",
+      "contrast": 0.2
     }
   ]
 }

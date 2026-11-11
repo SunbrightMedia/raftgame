@@ -41,6 +41,8 @@ const sc = new THREE.Scene(); sc.add(blit);
 gl.setRenderTarget(rt);
 gl.render(sc, new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1));
 const params = { ...(defaultsOf(SETTINGS).camcorder as unknown as CamcorderParams) };
+// The captured scene picture is already the game's upscaler output: no extra softness.
+params.soften = 0;
 for (const [k, v] of q) if (k in params && k !== 'bars') (params as unknown as Record<string, number>)[k] = Number(v);
 const post = new CamcorderPost();
 post.debugStage = stage === 'final' ? null : (stage as 'tone' | 'sharp' | 'finish');

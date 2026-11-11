@@ -50,6 +50,13 @@ export interface BakeLight {
    */
   channel?: number;
   /**
+   * false: the per-pixel direct light of this (dynamic) light ignores
+   * geometry, like Unreal's unshadowed lights (the reference capture's ceiling
+   * panels: no shadow passes in the frame). Its bounce stays shadowed, as
+   * Lumen shadows its own bounce light.
+   */
+  shadows?: boolean;
+  /**
    * Reflected per pixel by the shader (light-emitting rectangles): counts
    * toward the alpha channel's shadow fraction, which hides reflections of
    * lights the spot can't see.
@@ -297,10 +304,11 @@ export function bake(input: BakeInput): BakeOutput {
         if (perPixel) unshadowed += w;
         const ch = l.dynamic ? (l.channel ?? 0) : -1;
         if (ch >= 0) cu[ch] += w;
+        const unshadowedLight = l.shadows === false;
+        if (unshadowedLight) { if (perPixel) lit += w; if (ch >= 0) cl[ch] += w; }
         if (grid.occluded(px, py, pz, l.pos[0], l.pos[1], l.pos[2])) continue;
         r += l.color[0] * w; g += l.color[1] * w; b += l.color[2] * w;
-        if (perPixel) lit += w;
-        if (ch >= 0) cl[ch] += w;
+        if (!unshadowedLight) { if (perPixel) lit += w; if (ch >= 0) cl[ch] += w; }
         if (l.dynamic) { dr += l.color[0] * w; dg += l.color[1] * w; db += l.color[2] * w; }
         else {
           const lum = (0.2126 * l.color[0] + 0.7152 * l.color[1] + 0.0722 * l.color[2]) * w;
