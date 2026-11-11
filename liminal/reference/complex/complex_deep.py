@@ -8,6 +8,8 @@
 #  - lights.json   the shader numbers of EVERY draw and dispatch in the lighting steps: each lamp's
 #                  position, range, colour and brightness, direction, cone and size (only the blocks that
 #                  change from draw to draw are repeated)
+#  - steps.json.z  the same for every other step of the frame (zlib JSON): material numbers of each object
+#                  drawn, Lumen's settings, the glow, tone curve and camera passes
 #  - buffers.json + buffers/*.bin.z
 #                  raw contents of the data buffers the light-list and Lumen light steps read (the list of
 #                  every lamp in view, as the engine packs it)
@@ -15,7 +17,7 @@
 #                  lossless copies (raw bytes, zlib) of what key steps drew: depth, the G-buffer (normals,
 #                  material, base colour and their alpha channels), the scene light after the emissive base
 #                  pass, after the bounce light, after the lamps, the bounce light itself (Lumen), the
-#                  upscaled picture, after motion blur, and the glow
+#                  upscaled picture, after motion blur, the glow, the tone curve and each camera pass
 #  - errors.txt
 #
 # Step numbers are the same as in complex_export.py's export (same way of splitting the frame into steps),
@@ -48,7 +50,7 @@ BUFFER_STEPS = ('LightGrid', 'CullLights', 'LumenSceneLighting', 'BatchedLights'
 # Steps whose drawn targets are kept losslessly (after the last step of each run of steps with the same name).
 TARGET_STEPS = ('PrePass', 'BasePass', 'DiffuseIndirectComposite', 'LumenScreenProbeGather / Integrate',
                 'LumenScreenProbeGather / TemporalReprojection', 'ShortRangeAO', 'BatchedLights', 'ExponentialHeightFog',
-                'PostProcessing / TAA', 'MotionBlur FullResFilter', 'Bloom')
+                'PostProcessing / TAA', 'MotionBlur FullResFilter', 'Bloom', 'Tonemap', 'PostProcessMaterial')
 # Depth of field's own half-size copies, Lumen's atlases, the translucency light volume.
 SKIP_TARGET_STEPS = ('DOF', 'LumenSceneLighting', 'Inject')
 
@@ -297,7 +299,7 @@ class Deep:
         leaves = self.leaves()
         ps = self.passes(leaves)
         n = len(ps)
-        lights, targets = [], []
+        lights, targets, others = [], [], []
         for i, p in enumerate(ps):
             if i % 25 == 0:
                 self.progress('%s: step %d of %d' % (label, i, n))
@@ -306,6 +308,11 @@ class Deep:
                     lights.append(self.light_step(i, p))
                 except Exception as e:
                     self.err('light step %d' % i, e)
+            elif p['kind'] in ('draw', 'dispatch'):
+                try:
+                    others.append(self.light_step(i, p))
+                except Exception as e:
+                    self.err('step %d' % i, e)
             # Targets after the last step of each run of steps with the same markers.
             nxt = ps[i + 1]['path'] if i + 1 < n else None
             if (p['kind'] in ('draw', 'dispatch') and has(p['path'], TARGET_STEPS) and not has(p['path'], SKIP_TARGET_STEPS)
@@ -323,6 +330,7 @@ class Deep:
                     self.err('final picture', e)
                 break
         self.write_json('lights.json', lights)
+        self.write_z('steps.json.z', json.dumps(others).encode('utf-8'))
         self.write_json('targets.json', targets)
         self.write_json('buffers.json', {'saved': self.saved_buffers})
         self.write_json('deep.json', {'steps': n, 'light_steps': len(lights), 'targets': len(targets),

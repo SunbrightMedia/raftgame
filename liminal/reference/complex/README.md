@@ -14,8 +14,11 @@ For study only: what we learn is rebuilt in our own code. Nothing of the game (i
 textures) goes into our game.
 
 `complex_deep.ps1` (also run on the user's PC) reads the same recorded frames again, without starting the
-game, and saves what the first export left out: the shader numbers of every lamp (position, colour,
-brightness, range, cone), the packed lamp list, and exact copies (raw, zlib) of the depth, the G-buffer and
-the light at each lighting step. They go to the same branch, folder `deep/`. `complex_deep.py` is the part
+game, and saves what the first export left out: the shader numbers of every draw (every lamp's position,
+colour, brightness, range and cone; each object's material numbers; Lumen's and the camera passes'
+settings), the packed lamp list, and exact copies (raw, zlib) of the depth, the G-buffer, the light at each
+lighting step and each camera pass. It also reads a few header bytes of the game's data files to report
+whether they are encrypted (`game_files.txt`; nothing is unpacked or decrypted). They go to the same
+branch, folder `deep/`. `complex_deep.py` is the part
 that runs inside RenderDoc; the `.ps1` carries a copy of it between `$DeepPy = @'` and `'@` (keep the two the
 same). Its step numbers match the first export's.

@@ -8,8 +8,9 @@
 #   2. Run:  powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\Downloads\complex_deep.ps1"
 #   3. Wait. RenderDoc opens by itself, works through each frame and closes again. Then the upload runs.
 #
-# The game is not started. Nothing of the game's own files or textures is read or sent: only what the
-# graphics card computed for the recorded frames. Safe to run again: it skips frames already done.
+# The game is not started. Nothing of the game's own files or textures is sent: only what the graphics
+# card computed for the recorded frames, and (from a few header bytes of the game's data files) whether the
+# game packed its data encrypted. Safe to run again: it skips frames already done.
 param(
   [string]$Out = "$env:USERPROFILE\Desktop\complex-capture",       # the folder complex_capture.ps1 made
   [string]$Remote = "https://github.com/SunbrightMedia/raftgame.git",
@@ -47,6 +48,68 @@ if ($caps.Count -eq 0) {
 Write-Host "$($caps.Count) recorded frame(s) found."
 New-Item -ItemType Directory -Force -Path "$Out\deep" | Out-Null
 
+# ---------------------------------------------------------------- the game's data files: locked or not?
+# Reads a few header bytes of each container file in the game's Paks folder (nothing is unpacked or
+# decrypted): whether Unreal packed it encrypted. If not, the game's own light settings could perhaps be
+# read one day; if so, that way is closed (we do not decrypt). Written to deep\game_files.txt.
+$AppId = "2172260"
+function Find-Game {
+  $steam = (Get-ItemProperty -Path 'HKCU:\Software\Valve\Steam' -ErrorAction SilentlyContinue).SteamPath
+  if (-not $steam) { $steam = "${env:ProgramFiles(x86)}\Steam" }
+  $libs = @($steam)
+  $vdf = Join-Path $steam 'steamapps\libraryfolders.vdf'
+  if (Test-Path $vdf) {
+    foreach ($m in [regex]::Matches((Get-Content $vdf -Raw), '"path"\s+"([^"]+)"')) { $libs += ($m.Groups[1].Value -replace '\\\\', '\') }
+  }
+  foreach ($lib in ($libs | Select-Object -Unique)) {
+    $acf = Join-Path $lib "steamapps\appmanifest_$AppId.acf"
+    if (Test-Path $acf) {
+      $dir = [regex]::Match((Get-Content $acf -Raw), '"installdir"\s+"([^"]+)"').Groups[1].Value
+      $p = Join-Path $lib "steamapps\common\$dir"
+      if (Test-Path $p) { return $p }
+    }
+  }
+  return $null
+}
+function Read-Bytes([string]$path, [long]$offset, [int]$count) {
+  $fs = [System.IO.File]::Open($path, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
+  try {
+    if ($offset -lt 0) { $offset = [Math]::Max([long]0, $fs.Length + $offset) }
+    [void]$fs.Seek($offset, [System.IO.SeekOrigin]::Begin)
+    $buf = New-Object byte[] $count
+    [void]$fs.Read($buf, 0, $count)
+    return ,$buf
+  } finally { $fs.Close() }
+}
+function Is-Zero($bytes) { foreach ($x in $bytes) { if ($x -ne 0) { return $false } }; return $true }
+$gameFiles = @()
+$gameDir = Find-Game
+if ($gameDir) {
+  foreach ($f in @(Get-ChildItem $gameDir -Recurse -Include '*.utoc', '*.pak' -File -ErrorAction SilentlyContinue)) {
+    $mb = '{0:N1} MB' -f ($f.Length / 1MB)
+    try {
+      if ($f.Extension -eq '.utoc') {
+        $h = Read-Bytes $f.FullName 0 96
+        if ([System.Text.Encoding]::ASCII.GetString($h, 0, 16) -eq '-==--==--==--==-') {
+          $flags = $h[80]
+          $gameFiles += ('{0}: {1}, IoStore table v{2}, compressed {3}, encrypted {4}, signed {5}, key id set {6}' -f $f.Name, $mb, $h[16], (($flags -band 1) -ne 0), (($flags -band 2) -ne 0), (($flags -band 4) -ne 0), (-not (Is-Zero $h[64..79])))
+        } else { $gameFiles += ('{0}: {1}, unknown header' -f $f.Name, $mb) }
+      } else {
+        $t = Read-Bytes $f.FullName -512 512
+        $k = -1
+        for ($j = $t.Length - 4; $j -ge 17; $j--) { if ($t[$j] -eq 0xE1 -and $t[$j + 1] -eq 0x12 -and $t[$j + 2] -eq 0x6F -and $t[$j + 3] -eq 0x5A) { $k = $j; break } }
+        if ($k -ge 0) {
+          $gameFiles += ('{0}: {1}, pak v{2}, index encrypted {3}, key id set {4}' -f $f.Name, $mb, [BitConverter]::ToInt32($t, $k + 4), ($t[$k - 1] -ne 0), (-not (Is-Zero $t[($k - 17)..($k - 2)])))
+        } else { $gameFiles += ('{0}: {1}, no pak footer found' -f $f.Name, $mb) }
+      }
+    } catch { $gameFiles += ('{0}: {1}, could not read ({2})' -f $f.Name, $mb, $_.Exception.Message) }
+  }
+} else { $gameFiles += 'game folder not found' }
+New-Item -ItemType Directory -Force -Path "$Out\deep" | Out-Null
+Set-Content -Path "$Out\deep\game_files.txt" -Value $gameFiles -Encoding UTF8
+Write-Host "The game's data files (header check only):"
+$gameFiles | ForEach-Object { Write-Host "  $_" }
+
 # ---------------------------------------------------------------- deep export (RenderDoc runs complex_deep.py on each frame)
 $DeepPy = @'
 # Deep export of RenderDoc frame captures of The Complex: Expedition: the numbers behind its lighting.
@@ -59,6 +122,8 @@ $DeepPy = @'
 #  - lights.json   the shader numbers of EVERY draw and dispatch in the lighting steps: each lamp's
 #                  position, range, colour and brightness, direction, cone and size (only the blocks that
 #                  change from draw to draw are repeated)
+#  - steps.json.z  the same for every other step of the frame (zlib JSON): material numbers of each object
+#                  drawn, Lumen's settings, the glow, tone curve and camera passes
 #  - buffers.json + buffers/*.bin.z
 #                  raw contents of the data buffers the light-list and Lumen light steps read (the list of
 #                  every lamp in view, as the engine packs it)
@@ -66,7 +131,7 @@ $DeepPy = @'
 #                  lossless copies (raw bytes, zlib) of what key steps drew: depth, the G-buffer (normals,
 #                  material, base colour and their alpha channels), the scene light after the emissive base
 #                  pass, after the bounce light, after the lamps, the bounce light itself (Lumen), the
-#                  upscaled picture, after motion blur, and the glow
+#                  upscaled picture, after motion blur, the glow, the tone curve and each camera pass
 #  - errors.txt
 #
 # Step numbers are the same as in complex_export.py's export (same way of splitting the frame into steps),
@@ -99,7 +164,7 @@ BUFFER_STEPS = ('LightGrid', 'CullLights', 'LumenSceneLighting', 'BatchedLights'
 # Steps whose drawn targets are kept losslessly (after the last step of each run of steps with the same name).
 TARGET_STEPS = ('PrePass', 'BasePass', 'DiffuseIndirectComposite', 'LumenScreenProbeGather / Integrate',
                 'LumenScreenProbeGather / TemporalReprojection', 'ShortRangeAO', 'BatchedLights', 'ExponentialHeightFog',
-                'PostProcessing / TAA', 'MotionBlur FullResFilter', 'Bloom')
+                'PostProcessing / TAA', 'MotionBlur FullResFilter', 'Bloom', 'Tonemap', 'PostProcessMaterial')
 # Depth of field's own half-size copies, Lumen's atlases, the translucency light volume.
 SKIP_TARGET_STEPS = ('DOF', 'LumenSceneLighting', 'Inject')
 
@@ -348,7 +413,7 @@ class Deep:
         leaves = self.leaves()
         ps = self.passes(leaves)
         n = len(ps)
-        lights, targets = [], []
+        lights, targets, others = [], [], []
         for i, p in enumerate(ps):
             if i % 25 == 0:
                 self.progress('%s: step %d of %d' % (label, i, n))
@@ -357,6 +422,11 @@ class Deep:
                     lights.append(self.light_step(i, p))
                 except Exception as e:
                     self.err('light step %d' % i, e)
+            elif p['kind'] in ('draw', 'dispatch'):
+                try:
+                    others.append(self.light_step(i, p))
+                except Exception as e:
+                    self.err('step %d' % i, e)
             # Targets after the last step of each run of steps with the same markers.
             nxt = ps[i + 1]['path'] if i + 1 < n else None
             if (p['kind'] in ('draw', 'dispatch') and has(p['path'], TARGET_STEPS) and not has(p['path'], SKIP_TARGET_STEPS)
@@ -374,6 +444,7 @@ class Deep:
                     self.err('final picture', e)
                 break
         self.write_json('lights.json', lights)
+        self.write_z('steps.json.z', json.dumps(others).encode('utf-8'))
         self.write_json('targets.json', targets)
         self.write_json('buffers.json', {'saved': self.saved_buffers})
         self.write_json('deep.json', {'steps': n, 'light_steps': len(lights), 'targets': len(targets),
@@ -443,7 +514,6 @@ def main():
 
 
 main()
-
 '@
 $todo = @($caps | Where-Object { -not (Test-Path (Join-Path (Join-Path "$Out\deep" $_.BaseName) 'deep.json')) })
 if ($todo.Count -gt 0) {
