@@ -1,0 +1,55 @@
+shader ResourceId::7865, stage cs, name "Compute Shader 7865"
+entry point: main
+constant block 0 "cbuffer0" (48 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+read  0 "texture0" (TextureType.Buffer)
+write 0 "uav0" (TextureType.Buffer)
+write 1 "uav1" (TextureType.Buffer)
+write 2 "uav2" (TextureType.Buffer)
+write 3 "uav3" (TextureType.Buffer)
+
+==================== disassembly: DXBC ====================
+
+Shader hash 8e4b18b3-aeac8382-4ba80c52-e7c7e78c
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[3], immediateIndexed
+      dcl_resource_buffer (uint,uint,uint,uint) t0
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u0
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u1
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u2
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u3
+      dcl_temps 1
+      dcl_thread_group 1, 1, 1
+   0: store_uav_typed u0.xyzw, l(0, 0, 0, 0), l(128, 128, 128, 128)
+   1: ld_indexable(buffer)(uint,uint,uint,uint) r0.x, l(0, 0, 0, 0), t0.xyzw
+   2: iadd r0.y, r0.x, l(127)
+   3: ushr r0.y, r0.y, l(7)
+   4: store_uav_typed u0.xyzw, l(1, 1, 1, 1), r0.yyyy
+   5: store_uav_typed u0.xyzw, l(2, 2, 2, 2), l(1, 1, 1, 1)
+   6: iadd r0.y, r0.x, cb0[2].z
+   7: iadd r0.y, r0.y, l(-1)
+   8: udiv r0.y, null, r0.y, cb0[2].z
+   9: store_uav_typed u1.xyzw, l(0, 0, 0, 0), r0.yyyy
+  10: store_uav_typed u1.xyzw, l(1, 1, 1, 1), l(1, 1, 1, 1)
+  11: store_uav_typed u1.xyzw, l(2, 2, 2, 2), l(1, 1, 1, 1)
+  12: store_uav_typed u2.xyzw, l(0, 0, 0, 0), l(64, 64, 64, 64)
+  13: store_uav_typed u2.xyzw, l(1, 1, 1, 1), r0.xxxx
+  14: ishl r0.x, r0.x, l(6)
+  15: store_uav_typed u3.xyzw, l(0, 0, 0, 0), r0.xxxx
+  16: store_uav_typed u2.xyzw, l(2, 2, 2, 2), l(1, 1, 1, 1)
+  17: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

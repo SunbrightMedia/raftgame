@@ -1,0 +1,309 @@
+{
+ "index": 300,
+ "kind": "dispatch",
+ "events": [
+  11898,
+  11898
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "LumenSceneLighting%s",
+  "Radiosity",
+  "SpatialFilterProbes"
+ ],
+ "first": "DispatchIndirect(<6143, 1, 1>)",
+ "last": "DispatchIndirect(<6143, 1, 1>)",
+ "shaders": {
+  "cs": [
+   "shaders/cs_8815.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::8815": [
+    {
+     "block": "cbuffer0",
+     "bytes": 160,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        88.902954,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        4.8170220139378115e+19,
+        0.0,
+        88.941422,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        8.253799,
+        0.0,
+        -0.729065,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        88.866821,
+        0.0,
+        88.867188,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v4",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        88.852905,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v5",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v6",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v7",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        NaN,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v8",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v9",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        88.945312,
+        0.0,
+        -100.0,
+        0.0
+       ]
+      }
+     ]
+    },
+    {
+     "block": "cbuffer1",
+     "bytes": 48,
+     "vars": [
+      {
+       "name": "cb1_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -0.0,
+        4096.0,
+        4096.0
+       ]
+      },
+      {
+       "name": "cb1_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.000244,
+        0.000244,
+        1.0,
+        0.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::8815": [
+    {
+     "id": "ResourceId::48613",
+     "name": "Lumen.Cards",
+     "binding": "structuredbuffer0"
+    },
+    {
+     "id": "ResourceId::49096",
+     "name": "Lumen.PageBuffer",
+     "binding": "structuredbuffer1"
+    },
+    {
+     "id": "ResourceId::6853",
+     "name": "2D Render Target 6853",
+     "w": 4096,
+     "h": 4096,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R8G8_UNORM",
+     "samples": 1,
+     "binding": "texture2"
+    },
+    {
+     "id": "ResourceId::6844",
+     "name": "2D Render Target 6844",
+     "w": 4096,
+     "h": 4096,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R16_UNORM",
+     "samples": 1,
+     "binding": "texture3"
+    },
+    {
+     "id": "ResourceId::51999",
+     "name": "InstanceCulling.CompactionBlockDataIndices",
+     "binding": "structuredbuffer4"
+    },
+    {
+     "id": "ResourceId::6819",
+     "name": "GlobalDistanceField.PageComposeTiles",
+     "binding": "structuredbuffer5"
+    },
+    {
+     "id": "ResourceId::71063",
+     "name": "2D Texture 71063",
+     "w": 1536,
+     "h": 1536,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R11G11B10_FLOAT",
+     "samples": 1,
+     "binding": "texture6"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 11898,
+   "name": "DispatchIndirect(<6143, 1, 1>)",
+   "cs": "ResourceId::8815"
+  }
+ ],
+ "outputs": [
+  {
+   "id": "ResourceId::71100",
+   "name": "2D Texture 71100",
+   "w": 1536,
+   "h": 1536,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R11G11B10_FLOAT",
+   "samples": 1
+  }
+ ],
+ "images": [
+  {
+   "file": "images/0300_out0.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "max": [
+    0.15234375,
+    0.150390625,
+    0.1484375,
+    1.0
+   ],
+   "target": {
+    "id": "ResourceId::71100",
+    "name": "2D Texture 71100",
+    "w": 1536,
+    "h": 1536,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R11G11B10_FLOAT",
+    "samples": 1
+   }
+  }
+ ]
+}

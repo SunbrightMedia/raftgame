@@ -1,0 +1,418 @@
+shader ResourceId::71206, stage cs, name "Compute Shader 71206"
+entry point: main
+constant block 0 "cbuffer0" (368 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+    +80    float4 cb0_v5 1x4
+    +96    float4 cb0_v6 1x4
+    +112   float4 cb0_v7 1x4
+    +128   float4 cb0_v8 1x4
+    +144   float4 cb0_v9 1x4
+    +160   float4 cb0_v10 1x4
+    +176   float4 cb0_v11 1x4
+    +192   float4 cb0_v12 1x4
+    +208   float4 cb0_v13 1x4
+    +224   float4 cb0_v14 1x4
+    +240   float4 cb0_v15 1x4
+    +256   float4 cb0_v16 1x4
+    +272   float4 cb0_v17 1x4
+    +288   float4 cb0_v18 1x4
+    +304   float4 cb0_v19 1x4
+    +320   float4 cb0_v20 1x4
+    +336   float4 cb0_v21 1x4
+    +352   float4 cb0_v22 1x4
+constant block 1 "cbuffer1" (2336 bytes)
+    +0     float4 cb1_v0 1x4
+    +16    float4 cb1_v1 1x4
+    +32    float4 cb1_v2 1x4
+    +48    float4 cb1_v3 1x4
+    +64    float4 cb1_v4 1x4
+    +80    float4 cb1_v5 1x4
+    +96    float4 cb1_v6 1x4
+    +112   float4 cb1_v7 1x4
+    +128   float4 cb1_v8 1x4
+    +144   float4 cb1_v9 1x4
+    +160   float4 cb1_v10 1x4
+    +176   float4 cb1_v11 1x4
+    +192   float4 cb1_v12 1x4
+    +208   float4 cb1_v13 1x4
+    +224   float4 cb1_v14 1x4
+    +240   float4 cb1_v15 1x4
+    +256   float4 cb1_v16 1x4
+    +272   float4 cb1_v17 1x4
+    +288   float4 cb1_v18 1x4
+    +304   float4 cb1_v19 1x4
+    +320   float4 cb1_v20 1x4
+    +336   float4 cb1_v21 1x4
+    +352   float4 cb1_v22 1x4
+    +368   float4 cb1_v23 1x4
+    +384   float4 cb1_v24 1x4
+    +400   float4 cb1_v25 1x4
+    +416   float4 cb1_v26 1x4
+    +432   float4 cb1_v27 1x4
+    +448   float4 cb1_v28 1x4
+    +464   float4 cb1_v29 1x4
+    +480   float4 cb1_v30 1x4
+    +496   float4 cb1_v31 1x4
+    +512   float4 cb1_v32 1x4
+    +528   float4 cb1_v33 1x4
+    +544   float4 cb1_v34 1x4
+    +560   float4 cb1_v35 1x4
+    +576   float4 cb1_v36 1x4
+    +592   float4 cb1_v37 1x4
+    +608   float4 cb1_v38 1x4
+    +624   float4 cb1_v39 1x4
+    +640   float4 cb1_v40 1x4
+    +656   float4 cb1_v41 1x4
+    +672   float4 cb1_v42 1x4
+    +688   float4 cb1_v43 1x4
+    +704   float4 cb1_v44 1x4
+    +720   float4 cb1_v45 1x4
+    +736   float4 cb1_v46 1x4
+    +752   float4 cb1_v47 1x4
+    +768   float4 cb1_v48 1x4
+    +784   float4 cb1_v49 1x4
+    +800   float4 cb1_v50 1x4
+    +816   float4 cb1_v51 1x4
+    +832   float4 cb1_v52 1x4
+    +848   float4 cb1_v53 1x4
+    +864   float4 cb1_v54 1x4
+    +880   float4 cb1_v55 1x4
+    +896   float4 cb1_v56 1x4
+    +912   float4 cb1_v57 1x4
+    +928   float4 cb1_v58 1x4
+    +944   float4 cb1_v59 1x4
+    +960   float4 cb1_v60 1x4
+    +976   float4 cb1_v61 1x4
+    +992   float4 cb1_v62 1x4
+    +1008  float4 cb1_v63 1x4
+    +1024  float4 cb1_v64 1x4
+    +1040  float4 cb1_v65 1x4
+    +1056  float4 cb1_v66 1x4
+    +1072  float4 cb1_v67 1x4
+    +1088  float4 cb1_v68 1x4
+    +1104  float4 cb1_v69 1x4
+    +1120  float4 cb1_v70 1x4
+    +1136  float4 cb1_v71 1x4
+    +1152  float4 cb1_v72 1x4
+    +1168  float4 cb1_v73 1x4
+    +1184  float4 cb1_v74 1x4
+    +1200  float4 cb1_v75 1x4
+    +1216  float4 cb1_v76 1x4
+    +1232  float4 cb1_v77 1x4
+    +1248  float4 cb1_v78 1x4
+    +1264  float4 cb1_v79 1x4
+    +1280  float4 cb1_v80 1x4
+    +1296  float4 cb1_v81 1x4
+    +1312  float4 cb1_v82 1x4
+    +1328  float4 cb1_v83 1x4
+    +1344  float4 cb1_v84 1x4
+    +1360  float4 cb1_v85 1x4
+    +1376  float4 cb1_v86 1x4
+    +1392  float4 cb1_v87 1x4
+    +1408  float4 cb1_v88 1x4
+    +1424  float4 cb1_v89 1x4
+    +1440  float4 cb1_v90 1x4
+    +1456  float4 cb1_v91 1x4
+    +1472  float4 cb1_v92 1x4
+    +1488  float4 cb1_v93 1x4
+    +1504  float4 cb1_v94 1x4
+    +1520  float4 cb1_v95 1x4
+    +1536  float4 cb1_v96 1x4
+    +1552  float4 cb1_v97 1x4
+    +1568  float4 cb1_v98 1x4
+    +1584  float4 cb1_v99 1x4
+    +1600  float4 cb1_v100 1x4
+    +1616  float4 cb1_v101 1x4
+    +1632  float4 cb1_v102 1x4
+    +1648  float4 cb1_v103 1x4
+    +1664  float4 cb1_v104 1x4
+    +1680  float4 cb1_v105 1x4
+    +1696  float4 cb1_v106 1x4
+    +1712  float4 cb1_v107 1x4
+    +1728  float4 cb1_v108 1x4
+    +1744  float4 cb1_v109 1x4
+    +1760  float4 cb1_v110 1x4
+    +1776  float4 cb1_v111 1x4
+    +1792  float4 cb1_v112 1x4
+    +1808  float4 cb1_v113 1x4
+    +1824  float4 cb1_v114 1x4
+    +1840  float4 cb1_v115 1x4
+    +1856  float4 cb1_v116 1x4
+    +1872  float4 cb1_v117 1x4
+    +1888  float4 cb1_v118 1x4
+    +1904  float4 cb1_v119 1x4
+    +1920  float4 cb1_v120 1x4
+    +1936  float4 cb1_v121 1x4
+    +1952  float4 cb1_v122 1x4
+    +1968  float4 cb1_v123 1x4
+    +1984  float4 cb1_v124 1x4
+    +2000  float4 cb1_v125 1x4
+    +2016  float4 cb1_v126 1x4
+    +2032  float4 cb1_v127 1x4
+    +2048  float4 cb1_v128 1x4
+    +2064  float4 cb1_v129 1x4
+    +2080  float4 cb1_v130 1x4
+    +2096  float4 cb1_v131 1x4
+    +2112  float4 cb1_v132 1x4
+    +2128  float4 cb1_v133 1x4
+    +2144  float4 cb1_v134 1x4
+    +2160  float4 cb1_v135 1x4
+    +2176  float4 cb1_v136 1x4
+    +2192  float4 cb1_v137 1x4
+    +2208  float4 cb1_v138 1x4
+    +2224  float4 cb1_v139 1x4
+    +2240  float4 cb1_v140 1x4
+    +2256  float4 cb1_v141 1x4
+    +2272  float4 cb1_v142 1x4
+    +2288  float4 cb1_v143 1x4
+    +2304  float4 cb1_v144 1x4
+    +2320  float4 cb1_v145 1x4
+read  0 "texture0" (TextureType.Texture2D)
+read  1 "texture1" (TextureType.Texture2D)
+read  2 "texture2" (TextureType.Texture2D)
+read  3 "texture3" (TextureType.Texture2D)
+read  4 "texture4" (TextureType.Texture2D)
+read  5 "texture5" (TextureType.Texture2D)
+read  6 "texture6" (TextureType.Texture2D)
+read  7 "texture7" (TextureType.Texture2D)
+read  8 "texture8" (TextureType.Texture2D)
+read  9 "texture9" (TextureType.Texture2D)
+write 0 "uav0" (TextureType.Texture2D)
+write 1 "uav1" (TextureType.Texture2D)
+write 2 "uav2" (TextureType.Texture2D)
+write 3 "uav3" (TextureType.Texture2D)
+sampler 0 "sampler0"
+in  vThreadID0
+
+==================== disassembly: DXBC ====================
+
+Shader hash d40002e4-3e2bbfec-4c0bcf09-6f1648b7
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_immediateConstantBuffer {
+			{ -1, -1, 0, 0}, 
+			{ 0, -1, 0, 0}, 
+			{ 1, -1, 0, 0}, 
+			{ -1, 0, 0, 0}, 
+			{ 1, 0, 0, 0}, 
+			{ -1, 1, 0, 0}, 
+			{ 0, 1, 0, 0}, 
+			{ 1, 1, 0, 0} }
+      dcl_constantbuffer cb0[23], immediateIndexed
+      dcl_constantbuffer cb1[146], immediateIndexed
+      dcl_sampler s0, mode_default
+      dcl_resource_texture2d (float,float,float,float) t0
+      dcl_resource_texture2d (float,float,float,float) t1
+      dcl_resource_texture2d (float,float,float,float) t2
+      dcl_resource_texture2d (float,float,float,float) t3
+      dcl_resource_texture2d (float,float,float,float) t4
+      dcl_resource_texture2d (float,float,float,float) t5
+      dcl_resource_texture2d (float,float,float,float) t6
+      dcl_resource_texture2d (float,float,float,float) t7
+      dcl_resource_texture2d (float,float,float,float) t8
+      dcl_resource_texture2d (float,float,float,float) t9
+      dcl_uav_typed_texture2d (float,float,float,float) u0
+      dcl_uav_typed_texture2d (float,float,float,float) u1
+      dcl_uav_typed_texture2d (unorm,unorm,unorm,unorm) u2
+      dcl_uav_typed_texture2d (unorm,unorm,unorm,unorm) u3
+      dcl_input vThreadID.xy
+      dcl_temps 11
+      dcl_thread_group 8, 8, 1
+   0: iadd r0.xy, vThreadID.xyxx, cb1[130].xyxx
+   1: utof r1.xy, r0.xyxx
+   2: add r1.zw, r1.xxxy, l(0.000000, 0.000000, 0.500000, 0.500000)
+   3: mul r2.xy, r1.zwzz, cb1[132].zwzz
+   4: mad r1.zw, r1.zzzw, cb1[132].zzzw, -cb1[72].wwwz
+   5: div r3.xy, r1.zwzz, cb1[72].xyxx
+   6: mov r0.zw, l(0, 0, 0, 0)
+   7: ld_indexable(texture2d)(float,float,float,float) r3.z, r0.xyww, t1.yzxw
+   8: mad r1.z, r3.z, cb1[71].x, cb1[71].y
+   9: mad r1.w, r3.z, cb1[71].z, -cb1[71].w
+  10: div r1.w, l(1.000000, 1.000000, 1.000000, 1.000000), r1.w
+  11: add r1.z, r1.w, r1.z
+  12: mul r4.xyzw, r3.yyyy, cb1[118].xyzw
+  13: mad r4.xyzw, r3.xxxx, cb1[117].xyzw, r4.xyzw
+  14: mad r4.xyzw, r3.zzzz, cb1[119].xyzw, r4.xyzw
+  15: add r4.xyzw, r4.xyzw, cb1[120].xyzw
+  16: div r4.xyz, r4.xyzx, r4.wwww
+  17: add r4.xyz, r3.xyzx, -r4.xyzx
+  18: sample_l(texture2d)(float,float,float,float) r2.xyzw, r2.xyxx, t2.xyzw, s0, l(0)
+  19: lt r1.w, l(0), r2.x
+  20: mul r2.zw, r2.zzzw, l(0.000000, 0.000000, 65535.000000, 65535.000000)
+  21: mad r2.xy, r2.xyxx, l(4.008016, 4.008016, 0.000000, 0.000000), l(-2.003978, -2.003978, 0.000000, 0.000000)
+  22: round_ne r2.zw, r2.zzzw
+  23: ftou r2.zw, r2.zzzw
+  24: ishl r2.z, r2.z, l(16)
+  25: or r5.z, r2.w, r2.z
+  26: mul r2.xy, abs(r2.xyxx), r2.xyxx
+  27: mul r5.xy, r2.xyxx, l(0.500000, 0.500000, 0.000000, 0.000000)
+  28: movc r2.xyz, r1.wwww, r5.xyzx, r4.xyzx
+  29: add r2.xyz, -r2.xyzx, r3.xyzx
+  30: mad r2.xy, r2.xyxx, cb0[17].xyxx, cb0[17].wzww
+  31: lt r3.zw, r2.xxxy, cb0[19].zzzw
+  32: and r1.w, r3.w, r3.z
+  33: lt r3.zw, cb0[19].xxxy, r2.xxxy
+  34: and r2.w, r3.w, r3.z
+  35: and r1.w, r1.w, r2.w
+  36: max r2.xy, r2.xyxx, cb0[19].xyxx
+  37: min r2.xy, r2.xyxx, cb0[19].zwzz
+  38: mad r2.xy, r2.xyxx, cb1[132].xyxx, l(-0.500000, -0.500000, 0.000000, 0.000000)
+  39: round_ni r4.xyzw, r2.xyxy
+  40: frc r2.xy, r2.xyxx
+  41: add r4.xyzw, r4.xyzw, l(1.000000, 1.000000, 0.500000, 0.500000)
+  42: mul r3.zw, r4.xxxy, cb0[22].zzzw
+  43: mul r5.xyzw, r4.xyzw, cb1[132].zwzw
+  44: gather4(texture2d)(float,float,float,float) r6.xyzw, r5.xyxx, t7.xyzw, s0.x
+  45: mad r4.xy, r6.wzww, cb1[71].xxxx, cb1[71].yyyy
+  46: mad r5.xy, r6.wzww, cb1[71].zzzz, -cb1[71].wwww
+  47: div r5.xy, l(1.000000, 1.000000, 1.000000, 1.000000), r5.xyxx
+  48: add r7.xy, r4.xyxx, r5.xyxx
+  49: mad r4.xy, r6.xyxx, cb1[71].xxxx, cb1[71].yyyy
+  50: mad r5.xy, r6.xyxx, cb1[71].zzzz, -cb1[71].wwww
+  51: div r5.xy, l(1.000000, 1.000000, 1.000000, 1.000000), r5.xyxx
+  52: add r7.zw, r4.xxxy, r5.xxxy
+  53: ld_indexable(texture2d)(float,float,float,float) r6.xyz, r0.xyww, t0.xyzw
+  54: mad r6.xyz, r6.xyzx, l(2.000000, 2.000000, 2.000000, 0.000000), l(-1.000000, -1.000000, -1.000000, 0.000000)
+  55: dp3 r2.w, r6.xyzx, r6.xyzx
+  56: rsq r2.w, r2.w
+  57: mul r6.xyz, r2.wwww, r6.xyzx
+  58: utof r2.w, cb1[145].x
+  59: mad r1.xy, r2.wwww, l(32.665001, 11.815000, 0.000000, 0.000000), r1.xyxx
+  60: dp2 r1.x, r1.xyxx, l(0.067111, 0.005837, 0.000000, 0.000000)
+  61: frc r1.x, r1.x
+  62: mul r1.x, r1.x, l(52.982918)
+  63: frc r1.x, r1.x
+  64: add r1.x, r1.x, l(0.500000)
+  65: mul r1.x, r1.x, cb0[15].x
+  66: mad r1.y, r2.z, cb1[71].x, cb1[71].y
+  67: mad r2.z, r2.z, cb1[71].z, -cb1[71].w
+  68: div r2.z, l(1.000000, 1.000000, 1.000000, 1.000000), r2.z
+  69: add r1.y, r1.y, r2.z
+  70: mov r8.xw, cb1[132].zzzw
+  71: mov r8.yz, l(0, 0, 0, 0)
+  72: mad r8.xyzw, r4.zwzw, cb1[132].zwzw, r8.xyzw
+  73: mad r2.zw, r4.zzzw, cb1[132].zzzw, cb1[132].zzzw
+  74: mul r3.xy, r1.zzzz, r3.xyxx
+  75: mul r4.xyz, r3.yyyy, cb1[57].xyzx
+  76: mad r4.xyz, r3.xxxx, cb1[56].xyzx, r4.xyzx
+  77: mad r4.xyz, r1.zzzz, cb1[58].xyzx, r4.xyzx
+  78: add r4.xyz, r4.xyzx, cb1[59].xyzx
+  79: dp3 r1.z, -r4.xyzx, -r4.xyzx
+  80: rsq r1.z, r1.z
+  81: mul r4.xyz, r1.zzzz, -r4.xyzx
+  82: dp3_sat r1.z, r4.xyzx, r6.xyzx
+  83: max r1.z, r1.z, l(0.100000)
+  84: div r1.x, r1.x, r1.z
+  85: add r4.xyzw, -r1.yyyy, r7.xyzw
+  86: mul r1.x, r1.x, r1.y
+  87: ge r4.xyzw, abs(r4.xyzw), r1.xxxx
+  88: and r4.xyzw, r4.xyzw, l(1.000000, 1.000000, 1.000000, 1.000000)
+  89: and r1.x, r1.w, l(1.000000)
+  90: add r4.xyzw, -r4.xyzw, r1.xxxx
+  91: max r4.xyzw, r4.xyzw, l(0, 0, 0, 0)
+  92: ld_indexable(texture2d)(float,float,float,float) r6.xyzw, r0.xyww, t3.xyzw
+  93: ge r1.x, l(0), r6.w
+  94: if_nz r1.x
+  95:   iadd r1.xy, cb1[130].zwzz, cb1[130].xyxx
+  96:   iadd r1.xy, r1.xyxx, l(-1, -1, 0, 0)
+  97:   mov r7.zw, l(0, 0, 0, 0)
+  98:   mov r9.xyzw, l(0, 0, 0, 0)
+  99:   mov r1.z, l(0)
+ 100:   loop
+ 101:     uge r3.x, r1.z, l(8)
+ 102:     breakc_nz r3.x
+ 103:     iadd r3.xy, r0.xyxx, icb[r1.z + 0].xyxx
+ 104:     umax r3.xy, r3.xyxx, cb1[130].xyxx
+ 105:     umin r7.xy, r1.xyxx, r3.xyxx
+ 106:     ld_indexable(texture2d)(float,float,float,float) r10.xyzw, r7.xyzw, t3.xyzw
+ 107:     lt r3.x, l(0), r10.w
+ 108:     add r10.xyz, r9.xyzx, r10.xyzx
+ 109:     add r10.w, r9.w, l(1.000000)
+ 110:     movc r9.xyzw, r3.xxxx, r10.xyzw, r9.xyzw
+ 111:     iadd r1.z, r1.z, l(1)
+ 112:   endloop
+ 113:   lt r1.x, l(0), r9.w
+ 114:   max r1.y, r9.w, l(1.000000)
+ 115:   div r6.xyz, r9.xyzx, r1.yyyy
+ 116: else
+ 117:   mov r1.x, l(-1)
+ 118: endif
+ 119: movc r4.xyzw, r1.xxxx, r4.xyzw, l(1.000000, 1.000000, 1.000000, 1.000000)
+ 120: add r1.xy, -r2.yxyy, l(1.000000, 1.000000, 0.000000, 0.000000)
+ 121: mul r7.x, r1.x, r1.y
+ 122: mul r7.yz, r1.xxyx, r2.xxyx
+ 123: mul r7.w, r2.y, r2.x
+ 124: mul r4.xyzw, r4.xyzw, r7.xyzw
+ 125: sample_l(texture2d)(float,float,float,float) r1.xyz, r5.zwzz, t5.xyzw, s0, l(0)
+ 126: sample_l(texture2d)(float,float,float,float) r7.xyz, r8.xyxx, t5.xyzw, s0, l(0)
+ 127: sample_l(texture2d)(float,float,float,float) r9.xyz, r8.zwzz, t5.xyzw, s0, l(0)
+ 128: sample_l(texture2d)(float,float,float,float) r10.xyz, r2.zwzz, t5.xyzw, s0, l(0)
+ 129: mul r7.xyzw, r4.yyyy, r7.xyzx
+ 130: mad r7.xyzw, r1.xyzx, r4.xxxx, r7.xyzw
+ 131: mad r7.xyzw, r9.xyzx, r4.zzzz, r7.xyzw
+ 132: mad r7.xyzw, r10.xyzx, r4.wwww, r7.xyzw
+ 133: dp4 r1.x, r4.xyzw, l(1.000000, 1.000000, 1.000000, 1.000000)
+ 134: max r1.x, r1.x, l(0.000010)
+ 135: div r7.xyzw, r7.xyzw, r1.xxxx
+ 136: mul r9.xyzw, r7.xyzw, cb0[15].yyyy
+ 137: sample_l(texture2d)(float,float,float,float) r5.xyz, r5.zwzz, t6.xyzw, s0, l(0)
+ 138: sample_l(texture2d)(float,float,float,float) r10.xyz, r8.xyxx, t6.xyzw, s0, l(0)
+ 139: sample_l(texture2d)(float,float,float,float) r8.xyz, r8.zwzz, t6.xyzw, s0, l(0)
+ 140: sample_l(texture2d)(float,float,float,float) r2.xyz, r2.zwzz, t6.xyzw, s0, l(0)
+ 141: mul r10.xyzw, r4.yyyy, r10.xyzx
+ 142: mad r5.xyzw, r5.xyzx, r4.xxxx, r10.xyzw
+ 143: mad r5.xyzw, r8.xyzx, r4.zzzz, r5.xyzw
+ 144: mad r2.xyzw, r2.xyzx, r4.wwww, r5.xyzw
+ 145: div r2.xyzw, r2.xyzw, r1.xxxx
+ 146: mul r5.xyzw, r2.xyzw, cb0[15].yyyy
+ 147: gather4(texture2d)(float,float,float,float) r8.xyzw, r3.zwzz, t8.xyzw, s0.x
+ 148: mad r8.xyzw, r8.wzxy, cb0[16].xxxx, l(1.000000, 1.000000, 1.000000, 1.000000)
+ 149: min r8.xyzw, r8.xyzw, cb0[16].xxxx
+ 150: dp4 r1.y, r8.xyzw, r4.xyzw
+ 151: div r1.y, r1.y, r1.x
+ 152: mul_sat r1.z, abs(r6.w), cb0[15].z
+ 153: add r1.z, r1.z, l(-0.200000)
+ 154: mul r1.z, r1.z, l(1.250000)
+ 155: min r1.z, r1.z, cb0[15].w
+ 156: max r1.z, r1.z, l(0)
+ 157: store_uav_typed u3.xyzw, r0.xyyy, r1.zzzz
+ 158: gather4(texture2d)(float,float,float,float) r3.xyzw, r3.zwzz, t9.xyzw, s0.x
+ 159: dp4 r2.x, r3.wzxy, r4.xyzw
+ 160: div r1.x, r2.x, r1.x
+ 161: max r1.x, r1.x, r1.z
+ 162: add r1.x, -r1.x, l(1.000000)
+ 163: mul r1.x, r1.x, cb0[16].x
+ 164: min r1.x, r1.x, r1.y
+ 165: and r1.x, r1.x, r1.w
+ 166: ld_indexable(texture2d)(float,float,float,float) r1.yzw, r0.xyzw, t4.wxyz
+ 167: add r0.z, r1.x, l(1.000000)
+ 168: div r0.z, l(1.000000, 1.000000, 1.000000, 1.000000), r0.z
+ 169: mad r3.xyzw, -r7.wyzw, cb0[15].yyyy, r6.xyzx
+ 170: mad r3.xyzw, r0.zzzz, r3.xyzw, r9.xyzw
+ 171: mad r2.xyzw, -r2.wyzw, cb0[15].yyyy, r1.yzwy
+ 172: mad r2.xyzw, r0.zzzz, r2.xyzw, r5.xyzw
+ 173: min r3.xyzw, -r3.xyzw, l(0, 0, 0, 0)
+ 174: mov r3.xyzw, -r3.xyzw
+ 175: min r2.xyzw, -r2.xyzw, l(0, 0, 0, 0)
+ 176: mov r2.xyzw, -r2.xyzw
+ 177: store_uav_typed u0.xyzw, r0.xyyy, r3.xyzw
+ 178: store_uav_typed u1.xyzw, r0.xyyy, r2.xyzw
+ 179: div r0.z, r1.x, cb0[16].x
+ 180: store_uav_typed u2.xyzw, r0.xyyy, r0.zzzz
+ 181: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

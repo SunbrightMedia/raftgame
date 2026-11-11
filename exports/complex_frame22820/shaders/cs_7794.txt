@@ -1,0 +1,40 @@
+shader ResourceId::7794, stage cs, name "Compute Shader 7794"
+entry point: main
+read  0 "structuredbuffer0" (TextureType.Buffer)
+write 0 "uav0" (TextureType.Buffer)
+in  vThreadID0
+
+==================== disassembly: DXBC ====================
+
+Shader hash 8853f105-6b245807-2ef9a78d-63d7d7c3
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_resource_structured t0, 4
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u0
+      dcl_input vThreadID.x
+      dcl_temps 1
+      dcl_thread_group 64, 1, 1
+   0: if_z vThreadID.x
+   1:   ld_structured_indexable(structured_buffer, stride=4)(mixed,mixed,mixed,mixed) r0.x, l(0), l(0), t0.xxxx
+   2:   iadd r0.y, r0.x, l(63)
+   3:   ushr r0.y, r0.y, l(6)
+   4:   store_uav_typed u0.xyzw, l(0, 0, 0, 0), r0.yyyy
+   5:   store_uav_typed u0.xyzw, l(1, 1, 1, 1), l(1, 1, 1, 1)
+   6:   store_uav_typed u0.xyzw, l(2, 2, 2, 2), l(1, 1, 1, 1)
+   7:   store_uav_typed u0.xyzw, l(3, 3, 3, 3), r0.xxxx
+   8:   store_uav_typed u0.xyzw, l(4, 4, 4, 4), l(1, 1, 1, 1)
+   9:   store_uav_typed u0.xyzw, l(5, 5, 5, 5), l(1, 1, 1, 1)
+  10: endif
+  11: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

@@ -1,0 +1,1336 @@
+{
+ "index": 170,
+ "kind": "dispatch",
+ "events": [
+  10906,
+  10906
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "LumenSceneLighting%s",
+  "DirectLighting",
+  "Non raytraced shadows"
+ ],
+ "first": "DispatchIndirect(<1307, 1, 1>)",
+ "last": "DispatchIndirect(<1307, 1, 1>)",
+ "shaders": {
+  "cs": [
+   "shaders/cs_7799.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::7799": [
+    {
+     "block": "cbuffer0",
+     "bytes": 176,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        8.307663,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        4.8170220139378115e+19,
+        0.0,
+        230216990720.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v4",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        8.253799,
+        0.0,
+        230216974336.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v5",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        8.307434,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v6",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        8.307663,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v7",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        8.312073,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v8",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        8.312119,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v9",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v10",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        1.15037,
+        0.0,
+        -0.081179
+       ]
+      }
+     ]
+    },
+    {
+     "block": "cbuffer1",
+     "bytes": 1232,
+     "vars": [
+      {
+       "name": "cb1_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.837157,
+        0.020534,
+        0.0,
+        0.25335
+       ]
+      },
+      {
+       "name": "cb1_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.220433,
+        -0.092446,
+        0.0,
+        -0.963962
+       ]
+      },
+      {
+       "name": "cb1_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.002771,
+        1.15037,
+        0.0,
+        -0.081179
+       ]
+      },
+      {
+       "name": "cb1_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.163065,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v4",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        140701.578125,
+        22529.195312,
+        0.0,
+        0.25335
+       ]
+      },
+      {
+       "name": "cb1_v5",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -95933.164062,
+        -84334.890625,
+        0.0,
+        -0.963962
+       ]
+      },
+      {
+       "name": "cb1_v6",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -10116.526367,
+        -119174.554688,
+        0.0,
+        -0.081179
+       ]
+      },
+      {
+       "name": "cb1_v7",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.163065,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v8",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.837157,
+        0.020534,
+        0.0,
+        0.25335
+       ]
+      },
+      {
+       "name": "cb1_v9",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.220433,
+        -0.092446,
+        0.0,
+        -0.963962
+       ]
+      },
+      {
+       "name": "cb1_v10",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.002771,
+        1.15037,
+        0.0,
+        -0.081179
+       ]
+      },
+      {
+       "name": "cb1_v11",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        4356.685547,
+        -90.927582,
+        0.163065,
+        -43.993931
+       ]
+      },
+      {
+       "name": "cb1_v12",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.117268,
+        0.293337,
+        0.00363,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v13",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.015235,
+        -0.068714,
+        0.863491,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v14",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -29773.568359,
+        -8135.536621,
+        362.384674,
+        6.132524
+       ]
+      },
+      {
+       "name": "cb1_v15",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.254029,
+        -0.963717,
+        -0.081981,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v16",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.967215,
+        0.017585,
+        0.25335,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v17",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.25394,
+        -0.079314,
+        -0.963962,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v18",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.003143,
+        0.996695,
+        -0.081179,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v19",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb1_v20",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.967215,
+        0.25394,
+        0.003143,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v21",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.017585,
+        -0.079314,
+        0.996695,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v22",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.25335,
+        -0.963962,
+        -0.081179,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v23",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb1_v24",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.967215,
+        0.017585,
+        0.25335,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v25",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.25394,
+        -0.079314,
+        -0.963962,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v26",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.003143,
+        0.996695,
+        -0.081179,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v27",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb1_v28",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.967215,
+        0.25394,
+        0.003143,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v29",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.017585,
+        -0.079314,
+        0.996695,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v30",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.25335,
+        -0.963962,
+        -0.081179,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v31",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb1_v32",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.865696,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v33",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        1.154261,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v34",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.00062,
+        0.000931,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb1_v35",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.163065,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v36",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.865696,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v37",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        1.154261,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v38",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb1_v39",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.163065,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v40",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.15514,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v41",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.866355,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v42",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        6.132524
+       ]
+      },
+      {
+       "name": "cb1_v43",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.000716,
+        -0.000806,
+        1.0,
+        -0.0
+       ]
+      },
+      {
+       "name": "cb1_v44",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.117268,
+        0.293337,
+        0.00363,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v45",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.015235,
+        -0.068714,
+        0.863491,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v46",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        6.132524
+       ]
+      },
+      {
+       "name": "cb1_v47",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.254029,
+        -0.963717,
+        -0.081981,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v48",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.002217,
+        0.000582,
+        7e-06,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v49",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -4e-05,
+        0.000182,
+        -0.002284,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v50",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        6.132524
+       ]
+      },
+      {
+       "name": "cb1_v51",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.848005,
+        -1.325767,
+        0.777881,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v52",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.117268,
+        0.293337,
+        0.00363,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v53",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.015235,
+        -0.068714,
+        0.863491,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v54",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.254029,
+        -0.963717,
+        -0.081981,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v55",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -4855.026855,
+        -1326.621338,
+        59.092258,
+        1.0
+       ]
+      },
+      {
+       "name": "cb1_v56",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.117268,
+        0.293337,
+        0.00363,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v57",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.015235,
+        -0.068714,
+        0.863491,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v58",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.254029,
+        -0.963717,
+        -0.081981,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v59",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb1_v60",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.117268,
+        0.293337,
+        0.00363,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v61",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.015235,
+        -0.068714,
+        0.863491,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v62",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.254029,
+        -0.963717,
+        -0.081981,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v63",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -4855.026855,
+        -1326.621216,
+        59.092255,
+        1.0
+       ]
+      },
+      {
+       "name": "cb1_v64",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v65",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v66",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.25335,
+        -0.963962,
+        -0.081179,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v67",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.017585,
+        -0.079314,
+        0.996695,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v68",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.967215,
+        0.25394,
+        0.003143,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v69",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.017585,
+        -0.079314,
+        0.996695,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v70",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.967215,
+        0.25394,
+        0.003143,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v71",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        6.132524,
+        -0.0
+       ]
+      },
+      {
+       "name": "cb1_v72",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.375,
+        -0.5,
+        0.5,
+        0.375
+       ]
+      },
+      {
+       "name": "cb1_v73",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -4855.026855,
+        -1326.621216,
+        59.092255,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v74",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v75",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -4855.026855,
+        -1326.621216,
+        59.092255,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v76",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        4855.026855,
+        1326.621216,
+        -59.092255,
+        0.0
+       ]
+      }
+     ]
+    },
+    {
+     "block": "cbuffer2",
+     "bytes": 48,
+     "vars": [
+      {
+       "name": "cb2_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb2_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -0.0,
+        4096.0,
+        4096.0
+       ]
+      },
+      {
+       "name": "cb2_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.000244,
+        0.000244,
+        1.0,
+        0.0
+       ]
+      }
+     ]
+    },
+    {
+     "block": "cbuffer3",
+     "bytes": 160,
+     "vars": [
+      {
+       "name": "cb3_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb3_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb3_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb3_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -4243.445801,
+        -9719.017578,
+        186.907745,
+        0.000769
+       ]
+      },
+      {
+       "name": "cb3_v4",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        20000.0,
+        17427.341797,
+        7728.588379,
+        0.0
+       ]
+      },
+      {
+       "name": "cb3_v5",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        -0.0,
+        1.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb3_v6",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        -0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb3_v7",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.052336,
+        1.055226,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb3_v8",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -2.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb3_v9",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        32.0,
+        -1.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::7799": [
+    {
+     "id": "ResourceId::706",
+     "name": "2D Texture 706",
+     "w": 1,
+     "h": 1,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "B8G8R8A8_TYPELESS",
+     "samples": 1,
+     "binding": "texture0"
+    },
+    {
+     "id": "ResourceId::48613",
+     "name": "Lumen.Cards",
+     "binding": "structuredbuffer1"
+    },
+    {
+     "id": "ResourceId::49096",
+     "name": "Lumen.PageBuffer",
+     "binding": "structuredbuffer2"
+    },
+    {
+     "id": "ResourceId::6853",
+     "name": "2D Render Target 6853",
+     "w": 4096,
+     "h": 4096,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R8G8_UNORM",
+     "samples": 1,
+     "binding": "texture3"
+    },
+    {
+     "id": "ResourceId::6844",
+     "name": "2D Render Target 6844",
+     "w": 4096,
+     "h": 4096,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R16_UNORM",
+     "samples": 1,
+     "binding": "texture4"
+    },
+    {
+     "id": "ResourceId::59093",
+     "name": "Lumen.DirectLighting.LightTiles",
+     "binding": "structuredbuffer5"
+    },
+    {
+     "id": "ResourceId::6679",
+     "name": "InstanceCullingLoadBalancer.Batches",
+     "binding": "structuredbuffer6"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 10906,
+   "name": "DispatchIndirect(<1307, 1, 1>)",
+   "cs": "ResourceId::7799"
+  }
+ ],
+ "outputs": [],
+ "images": []
+}

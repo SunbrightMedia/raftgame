@@ -1,0 +1,74 @@
+shader ResourceId::7746, stage cs, name "Compute Shader 7746"
+entry point: main
+constant block 0 "cbuffer0" (144 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+    +80    float4 cb0_v5 1x4
+    +96    float4 cb0_v6 1x4
+    +112   float4 cb0_v7 1x4
+    +128   float4 cb0_v8 1x4
+read  0 "structuredbuffer0" (TextureType.Buffer)
+write 0 "uav0" (TextureType.Buffer)
+write 1 "uav1" (TextureType.Buffer)
+in  vThreadID0
+
+==================== disassembly: DXBC ====================
+
+Shader hash d6dcbabe-23d600d7-b007d7f4-ecebaed4
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[9], immediateIndexed
+      dcl_resource_structured t0, 16
+      dcl_uav_structured u0, 4
+      dcl_uav_structured u1, 4
+      dcl_input vThreadID.x
+      dcl_temps 3
+      dcl_thread_group 64, 1, 1
+   0: ult r0.x, vThreadID.x, cb0[2].x
+   1: if_nz r0.x
+   2:   imul null, r0.x, vThreadID.x, l(3)
+   3:   imad r0.yz, vThreadID.xxxx, l(0, 3, 3, 0), l(0, 1, 2, 0)
+   4:   ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) r1.xyzw, r0.y, l(0), t0.xyzw
+   5:   ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) r2.xyzw, r0.z, l(0), t0.xyzw
+   6:   and r0.yzw, r2.wwww, l(0, 1, 8, 48)
+   7:   lt r1.w, cb0[6].x, r1.w
+   8:   ine r0.zw, r0.wwwz, l(0, 0, 0, 0)
+   9:   or r0.w, r0.w, r1.w
+  10:   and r0.z, r0.w, r0.z
+  11:   ieq r0.w, l(2), cb0[5].w
+  12:   ieq r0.y, r0.y, cb0[5].w
+  13:   or r0.y, r0.y, r0.w
+  14:   and r0.y, r0.y, r0.z
+  15:   if_nz r0.y
+  16:     ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) r0.xyz, r0.x, l(0), t0.xyzx
+  17:     add r0.xyz, r0.xyzx, -cb0[7].xyzx
+  18:     add r1.xyz, r1.xyzx, cb0[8].xyzx
+  19:     mad r0.xyz, r0.xyzx, l(2097152.000000, 2097152.000000, 2097152.000000, 0.000000), r1.xyzx
+  20:     add r0.xyz, r0.xyzx, -cb0[4].xyzx
+  21:     add r1.xyz, r2.xyzx, cb0[5].xyzx
+  22:     add r0.xyz, abs(r0.xyzx), -r1.xyzx
+  23:     max r0.xyz, r0.xyzx, l(0, 0, 0, 0)
+  24:     dp3 r0.x, r0.xyzx, r0.xyzx
+  25:     lt r0.x, r0.x, cb0[6].y
+  26:     if_nz r0.x
+  27:       imm_atomic_iadd r0.x, u1, l(0, 0, 0, 0), l(1)
+  28:       store_structured u0.x, r0.x, l(0), vThreadID.x
+  29:     endif
+  30:   endif
+  31: endif
+  32: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA
