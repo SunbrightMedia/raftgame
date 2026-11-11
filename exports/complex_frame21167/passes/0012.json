@@ -1,0 +1,120 @@
+{
+ "index": 12,
+ "kind": "dispatch",
+ "events": [
+  1007,
+  1007
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "GPUScene.Update",
+  "UpdateGPUScene NumPrimitiveDataUploads %u",
+  "ScatterUpload[%d] (Resource: %s, Offset: %u)"
+ ],
+ "first": "ID3D11DeviceContext::Dispatch()",
+ "last": "ID3D11DeviceContext::Dispatch()",
+ "shaders": {
+  "cs": [
+   "shaders/cs_7738.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::7738": [
+    {
+     "block": "cbuffer0",
+     "bytes": 80,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.1876425354892153e+32,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v4",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        1080.0,
+        0.000694,
+        0.000926
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::7738": [
+    {
+     "id": "ResourceId::79094",
+     "name": "Lumen.CardPageUploadBuffer",
+     "binding": "structuredbuffer0"
+    },
+    {
+     "id": "ResourceId::79160",
+     "name": "LightmapUploadBuffer",
+     "binding": "structuredbuffer1"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 1007,
+   "name": "ID3D11DeviceContext::Dispatch()",
+   "cs": "ResourceId::7738"
+  }
+ ],
+ "outputs": [],
+ "images": []
+}

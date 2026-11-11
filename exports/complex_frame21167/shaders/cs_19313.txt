@@ -1,0 +1,139 @@
+shader ResourceId::19313, stage cs, name "Compute Shader 19313"
+entry point: main
+constant block 0 "cbuffer0" (32 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+read  0 "texture0" (TextureType.Texture2D)
+write 0 "uav0" (TextureType.Texture2D)
+write 1 "uav1" (TextureType.Texture2D)
+sampler 0 "sampler0"
+in  vThreadIDInGroupFlattened0
+in  vThreadGroupID0
+in  vThreadID0
+
+==================== disassembly: DXBC ====================
+
+Shader hash 90c5f59f-aaf5dd7e-f3a44afb-b836a417
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[2], immediateIndexed
+      dcl_sampler s0, mode_default
+      dcl_resource_texture2d (float,float,float,float) t0
+      dcl_uav_typed_texture2d (float,float,float,float) u0
+      dcl_uav_typed_texture2d (float,float,float,float) u1
+      dcl_input vThreadIDInGroupFlattened
+      dcl_input vThreadGroupID.xy
+      dcl_input vThreadID.xy
+      dcl_temps 5
+      dcl_tgsm_structured g0, 16, 64
+      dcl_tgsm_structured g1, 4, 64
+      dcl_thread_group 8, 8, 1
+   0: utof r0.xy, vThreadID.xyxx
+   1: add r0.xy, r0.xyxx, l(0.500000, 0.500000, 0.000000, 0.000000)
+   2: mul r0.xy, r0.xyxx, cb0[1].xyxx
+   3: min r0.xy, r0.xyxx, cb0[1].zwzz
+   4: gather4(texture2d)(float,float,float,float) r0.xyzw, r0.xyxx, t0.xyzw, s0.w
+   5: lt r1.xyzw, l(0, 0, 0, 0), r0.xyzw
+   6: min r2.xyzw, r0.xyzw, l(0, 0, 0, 0)
+   7: max r3.xyzw, r0.xyzw, l(0, 0, 0, 0)
+   8: movc r0.xyzw, r1.xyzw, r0.xyzw, l(16384.000000, 16384.000000, 16384.000000, 16384.000000)
+   9: min r1.x, r2.y, r2.x
+  10: max r1.y, r2.y, r2.x
+  11: min r1.z, r3.y, r3.x
+  12: max r1.w, r3.y, r3.x
+  13: min r0.x, r0.y, r0.x
+  14: min r0.y, r2.z, r1.x
+  15: max r1.x, r2.z, r1.y
+  16: min r1.y, r3.z, r1.z
+  17: max r1.z, r3.z, r1.w
+  18: min r0.x, r0.z, r0.x
+  19: min r4.y, r2.w, r0.y
+  20: max r4.x, r2.w, r1.x
+  21: min r4.w, r3.w, r1.y
+  22: max r4.z, r3.w, r1.z
+  23: min r0.x, r0.w, r0.x
+  24: store_structured g0.xyzw, vThreadIDInGroupFlattened.x, l(0), r4.yxzw
+  25: store_structured g1.x, vThreadIDInGroupFlattened.x, l(0), r0.x
+  26: sync_g_t
+  27: ult r1.xyzw, vThreadIDInGroupFlattened.xxxx, l(32, 16, 8, 4)
+  28: if_nz r1.x
+  29:   iadd r0.y, vThreadIDInGroupFlattened.x, l(32)
+  30:   ld_structured r2.xyzw, r0.y, l(0), g0.xyzw
+  31:   ld_structured r0.y, r0.y, l(0), g1.xxxx
+  32:   min r4.yw, r2.xxxw, r4.yyyw
+  33:   max r4.xz, r2.yyzy, r4.xxzx
+  34:   min r0.x, r0.y, r0.x
+  35:   store_structured g0.xyzw, vThreadIDInGroupFlattened.x, l(0), r4.yxzw
+  36:   store_structured g1.x, vThreadIDInGroupFlattened.x, l(0), r0.x
+  37: endif
+  38: sync_g_t
+  39: if_nz r1.y
+  40:   iadd r0.y, vThreadIDInGroupFlattened.x, l(16)
+  41:   ld_structured r2.xyzw, r0.y, l(0), g0.xyzw
+  42:   ld_structured r0.y, r0.y, l(0), g1.xxxx
+  43:   min r4.yw, r2.xxxw, r4.yyyw
+  44:   max r4.xz, r2.yyzy, r4.xxzx
+  45:   min r0.x, r0.y, r0.x
+  46:   store_structured g0.xyzw, vThreadIDInGroupFlattened.x, l(0), r4.yxzw
+  47:   store_structured g1.x, vThreadIDInGroupFlattened.x, l(0), r0.x
+  48: endif
+  49: sync_g_t
+  50: if_nz r1.z
+  51:   iadd r0.y, vThreadIDInGroupFlattened.x, l(8)
+  52:   ld_structured r2.xyzw, r0.y, l(0), g0.xyzw
+  53:   ld_structured r0.y, r0.y, l(0), g1.xxxx
+  54:   min r4.yw, r2.xxxw, r4.yyyw
+  55:   max r4.xz, r2.yyzy, r4.xxzx
+  56:   min r0.x, r0.y, r0.x
+  57:   store_structured g0.xyzw, vThreadIDInGroupFlattened.x, l(0), r4.yxzw
+  58:   store_structured g1.x, vThreadIDInGroupFlattened.x, l(0), r0.x
+  59: endif
+  60: sync_g_t
+  61: if_nz r1.w
+  62:   iadd r0.y, vThreadIDInGroupFlattened.x, l(4)
+  63:   ld_structured r1.xyzw, r0.y, l(0), g0.xyzw
+  64:   ld_structured r0.y, r0.y, l(0), g1.xxxx
+  65:   min r4.yw, r1.xxxw, r4.yyyw
+  66:   max r4.xz, r1.yyzy, r4.xxzx
+  67:   min r0.x, r0.y, r0.x
+  68:   store_structured g0.xyzw, vThreadIDInGroupFlattened.x, l(0), r4.yxzw
+  69:   store_structured g1.x, vThreadIDInGroupFlattened.x, l(0), r0.x
+  70: endif
+  71: sync_g_t
+  72: ult r0.y, vThreadIDInGroupFlattened.x, l(2)
+  73: if_nz r0.y
+  74:   iadd r0.y, vThreadIDInGroupFlattened.x, l(2)
+  75:   ld_structured r1.xyzw, r0.y, l(0), g0.xyzw
+  76:   ld_structured r0.y, r0.y, l(0), g1.xxxx
+  77:   min r4.yw, r1.xxxw, r4.yyyw
+  78:   max r4.xz, r1.yyzy, r4.xxzx
+  79:   min r0.x, r0.y, r0.x
+  80:   store_structured g0.xyzw, vThreadIDInGroupFlattened.x, l(0), r4.yxzw
+  81:   store_structured g1.x, vThreadIDInGroupFlattened.x, l(0), r0.x
+  82: endif
+  83: sync_g_t
+  84: if_z vThreadIDInGroupFlattened.x
+  85:   ld_structured r1.xyzw, l(1), l(0), g0.xyzw
+  86:   ld_structured r0.y, l(1), l(0), g1.xxxx
+  87:   min r2.x, r1.x, r4.y
+  88:   max r2.y, r1.y, r4.x
+  89:   min r3.yw, r1.wwww, r4.wwww
+  90:   max r3.x, r1.z, r4.z
+  91:   min r3.z, r0.y, r0.x
+  92:   mov r2.zw, l(0, 0, 0, 0)
+  93:   store_uav_typed u0.xyzw, vThreadGroupID.xyyy, r2.xyzw
+  94:   store_uav_typed u1.xyzw, vThreadGroupID.xyyy, r3.xyzw
+  95: endif
+  96: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

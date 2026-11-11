@@ -1,0 +1,221 @@
+shader ResourceId::9523, stage cs, name "Compute Shader 9523"
+entry point: main
+constant block 0 "cbuffer0" (48 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+read  0 "texture0" (TextureType.Texture2D)
+write 0 "uav0" (TextureType.Buffer)
+write 1 "uav1" (TextureType.Buffer)
+in  vThreadIDInGroupFlattened0
+in  vThreadGroupID0
+
+==================== disassembly: DXBC ====================
+
+Shader hash 1ff5e852-08ea7743-074dfba0-c2900953
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[3], immediateIndexed
+      dcl_resource_texture2d (float,float,float,float) t0
+      dcl_uav_structured u0, 4, globallyCoherant
+      dcl_uav_structured u1, 4, globallyCoherant
+      dcl_input vThreadIDInGroupFlattened
+      dcl_input vThreadGroupID.xy
+      dcl_temps 6
+      dcl_tgsm_structured g0, 4, 5
+      dcl_thread_group 16, 16, 1
+   0: ubfe r0.x, l(1), l(1), vThreadIDInGroupFlattened.x
+   1: ushr r1.xyzw, vThreadIDInGroupFlattened.xxxx, l(2, 3, 4, 5)
+   2: bfi r2.xyzw, l(1, 1, 1, 1), l(1, 1, 2, 2), r1.xyzw, l(0, 0, 0, 0)
+   3: bfi r0.y, l(1), l(0), vThreadIDInGroupFlattened.x, r2.x
+   4: iadd r0.xy, r0.xyxx, r2.yzyy
+   5: iadd r0.z, r2.w, r0.x
+   6: ushr r1.xy, vThreadIDInGroupFlattened.xxxx, l(6, 7, 0, 0)
+   7: bfi r0.w, l(1), l(3), r1.x, l(0)
+   8: iadd r2.xz, r0.wwww, r0.yyyy
+   9: imad r2.yw, r1.yyyy, l(0, 8, 0, 8), r0.zzzz
+  10: imad r2.xyzw, vThreadGroupID.xyxy, l(16, 16, 16, 16), r2.xyzw
+  11: ilt r0.yz, r2.zzwz, cb0[1].zzwz
+  12: and r0.y, r0.z, r0.y
+  13: itof r3.xyzw, r2.xyzw
+  14: mad r3.xyzw, r3.xyzw, cb0[0].xyxy, cb0[0].zwzw
+  15: ftoi r3.xyzw, r3.xyzw
+  16: iadd r4.xyzw, r3.zwzw, l(-1, -1, 0, -1)
+  17: imax r4.xyzw, r4.xyzw, l(0, 0, 0, 0)
+  18: imin r4.xyzw, r4.zwxy, cb0[1].xyxy
+  19: mov r5.xy, r4.zwzz
+  20: mov r5.zw, l(0, 0, 0, 0)
+  21: ld_indexable(texture2d)(float,float,float,float) r5.xyzw, r5.xyzw, t0.xyzw
+  22: dp2 r0.z, r5.xyxx, r5.xyxx
+  23: dp2 r0.w, r5.zwzz, r5.zwzz
+  24: lt r1.x, cb0[2].z, r0.w
+  25: ine r1.z, l(0), cb0[2].x
+  26: and r1.x, r1.z, r1.x
+  27: lt r2.x, r0.w, l(0.250000)
+  28: mul r0.w, r0.w, l(0.400000)
+  29: lt r0.z, r0.w, r0.z
+  30: movc r2.yw, r1.xxxx, l(0, 0, 0, 2), l(0, 1, 0, 3)
+  31: movc r0.z, r0.z, r2.y, r2.w
+  32: movc r0.z, r2.x, l(0), r0.z
+  33: mov r4.zw, l(0, 0, 0, 0)
+  34: ld_indexable(texture2d)(float,float,float,float) r4.xyzw, r4.xyzw, t0.xyzw
+  35: dp2 r0.w, r4.xyxx, r4.xyxx
+  36: dp2 r1.x, r4.zwzz, r4.zwzz
+  37: lt r2.x, cb0[2].z, r1.x
+  38: and r2.x, r1.z, r2.x
+  39: lt r2.y, r1.x, l(0.250000)
+  40: mul r1.x, r1.x, l(0.400000)
+  41: lt r0.w, r1.x, r0.w
+  42: movc r2.xw, r2.xxxx, l(0, 0, 0, 2), l(1, 0, 0, 3)
+  43: movc r0.w, r0.w, r2.x, r2.w
+  44: movc r0.w, r2.y, l(0), r0.w
+  45: umax r0.z, r0.w, r0.z
+  46: iadd r4.xyzw, r3.zwzw, l(1, -1, -1, 0)
+  47: imax r4.xyzw, r4.xyzw, l(0, 0, 0, 0)
+  48: imin r4.xyzw, r4.zwxy, cb0[1].xyxy
+  49: mov r5.xy, r4.zwzz
+  50: mov r5.zw, l(0, 0, 0, 0)
+  51: ld_indexable(texture2d)(float,float,float,float) r5.xyzw, r5.xyzw, t0.xyzw
+  52: dp2 r0.w, r5.xyxx, r5.xyxx
+  53: dp2 r1.x, r5.zwzz, r5.zwzz
+  54: lt r2.x, cb0[2].z, r1.x
+  55: and r2.x, r1.z, r2.x
+  56: lt r2.y, r1.x, l(0.250000)
+  57: mul r1.x, r1.x, l(0.400000)
+  58: lt r0.w, r1.x, r0.w
+  59: movc r2.xw, r2.xxxx, l(0, 0, 0, 2), l(1, 0, 0, 3)
+  60: movc r0.w, r0.w, r2.x, r2.w
+  61: movc r0.w, r2.y, l(0), r0.w
+  62: umax r0.z, r0.w, r0.z
+  63: mov r4.zw, l(0, 0, 0, 0)
+  64: ld_indexable(texture2d)(float,float,float,float) r4.xyzw, r4.xyzw, t0.xyzw
+  65: dp2 r0.w, r4.xyxx, r4.xyxx
+  66: dp2 r1.x, r4.zwzz, r4.zwzz
+  67: lt r2.x, cb0[2].z, r1.x
+  68: and r2.x, r1.z, r2.x
+  69: lt r2.y, r1.x, l(0.250000)
+  70: mul r1.x, r1.x, l(0.400000)
+  71: lt r0.w, r1.x, r0.w
+  72: movc r2.xw, r2.xxxx, l(0, 0, 0, 2), l(1, 0, 0, 3)
+  73: movc r0.w, r0.w, r2.x, r2.w
+  74: movc r0.w, r2.y, l(0), r0.w
+  75: umax r0.z, r0.w, r0.z
+  76: imax r2.xy, r3.zwzz, l(0, 0, 0, 0)
+  77: imin r4.xy, r2.xyxx, cb0[1].xyxx
+  78: mov r4.zw, l(0, 0, 0, 0)
+  79: ld_indexable(texture2d)(float,float,float,float) r4.xyzw, r4.xyzw, t0.xyzw
+  80: dp2 r0.w, r4.xyxx, r4.xyxx
+  81: dp2 r1.x, r4.zwzz, r4.zwzz
+  82: lt r2.x, cb0[2].z, r1.x
+  83: and r2.x, r1.z, r2.x
+  84: lt r2.y, r1.x, l(0.250000)
+  85: mul r1.x, r1.x, l(0.400000)
+  86: lt r0.w, r1.x, r0.w
+  87: movc r2.xw, r2.xxxx, l(0, 0, 0, 2), l(1, 0, 0, 3)
+  88: movc r0.w, r0.w, r2.x, r2.w
+  89: movc r0.w, r2.y, l(0), r0.w
+  90: umax r0.z, r0.w, r0.z
+  91: iadd r4.xyzw, r3.zwzw, l(1, 0, -1, 1)
+  92: imax r4.xyzw, r4.xyzw, l(0, 0, 0, 0)
+  93: imin r4.xyzw, r4.zwxy, cb0[1].xyxy
+  94: mov r5.xy, r4.zwzz
+  95: mov r5.zw, l(0, 0, 0, 0)
+  96: ld_indexable(texture2d)(float,float,float,float) r5.xyzw, r5.xyzw, t0.xyzw
+  97: dp2 r0.w, r5.xyxx, r5.xyxx
+  98: dp2 r1.x, r5.zwzz, r5.zwzz
+  99: lt r2.x, cb0[2].z, r1.x
+ 100: and r2.x, r1.z, r2.x
+ 101: lt r2.y, r1.x, l(0.250000)
+ 102: mul r1.x, r1.x, l(0.400000)
+ 103: lt r0.w, r1.x, r0.w
+ 104: movc r2.xw, r2.xxxx, l(0, 0, 0, 2), l(1, 0, 0, 3)
+ 105: movc r0.w, r0.w, r2.x, r2.w
+ 106: movc r0.w, r2.y, l(0), r0.w
+ 107: umax r0.z, r0.w, r0.z
+ 108: mov r4.zw, l(0, 0, 0, 0)
+ 109: ld_indexable(texture2d)(float,float,float,float) r4.xyzw, r4.xyzw, t0.xyzw
+ 110: dp2 r0.w, r4.xyxx, r4.xyxx
+ 111: dp2 r1.x, r4.zwzz, r4.zwzz
+ 112: lt r2.x, cb0[2].z, r1.x
+ 113: and r2.x, r1.z, r2.x
+ 114: lt r2.y, r1.x, l(0.250000)
+ 115: mul r1.x, r1.x, l(0.400000)
+ 116: lt r0.w, r1.x, r0.w
+ 117: movc r2.xw, r2.xxxx, l(0, 0, 0, 2), l(1, 0, 0, 3)
+ 118: movc r0.w, r0.w, r2.x, r2.w
+ 119: movc r0.w, r2.y, l(0), r0.w
+ 120: umax r0.z, r0.w, r0.z
+ 121: iadd r3.xyzw, r3.xyzw, l(0, 1, 1, 1)
+ 122: imax r3.xyzw, r3.xyzw, l(0, 0, 0, 0)
+ 123: imin r3.xyzw, r3.zwxy, cb0[1].xyxy
+ 124: mov r4.xy, r3.zwzz
+ 125: mov r4.zw, l(0, 0, 0, 0)
+ 126: ld_indexable(texture2d)(float,float,float,float) r4.xyzw, r4.xyzw, t0.xyzw
+ 127: dp2 r0.w, r4.xyxx, r4.xyxx
+ 128: dp2 r1.x, r4.zwzz, r4.zwzz
+ 129: lt r2.x, cb0[2].z, r1.x
+ 130: and r2.x, r1.z, r2.x
+ 131: lt r2.y, r1.x, l(0.250000)
+ 132: mul r1.x, r1.x, l(0.400000)
+ 133: lt r0.w, r1.x, r0.w
+ 134: movc r2.xw, r2.xxxx, l(0, 0, 0, 2), l(1, 0, 0, 3)
+ 135: movc r0.w, r0.w, r2.x, r2.w
+ 136: movc r0.w, r2.y, l(0), r0.w
+ 137: umax r0.z, r0.w, r0.z
+ 138: mov r3.zw, l(0, 0, 0, 0)
+ 139: ld_indexable(texture2d)(float,float,float,float) r3.xyzw, r3.xyzw, t0.xyzw
+ 140: dp2 r0.w, r3.xyxx, r3.xyxx
+ 141: dp2 r1.x, r3.zwzz, r3.zwzz
+ 142: lt r2.x, cb0[2].z, r1.x
+ 143: and r1.z, r1.z, r2.x
+ 144: lt r2.x, r1.x, l(0.250000)
+ 145: mul r1.x, r1.x, l(0.400000)
+ 146: lt r0.w, r1.x, r0.w
+ 147: movc r1.xz, r1.zzzz, l(0, 0, 2, 0), l(1, 0, 3, 0)
+ 148: movc r0.w, r0.w, r1.x, r1.z
+ 149: movc r0.w, r2.x, l(0), r0.w
+ 150: umax r2.x, r0.w, r0.z
+ 151: ult r0.z, vThreadIDInGroupFlattened.x, l(5)
+ 152: if_nz r0.z
+ 153:   store_structured g0.x, vThreadIDInGroupFlattened.x, l(0), l(0)
+ 154: endif
+ 155: sync_g_t
+ 156: if_nz r0.y
+ 157:   mov r2.y, l(0)
+ 158:   imm_atomic_iadd r3.x, g0, r2.xyxx, l(1)
+ 159: else
+ 160:   mov r3.x, l(0)
+ 161: endif
+ 162: sync_g_t
+ 163: if_nz r0.z
+ 164:   ld_structured r0.z, vThreadIDInGroupFlattened.x, l(0), g0.xxxx
+ 165:   mov r4.x, vThreadIDInGroupFlattened.x
+ 166:   mov r4.y, l(0)
+ 167:   imm_atomic_iadd r4.x, u1, r4.xyxx, r0.z
+ 168:   store_structured g0.x, vThreadIDInGroupFlattened.x, l(0), r4.x
+ 169: endif
+ 170: sync_g_t
+ 171: if_nz r0.y
+ 172:   ld_structured r0.y, r2.x, l(0), g0.xxxx
+ 173:   iadd r0.y, r3.x, r0.y
+ 174:   imad r0.y, cb0[2].y, r2.x, r0.y
+ 175:   bfi r0.z, l(1), l(18), r1.w, l(0)
+ 176:   imad r0.x, r0.x, l(0x00010000), r0.z
+ 177:   imad r0.x, r1.y, l(0x00080000), r0.x
+ 178:   imad r0.x, vThreadGroupID.y, l(0x00100000), r0.x
+ 179:   or r0.x, r0.x, r2.z
+ 180:   store_structured u0.x, r0.y, l(0), r0.x
+ 181: endif
+ 182: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

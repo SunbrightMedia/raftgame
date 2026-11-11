@@ -1,0 +1,36 @@
+shader ResourceId::7786, stage vs, name "Vertex Shader 7786"
+entry point: main
+constant block 0 "cbuffer0" (64 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+in  ATTRIBUTE0
+out SV_POSITION0
+
+==================== disassembly: DXBC ====================
+
+Shader hash f220ddbb-32cb7343-68ca9720-397e529e
+
+vs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[4], immediateIndexed
+      dcl_input v0.xyzw
+      dcl_output_siv o0.xyzw, position
+      dcl_temps 1
+   0: mul r0.xyzw, v0.yyyy, cb0[1].xyzw
+   1: mad r0.xyzw, v0.xxxx, cb0[0].xyzw, r0.xyzw
+   2: mad r0.xyzw, v0.zzzz, cb0[2].xyzw, r0.xyzw
+   3: mad o0.xyzw, v0.wwww, cb0[3].xyzw, r0.xyzw
+   4: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

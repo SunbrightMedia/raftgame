@@ -1,0 +1,24 @@
+{
+ "index": 310,
+ "kind": "clear",
+ "events": [
+  7020,
+  7020
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "DiffuseIndirectAndAO",
+  "LumenScreenProbeGather",
+  "ClearTextureUint(%s %s %dx%d Mip=%d)"
+ ],
+ "first": "ID3D11DeviceContext::ClearUnorderedAccessViewUint()",
+ "last": "ID3D11DeviceContext::ClearUnorderedAccessViewUint()",
+ "shaders": {},
+ "constants": {},
+ "reads": {},
+ "draws": [],
+ "outputs": [],
+ "images": []
+}

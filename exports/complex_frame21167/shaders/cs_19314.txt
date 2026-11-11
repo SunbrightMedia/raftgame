@@ -1,0 +1,706 @@
+shader ResourceId::19314, stage cs, name "Compute Shader 19314"
+entry point: main
+constant block 0 "cbuffer0" (32 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+read  0 "texture0" (TextureType.Texture2D)
+read  1 "texture1" (TextureType.Texture2D)
+write 0 "uav0" (TextureType.Texture2D)
+write 1 "uav1" (TextureType.Texture2D)
+in  vThreadID0
+
+==================== disassembly: DXBC ====================
+
+Shader hash b574eafb-195ed4dc-f225f403-b8cf0d7b
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[2], immediateIndexed
+      dcl_resource_texture2d (float,float,float,float) t0
+      dcl_resource_texture2d (float,float,float,float) t1
+      dcl_uav_typed_texture2d (float,float,float,float) u0
+      dcl_uav_typed_texture2d (float,float,float,float) u1
+      dcl_input vThreadID.xy
+      dcl_temps 5
+      dcl_indexableTemp x0[12], 4
+      dcl_thread_group 8, 8, 1
+   0: mov x0[0].x, l(0)
+   1: mov x0[1].x, l(-16384.000000)
+   2: mov x0[2].x, l(16384.000000)
+   3: mov x0[3].x, l(0)
+   4: mov x0[4].x, l(16384.000000)
+   5: mov x0[5].x, l(16384.000000)
+   6: iadd r0.xyzw, vThreadID.xyxy, l(-1, 0, 1, 0)
+   7: ult r1.xyzw, r0.zwxy, cb0[0].zwzw
+   8: and r1.xy, r1.ywyy, r1.xzxx
+   9: if_nz r1.x
+  10:   mov r2.xy, r0.zwzz
+  11:   mov r2.zw, l(0, 0, 0, 0)
+  12:   ld_indexable(texture2d)(float,float,float,float) r1.xz, r2.xyww, t0.xzyw
+  13:   ld_indexable(texture2d)(float,float,float,float) r2.xyzw, r2.xyzw, t1.xyzw
+  14:   min r1.x, r1.x, l(0)
+  15:   mov x0[0].x, r1.x
+  16:   max r1.x, r1.z, l(-16384.000000)
+  17:   mov x0[1].x, r1.x
+  18:   min r1.xzw, r2.yyzw, l(16384.000000, 0.000000, 16384.000000, 16384.000000)
+  19:   mov x0[2].x, r1.x
+  20:   max r1.x, r2.x, l(0)
+  21:   mov x0[3].x, r1.x
+  22:   mov x0[4].x, r1.z
+  23:   mov x0[5].x, r1.w
+  24: endif
+  25: if_nz r1.y
+  26:   mov r0.zw, l(0, 0, 0, 0)
+  27:   ld_indexable(texture2d)(float,float,float,float) r1.xy, r0.xyww, t0.xyzw
+  28:   ld_indexable(texture2d)(float,float,float,float) r0.xyzw, r0.xyzw, t1.xyzw
+  29:   mov r1.z, x0[0].x
+  30:   mov r1.w, x0[1].x
+  31:   mov r2.x, x0[2].x
+  32:   mov r2.y, x0[3].x
+  33:   mov r2.z, x0[4].x
+  34:   mov r2.w, x0[5].x
+  35:   min r1.x, r1.x, r1.z
+  36:   mov x0[0].x, r1.x
+  37:   max r1.x, r1.y, r1.w
+  38:   mov x0[1].x, r1.x
+  39:   min r0.y, r0.y, r2.x
+  40:   mov x0[2].x, r0.y
+  41:   max r0.x, r0.x, r2.y
+  42:   mov x0[3].x, r0.x
+  43:   min r0.x, r0.z, r2.z
+  44:   mov x0[4].x, r0.x
+  45:   min r0.x, r0.w, r2.w
+  46:   mov x0[5].x, r0.x
+  47: endif
+  48: iadd r0.xyzw, vThreadID.xyxy, l(-1, -1, 1, 1)
+  49: ult r1.xyzw, r0.zwxy, cb0[0].zwzw
+  50: and r1.xy, r1.ywyy, r1.xzxx
+  51: if_nz r1.x
+  52:   mov r2.xy, r0.zwzz
+  53:   mov r2.zw, l(0, 0, 0, 0)
+  54:   ld_indexable(texture2d)(float,float,float,float) r1.xz, r2.xyww, t0.xzyw
+  55:   ld_indexable(texture2d)(float,float,float,float) r2.xyzw, r2.xyzw, t1.xyzw
+  56:   mov r1.w, x0[0].x
+  57:   mov r3.x, x0[1].x
+  58:   mov r3.y, x0[2].x
+  59:   mov r3.z, x0[3].x
+  60:   mov r3.w, x0[4].x
+  61:   mov r4.x, x0[5].x
+  62:   min r1.x, r1.x, r1.w
+  63:   mov x0[0].x, r1.x
+  64:   max r1.x, r1.z, r3.x
+  65:   mov x0[1].x, r1.x
+  66:   min r1.x, r2.y, r3.y
+  67:   mov x0[2].x, r1.x
+  68:   max r1.x, r2.x, r3.z
+  69:   mov x0[3].x, r1.x
+  70:   min r1.x, r2.z, r3.w
+  71:   mov x0[4].x, r1.x
+  72:   min r1.x, r2.w, r4.x
+  73:   mov x0[5].x, r1.x
+  74: endif
+  75: if_nz r1.y
+  76:   mov r0.zw, l(0, 0, 0, 0)
+  77:   ld_indexable(texture2d)(float,float,float,float) r1.xy, r0.xyww, t0.xyzw
+  78:   ld_indexable(texture2d)(float,float,float,float) r0.xyzw, r0.xyzw, t1.xyzw
+  79:   mov r1.z, x0[0].x
+  80:   mov r1.w, x0[1].x
+  81:   mov r2.x, x0[2].x
+  82:   mov r2.y, x0[3].x
+  83:   mov r2.z, x0[4].x
+  84:   mov r2.w, x0[5].x
+  85:   min r1.x, r1.x, r1.z
+  86:   mov x0[0].x, r1.x
+  87:   max r1.x, r1.y, r1.w
+  88:   mov x0[1].x, r1.x
+  89:   min r0.y, r0.y, r2.x
+  90:   mov x0[2].x, r0.y
+  91:   max r0.x, r0.x, r2.y
+  92:   mov x0[3].x, r0.x
+  93:   min r0.x, r0.z, r2.z
+  94:   mov x0[4].x, r0.x
+  95:   min r0.x, r0.w, r2.w
+  96:   mov x0[5].x, r0.x
+  97: endif
+  98: iadd r0.xyzw, vThreadID.xyxy, l(0, -1, 0, 1)
+  99: ult r1.xyzw, r0.zwxy, cb0[0].zwzw
+ 100: and r1.xy, r1.ywyy, r1.xzxx
+ 101: if_nz r1.x
+ 102:   mov r2.xy, r0.zwzz
+ 103:   mov r2.zw, l(0, 0, 0, 0)
+ 104:   ld_indexable(texture2d)(float,float,float,float) r1.xz, r2.xyww, t0.xzyw
+ 105:   ld_indexable(texture2d)(float,float,float,float) r2.xyzw, r2.xyzw, t1.xyzw
+ 106:   mov r1.w, x0[0].x
+ 107:   mov r3.x, x0[1].x
+ 108:   mov r3.y, x0[2].x
+ 109:   mov r3.z, x0[3].x
+ 110:   mov r3.w, x0[4].x
+ 111:   mov r4.x, x0[5].x
+ 112:   min r1.x, r1.x, r1.w
+ 113:   mov x0[0].x, r1.x
+ 114:   max r1.x, r1.z, r3.x
+ 115:   mov x0[1].x, r1.x
+ 116:   min r1.x, r2.y, r3.y
+ 117:   mov x0[2].x, r1.x
+ 118:   max r1.x, r2.x, r3.z
+ 119:   mov x0[3].x, r1.x
+ 120:   min r1.x, r2.z, r3.w
+ 121:   mov x0[4].x, r1.x
+ 122:   min r1.x, r2.w, r4.x
+ 123:   mov x0[5].x, r1.x
+ 124: endif
+ 125: if_nz r1.y
+ 126:   mov r0.zw, l(0, 0, 0, 0)
+ 127:   ld_indexable(texture2d)(float,float,float,float) r1.xy, r0.xyww, t0.xyzw
+ 128:   ld_indexable(texture2d)(float,float,float,float) r0.xyzw, r0.xyzw, t1.xyzw
+ 129:   mov r1.z, x0[0].x
+ 130:   mov r1.w, x0[1].x
+ 131:   mov r2.x, x0[2].x
+ 132:   mov r2.y, x0[3].x
+ 133:   mov r2.z, x0[4].x
+ 134:   mov r2.w, x0[5].x
+ 135:   min r1.x, r1.x, r1.z
+ 136:   mov x0[0].x, r1.x
+ 137:   max r1.x, r1.y, r1.w
+ 138:   mov x0[1].x, r1.x
+ 139:   min r0.y, r0.y, r2.x
+ 140:   mov x0[2].x, r0.y
+ 141:   max r0.x, r0.x, r2.y
+ 142:   mov x0[3].x, r0.x
+ 143:   min r0.x, r0.z, r2.z
+ 144:   mov x0[4].x, r0.x
+ 145:   min r0.x, r0.w, r2.w
+ 146:   mov x0[5].x, r0.x
+ 147: endif
+ 148: iadd r0.xyzw, vThreadID.xyxy, l(1, -1, -1, 1)
+ 149: ult r1.xyzw, r0.zwxy, cb0[0].zwzw
+ 150: and r1.xy, r1.ywyy, r1.xzxx
+ 151: if_nz r1.x
+ 152:   mov r2.xy, r0.zwzz
+ 153:   mov r2.zw, l(0, 0, 0, 0)
+ 154:   ld_indexable(texture2d)(float,float,float,float) r1.xz, r2.xyww, t0.xzyw
+ 155:   ld_indexable(texture2d)(float,float,float,float) r2.xyzw, r2.xyzw, t1.xyzw
+ 156:   mov r1.w, x0[0].x
+ 157:   mov r3.x, x0[1].x
+ 158:   mov r3.y, x0[2].x
+ 159:   mov r3.z, x0[3].x
+ 160:   mov r3.w, x0[4].x
+ 161:   mov r4.x, x0[5].x
+ 162:   min r1.x, r1.x, r1.w
+ 163:   mov x0[0].x, r1.x
+ 164:   max r1.x, r1.z, r3.x
+ 165:   mov x0[1].x, r1.x
+ 166:   min r1.x, r2.y, r3.y
+ 167:   mov x0[2].x, r1.x
+ 168:   max r1.x, r2.x, r3.z
+ 169:   mov x0[3].x, r1.x
+ 170:   min r1.x, r2.z, r3.w
+ 171:   mov x0[4].x, r1.x
+ 172:   min r1.x, r2.w, r4.x
+ 173:   mov x0[5].x, r1.x
+ 174: endif
+ 175: if_nz r1.y
+ 176:   mov r0.zw, l(0, 0, 0, 0)
+ 177:   ld_indexable(texture2d)(float,float,float,float) r1.xy, r0.xyww, t0.xyzw
+ 178:   ld_indexable(texture2d)(float,float,float,float) r0.xyzw, r0.xyzw, t1.xyzw
+ 179:   mov r1.z, x0[0].x
+ 180:   mov r1.w, x0[1].x
+ 181:   mov r2.x, x0[2].x
+ 182:   mov r2.y, x0[3].x
+ 183:   mov r2.z, x0[4].x
+ 184:   mov r2.w, x0[5].x
+ 185:   min r1.x, r1.x, r1.z
+ 186:   mov x0[0].x, r1.x
+ 187:   max r1.x, r1.y, r1.w
+ 188:   mov x0[1].x, r1.x
+ 189:   min r0.y, r0.y, r2.x
+ 190:   mov x0[2].x, r0.y
+ 191:   max r0.x, r0.x, r2.y
+ 192:   mov x0[3].x, r0.x
+ 193:   min r0.x, r0.z, r2.z
+ 194:   mov x0[4].x, r0.x
+ 195:   min r0.x, r0.w, r2.w
+ 196:   mov x0[5].x, r0.x
+ 197: endif
+ 198: mov x0[6].x, l(0)
+ 199: mov x0[7].x, l(-16384.000000)
+ 200: mov x0[8].x, l(16384.000000)
+ 201: mov x0[9].x, l(0)
+ 202: mov x0[10].x, l(16384.000000)
+ 203: mov x0[11].x, l(16384.000000)
+ 204: iadd r0.xyzw, vThreadID.xyxy, l(-2, 0, 2, 0)
+ 205: ult r1.xyzw, r0.zwxy, cb0[0].zwzw
+ 206: and r1.xy, r1.ywyy, r1.xzxx
+ 207: if_nz r1.x
+ 208:   mov r2.xy, r0.zwzz
+ 209:   mov r2.zw, l(0, 0, 0, 0)
+ 210:   ld_indexable(texture2d)(float,float,float,float) r1.xz, r2.xyww, t0.xzyw
+ 211:   ld_indexable(texture2d)(float,float,float,float) r2.xyzw, r2.xyzw, t1.xyzw
+ 212:   min r1.x, r1.x, l(0)
+ 213:   mov x0[6].x, r1.x
+ 214:   max r1.x, r1.z, l(-16384.000000)
+ 215:   mov x0[7].x, r1.x
+ 216:   min r1.x, r2.y, l(16384.000000)
+ 217:   mov x0[8].x, r1.x
+ 218:   max r1.x, r2.x, l(0)
+ 219:   mov x0[9].x, r1.x
+ 220:   mad r1.xz, cb0[1].wwww, l(8.000000, 0.000000, 8.000000, 0.000000), r2.zzwz
+ 221:   min r1.xz, r1.xxzx, l(16384.000000, 0.000000, 16384.000000, 0.000000)
+ 222:   mov x0[10].x, r1.x
+ 223:   mov x0[11].x, r1.z
+ 224: endif
+ 225: if_nz r1.y
+ 226:   mov r0.zw, l(0, 0, 0, 0)
+ 227:   ld_indexable(texture2d)(float,float,float,float) r1.xy, r0.xyww, t0.xyzw
+ 228:   ld_indexable(texture2d)(float,float,float,float) r0.xyzw, r0.xyzw, t1.xyzw
+ 229:   mov r1.z, x0[6].x
+ 230:   mov r1.w, x0[7].x
+ 231:   mov r2.x, x0[8].x
+ 232:   mov r2.y, x0[9].x
+ 233:   mov r2.z, x0[10].x
+ 234:   mov r2.w, x0[11].x
+ 235:   min r1.x, r1.x, r1.z
+ 236:   mov x0[6].x, r1.x
+ 237:   max r1.x, r1.y, r1.w
+ 238:   mov x0[7].x, r1.x
+ 239:   min r0.y, r0.y, r2.x
+ 240:   mov x0[8].x, r0.y
+ 241:   max r0.x, r0.x, r2.y
+ 242:   mov x0[9].x, r0.x
+ 243:   mad r0.xy, cb0[1].wwww, l(8.000000, 8.000000, 0.000000, 0.000000), r0.zwzz
+ 244:   min r0.x, r0.x, r2.z
+ 245:   mov x0[10].x, r0.x
+ 246:   min r0.x, r0.y, r2.w
+ 247:   mov x0[11].x, r0.x
+ 248: endif
+ 249: iadd r0.xyzw, vThreadID.xyxy, l(-2, -1, 2, 1)
+ 250: ult r1.xyzw, r0.zwxy, cb0[0].zwzw
+ 251: and r1.xy, r1.ywyy, r1.xzxx
+ 252: if_nz r1.x
+ 253:   mov r2.xy, r0.zwzz
+ 254:   mov r2.zw, l(0, 0, 0, 0)
+ 255:   ld_indexable(texture2d)(float,float,float,float) r1.xz, r2.xyww, t0.xzyw
+ 256:   ld_indexable(texture2d)(float,float,float,float) r2.xyzw, r2.xyzw, t1.xyzw
+ 257:   mov r1.w, x0[6].x
+ 258:   mov r3.x, x0[7].x
+ 259:   mov r3.y, x0[8].x
+ 260:   mov r3.z, x0[9].x
+ 261:   mov r3.w, x0[10].x
+ 262:   mov r4.x, x0[11].x
+ 263:   min r1.x, r1.x, r1.w
+ 264:   mov x0[6].x, r1.x
+ 265:   max r1.x, r1.z, r3.x
+ 266:   mov x0[7].x, r1.x
+ 267:   min r1.x, r2.y, r3.y
+ 268:   mov x0[8].x, r1.x
+ 269:   max r1.x, r2.x, r3.z
+ 270:   mov x0[9].x, r1.x
+ 271:   mad r1.xz, cb0[1].wwww, l(8.000000, 0.000000, 8.000000, 0.000000), r2.zzwz
+ 272:   min r1.x, r1.x, r3.w
+ 273:   mov x0[10].x, r1.x
+ 274:   min r1.x, r1.z, r4.x
+ 275:   mov x0[11].x, r1.x
+ 276: endif
+ 277: if_nz r1.y
+ 278:   mov r0.zw, l(0, 0, 0, 0)
+ 279:   ld_indexable(texture2d)(float,float,float,float) r1.xy, r0.xyww, t0.xyzw
+ 280:   ld_indexable(texture2d)(float,float,float,float) r0.xyzw, r0.xyzw, t1.xyzw
+ 281:   mov r1.z, x0[6].x
+ 282:   mov r1.w, x0[7].x
+ 283:   mov r2.x, x0[8].x
+ 284:   mov r2.y, x0[9].x
+ 285:   mov r2.z, x0[10].x
+ 286:   mov r2.w, x0[11].x
+ 287:   min r1.x, r1.x, r1.z
+ 288:   mov x0[6].x, r1.x
+ 289:   max r1.x, r1.y, r1.w
+ 290:   mov x0[7].x, r1.x
+ 291:   min r0.y, r0.y, r2.x
+ 292:   mov x0[8].x, r0.y
+ 293:   max r0.x, r0.x, r2.y
+ 294:   mov x0[9].x, r0.x
+ 295:   mad r0.xy, cb0[1].wwww, l(8.000000, 8.000000, 0.000000, 0.000000), r0.zwzz
+ 296:   min r0.x, r0.x, r2.z
+ 297:   mov x0[10].x, r0.x
+ 298:   min r0.x, r0.y, r2.w
+ 299:   mov x0[11].x, r0.x
+ 300: endif
+ 301: iadd r0.xyzw, vThreadID.xyxy, l(-2, -2, 2, 2)
+ 302: ult r1.xyzw, r0.zwxy, cb0[0].zwzw
+ 303: and r1.xy, r1.ywyy, r1.xzxx
+ 304: if_nz r1.x
+ 305:   mov r2.xy, r0.zwzz
+ 306:   mov r2.zw, l(0, 0, 0, 0)
+ 307:   ld_indexable(texture2d)(float,float,float,float) r1.xz, r2.xyww, t0.xzyw
+ 308:   ld_indexable(texture2d)(float,float,float,float) r2.xyzw, r2.xyzw, t1.xyzw
+ 309:   mov r1.w, x0[6].x
+ 310:   mov r3.x, x0[7].x
+ 311:   mov r3.y, x0[8].x
+ 312:   mov r3.z, x0[9].x
+ 313:   mov r3.w, x0[10].x
+ 314:   mov r4.x, x0[11].x
+ 315:   min r1.x, r1.x, r1.w
+ 316:   mov x0[6].x, r1.x
+ 317:   max r1.x, r1.z, r3.x
+ 318:   mov x0[7].x, r1.x
+ 319:   min r1.x, r2.y, r3.y
+ 320:   mov x0[8].x, r1.x
+ 321:   max r1.x, r2.x, r3.z
+ 322:   mov x0[9].x, r1.x
+ 323:   mad r1.xz, cb0[1].wwww, l(11.313708, 0.000000, 11.313708, 0.000000), r2.zzwz
+ 324:   min r1.x, r1.x, r3.w
+ 325:   mov x0[10].x, r1.x
+ 326:   min r1.x, r1.z, r4.x
+ 327:   mov x0[11].x, r1.x
+ 328: endif
+ 329: if_nz r1.y
+ 330:   mov r0.zw, l(0, 0, 0, 0)
+ 331:   ld_indexable(texture2d)(float,float,float,float) r1.xy, r0.xyww, t0.xyzw
+ 332:   ld_indexable(texture2d)(float,float,float,float) r0.xyzw, r0.xyzw, t1.xyzw
+ 333:   mov r1.z, x0[6].x
+ 334:   mov r1.w, x0[7].x
+ 335:   mov r2.x, x0[8].x
+ 336:   mov r2.y, x0[9].x
+ 337:   mov r2.z, x0[10].x
+ 338:   mov r2.w, x0[11].x
+ 339:   min r1.x, r1.x, r1.z
+ 340:   mov x0[6].x, r1.x
+ 341:   max r1.x, r1.y, r1.w
+ 342:   mov x0[7].x, r1.x
+ 343:   min r0.y, r0.y, r2.x
+ 344:   mov x0[8].x, r0.y
+ 345:   max r0.x, r0.x, r2.y
+ 346:   mov x0[9].x, r0.x
+ 347:   mad r0.xy, cb0[1].wwww, l(11.313708, 11.313708, 0.000000, 0.000000), r0.zwzz
+ 348:   min r0.x, r0.x, r2.z
+ 349:   mov x0[10].x, r0.x
+ 350:   min r0.x, r0.y, r2.w
+ 351:   mov x0[11].x, r0.x
+ 352: endif
+ 353: iadd r0.xyzw, vThreadID.xyxy, l(-1, -2, 1, 2)
+ 354: ult r1.xyzw, r0.zwxy, cb0[0].zwzw
+ 355: and r1.xy, r1.ywyy, r1.xzxx
+ 356: if_nz r1.x
+ 357:   mov r2.xy, r0.zwzz
+ 358:   mov r2.zw, l(0, 0, 0, 0)
+ 359:   ld_indexable(texture2d)(float,float,float,float) r1.xz, r2.xyww, t0.xzyw
+ 360:   ld_indexable(texture2d)(float,float,float,float) r2.xyzw, r2.xyzw, t1.xyzw
+ 361:   mov r1.w, x0[6].x
+ 362:   mov r3.x, x0[7].x
+ 363:   mov r3.y, x0[8].x
+ 364:   mov r3.z, x0[9].x
+ 365:   mov r3.w, x0[10].x
+ 366:   mov r4.x, x0[11].x
+ 367:   min r1.x, r1.x, r1.w
+ 368:   mov x0[6].x, r1.x
+ 369:   max r1.x, r1.z, r3.x
+ 370:   mov x0[7].x, r1.x
+ 371:   min r1.x, r2.y, r3.y
+ 372:   mov x0[8].x, r1.x
+ 373:   max r1.x, r2.x, r3.z
+ 374:   mov x0[9].x, r1.x
+ 375:   mad r1.xz, cb0[1].wwww, l(8.000000, 0.000000, 8.000000, 0.000000), r2.zzwz
+ 376:   min r1.x, r1.x, r3.w
+ 377:   mov x0[10].x, r1.x
+ 378:   min r1.x, r1.z, r4.x
+ 379:   mov x0[11].x, r1.x
+ 380: endif
+ 381: if_nz r1.y
+ 382:   mov r0.zw, l(0, 0, 0, 0)
+ 383:   ld_indexable(texture2d)(float,float,float,float) r1.xy, r0.xyww, t0.xyzw
+ 384:   ld_indexable(texture2d)(float,float,float,float) r0.xyzw, r0.xyzw, t1.xyzw
+ 385:   mov r1.z, x0[6].x
+ 386:   mov r1.w, x0[7].x
+ 387:   mov r2.x, x0[8].x
+ 388:   mov r2.y, x0[9].x
+ 389:   mov r2.z, x0[10].x
+ 390:   mov r2.w, x0[11].x
+ 391:   min r1.x, r1.x, r1.z
+ 392:   mov x0[6].x, r1.x
+ 393:   max r1.x, r1.y, r1.w
+ 394:   mov x0[7].x, r1.x
+ 395:   min r0.y, r0.y, r2.x
+ 396:   mov x0[8].x, r0.y
+ 397:   max r0.x, r0.x, r2.y
+ 398:   mov x0[9].x, r0.x
+ 399:   mad r0.xy, cb0[1].wwww, l(8.000000, 8.000000, 0.000000, 0.000000), r0.zwzz
+ 400:   min r0.x, r0.x, r2.z
+ 401:   mov x0[10].x, r0.x
+ 402:   min r0.x, r0.y, r2.w
+ 403:   mov x0[11].x, r0.x
+ 404: endif
+ 405: iadd r0.xyzw, vThreadID.xyxy, l(0, -2, 0, 2)
+ 406: ult r1.xyzw, r0.zwxy, cb0[0].zwzw
+ 407: and r1.xy, r1.ywyy, r1.xzxx
+ 408: if_nz r1.x
+ 409:   mov r2.xy, r0.zwzz
+ 410:   mov r2.zw, l(0, 0, 0, 0)
+ 411:   ld_indexable(texture2d)(float,float,float,float) r1.xz, r2.xyww, t0.xzyw
+ 412:   ld_indexable(texture2d)(float,float,float,float) r2.xyzw, r2.xyzw, t1.xyzw
+ 413:   mov r1.w, x0[6].x
+ 414:   mov r3.x, x0[7].x
+ 415:   mov r3.y, x0[8].x
+ 416:   mov r3.z, x0[9].x
+ 417:   mov r3.w, x0[10].x
+ 418:   mov r4.x, x0[11].x
+ 419:   min r1.x, r1.x, r1.w
+ 420:   mov x0[6].x, r1.x
+ 421:   max r1.x, r1.z, r3.x
+ 422:   mov x0[7].x, r1.x
+ 423:   min r1.x, r2.y, r3.y
+ 424:   mov x0[8].x, r1.x
+ 425:   max r1.x, r2.x, r3.z
+ 426:   mov x0[9].x, r1.x
+ 427:   mad r1.xz, cb0[1].wwww, l(8.000000, 0.000000, 8.000000, 0.000000), r2.zzwz
+ 428:   min r1.x, r1.x, r3.w
+ 429:   mov x0[10].x, r1.x
+ 430:   min r1.x, r1.z, r4.x
+ 431:   mov x0[11].x, r1.x
+ 432: endif
+ 433: if_nz r1.y
+ 434:   mov r0.zw, l(0, 0, 0, 0)
+ 435:   ld_indexable(texture2d)(float,float,float,float) r1.xy, r0.xyww, t0.xyzw
+ 436:   ld_indexable(texture2d)(float,float,float,float) r0.xyzw, r0.xyzw, t1.xyzw
+ 437:   mov r1.z, x0[6].x
+ 438:   mov r1.w, x0[7].x
+ 439:   mov r2.x, x0[8].x
+ 440:   mov r2.y, x0[9].x
+ 441:   mov r2.z, x0[10].x
+ 442:   mov r2.w, x0[11].x
+ 443:   min r1.x, r1.x, r1.z
+ 444:   mov x0[6].x, r1.x
+ 445:   max r1.x, r1.y, r1.w
+ 446:   mov x0[7].x, r1.x
+ 447:   min r0.y, r0.y, r2.x
+ 448:   mov x0[8].x, r0.y
+ 449:   max r0.x, r0.x, r2.y
+ 450:   mov x0[9].x, r0.x
+ 451:   mad r0.xy, cb0[1].wwww, l(8.000000, 8.000000, 0.000000, 0.000000), r0.zwzz
+ 452:   min r0.x, r0.x, r2.z
+ 453:   mov x0[10].x, r0.x
+ 454:   min r0.x, r0.y, r2.w
+ 455:   mov x0[11].x, r0.x
+ 456: endif
+ 457: iadd r0.xyzw, vThreadID.xyxy, l(1, -2, -1, 2)
+ 458: ult r1.xyzw, r0.zwxy, cb0[0].zwzw
+ 459: and r1.xy, r1.ywyy, r1.xzxx
+ 460: if_nz r1.x
+ 461:   mov r2.xy, r0.zwzz
+ 462:   mov r2.zw, l(0, 0, 0, 0)
+ 463:   ld_indexable(texture2d)(float,float,float,float) r1.xz, r2.xyww, t0.xzyw
+ 464:   ld_indexable(texture2d)(float,float,float,float) r2.xyzw, r2.xyzw, t1.xyzw
+ 465:   mov r1.w, x0[6].x
+ 466:   mov r3.x, x0[7].x
+ 467:   mov r3.y, x0[8].x
+ 468:   mov r3.z, x0[9].x
+ 469:   mov r3.w, x0[10].x
+ 470:   mov r4.x, x0[11].x
+ 471:   min r1.x, r1.x, r1.w
+ 472:   mov x0[6].x, r1.x
+ 473:   max r1.x, r1.z, r3.x
+ 474:   mov x0[7].x, r1.x
+ 475:   min r1.x, r2.y, r3.y
+ 476:   mov x0[8].x, r1.x
+ 477:   max r1.x, r2.x, r3.z
+ 478:   mov x0[9].x, r1.x
+ 479:   mad r1.xz, cb0[1].wwww, l(8.000000, 0.000000, 8.000000, 0.000000), r2.zzwz
+ 480:   min r1.x, r1.x, r3.w
+ 481:   mov x0[10].x, r1.x
+ 482:   min r1.x, r1.z, r4.x
+ 483:   mov x0[11].x, r1.x
+ 484: endif
+ 485: if_nz r1.y
+ 486:   mov r0.zw, l(0, 0, 0, 0)
+ 487:   ld_indexable(texture2d)(float,float,float,float) r1.xy, r0.xyww, t0.xyzw
+ 488:   ld_indexable(texture2d)(float,float,float,float) r0.xyzw, r0.xyzw, t1.xyzw
+ 489:   mov r1.z, x0[6].x
+ 490:   mov r1.w, x0[7].x
+ 491:   mov r2.x, x0[8].x
+ 492:   mov r2.y, x0[9].x
+ 493:   mov r2.z, x0[10].x
+ 494:   mov r2.w, x0[11].x
+ 495:   min r1.x, r1.x, r1.z
+ 496:   mov x0[6].x, r1.x
+ 497:   max r1.x, r1.y, r1.w
+ 498:   mov x0[7].x, r1.x
+ 499:   min r0.y, r0.y, r2.x
+ 500:   mov x0[8].x, r0.y
+ 501:   max r0.x, r0.x, r2.y
+ 502:   mov x0[9].x, r0.x
+ 503:   mad r0.xy, cb0[1].wwww, l(8.000000, 8.000000, 0.000000, 0.000000), r0.zwzz
+ 504:   min r0.x, r0.x, r2.z
+ 505:   mov x0[10].x, r0.x
+ 506:   min r0.x, r0.y, r2.w
+ 507:   mov x0[11].x, r0.x
+ 508: endif
+ 509: iadd r0.xyzw, vThreadID.xyxy, l(2, -2, -2, 2)
+ 510: ult r1.xyzw, r0.zwxy, cb0[0].zwzw
+ 511: and r1.xy, r1.ywyy, r1.xzxx
+ 512: if_nz r1.x
+ 513:   mov r2.xy, r0.zwzz
+ 514:   mov r2.zw, l(0, 0, 0, 0)
+ 515:   ld_indexable(texture2d)(float,float,float,float) r1.xz, r2.xyww, t0.xzyw
+ 516:   ld_indexable(texture2d)(float,float,float,float) r2.xyzw, r2.xyzw, t1.xyzw
+ 517:   mov r1.w, x0[6].x
+ 518:   mov r3.x, x0[7].x
+ 519:   mov r3.y, x0[8].x
+ 520:   mov r3.z, x0[9].x
+ 521:   mov r3.w, x0[10].x
+ 522:   mov r4.x, x0[11].x
+ 523:   min r1.x, r1.x, r1.w
+ 524:   mov x0[6].x, r1.x
+ 525:   max r1.x, r1.z, r3.x
+ 526:   mov x0[7].x, r1.x
+ 527:   min r1.x, r2.y, r3.y
+ 528:   mov x0[8].x, r1.x
+ 529:   max r1.x, r2.x, r3.z
+ 530:   mov x0[9].x, r1.x
+ 531:   mad r1.xz, cb0[1].wwww, l(11.313708, 0.000000, 11.313708, 0.000000), r2.zzwz
+ 532:   min r1.x, r1.x, r3.w
+ 533:   mov x0[10].x, r1.x
+ 534:   min r1.x, r1.z, r4.x
+ 535:   mov x0[11].x, r1.x
+ 536: endif
+ 537: if_nz r1.y
+ 538:   mov r0.zw, l(0, 0, 0, 0)
+ 539:   ld_indexable(texture2d)(float,float,float,float) r1.xy, r0.xyww, t0.xyzw
+ 540:   ld_indexable(texture2d)(float,float,float,float) r0.xyzw, r0.xyzw, t1.xyzw
+ 541:   mov r1.z, x0[6].x
+ 542:   mov r1.w, x0[7].x
+ 543:   mov r2.x, x0[8].x
+ 544:   mov r2.y, x0[9].x
+ 545:   mov r2.z, x0[10].x
+ 546:   mov r2.w, x0[11].x
+ 547:   min r1.x, r1.x, r1.z
+ 548:   mov x0[6].x, r1.x
+ 549:   max r1.x, r1.y, r1.w
+ 550:   mov x0[7].x, r1.x
+ 551:   min r0.y, r0.y, r2.x
+ 552:   mov x0[8].x, r0.y
+ 553:   max r0.x, r0.x, r2.y
+ 554:   mov x0[9].x, r0.x
+ 555:   mad r0.xy, cb0[1].wwww, l(11.313708, 11.313708, 0.000000, 0.000000), r0.zwzz
+ 556:   min r0.x, r0.x, r2.z
+ 557:   mov x0[10].x, r0.x
+ 558:   min r0.x, r0.y, r2.w
+ 559:   mov x0[11].x, r0.x
+ 560: endif
+ 561: iadd r0.xyzw, vThreadID.xyxy, l(2, -1, -2, 1)
+ 562: ult r1.xyzw, r0.zwxy, cb0[0].zwzw
+ 563: and r1.xy, r1.ywyy, r1.xzxx
+ 564: if_nz r1.x
+ 565:   mov r2.xy, r0.zwzz
+ 566:   mov r2.zw, l(0, 0, 0, 0)
+ 567:   ld_indexable(texture2d)(float,float,float,float) r1.xz, r2.xyww, t0.xzyw
+ 568:   ld_indexable(texture2d)(float,float,float,float) r2.xyzw, r2.xyzw, t1.xyzw
+ 569:   mov r1.w, x0[6].x
+ 570:   mov r3.x, x0[7].x
+ 571:   mov r3.y, x0[8].x
+ 572:   mov r3.z, x0[9].x
+ 573:   mov r3.w, x0[10].x
+ 574:   mov r4.x, x0[11].x
+ 575:   min r1.x, r1.x, r1.w
+ 576:   mov x0[6].x, r1.x
+ 577:   max r1.x, r1.z, r3.x
+ 578:   mov x0[7].x, r1.x
+ 579:   min r1.x, r2.y, r3.y
+ 580:   mov x0[8].x, r1.x
+ 581:   max r1.x, r2.x, r3.z
+ 582:   mov x0[9].x, r1.x
+ 583:   mad r1.xz, cb0[1].wwww, l(8.000000, 0.000000, 8.000000, 0.000000), r2.zzwz
+ 584:   min r1.x, r1.x, r3.w
+ 585:   mov x0[10].x, r1.x
+ 586:   min r1.x, r1.z, r4.x
+ 587:   mov x0[11].x, r1.x
+ 588: endif
+ 589: if_nz r1.y
+ 590:   mov r0.zw, l(0, 0, 0, 0)
+ 591:   ld_indexable(texture2d)(float,float,float,float) r1.xy, r0.xyww, t0.xyzw
+ 592:   ld_indexable(texture2d)(float,float,float,float) r0.xyzw, r0.xyzw, t1.xyzw
+ 593:   mov r1.z, x0[6].x
+ 594:   mov r1.w, x0[7].x
+ 595:   mov r2.x, x0[8].x
+ 596:   mov r2.y, x0[9].x
+ 597:   mov r2.z, x0[10].x
+ 598:   mov r2.w, x0[11].x
+ 599:   min r1.x, r1.x, r1.z
+ 600:   mov x0[6].x, r1.x
+ 601:   max r1.x, r1.y, r1.w
+ 602:   mov x0[7].x, r1.x
+ 603:   min r0.y, r0.y, r2.x
+ 604:   mov x0[8].x, r0.y
+ 605:   max r0.x, r0.x, r2.y
+ 606:   mov x0[9].x, r0.x
+ 607:   mad r0.xy, cb0[1].wwww, l(8.000000, 8.000000, 0.000000, 0.000000), r0.zwzz
+ 608:   min r0.x, r0.x, r2.z
+ 609:   mov x0[10].x, r0.x
+ 610:   min r0.x, r0.y, r2.w
+ 611:   mov x0[11].x, r0.x
+ 612: endif
+ 613: ult r0.xy, vThreadID.xyxx, cb0[0].zwzz
+ 614: and r0.x, r0.y, r0.x
+ 615: if_nz r0.x
+ 616:   mov r0.xy, vThreadID.xyxx
+ 617:   mov r0.zw, l(0, 0, 0, 0)
+ 618:   ld_indexable(texture2d)(float,float,float,float) r1.xy, r0.xyww, t0.xyzw
+ 619:   ld_indexable(texture2d)(float,float,float,float) r0.xyzw, r0.xyzw, t1.xyzw
+ 620:   mov r1.z, x0[0].x
+ 621:   mul r1.w, -r1.z, cb0[1].z
+ 622:   lt r1.w, l(0), r1.w
+ 623:   min r1.z, r1.z, r1.x
+ 624:   movc r1.x, r1.w, r1.z, r1.x
+ 625:   mov r1.z, x0[3].x
+ 626:   mul r1.w, r1.z, cb0[1].z
+ 627:   lt r1.w, l(0), r1.w
+ 628:   max r1.z, r0.x, r1.z
+ 629:   movc r0.x, r1.w, r1.z, r0.x
+ 630:   mov r1.z, x0[6].x
+ 631:   mul r1.w, -r1.z, cb0[1].z
+ 632:   lt r1.w, l(8.000000), r1.w
+ 633:   min r1.z, r1.z, r1.x
+ 634:   movc r2.x, r1.w, r1.z, r1.x
+ 635:   mov r1.x, x0[9].x
+ 636:   mul r1.z, r1.x, cb0[1].z
+ 637:   lt r1.z, l(8.000000), r1.z
+ 638:   max r1.x, r0.x, r1.x
+ 639:   movc r3.x, r1.z, r1.x, r0.x
+ 640:   mul r0.x, -r2.x, cb0[1].z
+ 641:   lt r1.xz, l(0.000000, 0.000000, 8.000000, 0.000000), r0.xxxx
+ 642:   mov r0.x, x0[1].x
+ 643:   max r0.x, r0.x, r1.y
+ 644:   movc r0.x, r1.x, r0.x, r1.y
+ 645:   mul r1.x, r3.x, cb0[1].z
+ 646:   lt r1.xy, l(0.000000, 8.000000, 0.000000, 0.000000), r1.xxxx
+ 647:   mov r1.w, x0[2].x
+ 648:   min r4.y, r0.y, r1.w
+ 649:   mov r1.w, x0[4].x
+ 650:   min r4.z, r0.z, r1.w
+ 651:   movc r0.yz, r1.xxxx, r4.yyzy, r0.yyzy
+ 652:   mov r1.x, x0[5].x
+ 653:   min r0.w, r0.w, r1.x
+ 654:   mov r1.x, x0[7].x
+ 655:   max r1.x, r0.x, r1.x
+ 656:   movc r2.y, r1.z, r1.x, r0.x
+ 657:   mov r0.x, x0[8].x
+ 658:   min r4.y, r0.x, r0.y
+ 659:   mov r0.x, x0[10].x
+ 660:   min r4.z, r0.x, r0.z
+ 661:   movc r3.yz, r1.yyyy, r4.yyzy, r0.yyzy
+ 662:   mov r0.x, x0[11].x
+ 663:   min r3.w, r0.x, r0.w
+ 664:   mov r2.zw, l(0, 0, 0, 0)
+ 665:   store_uav_typed u0.xyzw, vThreadID.xyyy, r2.xyzw
+ 666:   store_uav_typed u1.xyzw, vThreadID.xyyy, r3.xyzw
+ 667: endif
+ 668: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

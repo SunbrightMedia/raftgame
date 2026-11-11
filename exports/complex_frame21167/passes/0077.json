@@ -1,0 +1,4342 @@
+{
+ "index": 77,
+ "kind": "draw",
+ "events": [
+  4347,
+  4777
+ ],
+ "count": 38,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "LumenSceneUpdate: %u card captures %.3fM texels",
+  "ClearCardCapture"
+ ],
+ "first": "ID3D11DeviceContext::DrawInstanced()",
+ "last": "ID3D11DeviceContext::DrawIndexed()",
+ "shaders": {
+  "vs": [
+   "shaders/vs_7777.txt",
+   "shaders/vs_6120.txt"
+  ],
+  "ps": [
+   "shaders/ps_7778.txt",
+   "shaders/ps_6119.txt",
+   "shaders/ps_6129.txt"
+  ]
+ },
+ "constants": {
+  "ps": {
+   "ResourceId::7778": [],
+   "ResourceId::6119": [
+    {
+     "block": "cbuffer0",
+     "bytes": 2288,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.02,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.05,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        2.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v4",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        20.48,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v5",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1e-06,
+        0.0,
+        0.05,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v6",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -2048.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v7",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        31744.0,
+        31744.0,
+        1.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v8",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.02,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v9",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.05,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v10",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        2.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v11",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        127.839996,
+        -360.0,
+        -8.05001,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v12",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        50.0,
+        2e-06,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v13",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.5,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v14",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -1e-06,
+        20.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v15",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -6392.0,
+        160.999954,
+        180.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v16",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v17",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        -1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v18",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v19",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v20",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v21",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v22",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -1.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v23",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v24",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v25",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        -1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v26",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        1.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v27",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v28",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v29",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v30",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -1.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v31",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v32",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.02,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v33",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        2.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v34",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        -0.05,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v35",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v36",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v37",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v38",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v39",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v40",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        50.0,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v41",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.5,
+        0.0,
+        -0.0
+       ]
+      },
+      {
+       "name": "cb0_v42",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        0.0,
+        -20.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v43",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -0.0,
+        20.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v44",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        50.0,
+        2e-06,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v45",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.5,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v46",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -1e-06,
+        20.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v47",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1e-06,
+        -20.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v48",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        12.5,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v49",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        -0.125,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v50",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -1e-06,
+        20.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v51",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -1550.0,
+        -20.000053,
+        15.5,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v52",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        50.0,
+        2e-06,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v53",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.5,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v54",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -6392.0,
+        159.999954,
+        180.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v55",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -1e-06,
+        20.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v56",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        50.0,
+        2e-06,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v57",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.5,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v58",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1e-06,
+        -21.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v59",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -1e-06,
+        20.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v60",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        50.0,
+        2e-06,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v61",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.5,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v62",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -6392.0,
+        159.999954,
+        180.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v63",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -1e-06,
+        20.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v64",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v65",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v66",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -1.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v67",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v68",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v69",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v70",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v71",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        6.132524,
+        -0.0
+       ]
+      },
+      {
+       "name": "cb0_v72",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.002976,
+        -0.005291,
+        0.164021,
+        0.092262
+       ]
+      },
+      {
+       "name": "cb0_v73",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -6392.0,
+        180.999954,
+        180.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v74",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v75",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -6392.0,
+        180.999954,
+        180.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v76",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        6392.0,
+        -180.999954,
+        -180.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v77",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.865696,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v78",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        1.154261,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v79",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.000248,
+        0.000735,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v80",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.163065,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v81",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.15514,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v82",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.866355,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v83",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        6.132524
+       ]
+      },
+      {
+       "name": "cb0_v84",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.000286,
+        -0.000637,
+        1.0,
+        -0.0
+       ]
+      },
+      {
+       "name": "cb0_v85",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.018965,
+        0.091688,
+        0.0,
+        0.996643
+       ]
+      },
+      {
+       "name": "cb0_v86",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.865484,
+        -0.005702,
+        0.0,
+        -0.021872
+       ]
+      },
+      {
+       "name": "cb0_v87",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.002778,
+        1.1506,
+        0.0,
+        -0.078889
+       ]
+      },
+      {
+       "name": "cb0_v88",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.163065,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v89",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.022192,
+        0.0788,
+        0.996643,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v90",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.999749,
+        -0.004926,
+        -0.021872,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v91",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.003186,
+        0.996878,
+        -0.078889,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v92",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v93",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.022192,
+        0.999749,
+        0.003186,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v94",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0788,
+        -0.004926,
+        0.996878,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v95",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.996643,
+        -0.021872,
+        -0.078889,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v96",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v97",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.022192,
+        0.0788,
+        0.996643,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v98",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.999749,
+        -0.004926,
+        -0.021872,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v99",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.003186,
+        0.996878,
+        -0.078889,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v100",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v101",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.022192,
+        0.999749,
+        0.003186,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v102",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0788,
+        -0.004926,
+        0.996878,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v103",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.996643,
+        -0.021872,
+        -0.078889,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v104",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v105",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v106",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -3330.03418,
+        371.727783,
+        59.092255,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v107",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -3330.03418,
+        371.727783,
+        59.092255,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v108",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        3330.03418,
+        -371.727783,
+        -59.092255,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v109",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.025635,
+        1.15485,
+        0.00368,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v110",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.068268,
+        -0.004268,
+        0.863651,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v111",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -20421.513672,
+        2279.629639,
+        362.384674,
+        6.132524
+       ]
+      },
+      {
+       "name": "cb0_v112",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.9966,
+        -0.021583,
+        -0.079523,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v113",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.025635,
+        1.15485,
+        0.00368,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v114",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.068268,
+        -0.004268,
+        0.863651,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v115",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.9966,
+        -0.021583,
+        -0.079523,
+        -0.306626
+       ]
+      },
+      {
+       "name": "cb0_v116",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        6.132524
+       ]
+      },
+      {
+       "name": "cb0_v117",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.960596,
+        4.547762,
+        0.0,
+        49.832172
+       ]
+      },
+      {
+       "name": "cb0_v118",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.001379,
+        0.575329,
+        0.0,
+        -0.039445
+       ]
+      },
+      {
+       "name": "cb0_v119",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        17.309566,
+        -0.113722,
+        0.0,
+        -0.437442
+       ]
+      },
+      {
+       "name": "cb0_v120",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -240.873032,
+        -138.180191,
+        0.163065,
+        -3056.617432
+       ]
+      },
+      {
+       "name": "cb0_v121",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.948237,
+        4.584382,
+        0.0,
+        49.832172
+       ]
+      },
+      {
+       "name": "cb0_v122",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.001389,
+        0.5753,
+        0.0,
+        -0.039445
+       ]
+      },
+      {
+       "name": "cb0_v123",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        17.309675,
+        -0.114043,
+        0.0,
+        -0.437442
+       ]
+      },
+      {
+       "name": "cb0_v124",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -240.114944,
+        -140.426376,
+        0.163065,
+        -3056.617432
+       ]
+      },
+      {
+       "name": "cb0_v125",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        -0.000248,
+        0.000735
+       ]
+      },
+      {
+       "name": "cb0_v126",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        -0.0
+       ]
+      },
+      {
+       "name": "cb0_v127",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        2.38058,
+        0.04999,
+        1.71452,
+        1.427826
+       ]
+      },
+      {
+       "name": "cb0_v128",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        120.0,
+        120.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v129",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        8.0,
+        8.0,
+        0.125,
+        0.125
+       ]
+      },
+      {
+       "name": "cb0_v130",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v131",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v132",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1344.0,
+        756.0,
+        0.000744,
+        0.001323
+       ]
+      },
+      {
+       "name": "cb0_v133",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.089658,
+        0.159392,
+        0.094866,
+        0.168651
+       ]
+      },
+      {
+       "name": "cb0_v134",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        16800.0,
+        -7087.5,
+        -1550.0,
+        1162.5
+       ]
+      },
+      {
+       "name": "cb0_v135",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        1.0,
+        0.005556,
+        180.0
+       ]
+      },
+      {
+       "name": "cb0_v136",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        34.133327,
+        0.029297,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v137",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v138",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v139",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v140",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        1.0,
+        111.534843,
+        161.818558
+       ]
+      },
+      {
+       "name": "cb0_v141",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v142",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -3061.96582,
+        -190.727829,
+        120.907745,
+        1.0
+       ]
+      }
+     ]
+    },
+    {
+     "block": "cbuffer1",
+     "bytes": 336,
+     "vars": [
+      {
+       "name": "cb1_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.4,
+        0.5,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.5,
+        0.4,
+        0.4,
+        0.5
+       ]
+      },
+      {
+       "name": "cb1_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v4",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.2,
+        0.25,
+        0.2,
+        0.25
+       ]
+      },
+      {
+       "name": "cb1_v5",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.2,
+        -0.25,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v6",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -0.0,
+        1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v7",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        -0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb1_v8",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        2.0,
+        -0.0,
+        -0.0,
+        -0.0
+       ]
+      },
+      {
+       "name": "cb1_v9",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        1.0,
+        1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v10",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        1.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v11",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v12",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        1.0,
+        1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v13",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        0.0,
+        1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v14",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        0.974153,
+        0.260417,
+        1.0
+       ]
+      },
+      {
+       "name": "cb1_v15",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        0.974153,
+        0.260417,
+        1.0
+       ]
+      },
+      {
+       "name": "cb1_v16",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        0.0,
+        1.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb1_v17",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        1.0,
+        1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v18",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.5,
+        0.5,
+        0.5,
+        1.0
+       ]
+      },
+      {
+       "name": "cb1_v19",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.5,
+        0.5,
+        0.5,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v20",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.5,
+        1.0,
+        1.0,
+        1.0
+       ]
+      }
+     ]
+    }
+   ],
+   "ResourceId::6129": [
+    {
+     "block": "cbuffer0",
+     "bytes": 2288,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -0.0,
+        0.033333,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        0.133333,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.006494,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v4",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.033333,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v5",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        -136.53334,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v6",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        6.649351,
+        -0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v7",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        17408.0,
+        29696.0,
+        1.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v8",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -0.0,
+        0.033333,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v9",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        0.133333,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v10",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.006494,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v11",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -1.675547,
+        -176.950378,
+        1.116112,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v12",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -0.0,
+        154.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v13",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        7.5,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v14",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        29.999998,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v15",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -33.483372,
+        1327.127808,
+        258.034302,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v16",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -0.0,
+        -1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v17",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        1.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v18",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v19",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v20",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -0.0,
+        1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v21",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        1.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v22",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -1.0,
+        -0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v23",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v24",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -0.0,
+        -1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v25",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        1.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v26",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v27",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v28",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -0.0,
+        1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v29",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        1.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v30",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -1.0,
+        -0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v31",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v32",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.006494,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v33",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.133333,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v34",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        -0.033333,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v35",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v36",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v37",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v38",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v39",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v40",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        154.0,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v41",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        7.5,
+        0.0,
+        -0.0
+       ]
+      },
+      {
+       "name": "cb0_v42",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        0.0,
+        -29.999998,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v43",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -0.0,
+        29.999998,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v44",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -0.0,
+        154.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v45",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        7.5,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v46",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        29.999998,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v47",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -29.999998,
+        -0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v48",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -0.0,
+        38.5,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v49",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -1.875,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v50",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        29.999998,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v51",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -29.999998,
+        217.5,
+        -2618.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v52",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -0.0,
+        154.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v53",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        7.5,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v54",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -34.483372,
+        1327.127808,
+        258.034302,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v55",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        29.999998,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v56",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -0.0,
+        154.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v57",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        7.5,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v58",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -30.999998,
+        -0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v59",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        29.999998,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v60",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -0.0,
+        154.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v61",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        7.5,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v62",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -34.483372,
+        1327.127808,
+        258.034302,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v63",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        29.999998,
+        0.0,
+        -0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v64",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v65",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v66",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -1.0,
+        -0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v67",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        1.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v68",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -0.0,
+        1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v69",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        1.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v70",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        -0.0,
+        1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v71",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        6.132524,
+        -0.0
+       ]
+      },
+      {
+       "name": "cb0_v72",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.002976,
+        -0.005291,
+        0.153439,
+        0.050595
+       ]
+      },
+      {
+       "name": "cb0_v73",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -3.483375,
+        1327.127808,
+        258.034302,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v74",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v75",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -3.483375,
+        1327.127808,
+        258.034302,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v76",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        3.483375,
+        -1327.127808,
+        -258.034302,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v77",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.865696,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v78",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        1.154261,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v79",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.000248,
+        0.000735,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v80",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.163065,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v81",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.15514,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v82",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.866355,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v83",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        6.132524
+       ]
+      },
+      {
+       "name": "cb0_v84",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.000286,
+        -0.000637,
+        1.0,
+        -0.0
+       ]
+      },
+      {
+       "name": "cb0_v85",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.018965,
+        0.091688,
+        0.0,
+        0.996643
+       ]
+      },
+      {
+       "name": "cb0_v86",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.865484,
+        -0.005702,
+        0.0,
+        -0.021872
+       ]
+      },
+      {
+       "name": "cb0_v87",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.002778,
+        1.1506,
+        0.0,
+        -0.078889
+       ]
+      },
+      {
+       "name": "cb0_v88",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.163065,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v89",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.022192,
+        0.0788,
+        0.996643,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v90",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.999749,
+        -0.004926,
+        -0.021872,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v91",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.003186,
+        0.996878,
+        -0.078889,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v92",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v93",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.022192,
+        0.999749,
+        0.003186,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v94",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0788,
+        -0.004926,
+        0.996878,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v95",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.996643,
+        -0.021872,
+        -0.078889,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v96",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v97",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.022192,
+        0.0788,
+        0.996643,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v98",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.999749,
+        -0.004926,
+        -0.021872,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v99",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.003186,
+        0.996878,
+        -0.078889,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v100",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v101",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.022192,
+        0.999749,
+        0.003186,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v102",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0788,
+        -0.004926,
+        0.996878,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v103",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.996643,
+        -0.021872,
+        -0.078889,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v104",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v105",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v106",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -3330.03418,
+        371.727783,
+        59.092255,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v107",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -3330.03418,
+        371.727783,
+        59.092255,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v108",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        3330.03418,
+        -371.727783,
+        -59.092255,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v109",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.025635,
+        1.15485,
+        0.00368,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v110",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.068268,
+        -0.004268,
+        0.863651,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v111",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -20421.513672,
+        2279.629639,
+        362.384674,
+        6.132524
+       ]
+      },
+      {
+       "name": "cb0_v112",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.9966,
+        -0.021583,
+        -0.079523,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v113",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.025635,
+        1.15485,
+        0.00368,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v114",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.068268,
+        -0.004268,
+        0.863651,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v115",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.9966,
+        -0.021583,
+        -0.079523,
+        -0.204417
+       ]
+      },
+      {
+       "name": "cb0_v116",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        6.132524
+       ]
+      },
+      {
+       "name": "cb0_v117",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.424764,
+        177.201294,
+        0.0,
+        -12.148915
+       ]
+      },
+      {
+       "name": "cb0_v118",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        6.491088,
+        -0.042646,
+        0.0,
+        -0.164041
+       ]
+      },
+      {
+       "name": "cb0_v119",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.576357,
+        2.728657,
+        0.0,
+        29.899302
+       ]
+      },
+      {
+       "name": "cb0_v120",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        890.759705,
+        523.320312,
+        0.163065,
+        3248.894775
+       ]
+      },
+      {
+       "name": "cb0_v121",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.427777,
+        177.192368,
+        0.0,
+        -12.148915
+       ]
+      },
+      {
+       "name": "cb0_v122",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        6.491128,
+        -0.042766,
+        0.0,
+        -0.164041
+       ]
+      },
+      {
+       "name": "cb0_v123",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.568941,
+        2.750629,
+        0.0,
+        29.899302
+       ]
+      },
+      {
+       "name": "cb0_v124",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        889.953979,
+        525.707825,
+        0.163065,
+        3248.894775
+       ]
+      },
+      {
+       "name": "cb0_v125",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        -0.000248,
+        0.000735
+       ]
+      },
+      {
+       "name": "cb0_v126",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        -0.0
+       ]
+      },
+      {
+       "name": "cb0_v127",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        2.756801,
+        0.489957,
+        1.71452,
+        1.427826
+       ]
+      },
+      {
+       "name": "cb0_v128",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        64.0,
+        112.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v129",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        8.0,
+        8.0,
+        0.125,
+        0.125
+       ]
+      },
+      {
+       "name": "cb0_v130",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v131",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v132",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1344.0,
+        756.0,
+        0.000744,
+        0.001323
+       ]
+      },
+      {
+       "name": "cb0_v133",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.047991,
+        0.14881,
+        0.053199,
+        0.158069
+       ]
+      },
+      {
+       "name": "cb0_v134",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        51744.0,
+        -21829.5,
+        -2618.0,
+        3349.5
+       ]
+      },
+      {
+       "name": "cb0_v135",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        1.0,
+        0.005556,
+        180.0
+       ]
+      },
+      {
+       "name": "cb0_v136",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        34.133327,
+        0.029297,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v137",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v138",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v139",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb0_v140",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        1.0,
+        111.534843,
+        161.818558
+       ]
+      },
+      {
+       "name": "cb0_v141",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v142",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        3326.550781,
+        955.400024,
+        198.942047,
+        1.0
+       ]
+      }
+     ]
+    },
+    {
+     "block": "cbuffer1",
+     "bytes": 192,
+     "vars": [
+      {
+       "name": "cb1_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.8
+       ]
+      },
+      {
+       "name": "cb1_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        1.0,
+        1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v4",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        0.0,
+        1.0,
+        0.4
+       ]
+      },
+      {
+       "name": "cb1_v5",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb1_v6",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb1_v7",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        0.0,
+        1.0,
+        1.0
+       ]
+      },
+      {
+       "name": "cb1_v8",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        1.0,
+        1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v9",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.5,
+        0.5,
+        0.5,
+        1.0
+       ]
+      },
+      {
+       "name": "cb1_v10",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.5,
+        0.5,
+        0.5,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v11",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        0.2,
+        0.0,
+        0.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "ps": {
+   "ResourceId::7778": [],
+   "ResourceId::6119": [
+    {
+     "id": "ResourceId::44847",
+     "name": "GPUScene.PrimitiveData",
+     "binding": "structuredbuffer0"
+    },
+    {
+     "id": "ResourceId::80339",
+     "name": "2D Texture 80339",
+     "w": 2048,
+     "h": 2048,
+     "depth": 1,
+     "mips": 12,
+     "array": 1,
+     "format": "BC5_UNORM",
+     "samples": 1,
+     "binding": "texture1"
+    },
+    {
+     "id": "ResourceId::80343",
+     "name": "2D Texture 80343",
+     "w": 2048,
+     "h": 2048,
+     "depth": 1,
+     "mips": 12,
+     "array": 1,
+     "format": "BC1_TYPELESS",
+     "samples": 1,
+     "binding": "texture2"
+    },
+    {
+     "id": "ResourceId::983",
+     "name": "2D Texture 983",
+     "w": 32,
+     "h": 32,
+     "depth": 1,
+     "mips": 6,
+     "array": 1,
+     "format": "BC1_TYPELESS",
+     "samples": 1,
+     "binding": "texture3"
+    }
+   ],
+   "ResourceId::6129": [
+    {
+     "id": "ResourceId::44847",
+     "name": "GPUScene.PrimitiveData",
+     "binding": "structuredbuffer0"
+    },
+    {
+     "id": "ResourceId::78962",
+     "name": "2D Texture 78962",
+     "w": 512,
+     "h": 512,
+     "depth": 1,
+     "mips": 10,
+     "array": 1,
+     "format": "BC5_UNORM",
+     "samples": 1,
+     "binding": "texture1"
+    },
+    {
+     "id": "ResourceId::78981",
+     "name": "2D Texture 78981",
+     "w": 512,
+     "h": 512,
+     "depth": 1,
+     "mips": 10,
+     "array": 1,
+     "format": "BC1_TYPELESS",
+     "samples": 1,
+     "binding": "texture2"
+    },
+    {
+     "id": "ResourceId::983",
+     "name": "2D Texture 983",
+     "w": 32,
+     "h": 32,
+     "depth": 1,
+     "mips": 6,
+     "array": 1,
+     "format": "BC1_TYPELESS",
+     "samples": 1,
+     "binding": "texture3"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 4347,
+   "name": "ID3D11DeviceContext::DrawInstanced()",
+   "vs": "ResourceId::7777",
+   "ps": "ResourceId::7778"
+  },
+  {
+   "event": 4377,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4388,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4398,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4408,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4418,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4428,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4438,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4448,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4458,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4468,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4478,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4488,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4498,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4508,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4518,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4528,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4538,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4548,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4558,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4568,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4578,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4588,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4599,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4609,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4629,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6129"
+  },
+  {
+   "event": 4649,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4659,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4669,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4679,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4689,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4707,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4725,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4735,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4746,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4757,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4767,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  },
+  {
+   "event": 4777,
+   "name": "ID3D11DeviceContext::DrawIndexed()",
+   "vs": "ResourceId::6120",
+   "ps": "ResourceId::6119"
+  }
+ ],
+ "outputs": [
+  {
+   "id": "ResourceId::45625",
+   "name": "2D Render Target 45625",
+   "w": 512,
+   "h": 512,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R8G8B8A8_TYPELESS",
+   "samples": 1
+  },
+  {
+   "id": "ResourceId::45628",
+   "name": "2D Render Target 45628",
+   "w": 512,
+   "h": 512,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R8G8B8A8_TYPELESS",
+   "samples": 1
+  },
+  {
+   "id": "ResourceId::45631",
+   "name": "2D Render Target 45631",
+   "w": 512,
+   "h": 512,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R11G11B10_FLOAT",
+   "samples": 1
+  }
+ ],
+ "depth": {
+  "id": "ResourceId::45634",
+  "name": "2D Depth Target 45634",
+  "w": 512,
+  "h": 512,
+  "depth": 1,
+  "mips": 1,
+  "array": 1,
+  "format": "D32S8_TYPELESS",
+  "samples": 1
+ },
+ "images": [
+  {
+   "file": "images/0077_out0.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "max": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "target": {
+    "id": "ResourceId::45625",
+    "name": "2D Render Target 45625",
+    "w": 512,
+    "h": 512,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R8G8B8A8_TYPELESS",
+    "samples": 1
+   }
+  },
+  {
+   "file": "images/0077_out1.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.2862745225429535,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "max": [
+    0.8470588326454163,
+    1.0,
+    0.6901960968971252,
+    1.0
+   ],
+   "target": {
+    "id": "ResourceId::45628",
+    "name": "2D Render Target 45628",
+    "w": 512,
+    "h": 512,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R8G8B8A8_TYPELESS",
+    "samples": 1
+   }
+  },
+  {
+   "file": "images/0077_out2.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "max": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "target": {
+    "id": "ResourceId::45631",
+    "name": "2D Render Target 45631",
+    "w": 512,
+    "h": 512,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R11G11B10_FLOAT",
+    "samples": 1
+   }
+  }
+ ]
+}

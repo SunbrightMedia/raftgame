@@ -1,0 +1,129 @@
+shader ResourceId::7764, stage cs, name "Compute Shader 7764"
+entry point: main
+constant block 0 "cbuffer0" (96 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+    +80    float4 cb0_v5 1x4
+read  0 "texture0" (TextureType.Buffer)
+read  1 "texture1" (TextureType.Buffer)
+write 0 "uav0" (TextureType.Buffer)
+write 1 "uav1" (TextureType.Buffer)
+write 2 "uav2" (TextureType.Buffer)
+in  vThreadID0
+
+==================== disassembly: DXBC ====================
+
+Shader hash 9f9c90d3-6549c0c0-f0ed88ac-c33b64f1
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[6], immediateIndexed
+      dcl_resource_buffer (uint,uint,uint,uint) t0
+      dcl_resource_buffer (uint,uint,uint,uint) t1
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u0
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u1
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u2
+      dcl_input vThreadID.xyz
+      dcl_temps 3
+      dcl_thread_group 4, 4, 4
+   0: ult r0.xyz, vThreadID.xyzx, cb0[4].xyzx
+   1: and r0.x, r0.y, r0.x
+   2: and r0.x, r0.z, r0.x
+   3: imad r0.y, vThreadID.z, cb0[4].y, vThreadID.y
+   4: imad r0.y, r0.y, cb0[4].x, vThreadID.x
+   5: if_nz r0.x
+   6:   ld_indexable(buffer)(uint,uint,uint,uint) r0.z, r0.yyyy, t0.yzxw
+   7:   mov r0.w, l(0)
+   8:   mov r1.x, r0.z
+   9:   loop
+  10:     ine r1.y, r1.x, l(-1)
+  11:     ult r1.z, r0.w, cb0[5].x
+  12:     and r1.y, r1.z, r1.y
+  13:     breakc_z r1.y
+  14:     iadd r0.w, r0.w, l(1)
+  15:     bfi r1.y, l(31), l(1), r1.x, l(1)
+  16:     ld_indexable(buffer)(uint,uint,uint,uint) r1.x, r1.yyyy, t1.xyzw
+  17:   endloop
+  18: else
+  19:   mov r0.zw, l(0, 0, 0, 0)
+  20: endif
+  21: imm_atomic_iadd r1.x, u2, l(0), r0.w
+  22: if_nz r0.x
+  23:   ishl r1.y, r0.y, l(1)
+  24:   store_uav_typed u0.xyzw, r1.yyyy, r0.wwww
+  25:   bfi r1.z, l(31), l(1), r0.y, l(1)
+  26:   store_uav_typed u0.xyzw, r1.zzzz, r1.xxxx
+  27:   iadd r1.x, r0.w, r1.x
+  28:   mov r1.y, r0.z
+  29:   mov r1.z, l(0)
+  30:   loop
+  31:     ine r1.w, r1.y, l(-1)
+  32:     ult r2.x, r1.z, r0.w
+  33:     and r1.w, r1.w, r2.x
+  34:     breakc_z r1.w
+  35:     iadd r1.w, -r1.z, r1.x
+  36:     iadd r1.w, r1.w, l(-1)
+  37:     ishl r2.x, r1.y, l(1)
+  38:     ld_indexable(buffer)(uint,uint,uint,uint) r2.x, r2.xxxx, t1.xyzw
+  39:     store_uav_typed u1.xyzw, r1.wwww, r2.xxxx
+  40:     iadd r1.z, r1.z, l(1)
+  41:     bfi r1.w, l(31), l(1), r1.y, l(1)
+  42:     ld_indexable(buffer)(uint,uint,uint,uint) r1.y, r1.wwww, t1.yxzw
+  43:   endloop
+  44: endif
+  45: iadd r0.y, r0.y, cb0[5].y
+  46: if_nz r0.x
+  47:   ld_indexable(buffer)(uint,uint,uint,uint) r0.z, r0.yyyy, t0.yzxw
+  48:   mov r0.w, l(0)
+  49:   mov r1.x, r0.z
+  50:   loop
+  51:     ine r1.y, r1.x, l(-1)
+  52:     ult r1.z, r0.w, cb0[4].w
+  53:     and r1.y, r1.z, r1.y
+  54:     breakc_z r1.y
+  55:     iadd r0.w, r0.w, l(1)
+  56:     bfi r1.y, l(31), l(1), r1.x, l(1)
+  57:     ld_indexable(buffer)(uint,uint,uint,uint) r1.x, r1.yyyy, t1.xyzw
+  58:   endloop
+  59: else
+  60:   mov r0.zw, l(0, 0, 0, 0)
+  61: endif
+  62: imm_atomic_iadd r1.x, u2, l(0), r0.w
+  63: if_nz r0.x
+  64:   ishl r0.x, r0.y, l(1)
+  65:   store_uav_typed u0.xyzw, r0.xxxx, r0.wwww
+  66:   bfi r0.y, l(31), l(1), r0.y, l(1)
+  67:   store_uav_typed u0.xyzw, r0.yyyy, r1.xxxx
+  68:   iadd r0.x, r0.w, r1.x
+  69:   mov r0.y, r0.z
+  70:   mov r1.x, l(0)
+  71:   loop
+  72:     ine r1.y, r0.y, l(-1)
+  73:     ult r1.z, r1.x, r0.w
+  74:     and r1.y, r1.z, r1.y
+  75:     breakc_z r1.y
+  76:     iadd r1.y, r0.x, -r1.x
+  77:     iadd r1.y, r1.y, l(-1)
+  78:     ishl r1.z, r0.y, l(1)
+  79:     ld_indexable(buffer)(uint,uint,uint,uint) r1.z, r1.zzzz, t1.yzxw
+  80:     store_uav_typed u1.xyzw, r1.yyyy, r1.zzzz
+  81:     iadd r1.x, r1.x, l(1)
+  82:     bfi r1.y, l(31), l(1), r0.y, l(1)
+  83:     ld_indexable(buffer)(uint,uint,uint,uint) r0.y, r1.yyyy, t1.yxzw
+  84:   endloop
+  85: endif
+  86: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

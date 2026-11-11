@@ -1,0 +1,155 @@
+{
+ "index": 84,
+ "kind": "clear",
+ "events": [
+  4873,
+  4875
+ ],
+ "count": 3,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "CompositionBeforeBasePass",
+  "DeferredDecals %s",
+  "Decals (Visible %d, Total: %d)",
+  "Batch [%d, %d]"
+ ],
+ "first": "ID3D11DeviceContext::ClearRenderTargetView()",
+ "last": "ID3D11DeviceContext::ClearRenderTargetView()",
+ "shaders": {},
+ "constants": {},
+ "reads": {},
+ "draws": [],
+ "outputs": [
+  {
+   "id": "ResourceId::91253",
+   "name": "2D Render Target 91253",
+   "w": 1344,
+   "h": 756,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "B8G8R8A8_TYPELESS",
+   "samples": 1
+  },
+  {
+   "id": "ResourceId::91250",
+   "name": "2D Render Target 91250",
+   "w": 1344,
+   "h": 756,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "B8G8R8A8_TYPELESS",
+   "samples": 1
+  },
+  {
+   "id": "ResourceId::91247",
+   "name": "2D Render Target 91247",
+   "w": 1344,
+   "h": 756,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "B8G8R8A8_TYPELESS",
+   "samples": 1
+  }
+ ],
+ "depth": {
+  "id": "ResourceId::19356",
+  "name": "2D Depth Target 19356",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "mips": 1,
+  "array": 1,
+  "format": "D32S8_TYPELESS",
+  "samples": 1
+ },
+ "images": [
+  {
+   "file": "images/0084_out0.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "max": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "target": {
+    "id": "ResourceId::91253",
+    "name": "2D Render Target 91253",
+    "w": 1344,
+    "h": 756,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "B8G8R8A8_TYPELESS",
+    "samples": 1
+   }
+  },
+  {
+   "file": "images/0084_out1.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.501960813999176,
+    0.501960813999176,
+    0.501960813999176,
+    1.0
+   ],
+   "max": [
+    0.501960813999176,
+    0.501960813999176,
+    0.501960813999176,
+    1.0
+   ],
+   "target": {
+    "id": "ResourceId::91250",
+    "name": "2D Render Target 91250",
+    "w": 1344,
+    "h": 756,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "B8G8R8A8_TYPELESS",
+    "samples": 1
+   }
+  },
+  {
+   "file": "images/0084_out2.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "max": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "target": {
+    "id": "ResourceId::91247",
+    "name": "2D Render Target 91247",
+    "w": 1344,
+    "h": 756,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "B8G8R8A8_TYPELESS",
+    "samples": 1
+   }
+  }
+ ]
+}

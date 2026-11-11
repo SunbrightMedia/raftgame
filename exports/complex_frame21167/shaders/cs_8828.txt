@@ -1,0 +1,125 @@
+shader ResourceId::8828, stage cs, name "Compute Shader 8828"
+entry point: main
+constant block 0 "cbuffer0" (624 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+    +80    float4 cb0_v5 1x4
+    +96    float4 cb0_v6 1x4
+    +112   float4 cb0_v7 1x4
+    +128   float4 cb0_v8 1x4
+    +144   float4 cb0_v9 1x4
+    +160   float4 cb0_v10 1x4
+    +176   float4 cb0_v11 1x4
+    +192   float4 cb0_v12 1x4
+    +208   float4 cb0_v13 1x4
+    +224   float4 cb0_v14 1x4
+    +240   float4 cb0_v15 1x4
+    +256   float4 cb0_v16 1x4
+    +272   float4 cb0_v17 1x4
+    +288   float4 cb0_v18 1x4
+    +304   float4 cb0_v19 1x4
+    +320   float4 cb0_v20 1x4
+    +336   float4 cb0_v21 1x4
+    +352   float4 cb0_v22 1x4
+    +368   float4 cb0_v23 1x4
+    +384   float4 cb0_v24 1x4
+    +400   float4 cb0_v25 1x4
+    +416   float4 cb0_v26 1x4
+    +432   float4 cb0_v27 1x4
+    +448   float4 cb0_v28 1x4
+    +464   float4 cb0_v29 1x4
+    +480   float4 cb0_v30 1x4
+    +496   float4 cb0_v31 1x4
+    +512   float4 cb0_v32 1x4
+    +528   float4 cb0_v33 1x4
+    +544   float4 cb0_v34 1x4
+    +560   float4 cb0_v35 1x4
+    +576   float4 cb0_v36 1x4
+    +592   float4 cb0_v37 1x4
+    +608   float4 cb0_v38 1x4
+read  0 "texture0" (TextureType.Texture3D)
+write 0 "uav0" (TextureType.Texture3D)
+write 1 "uav1" (TextureType.Buffer)
+write 2 "uav2" (TextureType.Buffer)
+write 3 "uav3" (TextureType.Buffer)
+in  vThreadID0
+
+==================== disassembly: DXBC ====================
+
+Shader hash abdd7e0b-c7afe87e-fe209fbf-10316442
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[39], dynamicIndexed
+      dcl_resource_texture3d (uint,uint,uint,uint) t0
+      dcl_uav_typed_texture3d (uint,uint,uint,uint) u0
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u1
+      dcl_uav_typed_buffer (sint,sint,sint,sint) u2
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u3
+      dcl_input vThreadID.xyz
+      dcl_temps 3
+      dcl_thread_group 4, 4, 4
+   0: udiv r0.x, null, vThreadID.x, cb0[5].z
+   1: imad r0.y, -r0.x, cb0[5].z, vThreadID.x
+   2: mov r0.zw, vThreadID.yyyz
+   3: ult r1.xyzw, r0.xyzw, cb0[5].wzzz
+   4: and r1.y, r1.z, r1.y
+   5: and r1.y, r1.w, r1.y
+   6: and r1.x, r1.y, r1.x
+   7: if_nz r1.x
+   8:   imad r1.x, r0.x, cb0[5].z, r0.y
+   9:   mov r1.yz, vThreadID.yyzy
+  10:   mov r1.w, l(0)
+  11:   ld_indexable(texture3d)(uint,uint,uint,uint) r1.x, r1.xyzw, t0.xyzw
+  12:   ine r1.y, r1.x, l(-1)
+  13:   if_nz r1.y
+  14:     utof r0.yzw, r0.yyzw
+  15:     mad r0.yzw, r0.yyzw, cb0[r0.x + 32].wwww, cb0[r0.x + 32].xxyz
+  16:     mad r0.yzw, r0.yyzw, cb0[r0.x + 11].yyyy, cb0[r0.x + 17].xxyz
+  17:     round_ni r0.yzw, r0.yyzw
+  18:     ftoi r2.yzw, r0.yyzw
+  19:     ige r0.yzw, r2.yyzw, l(0, 0, 0, 0)
+  20:     and r0.y, r0.z, r0.y
+  21:     and r0.y, r0.w, r0.y
+  22:     ilt r1.yzw, r2.yyzw, cb0[5].zzzz
+  23:     and r0.z, r1.z, r1.y
+  24:     and r0.z, r1.w, r0.z
+  25:     and r0.y, r0.z, r0.y
+  26:     if_nz r0.y
+  27:       imad r2.x, r0.x, cb0[5].z, r2.y
+  28:       ld_uav_typed(texture3d)(uint,uint,uint,uint) r0.x, r2.xzww, u0.xyzw
+  29:       ld_uav_typed(buffer)(uint,uint,uint,uint) r0.y, r1.xxxx, u1.yxzw
+  30:       ieq r0.x, r0.x, l(-2)
+  31:       iadd r0.y, -r0.y, cb0[38].x
+  32:       ult r0.y, r0.y, cb0[38].y
+  33:       or r0.y, r0.y, r0.x
+  34:       if_nz r0.y
+  35:         if_nz r0.x
+  36:           store_uav_typed u1.xyzw, r1.xxxx, cb0[38].xxxx
+  37:         endif
+  38:         store_uav_typed u0.xyzw, r2.xzww, r1.xxxx
+  39:       endif
+  40:     else
+  41:       mov r0.y, l(0)
+  42:     endif
+  43:     if_z r0.y
+  44:       imm_atomic_iadd r0.x, u2, l(0), l(1)
+  45:       store_uav_typed u3.xyzw, r0.xxxx, r1.xxxx
+  46:     endif
+  47:   endif
+  48: endif
+  49: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

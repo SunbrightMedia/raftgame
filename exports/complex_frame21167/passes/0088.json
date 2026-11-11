@@ -1,0 +1,79 @@
+{
+ "index": 88,
+ "kind": "dispatch",
+ "events": [
+  4979,
+  4979
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "LumenSceneLighting%s",
+  "BuildCardUpdateContext",
+  "Select max update bucket"
+ ],
+ "first": "ID3D11DeviceContext::Dispatch()",
+ "last": "ID3D11DeviceContext::Dispatch()",
+ "shaders": {
+  "cs": [
+   "shaders/cs_7790.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::7790": [
+    {
+     "block": "cbuffer0",
+     "bytes": 32,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0018665776234853e+27,
+        0.0,
+        1.0019043565553482e+27,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        1.4960059001417918e+20,
+        0.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::7790": [
+    {
+     "id": "ResourceId::6684",
+     "name": "InstanceCulling.Compaction.TempInstanceIdsBuffer",
+     "binding": "structuredbuffer0"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 4979,
+   "name": "ID3D11DeviceContext::Dispatch()",
+   "cs": "ResourceId::7790"
+  }
+ ],
+ "outputs": [],
+ "images": []
+}

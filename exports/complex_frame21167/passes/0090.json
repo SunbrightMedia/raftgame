@@ -1,0 +1,108 @@
+{
+ "index": 90,
+ "kind": "dispatch",
+ "events": [
+  5013,
+  5013
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "LumenSceneLighting%s",
+  "BuildCardUpdateContext",
+  "SetCardPageIndexIndirectArgs"
+ ],
+ "first": "ID3D11DeviceContext::Dispatch()",
+ "last": "ID3D11DeviceContext::Dispatch()",
+ "shaders": {
+  "cs": [
+   "shaders/cs_7792.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::7792": [
+    {
+     "block": "cbuffer0",
+     "bytes": 64,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0025619460880878e+27,
+        0.0,
+        1.0025666684545707e+27,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0025713908210536e+27,
+        0.0,
+        1.0025761131875364e+27,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0018795641313132e+27,
+        0.0,
+        1.0018960924140032e+27,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        2.35726994855673e+31,
+        0.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::7792": [
+    {
+     "id": "ResourceId::51999",
+     "name": "InstanceCulling.CompactionBlockDataIndices",
+     "binding": "structuredbuffer0"
+    },
+    {
+     "id": "ResourceId::6495",
+     "name": "Lumen.CardPageLastUsedBuffer",
+     "binding": "structuredbuffer1"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 5013,
+   "name": "ID3D11DeviceContext::Dispatch()",
+   "cs": "ResourceId::7792"
+  }
+ ],
+ "outputs": [],
+ "images": []
+}
