@@ -75,9 +75,9 @@ function fileApi(): Plugin {
 export default defineConfig(({ mode }) => ({
   // Each build mode has its own list of asset files (src/assets/globs.<mode>.ts).
   resolve: { alias: { '@globs': fileURLToPath(new URL(`./src/assets/globs.${['page', 'atrium', 'catalogue', 'industrial'].includes(mode) ? mode : 'dev'}.ts`, import.meta.url)) } },
-  plugins: mode === 'page' ? [fileApi(), viteSingleFile()] : [fileApi()],
+  plugins: mode === 'page' || mode === 'planner' ? [fileApi(), viteSingleFile()] : [fileApi()],
   base: mode === 'atrium' || mode === 'catalogue' || mode === 'industrial' ? './' : '/',
-  build: mode === 'page' ? { outDir: 'dist-page', chunkSizeWarningLimit: 4000 } : mode === 'catalogue' || mode === 'industrial' ? { outDir: `dist-${mode}`, chunkSizeWarningLimit: 16000, assetsInlineLimit: 4096 } : mode === 'atrium' ? { outDir: 'dist-atrium', chunkSizeWarningLimit: 16000, assetsInlineLimit: (file: string, content: Buffer) => file.endsWith('.bin') || content.length < 10 * 1024 } : {},
+  build: mode === 'planner' ? { outDir: 'dist-planner', chunkSizeWarningLimit: 4000, rollupOptions: { input: path.resolve(ROOT, 'planner.html') } } : mode === 'page' ? { outDir: 'dist-page', chunkSizeWarningLimit: 4000 } : mode === 'catalogue' || mode === 'industrial' ? { outDir: `dist-${mode}`, chunkSizeWarningLimit: 16000, assetsInlineLimit: 4096 } : mode === 'atrium' ? { outDir: 'dist-atrium', chunkSizeWarningLimit: 16000, assetsInlineLimit: (file: string, content: Buffer) => file.endsWith('.bin') || content.length < 10 * 1024 } : {},
   server: {
     port: 5173,
     // Saving config/maps from the game must not trigger a page reload.

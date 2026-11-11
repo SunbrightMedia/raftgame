@@ -13,6 +13,7 @@
     "build:atrium": "vite build --mode atrium",
     "build:catalogue": "vite build --mode catalogue",
     "build:industrial": "vite build --mode industrial",
+    "build:planner": "vite build --mode planner",
     "bench:bake": "vite-node tools/bench/bake-bench.ts",
     "bench:vrad": "vite-node tools/bench/vrad-bench.ts --",
     "validate:vrad": "vite-node tools/bench/vrad-validate.ts --",
@@ -25,7 +26,8 @@
     "world:plan": "vite-node tools/world/plan.ts --",
     "fetch:textures": "python3 tools/fetch_textures.py",
     "world:look": "vite-node tools/world/look.ts --",
-    "gen:house": "vite-node tools/house/gen-house-test.ts"
+    "gen:house": "vite-node tools/house/gen-house-test.ts",
+    "planner:render": "vite-node tools/planner/render.ts --"
   },
   "dependencies": {
     "three": "^0.187.0"
