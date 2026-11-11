@@ -1,0 +1,58 @@
+shader ResourceId::7777, stage vs, name "Vertex Shader 7777"
+entry point: main
+constant block 0 "cbuffer0" (48 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+read  0 "texture0" (TextureType.Buffer)
+in  SV_InstanceID0
+in  SV_VertexID0
+out SV_POSITION0
+out TEXCOORD0
+out TEXCOORD1
+out RECT_INDEX0
+
+==================== disassembly: DXBC ====================
+
+Shader hash 90606880-1e4af176-9b9fd26e-e740d60f
+
+vs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[3], immediateIndexed
+      dcl_resource_buffer (uint,uint,uint,uint) t0
+      dcl_input_sgv v0.x, instanceid
+      dcl_input_sgv v1.x, vertexid
+      dcl_output_siv o0.xyzw, position
+      dcl_output o1.xy
+      dcl_output o1.zw
+      dcl_output o2.x
+      dcl_temps 2
+   0: ld_indexable(buffer)(uint,uint,uint,uint) r0.xyzw, v0.xxxx, t0.xyzw
+   1: utof r0.xyzw, r0.xyzw
+   2: mul r0.xyzw, r0.xyzw, cb0[2].xxxx
+   3: ftou r0.xyzw, r0.xyzw
+   4: ieq r1.xyzw, v1.xxxx, l(1, 2, 4, 5)
+   5: or r1.xy, r1.yzyy, r1.xyxx
+   6: or r1.xy, r1.zwzz, r1.xyxx
+   7: movc r1.zw, r1.xxxy, r0.zzzw, r0.xxxy
+   8: utof r0.xyzw, r0.xyzw
+   9: mul r0.xyzw, r0.xyzw, cb0[1].xyxy
+  10: movc o1.xy, r1.xyxx, r0.zwzz, r0.xyxx
+  11: and o1.zw, r1.xxxy, l(0.000000, 0.000000, 1.000000, 1.000000)
+  12: utof r0.xy, r1.zwzz
+  13: mul r0.xy, r0.xyxx, cb0[1].xyxx
+  14: mad o0.xy, r0.xyxx, l(2.000000, -2.000000, 0.000000, 0.000000), l(-1.000000, 1.000000, 0.000000, 0.000000)
+  15: mov o0.zw, l(0.000000, 0.000000, 0.000000, 1.000000)
+  16: utof o2.x, v0.x
+  17: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

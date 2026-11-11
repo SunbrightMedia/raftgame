@@ -1,0 +1,258 @@
+{
+ "index": 302,
+ "kind": "clear",
+ "events": [
+  4793,
+  4798
+ ],
+ "count": 6,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "GBufferClear"
+ ],
+ "first": "ID3D11DeviceContext::ClearRenderTargetView()",
+ "last": "ID3D11DeviceContext::ClearRenderTargetView()",
+ "shaders": {},
+ "constants": {},
+ "reads": {},
+ "draws": [],
+ "outputs": [
+  {
+   "id": "ResourceId::47190",
+   "name": "2D Render Target 47190",
+   "w": 1344,
+   "h": 756,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R16G16B16A16_FLOAT",
+   "samples": 1
+  },
+  {
+   "id": "ResourceId::45664",
+   "name": "2D Render Target 45664",
+   "w": 1344,
+   "h": 756,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R10G10B10A2_UNORM",
+   "samples": 1
+  },
+  {
+   "id": "ResourceId::45673",
+   "name": "2D Render Target 45673",
+   "w": 1344,
+   "h": 756,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "B8G8R8A8_TYPELESS",
+   "samples": 1
+  },
+  {
+   "id": "ResourceId::45670",
+   "name": "2D Render Target 45670",
+   "w": 1344,
+   "h": 756,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "B8G8R8A8_TYPELESS",
+   "samples": 1
+  },
+  {
+   "id": "ResourceId::45676",
+   "name": "2D Render Target 45676",
+   "w": 1344,
+   "h": 756,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "B8G8R8A8_TYPELESS",
+   "samples": 1
+  },
+  {
+   "id": "ResourceId::78801",
+   "name": "2D Render Target 78801",
+   "w": 1344,
+   "h": 756,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "B8G8R8A8_TYPELESS",
+   "samples": 1
+  }
+ ],
+ "images": [
+  {
+   "file": "images/0302_out0.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "max": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "target": {
+    "id": "ResourceId::47190",
+    "name": "2D Render Target 47190",
+    "w": 1344,
+    "h": 756,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R16G16B16A16_FLOAT",
+    "samples": 1
+   }
+  },
+  {
+   "file": "images/0302_out1.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "max": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "target": {
+    "id": "ResourceId::45664",
+    "name": "2D Render Target 45664",
+    "w": 1344,
+    "h": 756,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R10G10B10A2_UNORM",
+    "samples": 1
+   }
+  },
+  {
+   "file": "images/0302_out2.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "max": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "target": {
+    "id": "ResourceId::45673",
+    "name": "2D Render Target 45673",
+    "w": 1344,
+    "h": 756,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "B8G8R8A8_TYPELESS",
+    "samples": 1
+   }
+  },
+  {
+   "file": "images/0302_out3.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "max": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "target": {
+    "id": "ResourceId::45670",
+    "name": "2D Render Target 45670",
+    "w": 1344,
+    "h": 756,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "B8G8R8A8_TYPELESS",
+    "samples": 1
+   }
+  },
+  {
+   "file": "images/0302_out4.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "max": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "target": {
+    "id": "ResourceId::45676",
+    "name": "2D Render Target 45676",
+    "w": 1344,
+    "h": 756,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "B8G8R8A8_TYPELESS",
+    "samples": 1
+   }
+  },
+  {
+   "file": "images/0302_out5.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "max": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "target": {
+    "id": "ResourceId::78801",
+    "name": "2D Render Target 78801",
+    "w": 1344,
+    "h": 756,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "B8G8R8A8_TYPELESS",
+    "samples": 1
+   }
+  }
+ ]
+}

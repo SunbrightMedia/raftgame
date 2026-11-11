@@ -1,0 +1,46 @@
+shader ResourceId::7747, stage cs, name "Compute Shader 7747"
+entry point: main
+write 0 "uav0" (TextureType.Buffer)
+write 1 "uav1" (TextureType.Buffer)
+write 2 "uav2" (TextureType.Buffer)
+write 3 "uav3" (TextureType.Buffer)
+in  vThreadID0
+
+==================== disassembly: DXBC ====================
+
+Shader hash a89cb592-a61813a9-23177741-bc25626a
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u0
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u1
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u2
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u3
+      dcl_input vThreadID.x
+      dcl_thread_group 1, 1, 1
+   0: if_z vThreadID.x
+   1:   store_uav_typed u0.xyzw, l(0, 0, 0, 0), l(0, 0, 0, 0)
+   2:   store_uav_typed u0.xyzw, l(1, 1, 1, 1), l(1, 1, 1, 1)
+   3:   store_uav_typed u0.xyzw, l(2, 2, 2, 2), l(1, 1, 1, 1)
+   4:   store_uav_typed u1.xyzw, l(0, 0, 0, 0), l(0, 0, 0, 0)
+   5:   store_uav_typed u1.xyzw, l(1, 1, 1, 1), l(1, 1, 1, 1)
+   6:   store_uav_typed u1.xyzw, l(2, 2, 2, 2), l(1, 1, 1, 1)
+   7:   store_uav_typed u2.xyzw, l(0, 0, 0, 0), l(0, 0, 0, 0)
+   8:   store_uav_typed u2.xyzw, l(1, 1, 1, 1), l(1, 1, 1, 1)
+   9:   store_uav_typed u2.xyzw, l(2, 2, 2, 2), l(1, 1, 1, 1)
+  10:   store_uav_typed u3.xyzw, l(0, 0, 0, 0), l(0, 0, 0, 0)
+  11:   store_uav_typed u3.xyzw, l(1, 1, 1, 1), l(1, 1, 1, 1)
+  12:   store_uav_typed u3.xyzw, l(2, 2, 2, 2), l(1, 1, 1, 1)
+  13: endif
+  14: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

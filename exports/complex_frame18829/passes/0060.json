@@ -1,0 +1,63 @@
+{
+ "index": 60,
+ "kind": "clear",
+ "events": [
+  1465,
+  1465
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "ClearRenderTarget(%s, slice %d, mip %d) %dx%d ClearAction"
+ ],
+ "first": "ID3D11DeviceContext::ClearRenderTargetView()",
+ "last": "ID3D11DeviceContext::ClearRenderTargetView()",
+ "shaders": {},
+ "constants": {},
+ "reads": {},
+ "draws": [],
+ "outputs": [
+  {
+   "id": "ResourceId::78786",
+   "name": "2D Render Target 78786",
+   "w": 1344,
+   "h": 756,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R16G16B16A16_UNORM",
+   "samples": 1
+  }
+ ],
+ "images": [
+  {
+   "file": "images/0060_out0.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "max": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "target": {
+    "id": "ResourceId::78786",
+    "name": "2D Render Target 78786",
+    "w": 1344,
+    "h": 756,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R16G16B16A16_UNORM",
+    "samples": 1
+   }
+  }
+ ]
+}

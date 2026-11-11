@@ -1,0 +1,156 @@
+{
+ "index": 407,
+ "kind": "dispatch",
+ "events": [
+  6883,
+  6883
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "PostProcessing",
+  "Bloom %dx%d",
+  "FFT: Two-For-One %s of size %d of buffer %d x %d"
+ ],
+ "first": "ID3D11DeviceContext::Dispatch()",
+ "last": "ID3D11DeviceContext::Dispatch()",
+ "shaders": {
+  "cs": [
+   "shaders/cs_8862.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::8862": [
+    {
+     "block": "cbuffer0",
+     "bytes": 64,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        7.0,
+        15000.0,
+        15.0,
+        0.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::8862": [
+    {
+     "id": "ResourceId::48046",
+     "name": "2D Texture 48046",
+     "w": 1020,
+     "h": 764,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R11G11B10_FLOAT",
+     "samples": 1,
+     "binding": "texture0"
+    },
+    {
+     "id": "ResourceId::6516",
+     "name": "DefaultStructuredBuffer",
+     "binding": "structuredbuffer1"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 6883,
+   "name": "ID3D11DeviceContext::Dispatch()",
+   "cs": "ResourceId::8862"
+  }
+ ],
+ "outputs": [
+  {
+   "id": "ResourceId::47203",
+   "name": "2D Texture 47203",
+   "w": 1019,
+   "h": 1026,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R32G32B32A32_FLOAT",
+   "samples": 1
+  }
+ ],
+ "images": [
+  {
+   "file": "images/0407_out0.jpg",
+   "black": -162.41262817382812,
+   "white": 764.0,
+   "min": [
+    -111.87378692626953,
+    -129.54263305664062,
+    -162.41262817382812,
+    -167.47361755371094
+   ],
+   "max": [
+    343.197265625,
+    158.64016723632812,
+    764.0,
+    56.242767333984375
+   ],
+   "target": {
+    "id": "ResourceId::47203",
+    "name": "2D Texture 47203",
+    "w": 1019,
+    "h": 1026,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R32G32B32A32_FLOAT",
+    "samples": 1
+   }
+  }
+ ]
+}

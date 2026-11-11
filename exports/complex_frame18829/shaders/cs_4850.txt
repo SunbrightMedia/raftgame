@@ -1,0 +1,166 @@
+shader ResourceId::4850, stage cs, name "Compute Shader 4850"
+entry point: main
+constant block 0 "cbuffer0" (32 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+read  0 "texture0" (TextureType.Buffer)
+read  1 "texture1" (TextureType.Buffer)
+read  2 "texture2" (TextureType.Buffer)
+read  3 "texture3" (TextureType.Buffer)
+write 0 "uav0" (TextureType.Buffer)
+write 1 "uav1" (TextureType.Buffer)
+in  vThreadID0
+
+==================== disassembly: DXBC ====================
+
+Shader hash 1420148a-0a220092-a6666513-1e71aa26
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[2], immediateIndexed
+      dcl_resource_buffer (float,float,float,float) t0
+      dcl_resource_buffer (uint,uint,uint,uint) t1
+      dcl_resource_buffer (snorm,snorm,snorm,snorm) t2
+      dcl_resource_buffer (float,float,float,float) t3
+      dcl_uav_typed_buffer (snorm,snorm,snorm,snorm) u0
+      dcl_uav_typed_buffer (float,float,float,float) u1
+      dcl_input vThreadID.x
+      dcl_temps 15
+      dcl_thread_group 64, 1, 1
+   0: uge r0.x, vThreadID.x, cb0[0].z
+   1: if_nz r0.x
+   2:   ret
+   3: endif
+   4: iadd r0.xyzw, vThreadID.xxxx, cb0[0].xxyy
+   5: ushr r1.x, cb0[1].x, l(2)
+   6: imad r1.x, vThreadID.x, r1.x, cb0[0].w
+   7: ishl r1.yz, r0.yywy, l(0, 1, 1, 0)
+   8: ld_indexable(buffer)(snorm,snorm,snorm,snorm) r2.xyzw, r1.yyyy, t2.xyzw
+   9: bfi r1.yw, l(0, 31, 0, 31), l(0, 1, 0, 1), r0.yyyw, l(0, 1, 0, 1)
+  10: ld_indexable(buffer)(snorm,snorm,snorm,snorm) r3.xyzw, r1.yyyy, t2.xyzw
+  11: ld_indexable(buffer)(uint,uint,uint,uint) r1.y, r1.xxxx, t1.yxzw
+  12: and r4.x, r1.y, l(255)
+  13: ubfe r5.xyzw, l(8, 8, 8, 8), l(8, 8, 16, 16), r1.yyyy
+  14: ushr r1.y, r1.y, l(24)
+  15: iadd r4.yzw, r1.xxxx, l(0, 1, 2, 3)
+  16: ld_indexable(buffer)(uint,uint,uint,uint) r1.x, r4.yyyy, t1.xyzw
+  17: and r4.y, r1.x, l(255)
+  18: ubfe r6.xyzw, l(8, 8, 8, 8), l(8, 8, 16, 16), r1.xxxx
+  19: ushr r1.x, r1.x, l(24)
+  20: ld_indexable(buffer)(uint,uint,uint,uint) r4.z, r4.zzzz, t1.yzxw
+  21: and r7.x, r4.z, l(255)
+  22: utof r7.x, r7.x
+  23: ubfe r7.yz, l(0, 8, 8, 0), l(0, 8, 16, 0), r4.zzzz
+  24: utof r7.yz, r7.yyzy
+  25: ushr r4.z, r4.z, l(24)
+  26: utof r4.z, r4.z
+  27: mul r4.z, r4.z, l(0.003922)
+  28: ld_indexable(buffer)(uint,uint,uint,uint) r4.w, r4.wwww, t1.yzwx
+  29: and r7.w, r4.w, l(255)
+  30: utof r7.w, r7.w
+  31: mul r7.xyzw, r7.xyzw, l(0.003922, 0.003922, 0.003922, 0.003922)
+  32: ubfe r8.xy, l(8, 8, 0, 0), l(8, 16, 0, 0), r4.wwww
+  33: utof r8.xy, r8.xyxx
+  34: mul r8.xy, r8.xyxx, l(0.003922, 0.003922, 0.000000, 0.000000)
+  35: ushr r4.w, r4.w, l(24)
+  36: utof r4.w, r4.w
+  37: mul r4.w, r4.w, l(0.003922)
+  38: imul null, r8.z, r4.x, l(3)
+  39: ld_indexable(buffer)(float,float,float,float) r9.xyzw, r8.zzzz, t0.xyzw
+  40: imad r8.zw, r4.xxxx, l(0, 0, 3, 3), l(0, 0, 1, 2)
+  41: ld_indexable(buffer)(float,float,float,float) r10.xyzw, r8.zzzz, t0.xyzw
+  42: ld_indexable(buffer)(float,float,float,float) r11.xyzw, r8.wwww, t0.xyzw
+  43: imul null, r8.zw, r5.yyyw, l(0, 0, 3, 3)
+  44: ld_indexable(buffer)(float,float,float,float) r12.xyzw, r8.zzzz, t0.xyzw
+  45: imad r5.xyzw, r5.xyzw, l(3, 3, 3, 3), l(1, 2, 1, 2)
+  46: ld_indexable(buffer)(float,float,float,float) r13.xyzw, r5.xxxx, t0.xyzw
+  47: ld_indexable(buffer)(float,float,float,float) r14.xyzw, r5.yyyy, t0.xyzw
+  48: mul r12.xyzw, r7.yyyy, r12.xyzw
+  49: mul r13.xyzw, r7.yyyy, r13.xyzw
+  50: mul r14.xyzw, r7.yyyy, r14.xyzw
+  51: mad r9.xyzw, r7.xxxx, r9.xyzw, r12.xyzw
+  52: mad r10.xyzw, r7.xxxx, r10.xyzw, r13.xyzw
+  53: mad r11.xyzw, r7.xxxx, r11.xyzw, r14.xyzw
+  54: ld_indexable(buffer)(float,float,float,float) r12.xyzw, r8.wwww, t0.xyzw
+  55: ld_indexable(buffer)(float,float,float,float) r13.xyzw, r5.zzzz, t0.xyzw
+  56: ld_indexable(buffer)(float,float,float,float) r5.xyzw, r5.wwww, t0.xyzw
+  57: mad r9.xyzw, r7.zzzz, r12.xyzw, r9.xyzw
+  58: mad r10.xyzw, r7.zzzz, r13.xyzw, r10.xyzw
+  59: mad r5.xyzw, r7.zzzz, r5.xyzw, r11.xyzw
+  60: imul null, r4.x, r1.y, l(3)
+  61: ld_indexable(buffer)(float,float,float,float) r11.xyzw, r4.xxxx, t0.xyzw
+  62: imad r7.xy, r1.yyyy, l(3, 3, 0, 0), l(1, 2, 0, 0)
+  63: ld_indexable(buffer)(float,float,float,float) r12.xyzw, r7.xxxx, t0.xyzw
+  64: ld_indexable(buffer)(float,float,float,float) r13.xyzw, r7.yyyy, t0.xyzw
+  65: mad r9.xyzw, r4.zzzz, r11.xyzw, r9.xyzw
+  66: mad r10.xyzw, r4.zzzz, r12.xyzw, r10.xyzw
+  67: mad r5.xyzw, r4.zzzz, r13.xyzw, r5.xyzw
+  68: imul null, r1.y, r4.y, l(3)
+  69: ld_indexable(buffer)(float,float,float,float) r11.xyzw, r1.yyyy, t0.xyzw
+  70: imad r4.xy, r4.yyyy, l(3, 3, 0, 0), l(1, 2, 0, 0)
+  71: ld_indexable(buffer)(float,float,float,float) r12.xyzw, r4.xxxx, t0.xyzw
+  72: ld_indexable(buffer)(float,float,float,float) r13.xyzw, r4.yyyy, t0.xyzw
+  73: mad r9.xyzw, r7.wwww, r11.xyzw, r9.xyzw
+  74: mad r10.xyzw, r7.wwww, r12.xyzw, r10.xyzw
+  75: mad r5.xyzw, r7.wwww, r13.xyzw, r5.xyzw
+  76: imul null, r4.xy, r6.ywyy, l(3, 3, 0, 0)
+  77: ld_indexable(buffer)(float,float,float,float) r7.xyzw, r4.xxxx, t0.xyzw
+  78: imad r6.xyzw, r6.xyzw, l(3, 3, 3, 3), l(1, 2, 1, 2)
+  79: ld_indexable(buffer)(float,float,float,float) r11.xyzw, r6.xxxx, t0.xyzw
+  80: ld_indexable(buffer)(float,float,float,float) r12.xyzw, r6.yyyy, t0.xyzw
+  81: mad r7.xyzw, r8.xxxx, r7.xyzw, r9.xyzw
+  82: mad r9.xyzw, r8.xxxx, r11.xyzw, r10.xyzw
+  83: mad r5.xyzw, r8.xxxx, r12.xyzw, r5.xyzw
+  84: ld_indexable(buffer)(float,float,float,float) r10.xyzw, r4.yyyy, t0.xyzw
+  85: ld_indexable(buffer)(float,float,float,float) r11.xyzw, r6.zzzz, t0.xyzw
+  86: ld_indexable(buffer)(float,float,float,float) r6.xyzw, r6.wwww, t0.xyzw
+  87: mad r7.xyzw, r8.yyyy, r10.xyzw, r7.xyzw
+  88: mad r9.xyzw, r8.yyyy, r11.xyzw, r9.xyzw
+  89: mad r5.xyzw, r8.yyyy, r6.xyzw, r5.xyzw
+  90: imul null, r1.y, r1.x, l(3)
+  91: ld_indexable(buffer)(float,float,float,float) r6.xyzw, r1.yyyy, t0.xyzw
+  92: imad r1.xy, r1.xxxx, l(3, 3, 0, 0), l(1, 2, 0, 0)
+  93: ld_indexable(buffer)(float,float,float,float) r8.xyzw, r1.xxxx, t0.xyzw
+  94: ld_indexable(buffer)(float,float,float,float) r10.xyzw, r1.yyyy, t0.xyzw
+  95: mad r6.xyzw, r4.wwww, r6.xyzw, r7.xyzw
+  96: mad r7.xyzw, r4.wwww, r8.xyzw, r9.xyzw
+  97: mad r4.xyzw, r4.wwww, r10.xyzw, r5.xyzw
+  98: imul null, r1.xy, r0.ywyy, l(3, 3, 0, 0)
+  99: ld_indexable(buffer)(float,float,float,float) r5.x, r1.xxxx, t3.xyzw
+ 100: imad r0.xyzw, r0.xyzw, l(3, 3, 3, 3), l(1, 2, 1, 2)
+ 101: ld_indexable(buffer)(float,float,float,float) r5.y, r0.xxxx, t3.yxzw
+ 102: ld_indexable(buffer)(float,float,float,float) r5.z, r0.yyyy, t3.yzxw
+ 103: mov r5.w, l(1.000000)
+ 104: dp4 r8.x, r6.xyzw, r5.xyzw
+ 105: dp4 r8.y, r7.xyzw, r5.xyzw
+ 106: dp4 r8.z, r4.xyzw, r5.xyzw
+ 107: mul r5.xyz, r8.xyzx, cb0[1].yyyy
+ 108: dp3 r8.x, r6.xyzx, r2.xyzx
+ 109: dp3 r8.y, r7.xyzx, r2.xyzx
+ 110: dp3 r8.z, r4.xyzx, r2.xyzx
+ 111: dp3 r0.x, r8.xyzx, r8.xyzx
+ 112: rsq r0.x, r0.x
+ 113: mul r2.xyz, r0.xxxx, r8.xyzx
+ 114: dp3 r6.x, r6.xyzx, r3.xyzx
+ 115: dp3 r6.y, r7.xyzx, r3.xyzx
+ 116: dp3 r6.z, r4.xyzx, r3.xyzx
+ 117: dp3 r0.x, r6.xyzx, r6.xyzx
+ 118: rsq r0.x, r0.x
+ 119: mul r3.xyz, r0.xxxx, r6.xyzx
+ 120: store_uav_typed u1.xyzw, r1.yyyy, r5.xxxx
+ 121: store_uav_typed u1.xyzw, r0.zzzz, r5.yyyy
+ 122: store_uav_typed u1.xyzw, r0.wwww, r5.zzzz
+ 123: store_uav_typed u0.xyzw, r1.zzzz, r2.xyzw
+ 124: store_uav_typed u0.xyzw, r1.wwww, r3.xyzw
+ 125: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

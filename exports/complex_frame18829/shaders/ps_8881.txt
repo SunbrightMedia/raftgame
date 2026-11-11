@@ -1,0 +1,107 @@
+shader ResourceId::8881, stage ps, name "Pixel Shader 8881"
+entry point: main
+constant block 0 "cbuffer0" (624 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+    +80    float4 cb0_v5 1x4
+    +96    float4 cb0_v6 1x4
+    +112   float4 cb0_v7 1x4
+    +128   float4 cb0_v8 1x4
+    +144   float4 cb0_v9 1x4
+    +160   float4 cb0_v10 1x4
+    +176   float4 cb0_v11 1x4
+    +192   float4 cb0_v12 1x4
+    +208   float4 cb0_v13 1x4
+    +224   float4 cb0_v14 1x4
+    +240   float4 cb0_v15 1x4
+    +256   float4 cb0_v16 1x4
+    +272   float4 cb0_v17 1x4
+    +288   float4 cb0_v18 1x4
+    +304   float4 cb0_v19 1x4
+    +320   float4 cb0_v20 1x4
+    +336   float4 cb0_v21 1x4
+    +352   float4 cb0_v22 1x4
+    +368   float4 cb0_v23 1x4
+    +384   float4 cb0_v24 1x4
+    +400   float4 cb0_v25 1x4
+    +416   float4 cb0_v26 1x4
+    +432   float4 cb0_v27 1x4
+    +448   float4 cb0_v28 1x4
+    +464   float4 cb0_v29 1x4
+    +480   float4 cb0_v30 1x4
+    +496   float4 cb0_v31 1x4
+    +512   float4 cb0_v32 1x4
+    +528   float4 cb0_v33 1x4
+    +544   float4 cb0_v34 1x4
+    +560   float4 cb0_v35 1x4
+    +576   float4 cb0_v36 1x4
+    +592   float4 cb0_v37 1x4
+    +608   float4 cb0_v38 1x4
+constant block 1 "cbuffer1" (48 bytes)
+    +0     float4 cb1_v0 1x4
+    +16    float4 cb1_v1 1x4
+    +32    float4 cb1_v2 1x4
+read  0 "texture0" (TextureType.Texture2D)
+sampler 0 "sampler0"
+in  SV_POSITION0
+in  TEXCOORD0
+out SV_Target0
+
+==================== disassembly: DXBC ====================
+
+Shader hash 0ad1efe5-92f1d617-c43b4bd7-71313200
+
+ps_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[39], immediateIndexed
+      dcl_constantbuffer cb1[3], immediateIndexed
+      dcl_sampler s0, mode_default
+      dcl_resource_texture2d (float,float,float,float) t0
+      dcl_input_ps_siv linear noperspective v0.xy, position
+      dcl_output o0.xyzw
+      dcl_temps 4
+   0: utof r0.xyzw, cb0[37].xyxy
+   1: add r0.xyzw, -r0.xyzw, v0.xyxy
+   2: mad r1.xyzw, r0.zwzw, cb0[38].zwzw, l(0.000000, 0.001000, 0.000000, -0.001000)
+   3: mad r1.xyzw, r1.xyzw, cb0[5].xyxy, cb0[4].xyxy
+   4: max r1.xyzw, r1.xyzw, cb0[6].xyxy
+   5: min r1.xyzw, r1.xyzw, cb0[6].zwzw
+   6: sample_indexable(texture2d)(float,float,float,float) r2.xyz, r1.xyxx, t0.xyzw, s0
+   7: sample_indexable(texture2d)(float,float,float,float) r1.xyz, r1.zwzz, t0.xyzw, s0
+   8: add r1.xyz, r1.xyzx, r2.xyzx
+   9: mad r2.xyzw, r0.xyzw, cb0[38].zwzw, l(0.001000, 0.000000, -0.001000, 0.000000)
+  10: mul r0.xy, r0.zwzz, cb0[38].zwzz
+  11: mad r0.xy, r0.xyxx, cb0[5].xyxx, cb0[4].xyxx
+  12: max r0.xy, r0.xyxx, cb0[6].xyxx
+  13: min r0.xy, r0.xyxx, cb0[6].zwzz
+  14: sample_indexable(texture2d)(float,float,float,float) r0.xyz, r0.xyxx, t0.xyzw, s0
+  15: mad r2.xyzw, r2.xyzw, cb0[5].xyxy, cb0[4].xyxy
+  16: max r2.xyzw, r2.xyzw, cb0[6].xyxy
+  17: min r2.xyzw, r2.xyzw, cb0[6].zwzw
+  18: sample_indexable(texture2d)(float,float,float,float) r3.xyz, r2.xyxx, t0.xyzw, s0
+  19: sample_indexable(texture2d)(float,float,float,float) r2.xyz, r2.zwzz, t0.xyzw, s0
+  20: add r2.xyz, r2.xyzx, r3.xyzx
+  21: add r1.xyz, r1.xyzx, r2.xyzx
+  22: mad r1.xyz, -r1.xyzx, l(0.250000, 0.250000, 0.250000, 0.000000), r0.xyzx
+  23: mul r1.xyz, r1.xyzx, cb1[1].xxxx
+  24: dp3 r0.w, r1.xyzx, l(0.300000, 0.590000, 0.110000, 0.000000)
+  25: add r0.xyz, r0.xyzx, r0.wwww
+  26: add r1.xyz, -r0.xyzx, cb1[2].xyzx
+  27: mad r0.xyz, cb1[1].yyyy, r1.xyzx, r0.xyzx
+  28: max o0.xyz, r0.xyzx, l(0, 0, 0, 0)
+  29: mov o0.w, l(0)
+  30: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA
