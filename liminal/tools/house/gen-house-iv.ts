@@ -36,7 +36,7 @@ const TEX: HouseTex = {
   paint: 'house6/paint_ivory', carpet: 'house6/carpet_brown', ceiling: 'house6/ceiling_paint', trim: 'house6/trim_white',
   brass: 'pmp/brass', dome: 'fixture/dome', chrome: 'fixture/chrome', brick: 'house6/brick', soot: 'house6/soot',
   woodDark: 'house6/wood_dark', fabric: 'house6/fabric_grey', counter: 'house6/counter', glassDark: 'house6/dark',
-  woodPlaque: 'house6/wood_mid', sconce: 'fixture/sconce',
+  woodPlaque: 'house6/wood_mid', sconce: 'fixture/sconce', door: 'house6/door_white',
 };
 const m = new MapBuilder();
 
@@ -161,7 +161,8 @@ m.write('house_iv', HOUSE_IV_ROOMS, {
   // A fill in the lamps' colour: the video's renderer lights far walls and ceilings more evenly than bounce alone.
   light: { luxelSize: 3, bounces: 2, extraBounces: 1, ambientLux: 6, ambientKelvin: 2700 },
   fog: { enabled: false },
-  render: { internalHeight: 540 },
+  // full resolution, then the camera's own softness: thin lines (mortar, panel shadows) survive as in the video
+  render: { internalHeight: 1080 },
   // a camera held by hand: the found-footage research's first cue (a locked-off view reads as a render)
   view: { fov: 64.4, viewBob: 0, handheld: 0.6 },
   camera: { model: 'camcorder', flash: false },
@@ -171,7 +172,7 @@ m.write('house_iv', HOUSE_IV_ROOMS, {
     exposure: 0.012, whiteBalance: 2950, autoExposure: true, aeKey: 0.11, aeRange: 3, aeRate: 1.5,
     // the lamps: soft warm blobs with a white core, no disc edge (the glow mostly in its middle width)
     tintR: 1, tintG: 1, tintB: 1, glow: 0.35, glowSize: 0.8, glowNear: 0.3, glowMid: 0.6, glowFar: 0.1, glowThreshold: 2, contrast: 0.75, dirt: 0, fringe: 0.15,
-    vignette: 0.15, soften: 1.6, sharpen: 0.5, sharpenRadius: 2.0, posterize: 0, grain: 0, lift: 0.02, lineChroma: 0, hueWobble: 0, streaks: 0, lens: 0, bars: true,
+    vignette: 0.15, soften: 1.8, sharpen: 0.5, sharpenRadius: 2.0, posterize: 0, grain: 0, lift: 0.02, lineChroma: 0, hueWobble: 0, streaks: 0, lens: 0, bars: true,
     // The video signal, fitted to the frames (scratchpad meas/metrics.py): brightness edges 3-4 px wide at 960 with no
     // halo, colour edges ~11 px, little fine texture but colour blotches in flat areas.
     chromaBlur: 5.2, chromaDelay: 0.4, lumaNoise: 0.025, chromaNoise: 0.16, codec: 0.035, codecRadius: 1.5,

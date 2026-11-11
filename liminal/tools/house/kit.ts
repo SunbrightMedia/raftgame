@@ -24,6 +24,9 @@ export interface HouseTex {
   brick: string; soot: string; woodDark: string; fabric: string; counter: string; glassDark: string; woodPlaque: string;
   /** A wall sconce's shade (dimmer than a ceiling dome's lens). */
   sconce?: string;
+  /** A door's slab, stiles, rails and panels (default: the trim): its own texture can ask for fine lightmap luxels
+   * (textures/surfaces.json "luxel"), so the panel steps' thin shadows are baked. */
+  door?: string;
 }
 
 /** A rounded rectangle (plan, counter-clockwise), radius r on the corners chosen in the order sw, se, ne, nw. */
@@ -162,10 +165,11 @@ export class HouseKit {
   // ---- doors
   /**
    * A closed six-panel door set into its opening (the wall needs doorGap(centre, w, h)): jamb lining, a
-   * 1⅜" slab whose face sits ⅝" behind the wall's, profiled casing. The panels are recessed ½" with a
-   * 1¼" bevel round each, so the top edge of every panel faces down and goes dark and its bottom catches
-   * the light, as on a moulded door. Rails and stiles at the usual sizes (top panels 12½", middle 29",
-   * bottom 13"). `depth` = the wall's thickness.
+   * 1⅜" slab whose face sits ⅝" behind the wall's, profiled casing. Each panel sits 0.6" down behind a
+   * steep, narrow step (0.3" wide, ~63°), so its top edge is a thin dark line and its bottom a thin light
+   * one, as on a moulded door seen from a few yards (the video's doors: lines ~2 px at 9 ft, not a
+   * soft 1¼" bevel). Rails and stiles at the usual sizes (top panels 12½", middle 29", bottom 13").
+   * `depth` = the wall's thickness.
    */
   door(axis: Axis, face: number, dir: Dir, centre: number, knob: Dir, o: { w?: number; h?: number; depth?: number } = {}): void {
     const w = o.w ?? 32, h = o.h ?? 80, depth = o.depth ?? 5, T = this.t.trim, jt = 0.75;
@@ -175,20 +179,19 @@ export class HouseKit {
     this.wbox(axis, face, dir, b, b + jt, -depth, 0, 0, h + jt, T);
     this.wbox(axis, face, dir, a - jt, b + jt, -depth, 0, h, h + jt, T);
     // the slab
-    const vf = -0.625, vr = vf - 0.5, vb = vf - 1.375, sw = 4.5, mid = w / 2;
-    this.wbox(axis, face, dir, a + 0.1, b - 0.1, vb, vr, 0.5, h - 0.1, T);
-    for (const [u0, u1] of [[0.1, sw], [mid - 2.25, mid + 2.25], [w - sw, w - 0.1]]) this.wbox(axis, face, dir, a + u0, a + u1, vr, vf, 0.5, h - 0.1, T);
-    for (const [r0, r1] of [[0.1, 4.5], [17, 21.5], [50.5, 58.5], [71.5, 79.5]]) this.wbox(axis, face, dir, a + sw, b - sw, vr, vf, h - r1, h - r0, T);
+    const D = this.t.door ?? T, vf = -0.625, vr = vf - 0.6, vb = vf - 1.375, sw = 4.5, mid = w / 2;
+    this.wbox(axis, face, dir, a + 0.1, b - 0.1, vb, vr, 0.5, h - 0.1, D);
+    for (const [u0, u1] of [[0.1, sw], [mid - 2.25, mid + 2.25], [w - sw, w - 0.1]]) this.wbox(axis, face, dir, a + u0, a + u1, vr, vf, 0.5, h - 0.1, D);
+    for (const [r0, r1] of [[0.1, 4.5], [17, 21.5], [50.5, 58.5], [71.5, 79.5]]) this.wbox(axis, face, dir, a + sw, b - sw, vr, vf, h - r1, h - r0, D);
     for (const [z0, z1] of [[4.5, 17], [21.5, 50.5], [58.5, 71.5]]) {
-      for (const [u0, u1] of [[sw, mid - 2.25], [mid + 2.25, w - sw]]) this.panelBevels(axis, face, dir, a + u0, a + u1, h - z1, h - z0, vr, vf, 1.25);
+      for (const [u0, u1] of [[sw, mid - 2.25], [mid + 2.25, w - sw]]) this.panelBevels(axis, face, dir, a + u0, a + u1, h - z1, h - z0, vr, vf, 0.3, D);
     }
     this.casing(axis, face, dir, a - jt, b + jt, h + jt);
     // knob: a rose on the slab and a round knob 2¼" out, 2⅜" in from the edge, 36" up
     this.knob(axis, face, dir, centre + knob * (w / 2 - 2.375), 36, vf);
   }
   /** The four bevels of a recessed panel: wedges from the frame's face (vf) down to the field (vr). */
-  private panelBevels(axis: Axis, face: number, dir: Dir, u0: number, u1: number, z0: number, z1: number, vr: number, vf: number, bw: number): void {
-    const T = this.t.trim;
+  private panelBevels(axis: Axis, face: number, dir: Dir, u0: number, u1: number, z0: number, z1: number, vr: number, vf: number, bw: number, T = this.t.trim): void {
     this.along(axis, face, dir, u0, u1, [[vr, z1], [vf, z1], [vr, z1 - bw]], T);
     this.along(axis, face, dir, u0, u1, [[vr, z0], [vr, z0 + bw], [vf, z0]], T);
     this.upright(axis, face, dir, [[u0, vr], [u0, vf], [u0 + bw, vr]], z0, z1, T);
@@ -279,21 +282,22 @@ export class HouseKit {
     block(o1, b, 0, sh, false, true);
     block(o0, o1, oz + oh, sh, false, false);
     block(o0, o1, 0, oz, false, false);
-    // the firebox: soot back, sides, roof and floor, `fd` deep
+    // the firebox, `fd` deep: brick sides and roof (lit inside the opening, as the video's), soot at the back and floor
     this.wbox(axis, face, dir, o0, o1, d - fd - 1, d - fd, oz, oz + oh, S);
-    this.wbox(axis, face, dir, o0, o0 + 1.5, d - fd, d, oz, oz + oh, S);
-    this.wbox(axis, face, dir, o1 - 1.5, o1, d - fd, d, oz, oz + oh, S);
-    this.wbox(axis, face, dir, o0, o1, d - fd, d, oz + oh - 1.5, oz + oh, S);
+    this.wbox(axis, face, dir, o0, o0 + 1.5, d - fd, d, oz, oz + oh, B);
+    this.wbox(axis, face, dir, o1 - 1.5, o1, d - fd, d, oz, oz + oh, B);
+    this.wbox(axis, face, dir, o0, o1, d - fd, d, oz + oh - 1.5, oz + oh, B);
     this.wbox(axis, face, dir, o0 + 1.5, o1 - 1.5, d - fd, d, oz, oz + 0.4, S);
   }
-  /** An empty bookcase of dark wood, open at the front, with rounded front edges. */
+  /** An empty bookcase of dark wood, open at the front, with rounded front edges: inch-thick boards, as the video's. */
   bookshelf(axis: Axis, face: number, dir: Dir, a: number, b: number, h = 52, d = 12): void {
-    const W = this.t.woodDark;
+    const W = this.t.woodDark, t = 1;
+    const board = (z: number) => [[0, z], [d - 0.35, z], [d, z + 0.35], [d, z + t - 0.35], [d - 0.35, z + t], [0, z + t]] as [number, number][];
     this.wbox(axis, face, dir, a, b, 0, 0.5, 0, h, W);
-    this.wbox(axis, face, dir, a, a + 0.75, 0, d, 0, h, W);
-    this.wbox(axis, face, dir, b - 0.75, b, 0, d, 0, h, W);
-    for (const z of [0, 3, 16, 29, 42]) this.along(axis, face, dir, a + 0.75, b - 0.75, [[0, z], [d - 0.3, z], [d, z + 0.375], [d - 0.3, z + 0.75], [0, z + 0.75]], W);
-    this.along(axis, face, dir, a, b, [[0, h - 0.75], [d - 0.3, h - 0.75], [d, h - 0.375], [d - 0.3, h], [0, h]], W);
+    this.wbox(axis, face, dir, a, a + t, 0, d, 0, h, W);
+    this.wbox(axis, face, dir, b - t, b, 0, d, 0, h, W);
+    for (const z of [0, 3, 16, 29, 42]) this.along(axis, face, dir, a + t, b - t, board(z), W);
+    this.along(axis, face, dir, a, b, board(h - t), W);
   }
   /**
    * An upholstered armchair (`yaw` 0 = it faces +x): a skirted base, a seat cushion, rolled arms and a

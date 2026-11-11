@@ -59,6 +59,30 @@ delay is small.
   walls the same cream, white balance 2950 K, room 1 without baseboards and
   its east hall lit only by its sconce.
 
+## Textures and models, matched at full size
+
+Crops of the frames at 2-3× (user: "textures are still quite off: the door,
+the carpet, everything"):
+
+- **Carpet:** no weave at all; soft blotches a foot or two across (traffic,
+  crushed pile), fainter ones of a few inches. Ours: `house/carpet_worn`
+  (original, 8 ft tile), recoloured `house6/carpet_brown`.
+- **Doors:** each panel's top edge is a thin dark line (the rail's step
+  shadows a strip of the panel under overhead light), its bottom a thin
+  light line. A ¼" shadow needs fine luxels sampled close to the surface:
+  `surfaces.json` `"luxel"` per texture (`house6/door_white` 0.4"), with
+  the bake's sample lift and edge margin scaled down for those faces.
+  The video's doors are a little darker than its walls.
+- **Brick:** smooth, slightly glossy face brick in running bond, read as
+  long horizontal lines (raked bed joints, flush head joints). The Poly
+  Haven bricks are all rough; ours: `house/brick_smooth` (original).
+  Recolours can keep a texture's own hue differences (`keepHue`).
+- **Armchair:** a neutral grey fabric reads as the video's warm grey under
+  2700 K light (sampled a brown first: compare lit faces).
+- **Resolution:** at 540 lines a mortar line or panel shadow is under a
+  pixel and vanishes; the house renders at 1080 and gets its softness from
+  the camera pass instead (edge widths unchanged).
+
 ## Not done yet
 
 Interlacing, head-switching and tracking bands (tape only: the video shows

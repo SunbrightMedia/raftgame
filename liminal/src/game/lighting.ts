@@ -8,6 +8,7 @@ import type { TextureRegistry } from '../engine/render/textures';
 import type { Settings } from '../data/settings';
 import type { Level } from './level';
 import { worldUniforms } from '../engine/render/worldMaterial';
+import { luxelFor } from '../engine/render/surfaces';
 import type { Storage } from '../data/storage';
 import { AmbientTree, lightModelsRuntime } from '../engine/light/modelLight';
 import { SolidGrid } from '../engine/light/bake';
@@ -343,7 +344,7 @@ export class Lighting {
     if (level.source) return this.startSource(level, s, key, tryCache);
     const gen = ++this.seq;
     const L = s.light;
-    const layout = layoutLightmap(level.faces, Math.max(2, L.luxelSize), 2048, L.thinSamples);
+    const layout = layoutLightmap(level.faces, Math.max(2, L.luxelSize), 2048, L.thinSamples, luxelFor);
     if (tryCache) {
       try {
         const text = await this.storage.read(this.cachePath(level));
@@ -491,6 +492,8 @@ export class Lighting {
       ...(probes && light ? { probes: { pos: probes.pos, nrm: probes.nrm } } : {}),
       lights: mapLights(level),
       emissive,
+      // Fine-luxel textures: samples close to the surface (a third of a luxel), so small relief shades itself.
+      lift: Object.fromEntries([...new Set(level.faces.map((f) => f.tex))].flatMap((t) => { const l = luxelFor(t); return l !== undefined && layout.luxel > l ? [[t, Math.max(0.08, l / 3)]] : []; })),
       albedo,
       params: {
         ambient: L.ambientKelvin > 0 ? kelvinToLinear(L.ambientKelvin).map((c) => c * L.ambientLux) as [number, number, number] : [L.ambientLux, L.ambientLux, L.ambientLux],

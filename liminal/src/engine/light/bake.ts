@@ -118,6 +118,9 @@ export interface BakeParams {
 export type BakeBox = SolidPlanes;
 
 export interface BakeInput {
+  /** Per texture: how far luxel samples sit off the surface (default 1"). Fine-luxel faces need less, or a
+   * shallow recess (a door panel's step) could never shadow itself. */
+  lift?: Record<string, number>;
   faces: Face[];
   width: number;
   height: number;
@@ -266,11 +269,14 @@ export function bake(input: BakeInput): BakeOutput {
       mask: new Float32Array(n * 3).fill(1), mask3: new Float32Array(n * 3).fill(1),
       emitting: !!input.emissive[f.tex],
     };
+    // Samples keep half an inch off the face's edges (no light leaking in round corners), except on fine-luxel
+    // faces, whose edge is where their small shadows fall.
+    const fine = input.lift?.[f.tex], lift = fine ?? 1, edge = fine !== undefined ? 0.05 : 0.5;
     for (let j = 0; j < rect.h; j++) {
       for (let i = 0; i < rect.w; i++) {
-        const s = clamp(i * fs.stepS, 0.5, f.width - 0.5);
-        const t = clamp(j * fs.stepT, 0.5, f.height - 0.5);
-        const q = facePoint(f, s, t, 1);
+        const s = clamp(i * fs.stepS, edge, f.width - edge);
+        const t = clamp(j * fs.stepT, edge, f.height - edge);
+        const q = facePoint(f, s, t, lift);
         const k = j * rect.w + i;
         fs.pos[k * 3] = q[0]; fs.pos[k * 3 + 1] = q[1]; fs.pos[k * 3 + 2] = q[2];
         fs.valid[k] = grid.inside(q) ? 0 : 1;

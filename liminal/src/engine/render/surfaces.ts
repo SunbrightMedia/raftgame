@@ -16,6 +16,9 @@ export interface Surface {
   sheen: number;
   /** Darkening of the deepest crevices (grout, between pile tufts), 0..1. */
   cavity: number;
+  /** Lightmap luxel size for faces of this texture (inches), finer than the map's: small relief that casts its own
+   * shadows (a door's panel steps). Per texture only. */
+  luxel?: number;
 }
 
 interface SurfaceFile { materials: Record<string, Surface>; textures?: Record<string, Partial<Surface>> }
@@ -27,4 +30,10 @@ const FALLBACK: Surface = { roughness: 0.7, f0: 0.04, metal: 0, bump: 0.04, reli
 export function surfaceFor(texName: string, material: string): Surface {
   const base = data.materials[material] ?? data.materials.default ?? FALLBACK;
   return { ...FALLBACK, ...base, ...(data.textures?.[texName] ?? {}) };
+}
+
+/** The finer lightmap luxel a texture asks for (textures/surfaces.json "luxel"), if any. */
+export function luxelFor(texName: string): number | undefined {
+  const l = data.textures?.[texName]?.luxel;
+  return typeof l === 'number' && l > 0 ? l : undefined;
 }

@@ -102,7 +102,9 @@ function loadSheet(url: string): Promise<HTMLImageElement> {
   return p;
 }
 
-interface Variant { name: string; from: string; color: string; contrast?: number }
+/** `keepHue`: scale each channel (the texture's own colour differences stay: brick to brick, stain to stain)
+ * instead of tinting its brightness with one colour. */
+interface Variant { name: string; from: string; color: string; contrast?: number; keepHue?: boolean }
 
 /**
  * Extra facts about a material imported from Source (tools/source/convert_materials.py):
@@ -357,7 +359,14 @@ export class TextureRegistry {
     const n = parseInt(v.color.slice(1), 16);
     const tr = (n >> 16) & 255, tg = (n >> 8) & 255, tb = n & 255;
     const k = v.contrast ?? 1;
-    for (let i = 0; i < d.length; i += 4) {
+    if (v.keepHue) {
+      // per channel: its mean moves to the target, each pixel's difference from the mean scaled by k
+      const m = [0, 0, 0];
+      for (let i = 0; i < d.length; i += 4) { m[0] += d[i]; m[1] += d[i + 1]; m[2] += d[i + 2]; }
+      const n = d.length / 4, t = [tr, tg, tb];
+      for (let c = 0; c < 3; c++) m[c] = Math.max(1, m[c] / n);
+      for (let i = 0; i < d.length; i += 4) for (let c = 0; c < 3; c++) d[i + c] = t[c] * (1 + (d[i + c] / m[c] - 1) * k);
+    } else for (let i = 0; i < d.length; i += 4) {
       const l = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
       const f = 1 + (l / mean - 1) * k;
       d[i] = tr * f; d[i + 1] = tg * f; d[i + 2] = tb * f;

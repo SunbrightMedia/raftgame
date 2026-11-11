@@ -377,13 +377,15 @@ export interface LightmapLayout { width: number; height: number; luxel: number; 
  * with samples on the face's edges, and pack the blocks into one atlas with a
  * simple shelf packer. 16 units per luxel is Source's default lightmap scale.
  */
-export function layoutLightmap(faces: Face[], luxel: number, maxWidth = 2048, thin = 3): LightmapLayout {
+export function layoutLightmap(faces: Face[], luxel: number, maxWidth = 2048, thin = 3, fine?: (tex: string) => number | undefined): LightmapLayout {
   const items = faces.map((f) => {
     // Thin faces (baseboards, casing, girder flanges) get finer luxels ACROSS
     // so they have ~4 samples there, and keep the normal size along their
     // length (light along a 30' girder is smooth; fine luxels there only
-    // bloated the atlas).
-    const ls = Math.max(1, Math.min(luxel, f.width / thin)), lt = Math.max(1, Math.min(luxel, f.height / thin));
+    // bloated the atlas). A texture may ask for finer luxels everywhere (`fine`):
+    // relief small enough to shade itself, such as a door's panel steps.
+    const fl = fine?.(f.tex), base = fl !== undefined ? Math.min(luxel, fl) : luxel, floor = Math.min(1, base);
+    const ls = Math.max(floor, Math.min(base, f.width / thin)), lt = Math.max(floor, Math.min(base, f.height / thin));
     return { id: f.id, w: Math.max(2, Math.ceil(f.width / ls) + 1), h: Math.max(2, Math.ceil(f.height / lt) + 1) };
   });
   items.sort((a, b) => b.h - a.h || b.w - a.w);

@@ -351,6 +351,68 @@ const DEFS: Record<string, Def> = {
       g.putImageData(img, 0, 0);
     },
   },
+  // Worn cut-pile carpet, neutral: what a home video sees of one. No visible weave; soft blotches a foot or
+  // two across (traffic, pile crushed one way or the other, old stains), fainter ones of a few inches, a
+  // little streaking along the pile, and only a faint haze of fibre. An 8 ft tile, so the blotches don't
+  // visibly repeat across a room ("Infinite house": the carpet at full size).
+  'house/carpet_worn': {
+    px: [384, 384], world: [96, 96], material: 'carpet', raw: true,
+    paint: (g, w, h, rnd) => {
+      const big = valueNoise(w, h, 4, rnd), mid = valueNoise(w, h, 10, rnd), small = valueNoise(w, h, 40, rnd), fine = valueNoise(w, h, 128, rnd);
+      // streaks along the pile: noise stretched along x (few cells across y is the short way)
+      const sw = 48, sh = 6, sgrid = Array.from({ length: sw * sh }, () => rnd());
+      const smooth = (t: number) => t * t * (3 - 2 * t);
+      const img = g.createImageData(w, h);
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        const i = y * w + x;
+        const gx = (y / h) * sw, gy = (x / w) * sh, x0 = Math.floor(gx), y0 = Math.floor(gy), tx = smooth(gx - x0), ty = smooth(gy - y0);
+        const at = (a: number, b: number) => sgrid[((b + sh) % sh) * sw + ((a + sw) % sw)];
+        const st = (at(x0, y0) * (1 - tx) + at(x0 + 1, y0) * tx) * (1 - ty) + (at(x0, y0 + 1) * (1 - tx) + at(x0 + 1, y0 + 1) * tx) * ty;
+        const v = 128 * (1 + (big[i] - 0.5) * 0.2 + (mid[i] - 0.5) * 0.1 + (small[i] - 0.5) * 0.05 + (st - 0.5) * 0.02 + (fine[i] - 0.5) * 0.04 + (rnd() - 0.5) * 0.03);
+        img.data[i * 4] = img.data[i * 4 + 1] = img.data[i * 4 + 2] = v;
+        img.data[i * 4 + 3] = 255;
+      }
+      g.putImageData(img, 0, 0);
+    },
+  },
+  // Smooth face brick in running bond, as a sealed fireplace chimney: modular bricks (7⅝" × 2¼", ⅜" joints),
+  // each its own shade (a few lighter, as the video's catch the lamp), a slight orange/red drift, softly
+  // darker at their edges; raked bed joints dark, head joints struck flush (the video's chimney reads as
+  // long horizontal lines). 8 bricks × 16 courses a tile.
+  'house/brick_smooth': {
+    px: [512, 336], world: [64, 42], material: 'brick', raw: true,
+    paint: (g, w, h, rnd) => {
+      const ppi = w / 64, BW = 8, CH = 2.625, J = 0.375;
+      const tone = valueNoise(w, h, 24, rnd), fine = valueNoise(w, h, 96, rnd);
+      const cols = 8, rows = 16, shade = Array.from({ length: cols * rows }, () => {
+        const r = rnd(), b = r < 0.06 ? 1.05 + rnd() * 0.05 : 0.94 + rnd() * 0.1;
+        return [b, 1 + (rnd() - 0.5) * 0.06, 1 + (rnd() - 0.5) * 0.1];
+      });
+      const img = g.createImageData(w, h);
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        const i = y * w + x, wy = y / ppi, row = Math.floor(wy / CH), yIn = wy - row * CH;
+        const wx = x / ppi + (row % 2 ? BW / 2 : 0), col = Math.floor(wx / BW) % cols, xIn = wx - Math.floor(wx / BW) * BW;
+        let r: number, gg: number, b: number;
+        if (yIn < J) {
+          // a bed joint: raked, in its own shadow (the long dark lines the video's chimney shows)
+          const v = 0.9 + (fine[i] - 0.5) * 0.2;
+          r = 80 * v; gg = 52 * v; b = 36 * v;
+        } else if (xIn < J) {
+          // a head joint: struck flush, only a little darker than the bricks
+          const v = 0.9 + (fine[i] - 0.5) * 0.2;
+          r = 128 * v; gg = 66 * v; b = 42 * v;
+        } else {
+          const [k, rr, gf] = shade[(row % rows) * cols + col];
+          const ex = Math.min(xIn - J, BW - xIn, yIn - J, CH - yIn) * ppi;   // px to the brick's nearest edge
+          const e = ex < 2 ? 0.88 + 0.06 * ex : 1;
+          const v = k * e * (1 + (tone[i] - 0.5) * 0.08 + (fine[i] - 0.5) * 0.05 + (rnd() - 0.5) * 0.03);
+          r = 158 * v * rr; gg = 74 * v * gf; b = 44 * v;
+        }
+        img.data[i * 4] = r; img.data[i * 4 + 1] = gg; img.data[i * 4 + 2] = b; img.data[i * 4 + 3] = 255;
+      }
+      g.putImageData(img, 0, 0);
+    },
+  },
   // Woven upholstery fabric, neutral: a fine basket weave with soft slubs.
   'house/upholstery': {
     px: [128, 128], world: [8, 8], material: 'fabric', raw: true,
