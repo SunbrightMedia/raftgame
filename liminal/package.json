@@ -24,7 +24,8 @@
     "world:walk": "vite-node tools/world/walk.ts --",
     "world:plan": "vite-node tools/world/plan.ts --",
     "fetch:textures": "python3 tools/fetch_textures.py",
-    "world:look": "vite-node tools/world/look.ts --"
+    "world:look": "vite-node tools/world/look.ts --",
+    "gen:house": "vite-node tools/house/gen-house-test.ts"
   },
   "dependencies": {
     "three": "^0.187.0"

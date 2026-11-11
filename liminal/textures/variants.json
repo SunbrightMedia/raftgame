@@ -228,6 +228,24 @@
       "from": "ind/metal_rust",
       "color": "#4b433d",
       "contrast": 0.8
+    },
+    {
+      "name": "house6/paint_cream",
+      "from": "office/plaster",
+      "color": "#ddd4b9",
+      "contrast": 0.8
+    },
+    {
+      "name": "house6/ceiling",
+      "from": "office/plaster",
+      "color": "#e3dfd3",
+      "contrast": 0.6
+    },
+    {
+      "name": "house6/carpet",
+      "from": "house/carpet_plush",
+      "color": "#8b7b63",
+      "contrast": 0.9
     }
   ]
 }
