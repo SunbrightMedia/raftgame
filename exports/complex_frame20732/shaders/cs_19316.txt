@@ -1,0 +1,61 @@
+shader ResourceId::19316, stage cs, name "Compute Shader 19316"
+entry point: main
+constant block 0 "cbuffer0" (16 bytes)
+    +0     float4 cb0_v0 1x4
+write 0 "uav0" (TextureType.Buffer)
+write 1 "uav1" (TextureType.Buffer)
+in  vThreadIDInGroupFlattened0
+in  vThreadGroupID0
+
+==================== disassembly: DXBC ====================
+
+Shader hash ff38f10e-fddea2ee-7de4b3b3-430c3398
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[1], immediateIndexed
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u0
+      dcl_uav_structured u1, 16
+      dcl_input vThreadIDInGroupFlattened
+      dcl_input vThreadGroupID.x
+      dcl_temps 1
+      dcl_tgsm_raw g0, 4
+      dcl_thread_group 1, 16, 1
+   0: ult r0.x, vThreadIDInGroupFlattened.x, l(1)
+   1: if_nz r0.x
+   2:   imul null, r0.x, vThreadGroupID.x, l(5)
+   3:   imad r0.y, l(5), vThreadGroupID.x, l(1)
+   4:   ld_uav_typed(buffer)(uint,uint,uint,uint) r0.z, r0.yyyy, u0.yzxw
+   5:   umin r0.z, r0.z, cb0[0].x
+   6:   store_raw g0.x, l(0), r0.z
+   7:   iadd r0.z, r0.z, l(15)
+   8:   ushr r0.z, r0.z, l(4)
+   9:   store_uav_typed u0.xyzw, r0.xxxx, l(96, 96, 96, 96)
+  10:   store_uav_typed u0.xyzw, r0.yyyy, r0.zzzz
+  11: endif
+  12: sync_g_t
+  13: if_z vThreadGroupID.x
+  14:   ld_raw r0.x, l(0), g0.xxxx
+  15:   imad r0.x, r0.x, l(5), vThreadIDInGroupFlattened.x
+  16:   mov r0.y, l(0)
+  17:   loop
+  18:     uge r0.z, r0.y, l(5)
+  19:     breakc_nz r0.z
+  20:     ishl r0.z, r0.y, l(4)
+  21:     iadd r0.z, r0.z, r0.x
+  22:     store_structured u1.xyzw, r0.z, l(0), l(0, 0, 0, 0)
+  23:     iadd r0.y, r0.y, l(1)
+  24:   endloop
+  25: endif
+  26: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

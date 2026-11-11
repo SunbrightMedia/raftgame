@@ -1,0 +1,28 @@
+{
+ "index": 400,
+ "kind": "copy",
+ "events": [
+  9937,
+  9937
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "PostProcessing",
+  "EnqueueCopy(%s)"
+ ],
+ "first": "ID3D11DeviceContext::CopySubresourceRegion()",
+ "last": "ID3D11DeviceContext::CopySubresourceRegion()",
+ "shaders": {},
+ "constants": {},
+ "reads": {},
+ "draws": [],
+ "outputs": [
+  {
+   "id": "ResourceId::7962",
+   "name": "Buffer 7962"
+  }
+ ],
+ "images": []
+}

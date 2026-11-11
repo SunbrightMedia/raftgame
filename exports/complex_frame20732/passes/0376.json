@@ -1,0 +1,139 @@
+{
+ "index": 376,
+ "kind": "dispatch",
+ "events": [
+  9665,
+  9665
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "PostProcessing",
+  "DOF(Alpha=%s)",
+  "DOF Downsample %dx%d"
+ ],
+ "first": "ID3D11DeviceContext::Dispatch()",
+ "last": "ID3D11DeviceContext::Dispatch()",
+ "shaders": {
+  "cs": [
+   "shaders/cs_8840.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::8840": [
+    {
+     "block": "cbuffer0",
+     "bytes": 48,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.999306,
+        0.999074,
+        0.7,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        720.0,
+        540.0,
+        0.001389,
+        0.001852
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::8840": [
+    {
+     "id": "ResourceId::48008",
+     "name": "2D Texture 48008",
+     "w": 720,
+     "h": 540,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R16G16B16A16_FLOAT",
+     "samples": 1,
+     "binding": "texture0"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 9665,
+   "name": "ID3D11DeviceContext::Dispatch()",
+   "cs": "ResourceId::8840"
+  }
+ ],
+ "outputs": [
+  {
+   "id": "ResourceId::47168",
+   "name": "2D Texture 47168",
+   "w": 360,
+   "h": 270,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R16G16B16A16_FLOAT",
+   "samples": 1
+  }
+ ],
+ "images": [
+  {
+   "file": "images/0376_out0.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    -0.0,
+    0.2386474609375
+   ],
+   "max": [
+    0.379638671875,
+    0.308349609375,
+    0.0305023193359375,
+    0.43359375
+   ],
+   "target": {
+    "id": "ResourceId::47168",
+    "name": "2D Texture 47168",
+    "w": 360,
+    "h": 270,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R16G16B16A16_FLOAT",
+    "samples": 1
+   }
+  }
+ ]
+}

@@ -1,0 +1,24 @@
+{
+ "index": 86,
+ "kind": "clear",
+ "events": [
+  6123,
+  6123
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "LumenSceneLighting%s",
+  "BuildCardUpdateContext",
+  "SetCardPageIndexIndirectArgs"
+ ],
+ "first": "ID3D11DeviceContext::ClearUnorderedAccessViewUint()",
+ "last": "ID3D11DeviceContext::ClearUnorderedAccessViewUint()",
+ "shaders": {},
+ "constants": {},
+ "reads": {},
+ "draws": [],
+ "outputs": [],
+ "images": []
+}

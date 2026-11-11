@@ -1,0 +1,425 @@
+shader ResourceId::6086, stage vs, name "Vertex Shader 6086"
+entry point: main
+constant block 0 "cbuffer0" (4560 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+    +80    float4 cb0_v5 1x4
+    +96    float4 cb0_v6 1x4
+    +112   float4 cb0_v7 1x4
+    +128   float4 cb0_v8 1x4
+    +144   float4 cb0_v9 1x4
+    +160   float4 cb0_v10 1x4
+    +176   float4 cb0_v11 1x4
+    +192   float4 cb0_v12 1x4
+    +208   float4 cb0_v13 1x4
+    +224   float4 cb0_v14 1x4
+    +240   float4 cb0_v15 1x4
+    +256   float4 cb0_v16 1x4
+    +272   float4 cb0_v17 1x4
+    +288   float4 cb0_v18 1x4
+    +304   float4 cb0_v19 1x4
+    +320   float4 cb0_v20 1x4
+    +336   float4 cb0_v21 1x4
+    +352   float4 cb0_v22 1x4
+    +368   float4 cb0_v23 1x4
+    +384   float4 cb0_v24 1x4
+    +400   float4 cb0_v25 1x4
+    +416   float4 cb0_v26 1x4
+    +432   float4 cb0_v27 1x4
+    +448   float4 cb0_v28 1x4
+    +464   float4 cb0_v29 1x4
+    +480   float4 cb0_v30 1x4
+    +496   float4 cb0_v31 1x4
+    +512   float4 cb0_v32 1x4
+    +528   float4 cb0_v33 1x4
+    +544   float4 cb0_v34 1x4
+    +560   float4 cb0_v35 1x4
+    +576   float4 cb0_v36 1x4
+    +592   float4 cb0_v37 1x4
+    +608   float4 cb0_v38 1x4
+    +624   float4 cb0_v39 1x4
+    +640   float4 cb0_v40 1x4
+    +656   float4 cb0_v41 1x4
+    +672   float4 cb0_v42 1x4
+    +688   float4 cb0_v43 1x4
+    +704   float4 cb0_v44 1x4
+    +720   float4 cb0_v45 1x4
+    +736   float4 cb0_v46 1x4
+    +752   float4 cb0_v47 1x4
+    +768   float4 cb0_v48 1x4
+    +784   float4 cb0_v49 1x4
+    +800   float4 cb0_v50 1x4
+    +816   float4 cb0_v51 1x4
+    +832   float4 cb0_v52 1x4
+    +848   float4 cb0_v53 1x4
+    +864   float4 cb0_v54 1x4
+    +880   float4 cb0_v55 1x4
+    +896   float4 cb0_v56 1x4
+    +912   float4 cb0_v57 1x4
+    +928   float4 cb0_v58 1x4
+    +944   float4 cb0_v59 1x4
+    +960   float4 cb0_v60 1x4
+    +976   float4 cb0_v61 1x4
+    +992   float4 cb0_v62 1x4
+    +1008  float4 cb0_v63 1x4
+    +1024  float4 cb0_v64 1x4
+    +1040  float4 cb0_v65 1x4
+    +1056  float4 cb0_v66 1x4
+    +1072  float4 cb0_v67 1x4
+    +1088  float4 cb0_v68 1x4
+    +1104  float4 cb0_v69 1x4
+    +1120  float4 cb0_v70 1x4
+    +1136  float4 cb0_v71 1x4
+    +1152  float4 cb0_v72 1x4
+    +1168  float4 cb0_v73 1x4
+    +1184  float4 cb0_v74 1x4
+    +1200  float4 cb0_v75 1x4
+    +1216  float4 cb0_v76 1x4
+    +1232  float4 cb0_v77 1x4
+    +1248  float4 cb0_v78 1x4
+    +1264  float4 cb0_v79 1x4
+    +1280  float4 cb0_v80 1x4
+    +1296  float4 cb0_v81 1x4
+    +1312  float4 cb0_v82 1x4
+    +1328  float4 cb0_v83 1x4
+    +1344  float4 cb0_v84 1x4
+    +1360  float4 cb0_v85 1x4
+    +1376  float4 cb0_v86 1x4
+    +1392  float4 cb0_v87 1x4
+    +1408  float4 cb0_v88 1x4
+    +1424  float4 cb0_v89 1x4
+    +1440  float4 cb0_v90 1x4
+    +1456  float4 cb0_v91 1x4
+    +1472  float4 cb0_v92 1x4
+    +1488  float4 cb0_v93 1x4
+    +1504  float4 cb0_v94 1x4
+    +1520  float4 cb0_v95 1x4
+    +1536  float4 cb0_v96 1x4
+    +1552  float4 cb0_v97 1x4
+    +1568  float4 cb0_v98 1x4
+    +1584  float4 cb0_v99 1x4
+    +1600  float4 cb0_v100 1x4
+    +1616  float4 cb0_v101 1x4
+    +1632  float4 cb0_v102 1x4
+    +1648  float4 cb0_v103 1x4
+    +1664  float4 cb0_v104 1x4
+    +1680  float4 cb0_v105 1x4
+    +1696  float4 cb0_v106 1x4
+    +1712  float4 cb0_v107 1x4
+    +1728  float4 cb0_v108 1x4
+    +1744  float4 cb0_v109 1x4
+    +1760  float4 cb0_v110 1x4
+    +1776  float4 cb0_v111 1x4
+    +1792  float4 cb0_v112 1x4
+    +1808  float4 cb0_v113 1x4
+    +1824  float4 cb0_v114 1x4
+    +1840  float4 cb0_v115 1x4
+    +1856  float4 cb0_v116 1x4
+    +1872  float4 cb0_v117 1x4
+    +1888  float4 cb0_v118 1x4
+    +1904  float4 cb0_v119 1x4
+    +1920  float4 cb0_v120 1x4
+    +1936  float4 cb0_v121 1x4
+    +1952  float4 cb0_v122 1x4
+    +1968  float4 cb0_v123 1x4
+    +1984  float4 cb0_v124 1x4
+    +2000  float4 cb0_v125 1x4
+    +2016  float4 cb0_v126 1x4
+    +2032  float4 cb0_v127 1x4
+    +2048  float4 cb0_v128 1x4
+    +2064  float4 cb0_v129 1x4
+    +2080  float4 cb0_v130 1x4
+    +2096  float4 cb0_v131 1x4
+    +2112  float4 cb0_v132 1x4
+    +2128  float4 cb0_v133 1x4
+    +2144  float4 cb0_v134 1x4
+    +2160  float4 cb0_v135 1x4
+    +2176  float4 cb0_v136 1x4
+    +2192  float4 cb0_v137 1x4
+    +2208  float4 cb0_v138 1x4
+    +2224  float4 cb0_v139 1x4
+    +2240  float4 cb0_v140 1x4
+    +2256  float4 cb0_v141 1x4
+    +2272  float4 cb0_v142 1x4
+    +2288  float4 cb0_v143 1x4
+    +2304  float4 cb0_v144 1x4
+    +2320  float4 cb0_v145 1x4
+    +2336  float4 cb0_v146 1x4
+    +2352  float4 cb0_v147 1x4
+    +2368  float4 cb0_v148 1x4
+    +2384  float4 cb0_v149 1x4
+    +2400  float4 cb0_v150 1x4
+    +2416  float4 cb0_v151 1x4
+    +2432  float4 cb0_v152 1x4
+    +2448  float4 cb0_v153 1x4
+    +2464  float4 cb0_v154 1x4
+    +2480  float4 cb0_v155 1x4
+    +2496  float4 cb0_v156 1x4
+    +2512  float4 cb0_v157 1x4
+    +2528  float4 cb0_v158 1x4
+    +2544  float4 cb0_v159 1x4
+    +2560  float4 cb0_v160 1x4
+    +2576  float4 cb0_v161 1x4
+    +2592  float4 cb0_v162 1x4
+    +2608  float4 cb0_v163 1x4
+    +2624  float4 cb0_v164 1x4
+    +2640  float4 cb0_v165 1x4
+    +2656  float4 cb0_v166 1x4
+    +2672  float4 cb0_v167 1x4
+    +2688  float4 cb0_v168 1x4
+    +2704  float4 cb0_v169 1x4
+    +2720  float4 cb0_v170 1x4
+    +2736  float4 cb0_v171 1x4
+    +2752  float4 cb0_v172 1x4
+    +2768  float4 cb0_v173 1x4
+    +2784  float4 cb0_v174 1x4
+    +2800  float4 cb0_v175 1x4
+    +2816  float4 cb0_v176 1x4
+    +2832  float4 cb0_v177 1x4
+    +2848  float4 cb0_v178 1x4
+    +2864  float4 cb0_v179 1x4
+    +2880  float4 cb0_v180 1x4
+    +2896  float4 cb0_v181 1x4
+    +2912  float4 cb0_v182 1x4
+    +2928  float4 cb0_v183 1x4
+    +2944  float4 cb0_v184 1x4
+    +2960  float4 cb0_v185 1x4
+    +2976  float4 cb0_v186 1x4
+    +2992  float4 cb0_v187 1x4
+    +3008  float4 cb0_v188 1x4
+    +3024  float4 cb0_v189 1x4
+    +3040  float4 cb0_v190 1x4
+    +3056  float4 cb0_v191 1x4
+    +3072  float4 cb0_v192 1x4
+    +3088  float4 cb0_v193 1x4
+    +3104  float4 cb0_v194 1x4
+    +3120  float4 cb0_v195 1x4
+    +3136  float4 cb0_v196 1x4
+    +3152  float4 cb0_v197 1x4
+    +3168  float4 cb0_v198 1x4
+    +3184  float4 cb0_v199 1x4
+    +3200  float4 cb0_v200 1x4
+    +3216  float4 cb0_v201 1x4
+    +3232  float4 cb0_v202 1x4
+    +3248  float4 cb0_v203 1x4
+    +3264  float4 cb0_v204 1x4
+    +3280  float4 cb0_v205 1x4
+    +3296  float4 cb0_v206 1x4
+    +3312  float4 cb0_v207 1x4
+    +3328  float4 cb0_v208 1x4
+    +3344  float4 cb0_v209 1x4
+    +3360  float4 cb0_v210 1x4
+    +3376  float4 cb0_v211 1x4
+    +3392  float4 cb0_v212 1x4
+    +3408  float4 cb0_v213 1x4
+    +3424  float4 cb0_v214 1x4
+    +3440  float4 cb0_v215 1x4
+    +3456  float4 cb0_v216 1x4
+    +3472  float4 cb0_v217 1x4
+    +3488  float4 cb0_v218 1x4
+    +3504  float4 cb0_v219 1x4
+    +3520  float4 cb0_v220 1x4
+    +3536  float4 cb0_v221 1x4
+    +3552  float4 cb0_v222 1x4
+    +3568  float4 cb0_v223 1x4
+    +3584  float4 cb0_v224 1x4
+    +3600  float4 cb0_v225 1x4
+    +3616  float4 cb0_v226 1x4
+    +3632  float4 cb0_v227 1x4
+    +3648  float4 cb0_v228 1x4
+    +3664  float4 cb0_v229 1x4
+    +3680  float4 cb0_v230 1x4
+    +3696  float4 cb0_v231 1x4
+    +3712  float4 cb0_v232 1x4
+    +3728  float4 cb0_v233 1x4
+    +3744  float4 cb0_v234 1x4
+    +3760  float4 cb0_v235 1x4
+    +3776  float4 cb0_v236 1x4
+    +3792  float4 cb0_v237 1x4
+    +3808  float4 cb0_v238 1x4
+    +3824  float4 cb0_v239 1x4
+    +3840  float4 cb0_v240 1x4
+    +3856  float4 cb0_v241 1x4
+    +3872  float4 cb0_v242 1x4
+    +3888  float4 cb0_v243 1x4
+    +3904  float4 cb0_v244 1x4
+    +3920  float4 cb0_v245 1x4
+    +3936  float4 cb0_v246 1x4
+    +3952  float4 cb0_v247 1x4
+    +3968  float4 cb0_v248 1x4
+    +3984  float4 cb0_v249 1x4
+    +4000  float4 cb0_v250 1x4
+    +4016  float4 cb0_v251 1x4
+    +4032  float4 cb0_v252 1x4
+    +4048  float4 cb0_v253 1x4
+    +4064  float4 cb0_v254 1x4
+    +4080  float4 cb0_v255 1x4
+    +4096  float4 cb0_v256 1x4
+    +4112  float4 cb0_v257 1x4
+    +4128  float4 cb0_v258 1x4
+    +4144  float4 cb0_v259 1x4
+    +4160  float4 cb0_v260 1x4
+    +4176  float4 cb0_v261 1x4
+    +4192  float4 cb0_v262 1x4
+    +4208  float4 cb0_v263 1x4
+    +4224  float4 cb0_v264 1x4
+    +4240  float4 cb0_v265 1x4
+    +4256  float4 cb0_v266 1x4
+    +4272  float4 cb0_v267 1x4
+    +4288  float4 cb0_v268 1x4
+    +4304  float4 cb0_v269 1x4
+    +4320  float4 cb0_v270 1x4
+    +4336  float4 cb0_v271 1x4
+    +4352  float4 cb0_v272 1x4
+    +4368  float4 cb0_v273 1x4
+    +4384  float4 cb0_v274 1x4
+    +4400  float4 cb0_v275 1x4
+    +4416  float4 cb0_v276 1x4
+    +4432  float4 cb0_v277 1x4
+    +4448  float4 cb0_v278 1x4
+    +4464  float4 cb0_v279 1x4
+    +4480  float4 cb0_v280 1x4
+    +4496  float4 cb0_v281 1x4
+    +4512  float4 cb0_v282 1x4
+    +4528  float4 cb0_v283 1x4
+    +4544  float4 cb0_v284 1x4
+constant block 1 "cbuffer1" (16 bytes)
+    +0     float4 cb1_v0 1x4
+read  0 "structuredbuffer0" (TextureType.Buffer)
+read  1 "structuredbuffer1" (TextureType.Buffer)
+read  2 "structuredbuffer2" (TextureType.Buffer)
+read  3 "texture3" (TextureType.Buffer)
+in  ATTRIBUTE0
+in  ATTRIBUTE13
+in  SV_InstanceID0
+in  SV_VertexID0
+out SV_POSITION0
+out TEXCOORD0
+
+==================== disassembly: DXBC ====================
+
+Shader hash 927504bb-27a7af8f-18ed8313-66143c16
+
+vs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[285], immediateIndexed
+      dcl_constantbuffer cb1[1], immediateIndexed
+      dcl_resource_structured t0, 16
+      dcl_resource_structured t1, 16
+      dcl_resource_structured t2, 4
+      dcl_resource_buffer (float,float,float,float) t3
+      dcl_input v0.xyz
+      dcl_input v1.x
+      dcl_input_sgv v2.x, instanceid
+      dcl_input_sgv v3.x, vertexid
+      dcl_output_siv o0.xyzw, position
+      dcl_output o1.xyzw
+      dcl_temps 8
+   0: and [precise(x)]  r0.x, v1.x, l(0x80000000)
+   1: if_nz r0.x
+   2:   and [precise(x)]  r0.x, v1.x, l(0x7fffffff)
+   3:   imul [precise(x)]  null, r0.x, r0.x, l(41)
+   4:   ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) [precise(x)]  r0.x, r0.x, l(4), t0.xxxx
+   5:   iadd [precise(x)]  r0.x, r0.x, v2.x
+   6: else
+   7:   iadd [precise(y)]  r0.y, v1.x, v2.x
+   8:   ld_structured_indexable(structured_buffer, stride=4)(mixed,mixed,mixed,mixed) [precise(y)]  r0.y, r0.y, l(0), t2.xxxx
+   9:   and [precise(x)]  r0.x, r0.y, l(0.000000)
+  10: endif
+  11: ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) [precise(y)]  r0.y, r0.x, l(0), t1.xxxx
+  12: and [precise(y)]  r0.y, r0.y, l(0x000fffff)
+  13: ine [precise(z)]  r0.z, r0.y, l(0x000fffff)
+  14: if_nz r0.z
+  15:   imad [precise(y)]  r0.y, r0.y, l(41), l(1)
+  16:   ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) [precise(yzw)]  r0.yzw, r0.y, l(0), t0.xxyz
+  17:   iadd [precise(x)]  r1.x, r0.x, cb0[284].x
+  18:   ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) [precise(xyzw)]  r1.xyzw, r1.x, l(0), t1.xyzw
+  19:   ishl [precise(x)]  r2.x, cb0[284].x, l(1)
+  20:   iadd [precise(x)]  r0.x, r0.x, r2.x
+  21:   ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) [precise(xyz)]  r2.xyz, r0.x, l(0), t1.xyzx
+  22:   ushr [precise(xyz)]  r3.xyz, r1.xzwx, l(16, 16, 16, 0)
+  23:   and [precise(xyz)]  r4.xyz, r1.xyyx, l(0x0000ffff, 0x00007fff, 0x00008000, 0)
+  24:   utof [precise(xz)]  r5.xz, r4.xxyx
+  25:   utof [precise(y)]  r5.y, r3.x
+  26:   add [precise(xyw)]  r4.xyw, r5.xyxz, l(-32768.000000, -32768.000000, 0.000000, -16384.000000)
+  27:   mul [precise(xyw)]  r4.xyw, r4.xyxw, l(0.000031, 0.000031, 0.000000, 0.000043)
+  28:   add [precise(x)]  r5.x, r4.y, r4.x
+  29:   add [precise(y)]  r5.y, -r4.y, r4.x
+  30:   dp2 [precise(x)]  r0.x, l(1.000000, 1.000000, 0.000000, 0.000000), abs(r5.xyxx)
+  31:   add [precise(z)]  r5.z, -r0.x, l(2.000000)
+  32:   dp3 [precise(x)]  r0.x, r5.xyzx, r5.xyzx
+  33:   rsq [precise(x)]  r0.x, r0.x
+  34:   mul [precise(xyz)]  r5.xyz, r0.xxxx, r5.xyzx
+  35:   add [precise(x)]  r0.x, r5.z, l(1.000000)
+  36:   div [precise(x)]  r0.x, l(1.000000, 1.000000, 1.000000, 1.000000), r0.x
+  37:   mov [precise(xy)]  r6.xy, -r5.xyxx
+  38:   mul [precise(x)]  r1.x, r5.y, r6.x
+  39:   mul [precise(z)]  r7.z, r0.x, r1.x
+  40:   mul [precise(xy)]  r1.xy, r5.xyxx, r5.xyxx
+  41:   mul [precise(xy)]  r1.xy, r0.xxxx, r1.xyxx
+  42:   add [precise(xy)]  r7.xy, -r1.xyxx, l(1.000000, 1.000000, 0.000000, 0.000000)
+  43:   mul [precise(x)]  r0.x, r4.w, r4.w
+  44:   add [precise(x)]  r0.x, -r0.x, l(1.000000)
+  45:   sqrt [precise(x)]  r0.x, r0.x
+  46:   swapc [precise(x)]  r0.x, r1.x, r4.z, r4.w, r0.x
+  47:   mov [precise(w)]  r7.w, r6.x
+  48:   mul [precise(xyz)]  r4.xyz, r1.xxxx, r7.xzwx
+  49:   mov [precise(zw)]  r6.zw, r7.zzzy
+  50:   mul [precise(xyz)]  r6.xyz, r0.xxxx, r6.zwyz
+  51:   add [precise(xyz)]  r4.xyz, r4.xyzx, r6.xyzx
+  52:   mul [precise(xyz)]  r6.xyz, r4.zxyz, r5.yzxy
+  53:   mul [precise(xyz)]  r7.xyz, r4.yzxy, r5.zxyz
+  54:   add [precise(xyz)]  r6.xyz, r6.xyzx, -r7.xyzx
+  55:   ishl [precise(x)]  r0.x, r3.z, l(23)
+  56:   iadd [precise(x)]  r0.x, r0.x, l(-20769187434139310000000000000000000.000000)
+  57:   mov [precise(xz)]  r3.xz, r1.zzwz
+  58:   and [precise(xyz)]  r1.xyz, r3.xyzx, l(0x0000ffff, 0x0000ffff, 0x0000ffff, 0)
+  59:   utof [precise(xyz)]  r1.xyz, r1.xyzx
+  60:   add [precise(xyz)]  r1.xyz, r1.xyzx, l(-32768.000000, -32768.000000, -32768.000000, 0.000000)
+  61:   mul [precise(xyz)]  r1.xyz, r0.xxxx, r1.xyzx
+  62:   mul [precise(xyz)]  r3.xyz, r1.xxxx, r4.xyzx
+  63:   mul [precise(xyw)]  r1.xyw, r1.yyyy, r6.xyxz
+  64:   mul [precise(xyz)]  r4.xyz, r1.zzzz, r5.xyzx
+  65: else
+  66:   mov [precise(xyz)]  r3.xyz, l(0, 0, 0, 0)
+  67:   mov [precise(xyw)]  r1.xyw, l(0, 0, 0, 0)
+  68:   mov [precise(xyz)]  r4.xyz, l(0, 0, 0, 0)
+  69:   mov [precise(xyz)]  r2.xyz, l(0, 0, 0, 0)
+  70:   mov [precise(yzw)]  r0.yzw, l(0, 0, 0, 0)
+  71: endif
+  72: mul [precise(xyz)]  r3.xyz, r3.xyzx, v0.xxxx
+  73: mul [precise(xyz)]  r1.xyz, r1.xywx, v0.yyyy
+  74: add [precise(xyz)]  r1.xyz, r1.xyzx, r3.xyzx
+  75: mul [precise(xyz)]  r3.xyz, r4.xyzx, v0.zzzz
+  76: add [precise(xyz)]  r1.xyz, r1.xyzx, r3.xyzx
+  77: add [precise(xyz)]  r0.xyz, r0.yzwy, -cb0[64].xyzx
+  78: add [precise(xyz)]  r2.xyz, r2.xyzx, cb0[76].xyzx
+  79: mul [precise(xyz)]  r0.xyz, r0.xyzx, l(2097152.000000, 2097152.000000, 2097152.000000, 0.000000)
+  80: add [precise(xyz)]  r0.xyz, r2.xyzx, r0.xyzx
+  81: add [precise(xyz)]  r0.xyz, r0.xyzx, r1.xyzx
+  82: iadd r0.w, v3.x, cb1[0].w
+  83: imul null, r0.w, r0.w, cb1[0].y
+  84: ld_indexable(buffer)(float,float,float,float) r1.xy, r0.wwww, t3.xyzw
+  85: mul [precise(xyzw)]  r2.xyzw, r0.xxxx, cb0[0].xyzw
+  86: mul [precise(xyzw)]  r3.xyzw, r0.yyyy, cb0[1].xyzw
+  87: add [precise(xyzw)]  r2.xyzw, r2.xyzw, r3.xyzw
+  88: mul [precise(xyzw)]  r0.xyzw, r0.zzzz, cb0[2].xyzw
+  89: add [precise(xyzw)]  r0.xyzw, r0.xyzw, r2.xyzw
+  90: add [precise(xyzw)]  o0.xyzw, r0.xyzw, cb0[3].xyzw
+  91: mov o1.xy, r1.xyxx
+  92: mov o1.zw, l(0, 0, 0, 0)
+  93: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

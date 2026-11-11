@@ -1,0 +1,59 @@
+{
+ "index": 87,
+ "kind": "dispatch",
+ "events": [
+  6138,
+  6138
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "LumenSceneLighting%s",
+  "DirectLighting",
+  "CullTiles %d lights",
+  "SpliceCardPagesIntoTiles"
+ ],
+ "first": "DispatchIndirect(<78280, 1, 1>)",
+ "last": "DispatchIndirect(<78280, 1, 1>)",
+ "shaders": {
+  "cs": [
+   "shaders/cs_7793.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::7793": []
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::7793": [
+    {
+     "id": "ResourceId::49096",
+     "name": "Lumen.PageBuffer",
+     "binding": "structuredbuffer0"
+    },
+    {
+     "id": "ResourceId::51999",
+     "name": "InstanceCulling.CompactionBlockDataIndices",
+     "binding": "structuredbuffer1"
+    },
+    {
+     "id": "ResourceId::49107",
+     "name": "Lumen.Radiosity.CardTiles",
+     "binding": "structuredbuffer2"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 6138,
+   "name": "DispatchIndirect(<78280, 1, 1>)",
+   "cs": "ResourceId::7793"
+  }
+ ],
+ "outputs": [],
+ "images": []
+}
