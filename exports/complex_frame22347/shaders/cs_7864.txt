@@ -1,0 +1,156 @@
+shader ResourceId::7864, stage cs, name "Compute Shader 7864"
+entry point: main
+constant block 0 "cbuffer0" (144 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+    +80    float4 cb0_v5 1x4
+    +96    float4 cb0_v6 1x4
+    +112   float4 cb0_v7 1x4
+    +128   float4 cb0_v8 1x4
+constant block 1 "cbuffer1" (1184 bytes)
+    +0     float4 cb1_v0 1x4
+    +16    float4 cb1_v1 1x4
+    +32    float4 cb1_v2 1x4
+    +48    float4 cb1_v3 1x4
+    +64    float4 cb1_v4 1x4
+    +80    float4 cb1_v5 1x4
+    +96    float4 cb1_v6 1x4
+    +112   float4 cb1_v7 1x4
+    +128   float4 cb1_v8 1x4
+    +144   float4 cb1_v9 1x4
+    +160   float4 cb1_v10 1x4
+    +176   float4 cb1_v11 1x4
+    +192   float4 cb1_v12 1x4
+    +208   float4 cb1_v13 1x4
+    +224   float4 cb1_v14 1x4
+    +240   float4 cb1_v15 1x4
+    +256   float4 cb1_v16 1x4
+    +272   float4 cb1_v17 1x4
+    +288   float4 cb1_v18 1x4
+    +304   float4 cb1_v19 1x4
+    +320   float4 cb1_v20 1x4
+    +336   float4 cb1_v21 1x4
+    +352   float4 cb1_v22 1x4
+    +368   float4 cb1_v23 1x4
+    +384   float4 cb1_v24 1x4
+    +400   float4 cb1_v25 1x4
+    +416   float4 cb1_v26 1x4
+    +432   float4 cb1_v27 1x4
+    +448   float4 cb1_v28 1x4
+    +464   float4 cb1_v29 1x4
+    +480   float4 cb1_v30 1x4
+    +496   float4 cb1_v31 1x4
+    +512   float4 cb1_v32 1x4
+    +528   float4 cb1_v33 1x4
+    +544   float4 cb1_v34 1x4
+    +560   float4 cb1_v35 1x4
+    +576   float4 cb1_v36 1x4
+    +592   float4 cb1_v37 1x4
+    +608   float4 cb1_v38 1x4
+    +624   float4 cb1_v39 1x4
+    +640   float4 cb1_v40 1x4
+    +656   float4 cb1_v41 1x4
+    +672   float4 cb1_v42 1x4
+    +688   float4 cb1_v43 1x4
+    +704   float4 cb1_v44 1x4
+    +720   float4 cb1_v45 1x4
+    +736   float4 cb1_v46 1x4
+    +752   float4 cb1_v47 1x4
+    +768   float4 cb1_v48 1x4
+    +784   float4 cb1_v49 1x4
+    +800   float4 cb1_v50 1x4
+    +816   float4 cb1_v51 1x4
+    +832   float4 cb1_v52 1x4
+    +848   float4 cb1_v53 1x4
+    +864   float4 cb1_v54 1x4
+    +880   float4 cb1_v55 1x4
+    +896   float4 cb1_v56 1x4
+    +912   float4 cb1_v57 1x4
+    +928   float4 cb1_v58 1x4
+    +944   float4 cb1_v59 1x4
+    +960   float4 cb1_v60 1x4
+    +976   float4 cb1_v61 1x4
+    +992   float4 cb1_v62 1x4
+    +1008  float4 cb1_v63 1x4
+    +1024  float4 cb1_v64 1x4
+    +1040  float4 cb1_v65 1x4
+    +1056  float4 cb1_v66 1x4
+    +1072  float4 cb1_v67 1x4
+    +1088  float4 cb1_v68 1x4
+    +1104  float4 cb1_v69 1x4
+    +1120  float4 cb1_v70 1x4
+    +1136  float4 cb1_v71 1x4
+    +1152  float4 cb1_v72 1x4
+    +1168  float4 cb1_v73 1x4
+read  0 "structuredbuffer0" (TextureType.Buffer)
+read  1 "texture1" (TextureType.Buffer)
+write 0 "uav0" (TextureType.Buffer)
+write 1 "uav1" (TextureType.Buffer)
+in  vThreadGroupID0
+in  vThreadIDInGroup0
+
+==================== disassembly: DXBC ====================
+
+Shader hash 33a0af2a-17a52082-ad7f7a35-bef7196d
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[9], immediateIndexed
+      dcl_constantbuffer cb1[74], immediateIndexed
+      dcl_resource_structured t0, 16
+      dcl_resource_buffer (float,float,float,float) t1
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u0
+      dcl_uav_typed_buffer (uint,uint,uint,uint) u1
+      dcl_input vThreadGroupID.z
+      dcl_input vThreadIDInGroup.xy
+      dcl_temps 5
+      dcl_tgsm_raw g0, 4
+      dcl_thread_group 8, 8, 1
+   0: ld_indexable(buffer)(float,float,float,float) r0.xyzw, vThreadGroupID.zzzz, t1.xyzw
+   1: and r0.w, r0.w, l(0.000000)
+   2: ld_structured_indexable(structured_buffer, stride=16)(mixed,mixed,mixed,mixed) r1.xyz, r0.w, l(0), t0.xyzx
+   3: add r0.xyz, r0.xyzx, r1.xyzx
+   4: mad r1.xyz, cb1[64].xyzx, l(2097152.000000, 2097152.000000, 2097152.000000, 0.000000), cb1[73].xyzx
+   5: add r0.xyz, -r0.xyzx, r1.xyzx
+   6: dp3 r0.x, r0.xyzx, r0.xyzx
+   7: ge r0.x, r0.x, cb0[3].x
+   8: movc r0.x, r0.x, l(0), l(1)
+   9: ushr r0.z, cb0[8].x, l(4)
+  10: ishl r0.y, r0.z, r0.x
+  11: movc r0.xy, r0.yyyy, r0.xyxx, l(1, 1, 0, 0)
+  12: imul null, r0.z, r0.y, r0.y
+  13: imad r0.w, vThreadIDInGroup.y, l(8), vThreadIDInGroup.x
+  14: if_z r0.w
+  15:   imm_atomic_iadd r1.x, u0, l(0), r0.z
+  16:   store_raw g0.x, l(0), r1.x
+  17: endif
+  18: sync_g_t
+  19: ld_raw r1.x, l(0), g0.xxxx
+  20: mov r2.y, vThreadGroupID.z
+  21: mov r1.y, r0.w
+  22: loop
+  23:   uge r1.z, r1.y, r0.z
+  24:   breakc_nz r1.z
+  25:   udiv r3.x, r4.x, r1.y, r0.y
+  26:   iadd r1.z, r1.y, r1.x
+  27:   bfi r1.w, l(8), l(8), r3.x, l(0)
+  28:   bfi r1.w, l(8), l(0), r4.x, r1.w
+  29:   imad r2.xzw, r0.xxxx, l(0x00010000, 0, 0x00010000, 0x00010000), r1.wwww
+  30:   store_uav_typed u1.xyzw, r1.zzzz, r2.xyzw
+  31:   iadd r1.y, r1.y, l(64)
+  32: endloop
+  33: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

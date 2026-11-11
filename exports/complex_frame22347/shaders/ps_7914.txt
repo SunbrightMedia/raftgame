@@ -1,0 +1,89 @@
+shader ResourceId::7914, stage ps, name "Pixel Shader 7914"
+entry point: main
+constant block 0 "cbuffer0" (64 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+read  0 "texture0" (TextureType.Texture3D)
+read  1 "texture1" (TextureType.Texture3D)
+sampler 0 "sampler0"
+sampler 1 "sampler1"
+in  TEXCOORD0
+in  SV_POSITION0
+in  SV_RenderTargetArrayIndex0
+out SV_Target0
+out SV_Target1
+
+==================== disassembly: DXBC ====================
+
+Shader hash 983f6230-416cee8e-71f82ca4-90a172d4
+
+ps_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[4], immediateIndexed
+      dcl_sampler s0, mode_default
+      dcl_sampler s1, mode_default
+      dcl_resource_texture3d (float,float,float,float) t0
+      dcl_resource_texture3d (float,float,float,float) t1
+      dcl_input_ps linear noperspective v0.xy
+      dcl_input_ps_siv nointerpolation v2.x, rendertarget_array_index
+      dcl_output o0.xyzw
+      dcl_output o1.xyzw
+      dcl_temps 5
+   0: utof r0.x, v2.x
+   1: add r0.x, r0.x, l(0.500000)
+   2: mul r0.z, r0.x, cb0[3].x
+   3: mov r0.xy, v0.xyxx
+   4: mad r1.xyz, cb0[3].xxxx, l(0.500000, 0.500000, 0.500000, 0.000000), r0.xyzx
+   5: sample_indexable(texture3d)(float,float,float,float) r2.xyzw, r1.xyzx, t0.xyzw, s0
+   6: sample_indexable(texture3d)(float,float,float,float) r1.xyzw, r1.xyzx, t1.xyzw, s1
+   7: mad r3.xyz, cb0[3].xxxx, l(-0.500000, 0.500000, 0.500000, 0.000000), r0.xyzx
+   8: sample_indexable(texture3d)(float,float,float,float) r4.xyzw, r3.xyzx, t0.xyzw, s0
+   9: sample_indexable(texture3d)(float,float,float,float) r3.xyzw, r3.xyzx, t1.xyzw, s1
+  10: add r1.xyzw, r1.xyzw, r3.xyzw
+  11: add r2.xyzw, r2.xyzw, r4.xyzw
+  12: mad r3.xyz, cb0[3].xxxx, l(0.500000, -0.500000, 0.500000, 0.000000), r0.xyzx
+  13: sample_indexable(texture3d)(float,float,float,float) r4.xyzw, r3.xyzx, t0.xyzw, s0
+  14: sample_indexable(texture3d)(float,float,float,float) r3.xyzw, r3.xyzx, t1.xyzw, s1
+  15: add r1.xyzw, r1.xyzw, r3.xyzw
+  16: add r2.xyzw, r2.xyzw, r4.xyzw
+  17: mad r3.xyz, cb0[3].xxxx, l(-0.500000, -0.500000, 0.500000, 0.000000), r0.xyzx
+  18: sample_indexable(texture3d)(float,float,float,float) r4.xyzw, r3.xyzx, t0.xyzw, s0
+  19: sample_indexable(texture3d)(float,float,float,float) r3.xyzw, r3.xyzx, t1.xyzw, s1
+  20: add r1.xyzw, r1.xyzw, r3.xyzw
+  21: add r2.xyzw, r2.xyzw, r4.xyzw
+  22: mad r3.xyz, cb0[3].xxxx, l(0.500000, 0.500000, -0.500000, 0.000000), r0.xyzx
+  23: sample_indexable(texture3d)(float,float,float,float) r4.xyzw, r3.xyzx, t0.xyzw, s0
+  24: sample_indexable(texture3d)(float,float,float,float) r3.xyzw, r3.xyzx, t1.xyzw, s1
+  25: add r1.xyzw, r1.xyzw, r3.xyzw
+  26: add r2.xyzw, r2.xyzw, r4.xyzw
+  27: mad r3.xyz, cb0[3].xxxx, l(-0.500000, 0.500000, -0.500000, 0.000000), r0.xyzx
+  28: sample_indexable(texture3d)(float,float,float,float) r4.xyzw, r3.xyzx, t0.xyzw, s0
+  29: sample_indexable(texture3d)(float,float,float,float) r3.xyzw, r3.xyzx, t1.xyzw, s1
+  30: add r1.xyzw, r1.xyzw, r3.xyzw
+  31: add r2.xyzw, r2.xyzw, r4.xyzw
+  32: mad r3.xyz, cb0[3].xxxx, l(0.500000, -0.500000, -0.500000, 0.000000), r0.xyzx
+  33: mad r0.xyz, cb0[3].xxxx, l(-0.500000, -0.500000, -0.500000, 0.000000), r0.xyzx
+  34: sample_indexable(texture3d)(float,float,float,float) r4.xyzw, r3.xyzx, t0.xyzw, s0
+  35: sample_indexable(texture3d)(float,float,float,float) r3.xyzw, r3.xyzx, t1.xyzw, s1
+  36: add r1.xyzw, r1.xyzw, r3.xyzw
+  37: add r2.xyzw, r2.xyzw, r4.xyzw
+  38: sample_indexable(texture3d)(float,float,float,float) r3.xyzw, r0.xyzx, t0.xyzw, s0
+  39: sample_indexable(texture3d)(float,float,float,float) r0.xyzw, r0.xyzx, t1.xyzw, s1
+  40: add r0.xyzw, r0.xyzw, r1.xyzw
+  41: mul o1.xyzw, r0.xyzw, l(0.125000, 0.125000, 0.125000, 0.125000)
+  42: add r0.xyzw, r2.xyzw, r3.xyzw
+  43: mul o0.xyzw, r0.xyzw, l(0.125000, 0.125000, 0.125000, 0.125000)
+  44: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

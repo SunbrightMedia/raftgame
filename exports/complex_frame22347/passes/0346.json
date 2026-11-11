@@ -1,0 +1,122 @@
+{
+ "index": 346,
+ "kind": "dispatch",
+ "events": [
+  13641,
+  13641
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "DiffuseIndirectAndAO",
+  "LumenScreenProbeGather",
+  "ClearTraces %ux%u"
+ ],
+ "first": "DispatchIndirect(<64, 52, 1>)",
+ "last": "DispatchIndirect(<64, 52, 1>)",
+ "shaders": {
+  "cs": [
+   "shaders/cs_7872.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::7872": []
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::7872": []
+  }
+ },
+ "draws": [
+  {
+   "event": 13641,
+   "name": "DispatchIndirect(<64, 52, 1>)",
+   "cs": "ResourceId::7872"
+  }
+ ],
+ "outputs": [
+  {
+   "id": "ResourceId::71145",
+   "name": "2D Texture 71145",
+   "w": 672,
+   "h": 576,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R32_UINT",
+   "samples": 1
+  },
+  {
+   "id": "ResourceId::71142",
+   "name": "2D Texture 71142",
+   "w": 672,
+   "h": 576,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R11G11B10_FLOAT",
+   "samples": 1
+  }
+ ],
+ "images": [
+  {
+   "file": "images/0346_out0.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    1.401298464324817e-45
+   ],
+   "max": [
+    -2.0000085830688477,
+    0.0,
+    0.0,
+    1.401298464324817e-45
+   ],
+   "target": {
+    "id": "ResourceId::71145",
+    "name": "2D Texture 71145",
+    "w": 672,
+    "h": 576,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R32_UINT",
+    "samples": 1
+   }
+  },
+  {
+   "file": "images/0346_out1.jpg",
+   "black": 0.0,
+   "white": 3.75,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "max": [
+    3.09375,
+    2.5625,
+    3.75,
+    1.0
+   ],
+   "target": {
+    "id": "ResourceId::71142",
+    "name": "2D Texture 71142",
+    "w": 672,
+    "h": 576,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R11G11B10_FLOAT",
+    "samples": 1
+   }
+  }
+ ]
+}

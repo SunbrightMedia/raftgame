@@ -1,0 +1,40 @@
+shader ResourceId::7752, stage cs, name "Compute Shader 7752"
+entry point: main
+read  0 "structuredbuffer0" (TextureType.Buffer)
+read  1 "structuredbuffer1" (TextureType.Buffer)
+write 0 "uav0" (TextureType.Buffer)
+write 1 "uav1" (TextureType.Buffer)
+in  vThreadID0
+
+==================== disassembly: DXBC ====================
+
+Shader hash a1386757-6bacc5e1-419a75f4-7a7afec5
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_resource_structured t0, 4
+      dcl_resource_structured t1, 4
+      dcl_uav_structured u0, 4
+      dcl_uav_structured u1, 4
+      dcl_input vThreadID.x
+      dcl_temps 1
+      dcl_thread_group 64, 1, 1
+   0: ld_structured_indexable(structured_buffer, stride=4)(mixed,mixed,mixed,mixed) r0.x, l(0), l(0), t0.xxxx
+   1: ult r0.x, vThreadID.x, r0.x
+   2: if_nz r0.x
+   3:   imm_atomic_iadd r0.x, u1, l(0, 0, 0, 0), l(1)
+   4:   ld_structured_indexable(structured_buffer, stride=4)(mixed,mixed,mixed,mixed) r0.y, vThreadID.x, l(0), t1.xxxx
+   5:   store_structured u0.x, r0.x, l(0), r0.y
+   6: endif
+   7: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

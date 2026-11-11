@@ -1,0 +1,239 @@
+{
+ "index": 305,
+ "kind": "dispatch",
+ "events": [
+  12795,
+  12795
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "LumenSceneLighting%s",
+  "Radiosity",
+  "CombineLighting CS"
+ ],
+ "first": "DispatchIndirect(<43670, 1, 1>)",
+ "last": "DispatchIndirect(<43670, 1, 1>)",
+ "shaders": {
+  "cs": [
+   "shaders/cs_7803.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::7803": [
+    {
+     "block": "cbuffer0",
+     "bytes": 64,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        4.388543862018146e+31,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        8.853714,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        1.0,
+        0.0,
+        4.3899829673138155e+31,
+        0.0
+       ]
+      }
+     ]
+    },
+    {
+     "block": "cbuffer1",
+     "bytes": 48,
+     "vars": [
+      {
+       "name": "cb1_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb1_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        4096.0,
+        4096.0
+       ]
+      },
+      {
+       "name": "cb1_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.000244,
+        0.000244,
+        1.0,
+        0.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::7803": [
+    {
+     "id": "ResourceId::49096",
+     "name": "Lumen.PageBuffer",
+     "binding": "structuredbuffer0"
+    },
+    {
+     "id": "ResourceId::6859",
+     "name": "2D Render Target 6859",
+     "w": 4096,
+     "h": 4096,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R11G11B10_FLOAT",
+     "samples": 1,
+     "binding": "texture1"
+    },
+    {
+     "id": "ResourceId::6863",
+     "name": "2D Render Target 6863",
+     "w": 4096,
+     "h": 4096,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R11G11B10_FLOAT",
+     "samples": 1,
+     "binding": "texture2"
+    },
+    {
+     "id": "ResourceId::6847",
+     "name": "2D Render Target 6847",
+     "w": 4096,
+     "h": 4096,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R8G8B8A8_TYPELESS",
+     "samples": 1,
+     "binding": "texture3"
+    },
+    {
+     "id": "ResourceId::6856",
+     "name": "2D Render Target 6856",
+     "w": 4096,
+     "h": 4096,
+     "depth": 1,
+     "mips": 1,
+     "array": 1,
+     "format": "R11G11B10_FLOAT",
+     "samples": 1,
+     "binding": "texture4"
+    },
+    {
+     "id": "ResourceId::6807",
+     "name": "GlobalDistanceField.PageUpdateTiles",
+     "binding": "structuredbuffer5"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 12795,
+   "name": "DispatchIndirect(<43670, 1, 1>)",
+   "cs": "ResourceId::7803"
+  }
+ ],
+ "outputs": [
+  {
+   "id": "ResourceId::6871",
+   "name": "2D Render Target 6871",
+   "w": 4096,
+   "h": 4096,
+   "depth": 1,
+   "mips": 1,
+   "array": 1,
+   "format": "R11G11B10_FLOAT",
+   "samples": 1
+  }
+ ],
+ "images": [
+  {
+   "file": "images/0305_out0.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "max": [
+    0.29296875,
+    0.26171875,
+    0.2109375,
+    1.0
+   ],
+   "target": {
+    "id": "ResourceId::6871",
+    "name": "2D Render Target 6871",
+    "w": 4096,
+    "h": 4096,
+    "depth": 1,
+    "mips": 1,
+    "array": 1,
+    "format": "R11G11B10_FLOAT",
+    "samples": 1
+   }
+  }
+ ]
+}

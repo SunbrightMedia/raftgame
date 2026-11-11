@@ -1,0 +1,105 @@
+shader ResourceId::8845, stage cs, name "Compute Shader 8845"
+entry point: main
+constant block 0 "cbuffer0" (80 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+read  0 "texture0" (TextureType.Texture2D)
+write 0 "uav0" (TextureType.Texture2D)
+sampler 0 "sampler0"
+in  vThreadID0
+
+==================== disassembly: DXBC ====================
+
+Shader hash 7db270a1-124f3c58-854b8567-7459eb06
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[5], immediateIndexed
+      dcl_sampler s0, mode_default
+      dcl_resource_texture2d (float,float,float,float) t0
+      dcl_uav_typed_texture2d (float,float,float,float) u0
+      dcl_input vThreadID.xy
+      dcl_temps 11
+      dcl_thread_group 8, 8, 1
+   0: uge r0.xy, vThreadID.xyxx, cb0[0].zwzz
+   1: or r0.x, r0.y, r0.x
+   2: if_nz r0.x
+   3:   ret
+   4: endif
+   5: utof r0.xy, vThreadID.xyxx
+   6: add r0.xy, r0.xyxx, l(0.500000, 0.500000, 0.000000, 0.000000)
+   7: mul r0.zw, r0.xxxy, cb0[4].zzzw
+   8: mul r1.xyzw, r0.zwww, cb0[4].xyyy
+   9: ftou r1.xyzw, r1.xyzw
+  10: mad r2.xy, r0.xyxx, cb0[4].zwzz, -cb0[4].zwzz
+  11: min r2.xy, r2.xyxx, cb0[1].xyxx
+  12: min r2.xy, r2.xyxx, cb0[1].xyxx
+  13: sample_l(texture2d)(float,float,float,float) r2.xyzw, r2.xyxx, t0.xyzw, s0, l(0)
+  14: mad r3.xyzw, cb0[4].zwzw, l(0.000000, -1.000000, 1.000000, -1.000000), r0.zwzw
+  15: min r3.xyzw, r3.xyzw, cb0[1].xyxy
+  16: min r3.xyzw, r3.xyzw, cb0[1].xyxy
+  17: sample_l(texture2d)(float,float,float,float) r4.xyzw, r3.xyxx, t0.xyzw, s0, l(0)
+  18: sample_l(texture2d)(float,float,float,float) r3.xyzw, r3.zwzz, t0.xyzw, s0, l(0)
+  19: mad r5.xyzw, cb0[4].zwzw, l(-1.000000, 0.000000, 1.000000, 0.000000), r0.zwzw
+  20: min r5.xyzw, r5.xyzw, cb0[1].xyxy
+  21: min r5.xyzw, r5.xyzw, cb0[1].xyxy
+  22: sample_l(texture2d)(float,float,float,float) r6.xyzw, r5.xyxx, t0.xyzw, s0, l(0)
+  23: min r5.xy, r0.zwzz, cb0[1].xyxx
+  24: min r5.xy, r5.xyxx, cb0[1].xyxx
+  25: sample_l(texture2d)(float,float,float,float) r7.xyzw, r5.xyxx, t0.xyzw, s0, l(0)
+  26: sample_l(texture2d)(float,float,float,float) r5.xyzw, r5.zwzz, t0.xyzw, s0, l(0)
+  27: mad r8.xyzw, cb0[4].zwzw, l(-1.000000, 1.000000, 0.000000, 1.000000), r0.zwzw
+  28: min r8.xyzw, r8.xyzw, cb0[1].xyxy
+  29: min r8.xyzw, r8.xyzw, cb0[1].xyxy
+  30: sample_l(texture2d)(float,float,float,float) r9.xyzw, r8.xyxx, t0.xyzw, s0, l(0)
+  31: sample_l(texture2d)(float,float,float,float) r8.xyzw, r8.zwzz, t0.xyzw, s0, l(0)
+  32: mad r0.xy, r0.xyxx, cb0[4].zwzz, cb0[4].zwzz
+  33: min r0.xy, r0.xyxx, cb0[1].xyxx
+  34: min r0.xy, r0.xyxx, cb0[1].xyxx
+  35: sample_l(texture2d)(float,float,float,float) r0.xyzw, r0.xyxx, t0.xyzw, s0, l(0)
+  36: min r10.xyzw, r3.xyzw, r4.xyzw
+  37: max r3.xyzw, r3.xyzw, r4.xyzw
+  38: min r4.xyzw, r2.xyzw, r10.xyzw
+  39: max r2.xyzw, r2.xyzw, r10.xyzw
+  40: min r10.xyzw, r3.xyzw, r2.xyzw
+  41: max r2.xyzw, r3.xyzw, r2.xyzw
+  42: min r3.xyzw, r5.xyzw, r7.xyzw
+  43: max r5.xyzw, r5.xyzw, r7.xyzw
+  44: min r7.xyzw, r3.xyzw, r6.xyzw
+  45: max r3.xyzw, r3.xyzw, r6.xyzw
+  46: min r6.xyzw, r5.xyzw, r3.xyzw
+  47: max r3.xyzw, r5.xyzw, r3.xyzw
+  48: min r5.xyzw, r0.xyzw, r8.xyzw
+  49: max r0.xyzw, r0.xyzw, r8.xyzw
+  50: min r8.xyzw, r5.xyzw, r9.xyzw
+  51: max r5.xyzw, r5.xyzw, r9.xyzw
+  52: min r9.xyzw, r0.xyzw, r5.xyzw
+  53: max r0.xyzw, r0.xyzw, r5.xyzw
+  54: max r4.xyzw, r4.xyzw, r7.xyzw
+  55: max r4.xyzw, r8.xyzw, r4.xyzw
+  56: min r5.xyzw, r6.xyzw, r9.xyzw
+  57: max r6.xyzw, r6.xyzw, r9.xyzw
+  58: max r5.xyzw, r5.xyzw, r10.xyzw
+  59: min r5.xyzw, r6.xyzw, r5.xyzw
+  60: min r2.xyzw, r2.xyzw, r3.xyzw
+  61: min r0.xyzw, r0.xyzw, r2.xyzw
+  62: min r2.xyzw, r0.xyzw, r5.xyzw
+  63: max r0.xyzw, r0.xyzw, r5.xyzw
+  64: max r2.xyzw, r2.xyzw, r4.xyzw
+  65: min r0.xyzw, r0.xyzw, r2.xyzw
+  66: store_uav_typed u0.xyzw, r1.xyzw, r0.xyzw
+  67: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

@@ -1,0 +1,50 @@
+shader ResourceId::7741, stage cs, name "Compute Shader 7741"
+entry point: main
+constant block 0 "cbuffer0" (80 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+read  0 "bytebuffer0" (TextureType.Buffer)
+read  1 "bytebuffer1" (TextureType.Buffer)
+write 0 "rwbytebuffer0" (TextureType.Buffer)
+in  vThreadID0
+
+==================== disassembly: DXBC ====================
+
+Shader hash 01b1b46a-dc29a5d0-5981b3eb-5d198a4d
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[5], immediateIndexed
+      dcl_resource_raw t0
+      dcl_resource_raw t1
+      dcl_uav_raw u0
+      dcl_input vThreadID.x
+      dcl_temps 1
+      dcl_thread_group 64, 1, 1
+   0: iadd r0.x, vThreadID.x, cb0[0].z
+   1: udiv r0.y, null, r0.x, cb0[0].y
+   2: ult r0.z, r0.y, cb0[4].x
+   3: if_nz r0.z
+   4:   imad r0.z, -r0.y, cb0[0].y, r0.x
+   5:   ishl r0.xy, r0.xyxx, l(2, 2, 0, 0)
+   6:   ld_raw(rawbuffer)(mixed,mixed,mixed,mixed) r0.y, r0.y, t0.xxxx
+   7:   imad r0.y, r0.y, cb0[0].y, r0.z
+   8:   ld_raw(rawbuffer)(mixed,mixed,mixed,mixed) r0.x, r0.x, t1.xxxx
+   9:   ishl r0.y, r0.y, l(2)
+  10:   store_raw u0.x, r0.y, r0.x
+  11: endif
+  12: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

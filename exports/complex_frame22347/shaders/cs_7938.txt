@@ -1,0 +1,587 @@
+shader ResourceId::7938, stage cs, name "Compute Shader 7938"
+entry point: main
+constant block 0 "cbuffer0" (112 bytes)
+    +0     float4 cb0_v0 1x4
+    +16    float4 cb0_v1 1x4
+    +32    float4 cb0_v2 1x4
+    +48    float4 cb0_v3 1x4
+    +64    float4 cb0_v4 1x4
+    +80    float4 cb0_v5 1x4
+    +96    float4 cb0_v6 1x4
+read  0 "texture0" (TextureType.Texture2D)
+write 0 "uav0" (TextureType.Buffer)
+
+==================== disassembly: DXBC ====================
+
+Shader hash 66c0f905-39b90243-4959215e-f0fe8a75
+
+cs_5_0
+      dcl_globalFlags refactoringAllowed
+      dcl_constantbuffer cb0[7], immediateIndexed
+      dcl_resource_texture2d (float,float,float,float) t0
+      dcl_uav_structured u0, 16
+      dcl_temps 5
+      dcl_thread_group 1, 1, 1
+   0: mov r0.yzw, l(0, 0, 0, 0)
+   1: mov r1.xy, l(0, 0, 0, 0)
+   2: loop
+   3:   uge r1.z, r1.y, l(64)
+   4:   breakc_nz r1.z
+   5:   ushr r0.x, r1.y, l(2)
+   6:   ld_indexable(texture2d)(float,float,float,float) r2.xyzw, r0.xyzw, t0.xyzw
+   7:   and r0.x, r1.y, l(3)
+   8:   ieq r3.xyz, r0.xxxx, l(1, 2, 3, 0)
+   9:   movc r0.x, r3.x, r2.y, r2.x
+  10:   movc r0.x, r3.y, r2.z, r0.x
+  11:   movc r0.x, r3.z, r2.w, r0.x
+  12:   add r1.x, r0.x, r1.x
+  13:   iadd r1.y, r1.y, l(1)
+  14: endloop
+  15: mul r0.x, r1.x, cb0[0].x
+  16: ld_indexable(texture2d)(float,float,float,float) r2.xyzw, l(0, 0, 0, 0), t0.xyzw
+  17: min r0.x, r0.x, r2.x
+  18: add r0.y, -r0.x, r2.x
+  19: mad r0.xz, r1.xxxx, cb0[0].xxyx, -r0.xxxx
+  20: min r0.y, r0.z, r0.y
+  21: div r1.x, -cb0[2].z, cb0[2].y
+  22: mov r1.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+  23: min r0.w, r0.x, r2.y
+  24: add r2.x, -r0.w, r2.y
+  25: add r0.xz, -r0.wwyw, r0.xxzx
+  26: add r0.z, -r0.w, r0.z
+  27: min r0.w, r0.z, r2.x
+  28: add r0.z, -r0.w, r0.z
+  29: add r3.xyzw, l(0.015873, 0.031746, 0.047619, 0.063492), -cb0[2].zzzz
+  30: div r3.xyzw, r3.wxyz, cb0[2].yyyy
+  31: mov r1.z, r3.y
+  32: mul r1.zw, r0.wwww, r1.zzzw
+  33: mad r0.yw, r1.xxxy, r0.yyyy, r1.zzzw
+  34: min r1.x, r0.x, r2.z
+  35: add r1.y, -r1.x, r2.z
+  36: add r0.xz, r0.xxzx, -r1.xxxx
+  37: min r1.x, r0.z, r1.y
+  38: add r0.z, r0.z, -r1.x
+  39: mov r4.xz, r3.zzwz
+  40: mov r4.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+  41: mad r0.yw, r4.xxxy, r1.xxxx, r0.yyyw
+  42: min r1.x, r0.x, r2.w
+  43: add r1.y, -r1.x, r2.w
+  44: add r0.xz, r0.xxzx, -r1.xxxx
+  45: min r1.x, r0.z, r1.y
+  46: add r0.z, r0.z, -r1.x
+  47: mad r0.yw, r4.zzzw, r1.xxxx, r0.yyyw
+  48: ld_indexable(texture2d)(float,float,float,float) r1.xyzw, l(1, 0, 0, 0), t0.xyzw
+  49: min r2.x, r0.x, r1.x
+  50: add r1.x, r1.x, -r2.x
+  51: add r0.xz, r0.xxzx, -r2.xxxx
+  52: min r1.x, r0.z, r1.x
+  53: add r0.z, r0.z, -r1.x
+  54: mov r3.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+  55: mad r0.yw, r3.xxxy, r1.xxxx, r0.yyyw
+  56: min r1.x, r0.x, r1.y
+  57: add r1.y, -r1.x, r1.y
+  58: add r0.xz, r0.xxzx, -r1.xxxx
+  59: min r1.x, r0.z, r1.y
+  60: add r0.z, r0.z, -r1.x
+  61: add r2.xyzw, l(0.079365, 0.095238, 0.111111, 0.126984), -cb0[2].zzzz
+  62: div r2.xyzw, r2.wxyz, cb0[2].yyyy
+  63: mov r3.z, r2.y
+  64: mad r0.yw, r3.zzzw, r1.xxxx, r0.yyyw
+  65: min r1.x, r0.x, r1.z
+  66: add r1.y, -r1.x, r1.z
+  67: add r0.xz, r0.xxzx, -r1.xxxx
+  68: min r1.x, r0.z, r1.y
+  69: add r0.z, r0.z, -r1.x
+  70: mov r3.xz, r2.zzwz
+  71: mov r3.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+  72: mad r0.yw, r3.xxxy, r1.xxxx, r0.yyyw
+  73: min r1.x, r0.x, r1.w
+  74: add r1.y, -r1.x, r1.w
+  75: add r0.xz, r0.xxzx, -r1.xxxx
+  76: min r1.x, r0.z, r1.y
+  77: add r0.z, r0.z, -r1.x
+  78: mad r0.yw, r3.zzzw, r1.xxxx, r0.yyyw
+  79: ld_indexable(texture2d)(float,float,float,float) r1.xyzw, l(2, 0, 0, 0), t0.xyzw
+  80: min r3.x, r0.x, r1.x
+  81: add r1.x, r1.x, -r3.x
+  82: add r0.xz, r0.xxzx, -r3.xxxx
+  83: min r1.x, r0.z, r1.x
+  84: add r0.z, r0.z, -r1.x
+  85: mov r2.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+  86: mad r0.yw, r2.xxxy, r1.xxxx, r0.yyyw
+  87: min r1.x, r0.x, r1.y
+  88: add r1.y, -r1.x, r1.y
+  89: add r0.xz, r0.xxzx, -r1.xxxx
+  90: min r1.x, r0.z, r1.y
+  91: add r0.z, r0.z, -r1.x
+  92: add r3.xyzw, l(0.142857, 0.158730, 0.174603, 0.190476), -cb0[2].zzzz
+  93: div r3.xyzw, r3.wxyz, cb0[2].yyyy
+  94: mov r2.z, r3.y
+  95: mad r0.yw, r2.zzzw, r1.xxxx, r0.yyyw
+  96: min r1.x, r0.x, r1.z
+  97: add r1.y, -r1.x, r1.z
+  98: add r0.xz, r0.xxzx, -r1.xxxx
+  99: min r1.x, r0.z, r1.y
+ 100: add r0.z, r0.z, -r1.x
+ 101: mov r2.xz, r3.zzwz
+ 102: mov r2.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 103: mad r0.yw, r2.xxxy, r1.xxxx, r0.yyyw
+ 104: min r1.x, r0.x, r1.w
+ 105: add r1.y, -r1.x, r1.w
+ 106: add r0.xz, r0.xxzx, -r1.xxxx
+ 107: min r1.x, r0.z, r1.y
+ 108: add r0.z, r0.z, -r1.x
+ 109: mad r0.yw, r2.zzzw, r1.xxxx, r0.yyyw
+ 110: ld_indexable(texture2d)(float,float,float,float) r1.xyzw, l(3, 0, 0, 0), t0.xyzw
+ 111: min r2.x, r0.x, r1.x
+ 112: add r1.x, r1.x, -r2.x
+ 113: add r0.xz, r0.xxzx, -r2.xxxx
+ 114: min r1.x, r0.z, r1.x
+ 115: add r0.z, r0.z, -r1.x
+ 116: mov r3.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 117: mad r0.yw, r3.xxxy, r1.xxxx, r0.yyyw
+ 118: min r1.x, r0.x, r1.y
+ 119: add r1.y, -r1.x, r1.y
+ 120: add r0.xz, r0.xxzx, -r1.xxxx
+ 121: min r1.x, r0.z, r1.y
+ 122: add r0.z, r0.z, -r1.x
+ 123: add r2.xyzw, l(0.206349, 0.222222, 0.238095, 0.253968), -cb0[2].zzzz
+ 124: div r2.xyzw, r2.wxyz, cb0[2].yyyy
+ 125: mov r3.z, r2.y
+ 126: mad r0.yw, r3.zzzw, r1.xxxx, r0.yyyw
+ 127: min r1.x, r0.x, r1.z
+ 128: add r1.y, -r1.x, r1.z
+ 129: add r0.xz, r0.xxzx, -r1.xxxx
+ 130: min r1.x, r0.z, r1.y
+ 131: add r0.z, r0.z, -r1.x
+ 132: mov r3.xz, r2.zzwz
+ 133: mov r3.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 134: mad r0.yw, r3.xxxy, r1.xxxx, r0.yyyw
+ 135: min r1.x, r0.x, r1.w
+ 136: add r1.y, -r1.x, r1.w
+ 137: add r0.xz, r0.xxzx, -r1.xxxx
+ 138: min r1.x, r0.z, r1.y
+ 139: add r0.z, r0.z, -r1.x
+ 140: mad r0.yw, r3.zzzw, r1.xxxx, r0.yyyw
+ 141: ld_indexable(texture2d)(float,float,float,float) r1.xyzw, l(4, 0, 0, 0), t0.xyzw
+ 142: min r3.x, r0.x, r1.x
+ 143: add r1.x, r1.x, -r3.x
+ 144: add r0.xz, r0.xxzx, -r3.xxxx
+ 145: min r1.x, r0.z, r1.x
+ 146: add r0.z, r0.z, -r1.x
+ 147: mov r2.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 148: mad r0.yw, r2.xxxy, r1.xxxx, r0.yyyw
+ 149: min r1.x, r0.x, r1.y
+ 150: add r1.y, -r1.x, r1.y
+ 151: add r0.xz, r0.xxzx, -r1.xxxx
+ 152: min r1.x, r0.z, r1.y
+ 153: add r0.z, r0.z, -r1.x
+ 154: add r3.xyzw, l(0.269841, 0.285714, 0.301587, 0.317460), -cb0[2].zzzz
+ 155: div r3.xyzw, r3.wxyz, cb0[2].yyyy
+ 156: mov r2.z, r3.y
+ 157: mad r0.yw, r2.zzzw, r1.xxxx, r0.yyyw
+ 158: min r1.x, r0.x, r1.z
+ 159: add r1.y, -r1.x, r1.z
+ 160: add r0.xz, r0.xxzx, -r1.xxxx
+ 161: min r1.x, r0.z, r1.y
+ 162: add r0.z, r0.z, -r1.x
+ 163: mov r2.xz, r3.zzwz
+ 164: mov r2.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 165: mad r0.yw, r2.xxxy, r1.xxxx, r0.yyyw
+ 166: min r1.x, r0.x, r1.w
+ 167: add r1.y, -r1.x, r1.w
+ 168: add r0.xz, r0.xxzx, -r1.xxxx
+ 169: min r1.x, r0.z, r1.y
+ 170: add r0.z, r0.z, -r1.x
+ 171: mad r0.yw, r2.zzzw, r1.xxxx, r0.yyyw
+ 172: ld_indexable(texture2d)(float,float,float,float) r1.xyzw, l(5, 0, 0, 0), t0.xyzw
+ 173: min r2.x, r0.x, r1.x
+ 174: add r1.x, r1.x, -r2.x
+ 175: add r0.xz, r0.xxzx, -r2.xxxx
+ 176: min r1.x, r0.z, r1.x
+ 177: add r0.z, r0.z, -r1.x
+ 178: mov r3.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 179: mad r0.yw, r3.xxxy, r1.xxxx, r0.yyyw
+ 180: min r1.x, r0.x, r1.y
+ 181: add r1.y, -r1.x, r1.y
+ 182: add r0.xz, r0.xxzx, -r1.xxxx
+ 183: min r1.x, r0.z, r1.y
+ 184: add r0.z, r0.z, -r1.x
+ 185: add r2.xyzw, l(0.333333, 0.349206, 0.365079, 0.380952), -cb0[2].zzzz
+ 186: div r2.xyzw, r2.wxyz, cb0[2].yyyy
+ 187: mov r3.z, r2.y
+ 188: mad r0.yw, r3.zzzw, r1.xxxx, r0.yyyw
+ 189: min r1.x, r0.x, r1.z
+ 190: add r1.y, -r1.x, r1.z
+ 191: add r0.xz, r0.xxzx, -r1.xxxx
+ 192: min r1.x, r0.z, r1.y
+ 193: add r0.z, r0.z, -r1.x
+ 194: mov r3.xz, r2.zzwz
+ 195: mov r3.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 196: mad r0.yw, r3.xxxy, r1.xxxx, r0.yyyw
+ 197: min r1.x, r0.x, r1.w
+ 198: add r1.y, -r1.x, r1.w
+ 199: add r0.xz, r0.xxzx, -r1.xxxx
+ 200: min r1.x, r0.z, r1.y
+ 201: add r0.z, r0.z, -r1.x
+ 202: mad r0.yw, r3.zzzw, r1.xxxx, r0.yyyw
+ 203: ld_indexable(texture2d)(float,float,float,float) r1.xyzw, l(6, 0, 0, 0), t0.xyzw
+ 204: min r3.x, r0.x, r1.x
+ 205: add r1.x, r1.x, -r3.x
+ 206: add r0.xz, r0.xxzx, -r3.xxxx
+ 207: min r1.x, r0.z, r1.x
+ 208: add r0.z, r0.z, -r1.x
+ 209: mov r2.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 210: mad r0.yw, r2.xxxy, r1.xxxx, r0.yyyw
+ 211: min r1.x, r0.x, r1.y
+ 212: add r1.y, -r1.x, r1.y
+ 213: add r0.xz, r0.xxzx, -r1.xxxx
+ 214: min r1.x, r0.z, r1.y
+ 215: add r0.z, r0.z, -r1.x
+ 216: add r3.xyzw, l(0.396825, 0.412698, 0.428571, 0.444444), -cb0[2].zzzz
+ 217: div r3.xyzw, r3.wxyz, cb0[2].yyyy
+ 218: mov r2.z, r3.y
+ 219: mad r0.yw, r2.zzzw, r1.xxxx, r0.yyyw
+ 220: min r1.x, r0.x, r1.z
+ 221: add r1.y, -r1.x, r1.z
+ 222: add r0.xz, r0.xxzx, -r1.xxxx
+ 223: min r1.x, r0.z, r1.y
+ 224: add r0.z, r0.z, -r1.x
+ 225: mov r2.xz, r3.zzwz
+ 226: mov r2.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 227: mad r0.yw, r2.xxxy, r1.xxxx, r0.yyyw
+ 228: min r1.x, r0.x, r1.w
+ 229: add r1.y, -r1.x, r1.w
+ 230: add r0.xz, r0.xxzx, -r1.xxxx
+ 231: min r1.x, r0.z, r1.y
+ 232: add r0.z, r0.z, -r1.x
+ 233: mad r0.yw, r2.zzzw, r1.xxxx, r0.yyyw
+ 234: ld_indexable(texture2d)(float,float,float,float) r1.xyzw, l(7, 0, 0, 0), t0.xyzw
+ 235: min r2.x, r0.x, r1.x
+ 236: add r1.x, r1.x, -r2.x
+ 237: add r0.xz, r0.xxzx, -r2.xxxx
+ 238: min r1.x, r0.z, r1.x
+ 239: add r0.z, r0.z, -r1.x
+ 240: mov r3.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 241: mad r0.yw, r3.xxxy, r1.xxxx, r0.yyyw
+ 242: min r1.x, r0.x, r1.y
+ 243: add r1.y, -r1.x, r1.y
+ 244: add r0.xz, r0.xxzx, -r1.xxxx
+ 245: min r1.x, r0.z, r1.y
+ 246: add r0.z, r0.z, -r1.x
+ 247: add r2.xyzw, l(0.460317, 0.476190, 0.492063, 0.507937), -cb0[2].zzzz
+ 248: div r2.xyzw, r2.wxyz, cb0[2].yyyy
+ 249: mov r3.z, r2.y
+ 250: mad r0.yw, r3.zzzw, r1.xxxx, r0.yyyw
+ 251: min r1.x, r0.x, r1.z
+ 252: add r1.y, -r1.x, r1.z
+ 253: add r0.xz, r0.xxzx, -r1.xxxx
+ 254: min r1.x, r0.z, r1.y
+ 255: add r0.z, r0.z, -r1.x
+ 256: mov r3.xz, r2.zzwz
+ 257: mov r3.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 258: mad r0.yw, r3.xxxy, r1.xxxx, r0.yyyw
+ 259: min r1.x, r0.x, r1.w
+ 260: add r1.y, -r1.x, r1.w
+ 261: add r0.xz, r0.xxzx, -r1.xxxx
+ 262: min r1.x, r0.z, r1.y
+ 263: add r0.z, r0.z, -r1.x
+ 264: mad r0.yw, r3.zzzw, r1.xxxx, r0.yyyw
+ 265: ld_indexable(texture2d)(float,float,float,float) r1.xyzw, l(8, 0, 0, 0), t0.xyzw
+ 266: min r3.x, r0.x, r1.x
+ 267: add r1.x, r1.x, -r3.x
+ 268: add r0.xz, r0.xxzx, -r3.xxxx
+ 269: min r1.x, r0.z, r1.x
+ 270: add r0.z, r0.z, -r1.x
+ 271: mov r2.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 272: mad r0.yw, r2.xxxy, r1.xxxx, r0.yyyw
+ 273: min r1.x, r0.x, r1.y
+ 274: add r1.y, -r1.x, r1.y
+ 275: add r0.xz, r0.xxzx, -r1.xxxx
+ 276: min r1.x, r0.z, r1.y
+ 277: add r0.z, r0.z, -r1.x
+ 278: add r3.xyzw, l(0.523810, 0.539683, 0.555556, 0.571429), -cb0[2].zzzz
+ 279: div r3.xyzw, r3.wxyz, cb0[2].yyyy
+ 280: mov r2.z, r3.y
+ 281: mad r0.yw, r2.zzzw, r1.xxxx, r0.yyyw
+ 282: min r1.x, r0.x, r1.z
+ 283: add r1.y, -r1.x, r1.z
+ 284: add r0.xz, r0.xxzx, -r1.xxxx
+ 285: min r1.x, r0.z, r1.y
+ 286: add r0.z, r0.z, -r1.x
+ 287: mov r2.xz, r3.zzwz
+ 288: mov r2.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 289: mad r0.yw, r2.xxxy, r1.xxxx, r0.yyyw
+ 290: min r1.x, r0.x, r1.w
+ 291: add r1.y, -r1.x, r1.w
+ 292: add r0.xz, r0.xxzx, -r1.xxxx
+ 293: min r1.x, r0.z, r1.y
+ 294: add r0.z, r0.z, -r1.x
+ 295: mad r0.yw, r2.zzzw, r1.xxxx, r0.yyyw
+ 296: ld_indexable(texture2d)(float,float,float,float) r1.xyzw, l(9, 0, 0, 0), t0.xyzw
+ 297: min r2.x, r0.x, r1.x
+ 298: add r1.x, r1.x, -r2.x
+ 299: add r0.xz, r0.xxzx, -r2.xxxx
+ 300: min r1.x, r0.z, r1.x
+ 301: add r0.z, r0.z, -r1.x
+ 302: mov r3.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 303: mad r0.yw, r3.xxxy, r1.xxxx, r0.yyyw
+ 304: min r1.x, r0.x, r1.y
+ 305: add r1.y, -r1.x, r1.y
+ 306: add r0.xz, r0.xxzx, -r1.xxxx
+ 307: min r1.x, r0.z, r1.y
+ 308: add r0.z, r0.z, -r1.x
+ 309: add r2.xyzw, l(0.587302, 0.603175, 0.619048, 0.634921), -cb0[2].zzzz
+ 310: div r2.xyzw, r2.wxyz, cb0[2].yyyy
+ 311: mov r3.z, r2.y
+ 312: mad r0.yw, r3.zzzw, r1.xxxx, r0.yyyw
+ 313: min r1.x, r0.x, r1.z
+ 314: add r1.y, -r1.x, r1.z
+ 315: add r0.xz, r0.xxzx, -r1.xxxx
+ 316: min r1.x, r0.z, r1.y
+ 317: add r0.z, r0.z, -r1.x
+ 318: mov r3.xz, r2.zzwz
+ 319: mov r3.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 320: mad r0.yw, r3.xxxy, r1.xxxx, r0.yyyw
+ 321: min r1.x, r0.x, r1.w
+ 322: add r1.y, -r1.x, r1.w
+ 323: add r0.xz, r0.xxzx, -r1.xxxx
+ 324: min r1.x, r0.z, r1.y
+ 325: add r0.z, r0.z, -r1.x
+ 326: mad r0.yw, r3.zzzw, r1.xxxx, r0.yyyw
+ 327: ld_indexable(texture2d)(float,float,float,float) r1.xyzw, l(10, 0, 0, 0), t0.xyzw
+ 328: min r3.x, r0.x, r1.x
+ 329: add r1.x, r1.x, -r3.x
+ 330: add r0.xz, r0.xxzx, -r3.xxxx
+ 331: min r1.x, r0.z, r1.x
+ 332: add r0.z, r0.z, -r1.x
+ 333: mov r2.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 334: mad r0.yw, r2.xxxy, r1.xxxx, r0.yyyw
+ 335: min r1.x, r0.x, r1.y
+ 336: add r1.y, -r1.x, r1.y
+ 337: add r0.xz, r0.xxzx, -r1.xxxx
+ 338: min r1.x, r0.z, r1.y
+ 339: add r0.z, r0.z, -r1.x
+ 340: add r3.xyzw, l(0.650794, 0.666667, 0.682540, 0.698413), -cb0[2].zzzz
+ 341: div r3.xyzw, r3.wxyz, cb0[2].yyyy
+ 342: mov r2.z, r3.y
+ 343: mad r0.yw, r2.zzzw, r1.xxxx, r0.yyyw
+ 344: min r1.x, r0.x, r1.z
+ 345: add r1.y, -r1.x, r1.z
+ 346: add r0.xz, r0.xxzx, -r1.xxxx
+ 347: min r1.x, r0.z, r1.y
+ 348: add r0.z, r0.z, -r1.x
+ 349: mov r2.xz, r3.zzwz
+ 350: mov r2.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 351: mad r0.yw, r2.xxxy, r1.xxxx, r0.yyyw
+ 352: min r1.x, r0.x, r1.w
+ 353: add r1.y, -r1.x, r1.w
+ 354: add r0.xz, r0.xxzx, -r1.xxxx
+ 355: min r1.x, r0.z, r1.y
+ 356: add r0.z, r0.z, -r1.x
+ 357: mad r0.yw, r2.zzzw, r1.xxxx, r0.yyyw
+ 358: ld_indexable(texture2d)(float,float,float,float) r1.xyzw, l(11, 0, 0, 0), t0.xyzw
+ 359: min r2.x, r0.x, r1.x
+ 360: add r1.x, r1.x, -r2.x
+ 361: add r0.xz, r0.xxzx, -r2.xxxx
+ 362: min r1.x, r0.z, r1.x
+ 363: add r0.z, r0.z, -r1.x
+ 364: mov r3.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 365: mad r0.yw, r3.xxxy, r1.xxxx, r0.yyyw
+ 366: min r1.x, r0.x, r1.y
+ 367: add r1.y, -r1.x, r1.y
+ 368: add r0.xz, r0.xxzx, -r1.xxxx
+ 369: min r1.x, r0.z, r1.y
+ 370: add r0.z, r0.z, -r1.x
+ 371: add r2.xyzw, l(0.714286, 0.730159, 0.746032, 0.761905), -cb0[2].zzzz
+ 372: div r2.xyzw, r2.wxyz, cb0[2].yyyy
+ 373: mov r3.z, r2.y
+ 374: mad r0.yw, r3.zzzw, r1.xxxx, r0.yyyw
+ 375: min r1.x, r0.x, r1.z
+ 376: add r1.y, -r1.x, r1.z
+ 377: add r0.xz, r0.xxzx, -r1.xxxx
+ 378: min r1.x, r0.z, r1.y
+ 379: add r0.z, r0.z, -r1.x
+ 380: mov r3.xz, r2.zzwz
+ 381: mov r3.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 382: mad r0.yw, r3.xxxy, r1.xxxx, r0.yyyw
+ 383: min r1.x, r0.x, r1.w
+ 384: add r1.y, -r1.x, r1.w
+ 385: add r0.xz, r0.xxzx, -r1.xxxx
+ 386: min r1.x, r0.z, r1.y
+ 387: add r0.z, r0.z, -r1.x
+ 388: mad r0.yw, r3.zzzw, r1.xxxx, r0.yyyw
+ 389: ld_indexable(texture2d)(float,float,float,float) r1.xyzw, l(12, 0, 0, 0), t0.xyzw
+ 390: min r3.x, r0.x, r1.x
+ 391: add r1.x, r1.x, -r3.x
+ 392: add r0.xz, r0.xxzx, -r3.xxxx
+ 393: min r1.x, r0.z, r1.x
+ 394: add r0.z, r0.z, -r1.x
+ 395: mov r2.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 396: mad r0.yw, r2.xxxy, r1.xxxx, r0.yyyw
+ 397: min r1.x, r0.x, r1.y
+ 398: add r1.y, -r1.x, r1.y
+ 399: add r0.xz, r0.xxzx, -r1.xxxx
+ 400: min r1.x, r0.z, r1.y
+ 401: add r0.z, r0.z, -r1.x
+ 402: add r3.xyzw, l(0.777778, 0.793651, 0.809524, 0.825397), -cb0[2].zzzz
+ 403: div r3.xyzw, r3.wxyz, cb0[2].yyyy
+ 404: mov r2.z, r3.y
+ 405: mad r0.yw, r2.zzzw, r1.xxxx, r0.yyyw
+ 406: min r1.x, r0.x, r1.z
+ 407: add r1.y, -r1.x, r1.z
+ 408: add r0.xz, r0.xxzx, -r1.xxxx
+ 409: min r1.x, r0.z, r1.y
+ 410: add r0.z, r0.z, -r1.x
+ 411: mov r2.xz, r3.zzwz
+ 412: mov r2.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 413: mad r0.yw, r2.xxxy, r1.xxxx, r0.yyyw
+ 414: min r1.x, r0.x, r1.w
+ 415: add r1.y, -r1.x, r1.w
+ 416: add r0.xz, r0.xxzx, -r1.xxxx
+ 417: min r1.x, r0.z, r1.y
+ 418: add r0.z, r0.z, -r1.x
+ 419: mad r0.yw, r2.zzzw, r1.xxxx, r0.yyyw
+ 420: ld_indexable(texture2d)(float,float,float,float) r1.xyzw, l(13, 0, 0, 0), t0.xyzw
+ 421: min r2.x, r0.x, r1.x
+ 422: add r1.x, r1.x, -r2.x
+ 423: add r0.xz, r0.xxzx, -r2.xxxx
+ 424: min r1.x, r0.z, r1.x
+ 425: add r0.z, r0.z, -r1.x
+ 426: mov r3.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 427: mad r0.yw, r3.xxxy, r1.xxxx, r0.yyyw
+ 428: min r1.x, r0.x, r1.y
+ 429: add r1.y, -r1.x, r1.y
+ 430: add r0.xz, r0.xxzx, -r1.xxxx
+ 431: min r1.x, r0.z, r1.y
+ 432: add r0.z, r0.z, -r1.x
+ 433: add r2.xyzw, l(0.841270, 0.857143, 0.873016, 0.888889), -cb0[2].zzzz
+ 434: div r2.xyzw, r2.wxyz, cb0[2].yyyy
+ 435: mov r3.z, r2.y
+ 436: mad r0.yw, r3.zzzw, r1.xxxx, r0.yyyw
+ 437: min r1.x, r0.x, r1.z
+ 438: add r1.y, -r1.x, r1.z
+ 439: add r0.xz, r0.xxzx, -r1.xxxx
+ 440: min r1.x, r0.z, r1.y
+ 441: add r0.z, r0.z, -r1.x
+ 442: mov r3.xz, r2.zzwz
+ 443: mov r3.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 444: mad r0.yw, r3.xxxy, r1.xxxx, r0.yyyw
+ 445: min r1.x, r0.x, r1.w
+ 446: add r1.y, -r1.x, r1.w
+ 447: add r0.xz, r0.xxzx, -r1.xxxx
+ 448: min r1.x, r0.z, r1.y
+ 449: add r0.z, r0.z, -r1.x
+ 450: mad r0.yw, r3.zzzw, r1.xxxx, r0.yyyw
+ 451: ld_indexable(texture2d)(float,float,float,float) r1.xyzw, l(14, 0, 0, 0), t0.xyzw
+ 452: min r3.x, r0.x, r1.x
+ 453: add r1.x, r1.x, -r3.x
+ 454: add r0.xz, r0.xxzx, -r3.xxxx
+ 455: min r1.x, r0.z, r1.x
+ 456: add r0.z, r0.z, -r1.x
+ 457: mov r2.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 458: mad r0.yw, r2.xxxy, r1.xxxx, r0.yyyw
+ 459: min r1.x, r0.x, r1.y
+ 460: add r1.y, -r1.x, r1.y
+ 461: add r0.xz, r0.xxzx, -r1.xxxx
+ 462: min r1.x, r0.z, r1.y
+ 463: add r0.z, r0.z, -r1.x
+ 464: add r3.xyzw, l(0.904762, 0.920635, 0.936508, 0.952381), -cb0[2].zzzz
+ 465: div r3.xyzw, r3.wxyz, cb0[2].yyyy
+ 466: mov r2.z, r3.y
+ 467: mad r0.yw, r2.zzzw, r1.xxxx, r0.yyyw
+ 468: min r1.x, r0.x, r1.z
+ 469: add r1.y, -r1.x, r1.z
+ 470: add r0.xz, r0.xxzx, -r1.xxxx
+ 471: min r1.x, r0.z, r1.y
+ 472: add r0.z, r0.z, -r1.x
+ 473: mov r2.xz, r3.zzwz
+ 474: mov r2.yw, l(0.000000, 1.000000, 0.000000, 1.000000)
+ 475: mad r0.yw, r2.xxxy, r1.xxxx, r0.yyyw
+ 476: min r1.x, r0.x, r1.w
+ 477: add r1.y, -r1.x, r1.w
+ 478: add r0.xz, r0.xxzx, -r1.xxxx
+ 479: min r1.x, r0.z, r1.y
+ 480: add r0.z, r0.z, -r1.x
+ 481: mad r0.yw, r2.zzzw, r1.xxxx, r0.yyyw
+ 482: ld_indexable(texture2d)(float,float,float,float) r1.xyzw, l(15, 0, 0, 0), t0.xyzw
+ 483: min r2.x, r0.x, r1.x
+ 484: add r1.x, r1.x, -r2.x
+ 485: add r0.xz, r0.xxzx, -r2.xxxx
+ 486: min r1.x, r0.z, r1.x
+ 487: add r0.z, r0.z, -r1.x
+ 488: mov r3.y, l(1.000000)
+ 489: mad r0.yw, r3.xxxy, r1.xxxx, r0.yyyw
+ 490: min r1.x, r0.x, r1.y
+ 491: add r1.y, -r1.x, r1.y
+ 492: add r0.xz, r0.xxzx, -r1.xxxx
+ 493: min r1.x, r0.z, r1.y
+ 494: add r0.z, r0.z, -r1.x
+ 495: add r2.xyz, l(0.968254, 0.984127, 1.000000, 0.000000), -cb0[2].zzzz
+ 496: div r2.xyz, r2.xyzx, cb0[2].yyyy
+ 497: mov r2.w, l(1.000000)
+ 498: mad r0.yw, r2.xxxw, r1.xxxx, r0.yyyw
+ 499: min r1.x, r0.x, r1.z
+ 500: add r1.y, -r1.x, r1.z
+ 501: add r0.xz, r0.xxzx, -r1.xxxx
+ 502: min r1.x, r0.z, r1.y
+ 503: add r0.z, r0.z, -r1.x
+ 504: mad r0.yw, r2.yyyw, r1.xxxx, r0.yyyw
+ 505: min r0.x, r0.x, r1.w
+ 506: add r1.x, -r0.x, r1.w
+ 507: add r0.x, -r0.x, r0.z
+ 508: min r0.x, r0.x, r1.x
+ 509: mad r0.xy, r2.zwzz, r0.xxxx, r0.ywyy
+ 510: max r0.y, r0.y, l(0.000100)
+ 511: div r0.x, r0.x, r0.y
+ 512: exp r0.z, r0.x
+ 513: max r1.x, r0.z, cb0[0].z
+ 514: min r1.x, r1.x, cb0[0].w
+ 515: mul r1.y, r1.x, l(5.555555)
+ 516: ld_indexable(texture2d)(float,float,float,float) r1.z, l(0, 1, 0, 0), t0.yzxw
+ 517: mul r0.w, cb0[1].y, cb0[1].x
+ 518: ne r1.w, r1.z, l(0)
+ 519: movc r1.z, r1.w, r1.z, l(1.000000)
+ 520: div r1.z, r0.w, r1.z
+ 521: log r1.w, r1.y
+ 522: log r1.z, r1.z
+ 523: add r2.x, -r1.z, r1.w
+ 524: lt r2.y, l(0), r2.x
+ 525: movc r2.z, r2.y, cb0[1].w, cb0[2].x
+ 526: movc r2.y, r2.y, cb0[4].w, cb0[5].x
+ 527: mul r2.w, r2.z, -cb0[1].z
+ 528: exp r2.w, r2.w
+ 529: add r2.w, -r2.w, l(1.000000)
+ 530: mul r2.w, r2.w, r2.x
+ 531: mad r2.y, r2.w, r2.y, r1.z
+ 532: lt r2.w, r1.z, r1.w
+ 533: mad r3.x, cb0[1].z, r2.z, r1.z
+ 534: min r3.x, r1.w, r3.x
+ 535: mad r1.z, -cb0[1].z, r2.z, r1.z
+ 536: max r1.z, r1.z, r1.w
+ 537: movc r1.z, r2.w, r3.x, r1.z
+ 538: lt r1.w, cb0[5].y, abs(r2.x)
+ 539: movc r1.z, r1.w, r1.z, r2.y
+ 540: exp r1.z, r1.z
+ 541: mad r1.x, r1.x, l(5.555555), -r1.z
+ 542: mad r1.x, cb0[6].w, r1.x, r1.z
+ 543: mul r1.zw, l(0.000000, 0.000000, 5.555555, 5.555555), cb0[0].zzzw
+ 544: max r1.x, r1.z, r1.x
+ 545: min r1.x, r1.w, r1.x
+ 546: max r1.xy, r1.xyxx, l(0.000100, 0.000100, 0.000000, 0.000000)
+ 547: div r1.x, l(1.000000, 1.000000, 1.000000, 1.000000), r1.x
+ 548: div r1.y, l(1.000000, 1.000000, 1.000000, 1.000000), r1.y
+ 549: mul r0.xy, r0.wwww, r1.xyxx
+ 550: store_structured u0.xyzw, l(0), l(0), r0.xyzw
+ 551: ret
+
+
+==================== disassembly: AMD GCN ISA ====================
+
+; Error loading amdxx64.dll.
+
+; Currently amdxx64.dll from AMD's driver package is required for GCN disassembly and it cannot be
+; distributed with RenderDoc.
+
+; To see instructions on how to download and configure it on your system, go to:
+; https://github.com/baldurk/renderdoc/wiki/GCN-ISA

@@ -1,0 +1,660 @@
+{
+ "index": 35,
+ "kind": "dispatch",
+ "events": [
+  1314,
+  1314
+ ],
+ "count": 1,
+ "markers": [
+  "FRAME",
+  "Scene",
+  "UpdateGlobalDistanceField",
+  "Clipmap:%d CacheType:%s",
+  "CompositeObjectsIntoPages"
+ ],
+ "first": "DispatchIndirect(<256, 1, 1>)",
+ "last": "DispatchIndirect(<256, 1, 1>)",
+ "shaders": {
+  "cs": [
+   "shaders/cs_7756.txt"
+  ]
+ },
+ "constants": {
+  "cs": {
+   "ResourceId::7756": [
+    {
+     "block": "cbuffer0",
+     "bytes": 576,
+     "vars": [
+      {
+       "name": "cb0_v0",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        9.104614,
+        0.0,
+        9.104675,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v1",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        9.089417,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v2",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        9.104736,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v3",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        9.104782,
+        0.0,
+        9.078979,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v4",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        9.104843,
+        0.0,
+        9.104889,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v5",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v6",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        9.094162,
+        0.0,
+        9.094208,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v7",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v8",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v9",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        9.094345,
+        0.0,
+        9.094391,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v10",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v11",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        9.070328,
+        0.0,
+        1.2299049107372114e+18,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v12",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        8.0,
+        8.0,
+        8.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v13",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        7.0,
+        7.0,
+        7.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v14",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v15",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v16",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v17",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.000977,
+        0.000977,
+        0.125,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v18",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.000488,
+        0.000488,
+        0.0625,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v19",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.007812,
+        0.007812,
+        1.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v20",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.006836,
+        0.006836,
+        0.875,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v21",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        9.920635,
+        79.365082,
+        6298.816406,
+        10.0625
+       ]
+      },
+      {
+       "name": "cb0_v22",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v23",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        9.128906,
+        0.0,
+        8.992188
+       ]
+      },
+      {
+       "name": "cb0_v24",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.027778,
+        0.027778,
+        0.027778,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v25",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v26",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v27",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        19.84127,
+        19.84127,
+        19.84127,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v28",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -2490.079346,
+        -2490.079346,
+        -2490.079346,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v29",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        138.888885,
+        138.888885,
+        138.888885,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v30",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -2430.555664,
+        -2430.555664,
+        -2430.555664,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v31",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -0.472222,
+        0.361111,
+        0.5,
+        0.0002
+       ]
+      },
+      {
+       "name": "cb0_v32",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        39.682541,
+        39.682541,
+        39.682541,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v33",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        -7222.222168,
+        -2916.666748,
+        -2500.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v34",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      {
+       "name": "cb0_v35",
+       "type": "VarType.Float",
+       "rows": 1,
+       "cols": 4,
+       "v": [
+        4722.222168,
+        416.666656,
+        0.0,
+        1.0
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "reads": {
+  "cs": {
+   "ResourceId::7756": [
+    {
+     "id": "ResourceId::9557",
+     "name": "DistanceFields.IndirectionTable.Uint",
+     "binding": "bytebuffer0"
+    },
+    {
+     "id": "ResourceId::6348",
+     "name": "3D Texture 6348",
+     "w": 1024,
+     "h": 1024,
+     "depth": 8,
+     "mips": 1,
+     "array": 1,
+     "format": "R8_UNORM",
+     "samples": 1,
+     "binding": "texture1"
+    },
+    {
+     "id": "ResourceId::6343",
+     "name": "DistanceFields.DFObjectBounds",
+     "binding": "structuredbuffer2"
+    },
+    {
+     "id": "ResourceId::44860",
+     "name": "DistanceFields.DFObjectBounds",
+     "binding": "structuredbuffer3"
+    },
+    {
+     "id": "ResourceId::44859",
+     "name": "DistanceFields.DFObjectData",
+     "binding": "structuredbuffer4"
+    },
+    {
+     "id": "ResourceId::6376",
+     "name": "3D Texture 6376",
+     "w": 36,
+     "h": 36,
+     "depth": 144,
+     "mips": 1,
+     "array": 1,
+     "format": "R32_UINT",
+     "samples": 1,
+     "binding": "texture5"
+    },
+    {
+     "id": "ResourceId::6819",
+     "name": "GlobalDistanceField.PageComposeTiles",
+     "binding": "structuredbuffer6"
+    },
+    {
+     "id": "ResourceId::6684",
+     "name": "InstanceCulling.Compaction.TempInstanceIdsBuffer",
+     "binding": "structuredbuffer7"
+    },
+    {
+     "id": "ResourceId::73169",
+     "name": "GlobalDistanceField.CullGridObjectArray",
+     "binding": "structuredbuffer8"
+    }
+   ]
+  }
+ },
+ "draws": [
+  {
+   "event": 1314,
+   "name": "DispatchIndirect(<256, 1, 1>)",
+   "cs": "ResourceId::7756"
+  }
+ ],
+ "outputs": [
+  {
+   "id": "ResourceId::6364",
+   "name": "3D Texture 6364",
+   "w": 1024,
+   "h": 1024,
+   "depth": 56,
+   "mips": 1,
+   "array": 1,
+   "format": "R8_UNORM",
+   "samples": 1
+  },
+  {
+   "id": "ResourceId::6367",
+   "name": "3D Texture 6367",
+   "w": 512,
+   "h": 512,
+   "depth": 28,
+   "mips": 1,
+   "array": 1,
+   "format": "R8_UNORM",
+   "samples": 1
+  },
+  {
+   "id": "ResourceId::6370",
+   "name": "3D Texture 6370",
+   "w": 36,
+   "h": 36,
+   "depth": 144,
+   "mips": 1,
+   "array": 1,
+   "format": "R32_UINT",
+   "samples": 1
+  }
+ ],
+ "images": [
+  {
+   "file": "images/0035_out0.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.1921568661928177,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "max": [
+    1.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "target": {
+    "id": "ResourceId::6364",
+    "name": "3D Texture 6364",
+    "w": 1024,
+    "h": 1024,
+    "depth": 56,
+    "mips": 1,
+    "array": 1,
+    "format": "R8_UNORM",
+    "samples": 1
+   }
+  },
+  {
+   "file": "images/0035_out1.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "max": [
+    1.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "target": {
+    "id": "ResourceId::6367",
+    "name": "3D Texture 6367",
+    "w": 512,
+    "h": 512,
+    "depth": 28,
+    "mips": 1,
+    "array": 1,
+    "format": "R8_UNORM",
+    "samples": 1
+   }
+  },
+  {
+   "file": "images/0035_out2.jpg",
+   "black": 0.0,
+   "white": 1.0,
+   "min": [
+    NaN,
+    0.0,
+    0.0,
+    1.401298464324817e-45
+   ],
+   "max": [
+    NaN,
+    0.0,
+    0.0,
+    1.401298464324817e-45
+   ],
+   "target": {
+    "id": "ResourceId::6370",
+    "name": "3D Texture 6370",
+    "w": 36,
+    "h": 36,
+    "depth": 144,
+    "mips": 1,
+    "array": 1,
+    "format": "R32_UINT",
+    "samples": 1
+   }
+  }
+ ]
+}
