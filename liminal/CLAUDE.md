@@ -85,6 +85,19 @@ it *feels* right; that's the user's call.
   `tools/planner/zoom.ts`, `tools/planner/ascii.ts`. Publish:
   `npm run build:planner && node tools/planner/make-page.mjs <out.html>`, then
   the artifact https://claude.ai/artifact/RuMoZpbzboHkN6ztKqb3c4 with
-  `capabilities: {downloads: true}` (saves go through the viewer; `prompt()`
-  and plain downloads do not work in artifacts).
+  `capabilities: {downloads: {}, db: {}}` (saves go through the viewer; `prompt()`
+  and plain downloads do not work in artifacts; db holds the user's room-type
+  names in collection `typeNames`, doc id = feature id, `{name}`).
+  - The layout comes from the seed and settings alone; hand edits are applied
+    on top (`applyEdits` in generate.ts): a moved room pushes only the rooms it
+    lands on, moves replay in the order of `edits.zones` keys (the page re-inserts
+    a key on each move). Keep edits local like this.
+  - Maps are made in a worker (`genWorker.ts`); the plan is drawn once into a
+    cached picture that pan/zoom move. `npx vite-node tools/planner/check.ts --
+    <seeds> [params]` prints faults (long runs, overlaps, crossings between
+    floors); the test keeps them at zero.
+  - Shift-click: low-poly 3D room view (`room3d.ts` builds it: tiles, Z up, plan
+    (x, y) -> (x, -y); meant for the future isometric view and the engine too).
+  - The user's room-type names: copy them from the artifact db into
+    `src/planner/typeNames.json` when asked (the engine reads that file).
 
