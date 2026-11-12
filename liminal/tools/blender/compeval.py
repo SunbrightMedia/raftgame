@@ -69,21 +69,27 @@ def translate(M, t):
     return R
 
 
-class Domain:
-    __slots__ = ('size', 'display', 'offset', 'T')
+DEFAULT_RO = ('bilinear', 'clip', 'clip')
 
-    def __init__(self, size, T=None, display=None, offset=(0, 0)):
+
+class Domain:
+    """A result's domain. As in Blender 5.3, the realization options (interpolation, extension x/y) live in the
+    domain, so every operation whose output takes an input's domain also takes its realization options."""
+    __slots__ = ('size', 'display', 'offset', 'T', 'ro')
+
+    def __init__(self, size, T=None, display=None, offset=(0, 0), ro=DEFAULT_RO):
         self.size = (int(size[0]), int(size[1]))
         self.display = self.size if display is None else (int(display[0]), int(display[1]))
         self.offset = (int(offset[0]), int(offset[1]))
         self.T = np.eye(3, dtype=F) if T is None else np.array(T, F)
+        self.ro = ro
 
     @staticmethod
     def identity():
         return Domain((1, 1))
 
     def copy(self):
-        return Domain(self.size, self.T.copy(), self.display, self.offset)
+        return Domain(self.size, self.T.copy(), self.display, self.offset, self.ro)
 
     def transformed(self, M):
         d = self.copy(); d.T = mat_mul(np.array(M, F), self.T); return d
@@ -135,13 +141,23 @@ NCH = {'float': 1, 'float2': 2, 'float3': 3, 'float4': 4, 'color': 4, 'int': 1, 
 
 class Res:
     """A compositor result: a single value (data shape [C]) or an image (data [H, W, C], row 0 at the bottom)."""
-    __slots__ = ('type', 'data', 'domain', 'ro')
+    __slots__ = ('type', 'data', 'domain')
 
     def __init__(self, type_, data, domain=None, ro=None):
         self.type = type_
         self.data = data
         self.domain = domain
-        self.ro = ro or ('bilinear', 'clip', 'clip')
+        if ro is not None and domain is not None:
+            domain.ro = ro
+
+    @property
+    def ro(self):
+        return self.domain.ro if self.domain is not None else DEFAULT_RO
+
+    @ro.setter
+    def ro(self, v):
+        if self.domain is not None:
+            self.domain.ro = v
 
     @property
     def single(self):
@@ -158,7 +174,7 @@ class Res:
         return Res(type_, a[:n].copy())
 
     def share(self):
-        r = Res(self.type, self.data, self.domain.copy() if self.domain else None, self.ro); return r
+        return Res(self.type, self.data, self.domain.copy() if self.domain else None)
 
     def __repr__(self):
         return f'Res({self.type}, {"single " + str(self.data) if self.single else self.domain})'
@@ -179,7 +195,7 @@ def convert(r, to):
     shp = a.shape[:-1]
 
     def out(d):
-        return Res(to, d.astype(F), r.domain.copy() if r.domain else None, r.ro)
+        return Res(to, d.astype(F), r.domain.copy() if r.domain else None)
     if fr in ('float', 'int', 'bool'):
         x = a[..., 0].astype(F)
         if to == 'float': return out(x[..., None])
@@ -187,8 +203,18 @@ def convert(r, to):
         if to == 'float3': return out(np.stack([x, x, x], -1))
         if to == 'float4': return out(np.stack([x, x, x, x], -1))
         if to == 'color': return out(np.stack([x, x, x, np.ones(shp, F)], -1))
-        if to == 'int': return Res('int', np.trunc(x)[..., None].astype(np.int32), r.domain, r.ro)
-        if to == 'bool': return Res('bool', (x > 0)[..., None], r.domain, r.ro)
+        if to == 'int': return Res('int', np.trunc(x)[..., None].astype(np.int32), r.domain.copy() if r.domain else None)
+        if to == 'bool': return Res('bool', (x > 0)[..., None], r.domain.copy() if r.domain else None)
+    if fr == 'int2':
+        x = a.astype(F)
+        if to == 'float': return out(((x[..., 0] + x[..., 1]) / F(2))[..., None])
+        if to == 'float2': return out(x)
+        if to == 'float3': return out(np.concatenate([x, np.zeros(shp + (1,), F)], -1))
+        if to == 'color': return out(np.concatenate([x, np.zeros(shp + (1,), F), np.ones(shp + (1,), F)], -1))
+        if to == 'int': return Res('int', ((a[..., 0].astype(np.int64) + a[..., 1]) // 2)[..., None].astype(np.int32), r.domain.copy() if r.domain else None)
+        if to == 'bool': return Res('bool', np.any(a != 0, -1)[..., None], r.domain.copy() if r.domain else None)
+    if fr == 'int' and to == 'int2':
+        return Res('int2', np.concatenate([a, a], -1).astype(np.int32), r.domain.copy() if r.domain else None)
     if fr == 'float2':
         if to == 'float': return out(((a[..., 0] + a[..., 1]) / F(2))[..., None])
         if to == 'float3': return out(np.concatenate([a, np.zeros(shp + (1,), F)], -1))
@@ -197,13 +223,13 @@ def convert(r, to):
         if to == 'float': return out((((a[..., 0] + a[..., 1]) + a[..., 2]) / F(3))[..., None])
         if to == 'float2': return out(a[..., :2])
         if to == 'color': return out(np.concatenate([a, np.ones(shp + (1,), F)], -1))
-        if to == 'bool': return Res('bool', np.any(a != 0, -1)[..., None], r.domain, r.ro)
+        if to == 'bool': return Res('bool', np.any(a != 0, -1)[..., None], r.domain.copy() if r.domain else None)
     if fr in ('color', 'float4'):
         if to == 'float': return out(luminance(a)[..., None]) if fr == 'color' else out(((a[..., 0] + a[..., 1] + a[..., 2] + a[..., 3]) / F(4))[..., None])
         if to == 'float3': return out(a[..., :3])
         if to == 'float2': return out(a[..., :2])
         if to in ('color', 'float4'): return out(a)
-        if to == 'bool': return Res('bool', (luminance(a) > 0)[..., None], r.domain, r.ro)
+        if to == 'bool': return Res('bool', (luminance(a) > 0)[..., None], r.domain.copy() if r.domain else None)
     raise NotImplementedError(f'conversion {fr} -> {to}')
 
 
@@ -297,8 +323,7 @@ def realize(r, target, mode_translation=False):
     cy = (F(1) * (M[1, 0] * xs + M[1, 1] * ys) + M[1, 2]).astype(F)
     tu = (cx * F(ind.size[0])).astype(F); tv = (cy * F(ind.size[1])).astype(F)
     data = sample(r.data.astype(F) if r.data.dtype != np.bool_ else r.data.astype(F), tu, tv, *r.ro)
-    out = Res(r.type, data, Domain(target.size, target.T, target.display, target.offset))
-    return out
+    return Res(r.type, data, target.copy())
 
 
 def realize_onto(r, op_domain, realization_mode='domain'):
@@ -416,6 +441,13 @@ class Evaluator:
                 gid = prefix + n['name']
                 self.trees[gid] = self.d['node_groups'][n['group']]
                 self._index_groups(self.trees[gid], gid + '/')
+
+    def tree_name(self, nid):
+        g = nid.rsplit('/', 1)[0] if '/' in nid else None
+        if g is None:
+            return 'Compositor Nodes'
+        tr = self.trees[g]
+        return next(k for k, v in self.d['node_groups'].items() if v is tr)
 
     def iface(self, gid, ident, in_out):
         for it in self.trees[gid].get('interface', []):
@@ -608,7 +640,37 @@ def node_math(ev, nid, n):
         elif op == 'ABSOLUTE': r = np.abs(a)
         elif op == 'EXPONENT': r = np.exp(a.astype(np.float64)).astype(F)
         elif op == 'FLOOR': r = np.floor(a)
-        elif op == 'FRACT': r = a - np.floor(a)
+        elif op == 'CEIL': r = np.ceil(a)
+        elif op == 'ROUND': r = np.floor((a + F(0.5)).astype(F))
+        elif op == 'TRUNC': r = np.where(a >= 0, np.floor(a), np.ceil(a))
+        elif op in ('FRACT', 'FRACTION'): r = a - np.floor(a)
+        elif op == 'MODULO': r = np.where(b != 0, np.fmod(a, np.where(b != 0, b, F(1))), F(0))
+        elif op == 'WRAP':
+            rng = (b - c).astype(F)
+            r = np.where(rng != 0, (a - (rng * np.floor(((a - c).astype(F) / np.where(rng != 0, rng, F(1))).astype(F))).astype(F)).astype(F), c)
+        elif op == 'SNAP': r = (np.floor(np.where(b != 0, (a / np.where(b != 0, b, F(1))).astype(F), F(0))) * b).astype(F)
+        elif op == 'PINGPONG':
+            q = ((a - b).astype(F) / np.where(b != 0, (b * F(2)).astype(F), F(1))).astype(F)
+            r = np.where(b != 0, np.abs((((q - np.floor(q)).astype(F) * b).astype(F) * F(2)).astype(F) - b), F(0))
+        elif op == 'COMPARE': r = (np.abs((a - b).astype(F)) <= np.maximum(c, np.finfo(F).eps)).astype(F)
+        elif op in ('SMOOTH_MIN', 'SMOOTH_MAX'):
+            sg = F(-1) if op == 'SMOOTH_MAX' else F(1)
+            aa, bb = (a * sg).astype(F), (b * sg).astype(F)
+            h = (np.maximum((c - np.abs((aa - bb).astype(F))).astype(F), F(0)) / np.where(c != 0, c, F(1))).astype(F)
+            sm = np.where(c != 0, (np.minimum(aa, bb) - ((((h * h).astype(F) * h).astype(F) * c).astype(F) * F(1.0 / 6.0)).astype(F)).astype(F), np.minimum(aa, bb))
+            r = (sm * sg).astype(F)
+        elif op == 'SIGN': r = np.sign(a).astype(F)
+        elif op == 'INVERSE_SQRT': r = np.where(a > 0, (F(1) / np.sqrt(np.where(a > 0, a, F(1)).astype(np.float64)).astype(F)).astype(F), F(0))
+        elif op == 'TANGENT': r = np.tan(a.astype(np.float64)).astype(F)
+        elif op == 'ARCSINE': r = np.arcsin(np.clip(a, -1, 1).astype(np.float64)).astype(F)
+        elif op == 'ARCCOSINE': r = np.arccos(np.clip(a, -1, 1).astype(np.float64)).astype(F)
+        elif op == 'ARCTANGENT': r = np.arctan(a.astype(np.float64)).astype(F)
+        elif op == 'ARCTAN2': r = np.arctan2(a.astype(np.float64), b.astype(np.float64)).astype(F)
+        elif op == 'SINH': r = np.sinh(a.astype(np.float64)).astype(F)
+        elif op == 'COSH': r = np.cosh(a.astype(np.float64)).astype(F)
+        elif op == 'TANH': r = np.tanh(a.astype(np.float64)).astype(F)
+        elif op == 'RADIANS': r = (a * F(math.pi / 180.0)).astype(F)
+        elif op == 'DEGREES': r = (a * F(180.0 / math.pi)).astype(F)
         else: raise NotImplementedError('math ' + op)
     r = np.asarray(r, F)
     if n['props'].get('use_clamp'):
@@ -862,6 +924,23 @@ def node_relative_to_pixel(ev, nid, n):
     raise NotImplementedError('relative to pixel vector')
 
 
+def node_image_info(ev, nid, n):
+    r = ev.input(nid, 'Image')
+    if r.single:
+        z2 = Res('int2', np.zeros(2, np.int32))
+        return {'Dimensions': z2, 'Resolution': z2, 'Location': Res.value('float2', [0, 0]),
+                'Rotation': Res.value('float', 0), 'Scale': Res.value('float2', [0, 0])}
+    dm = r.domain
+    T = dm.T
+    sx = F(math.sqrt(float(F(F(T[0, 0] * T[0, 0]) + F(T[1, 0] * T[1, 0])))))
+    sy = F(math.sqrt(float(F(F(T[0, 1] * T[0, 1]) + F(T[1, 1] * T[1, 1])))))
+    rot = F(math.atan2(float(T[1, 0]), float(T[0, 0])))
+    return {'Dimensions': Res('int2', np.array(dm.realize_transformation().size, np.int32)),
+            'Resolution': Res('int2', np.array(dm.size, np.int32)),
+            'Location': Res.value('float2', [T[0, 2], T[1, 2]]), 'Rotation': Res.value('float', rot),
+            'Scale': Res.value('float2', [sx, sy])}
+
+
 def node_switch(ev, nid, n):
     g = {s['name']: s['id'] for s in n['inputs']}
     sw = convert(ev.input(nid, g['Switch']), 'bool')
@@ -970,7 +1049,7 @@ NODES = {
     'ShaderNodeVectorMath': node_vector_math, 'ShaderNodeTexWhiteNoise': node_white_noise,
     'CompositorNodeSceneTime': node_scene_time, 'CompositorNodeImageCoordinates': node_image_coordinates,
     'CompositorNodeRelativeToPixel': node_relative_to_pixel, 'GeometryNodeSwitch': node_switch,
-    'GeometryNodeMenuSwitch': node_menu_switch, 'GeometryNodeIndexSwitch': node_index_switch,
+    'CompositorNodeImageInfo': node_image_info, 'GeometryNodeMenuSwitch': node_menu_switch, 'GeometryNodeIndexSwitch': node_index_switch,
     'CompositorNodeScale': node_scale, 'CompositorNodeDisplace': node_displace, 'CompositorNodeSetAlpha': node_set_alpha,
 }
 
@@ -979,3 +1058,446 @@ def load_f32(path, W, H):
     """Our raw float32 RGBA files (top row first) -> Res with row 0 at the bottom."""
     a = np.fromfile(path, '<f4').reshape(H, W, 4)[::-1].copy()
     return Res('color', a, Domain((W, H)))
+
+
+# ----------------------------------------------------------------------------------------------- curves
+
+class CurveTable:
+    """One curve of a curve mapping, evaluated like BKE_curvemap_evaluateF from its 257-entry table
+    (tables from tools/blender/bl_curve_tables.py)."""
+
+    def __init__(self, c, y=None, s_in=None, s_out=None):
+        self.mn = F(c['mintable']); self.rng = F(c['range'])
+        self.x0, self.x1 = F(c['x'][0]), F(c['x'][256])
+        self.y = np.array(c['y'] if y is None else y, F)
+        self.s_in = F(c['slope_in'] if s_in is None else s_in)
+        self.s_out = F(c['slope_out'] if s_out is None else s_out)
+
+    def eval(self, v):
+        v = np.asarray(v, F)
+        fi = ((v - self.mn) * self.rng).astype(F)
+        out = np.empty(v.shape, F)
+        ext = (fi < 0) | (fi > F(256))
+        ins = ~ext
+        i = np.clip(fi[ins].astype(np.int64), 0, 256)
+        fr = (fi[ins] - i.astype(F)).astype(F)
+        y0 = self.y[i]; y1 = self.y[np.minimum(i + 1, 256)]
+        r = ((F(1) - fr) * y0 + fr * y1).astype(F)
+        r = np.where(i >= 256, self.y[256], r)
+        out[ins] = r
+        ve = v[ext]
+        lo = ve <= self.x0
+        e = np.where(lo, self.y[0] + (self.s_in * (ve - self.x0).astype(F)).astype(F),
+                     np.where(ve >= self.x1, self.y[256] + (self.s_out * (ve - self.x1).astype(F)).astype(F), F(0)))
+        out[ext] = e.astype(F)
+        return out
+
+
+def curve_mapping(ev, nid):
+    key = ev.tree_name(nid) + '/' + nid.split('/')[-1]
+    if key not in ev.curves:
+        raise KeyError('no curve table for ' + key + ' (run bl_curve_tables.py)')
+    return ev.curves[key]
+
+
+def node_float_curve(ev, nid, n):
+    I, dom = pixel_inputs(ev, nid, n)
+    cm = curve_mapping(ev, nid)
+    v = ch(I['Value']).astype(F); fac = ch(I['Factor']).astype(F)
+    r = CurveTable(cm['curves'][0]).eval(v)
+    if cm['use_clip']:
+        r = np.clip(r, F(cm['clip'][1]), F(cm['clip'][3]))
+    r = np.where(fac != F(1), ((F(1) - fac) * v).astype(F) + (fac * r).astype(F), r).astype(F)
+    return {'Value': mkres('float', r[..., None] if dom is not None else r, dom)}
+
+
+def node_hue_correct(ev, nid, n):
+    I, dom = pixel_inputs(ev, nid, n)
+    cm = curve_mapping(ev, nid)
+    c = I['Image'].data.astype(F); fac = ch(I['Fac']).astype(F)
+    hsv = rgb_to_hsv(c[..., :3])
+    p = hsv[..., 0]
+    tabs = [CurveTable(cm['curves'][k]) for k in range(3)]
+
+    def ev_clip(k):
+        r = tabs[k].eval(p)
+        return np.clip(r, F(cm['clip'][1]), F(cm['clip'][3])) if cm['use_clip'] else r
+    h = (hsv[..., 0] + (ev_clip(0) - F(0.5)).astype(F)).astype(F)
+    s = (hsv[..., 1] * (ev_clip(1) * F(2)).astype(F)).astype(F)
+    v = (hsv[..., 2] * (ev_clip(2) * F(2)).astype(F)).astype(F)
+    h = (h - np.floor(h)).astype(F)
+    s = np.clip(s, F(0), F(1))
+    rgb = np.maximum(hsv_to_rgb(np.stack([h, s, v], -1)), F(0))
+    res = np.concatenate([rgb, c[..., 3:4]], -1).astype(F)
+    ff = fac[..., None] if dom is not None else fac
+    out = ((c * (F(1) - ff)).astype(F) + (res * ff).astype(F)).astype(F)
+    return {'Image': mkres('color', out, dom)}
+
+
+def node_curve_rgb(ev, nid, n):
+    I, dom = pixel_inputs(ev, nid, n)
+    cm = curve_mapping(ev, nid)
+    c = I['Image'].data.astype(F); fac = np.clip(ch(I['Fac']).astype(F), F(0), F(1))
+    black = I['Black Level'].data.astype(F); white = I['White Level'].data.astype(F)
+    C = CurveTable(cm['curves'][3])
+    out = c.copy()
+    for k in range(3):
+        base = cm['curves'][k]
+        prem = C.eval(np.array(base['y'], F))
+        t = CurveTable(base, y=prem, s_in=F(base['slope_in']) * C.s_in, s_out=F(base['slope_out']) * C.s_out)
+        bk = black[..., k]; wk = white[..., k]
+        bw = (F(1) / np.maximum((wk - bk).astype(F), F(1e-5))).astype(F)
+        x = ((c[..., k] - bk).astype(F) * bw).astype(F)
+        r = t.eval(x)
+        out[..., k] = ((c[..., k] * (F(1) - fac)).astype(F) + (r * fac).astype(F)).astype(F)
+    return {'Image': mkres('color', out, dom)}
+
+
+# ----------------------------------------------------------------------------------------------- textures
+
+def node_vector_rotate(ev, nid, n):
+    P = n['props']
+    I, dom = pixel_inputs(ev, nid, n)
+    if P.get('rotation_type') != 'Z_AXIS':
+        raise NotImplementedError('vector rotate ' + str(P.get('rotation_type')))
+    v = convert(I['Vector'], 'float3').data.astype(F)
+    cen = convert(I['Center'], 'float3').data.astype(F)
+    ang = ch(I['Angle']).astype(F)
+    if P.get('invert'):
+        ang = -ang
+    sn = np.sin(ang.astype(np.float64)).astype(F); cs = np.cos(ang.astype(np.float64)).astype(F)
+    ico = (F(1) - cs).astype(F)
+    m22 = (ico + cs).astype(F)
+    t = (v - cen).astype(F)
+    if dom is not None:
+        sn, cs, m22 = sn[..., None] if np.ndim(sn) else sn, cs[..., None] if np.ndim(cs) else cs, m22
+    tx, ty, tz = t[..., 0], t[..., 1], t[..., 2]
+    s_ = np.squeeze(sn); c_ = np.squeeze(cs)
+    rx = (((c_ * tx).astype(F) + (-s_ * ty).astype(F)).astype(F) + (F(0) * tz).astype(F)).astype(F)
+    ry = (((s_ * tx).astype(F) + (c_ * ty).astype(F)).astype(F) + (F(0) * tz).astype(F)).astype(F)
+    rz = (((F(0) * tx).astype(F) + (F(0) * ty).astype(F)).astype(F) + (np.squeeze(m22) * tz).astype(F)).astype(F)
+    r = (np.stack([rx, ry, rz], -1) + cen).astype(F)
+    return {'Vector': mkres('float3', r, dom)}
+
+
+def pcg2d(x, y):
+    with np.errstate(over='ignore'):
+        x = (x.astype(np.int32) * np.int32(1664525) + np.int32(1013904223)).astype(np.int32)
+        y = (y.astype(np.int32) * np.int32(1664525) + np.int32(1013904223)).astype(np.int32)
+        x = (x + y * np.int32(1664525)).astype(np.int32)
+        y = (y + x * np.int32(1664525)).astype(np.int32)
+        x = x ^ (x >> 16); y = y ^ (y >> 16)
+        x = (x + y * np.int32(1664525)).astype(np.int32)
+        y = (y + x * np.int32(1664525)).astype(np.int32)
+    return x, y
+
+
+def pcg3d(x, y, z):
+    with np.errstate(over='ignore'):
+        m, a = np.int32(1664525), np.int32(1013904223)
+        x = (x.astype(np.int32) * m + a).astype(np.int32); y = (y.astype(np.int32) * m + a).astype(np.int32)
+        z = (z.astype(np.int32) * m + a).astype(np.int32)
+        x = (x + y * z).astype(np.int32); y = (y + z * x).astype(np.int32); z = (z + x * y).astype(np.int32)
+        x = x ^ (x >> 16); y = y ^ (y >> 16); z = z ^ (z >> 16)
+        x = (x + y * z).astype(np.int32); y = (y + z * x).astype(np.int32); z = (z + x * y).astype(np.int32)
+    return x, y, z
+
+
+def int_to_f01(k):
+    return ((k & np.int32(0x7fffffff)).astype(F) * F(1.0 / 2147483648.0)).astype(F)
+
+
+def node_voronoi(ev, nid, n):
+    P = n['props']
+    if (P.get('voronoi_dimensions'), P.get('feature'), P.get('distance')) != ('2D', 'F1', 'EUCLIDEAN'):
+        raise NotImplementedError('voronoi ' + str(P))
+    I, dom = pixel_inputs(ev, nid, n)
+    v = convert(I['Vector'], 'float3').data.astype(F)
+    scale = ch(I['Scale']).astype(F)
+    detail = ch(I['Detail']).astype(F); rough = ch(I['Roughness']).astype(F)
+    rnd = np.minimum(np.maximum(ch(I['Randomness']).astype(F), F(0)), F(1))
+    if not (np.all(detail == 0) or np.all(rough == 0)):
+        raise NotImplementedError('fractal voronoi')
+    cx = (v[..., 0] * scale).astype(F); cy = (v[..., 1] * scale).astype(F)
+    fx, fy = np.floor(cx), np.floor(cy)
+    lx, ly = (cx - fx).astype(F), (cy - fy).astype(F)
+    ix, iy = fx.astype(np.int32), fy.astype(np.int32)
+    best = np.full(cx.shape, np.finfo(F).max, F)
+    tox = np.zeros(cx.shape, np.int32); toy = np.zeros(cx.shape, np.int32)
+    tpx = np.zeros(cx.shape, F); tpy = np.zeros(cx.shape, F)
+    for j in (-1, 0, 1):
+        for i in (-1, 0, 1):
+            hx, hy = pcg2d((ix + i).astype(np.int32), (iy + j).astype(np.int32))
+            px_ = (F(i) + (int_to_f01(hx) * rnd).astype(F)).astype(F)
+            py_ = (F(j) + (int_to_f01(hy) * rnd).astype(F)).astype(F)
+            dx, dy = (px_ - lx).astype(F), (py_ - ly).astype(F)
+            d = ((dx * dx).astype(F) + (dy * dy).astype(F)).astype(F)
+            m = d < best
+            best = np.where(m, d, best); tox = np.where(m, i, tox); toy = np.where(m, j, toy)
+            tpx = np.where(m, px_, tpx); tpy = np.where(m, py_, tpy)
+    dx, dy = (tpx - lx).astype(F), (tpy - ly).astype(F)
+    dist = np.sqrt((((dx * dx).astype(F) + (dy * dy).astype(F)).astype(F)).astype(np.float64)).astype(F)
+    hx, hy, hz = pcg3d((ix + tox).astype(np.int32), (iy + toy).astype(np.int32), np.zeros_like(ix))
+    col = np.stack([int_to_f01(hx), int_to_f01(hy), int_to_f01(hz), np.ones(cx.shape, F)], -1)
+    pos = np.stack([(tpx + fx).astype(F), (tpy + fy).astype(F), np.zeros(cx.shape, F)], -1)
+    out = {'Distance': mkres('float', dist[..., None] if dom is not None else dist, dom),
+           'Color': mkres('color', col, dom), 'Position': mkres('float3', pos, dom)}
+    return out
+
+
+def _fade(t):
+    t = t.astype(F); D = np.float64
+    left = ((t * t).astype(F) * t).astype(F)
+    right = t.astype(D) * (t.astype(D) * 6.0 - 15.0) + 10.0
+    return (left.astype(D) * right).astype(F)
+
+
+def _grad2(h, x, y):
+    h = h & np.uint32(7)
+    u = np.where(h < 4, x, y).astype(F)
+    v = (F(2) * np.where(h < 4, y, x)).astype(F)
+    u = np.where((h & 1) != 0, -u, u); v = np.where((h & 2) != 0, -v, v)
+    return (u + v).astype(F)
+
+
+def _perlin2(px, py):
+    D = np.float64
+    X, Y = np.floor(px), np.floor(py)
+    fx, fy = (px - X).astype(F), (py - Y).astype(F)
+    Xi, Yi = X.astype(np.int32).view(np.uint32), Y.astype(np.int32).view(np.uint32)
+    one = np.uint32(1)
+    with np.errstate(over='ignore'):
+        Xi1, Yi1 = (Xi + one).astype(np.uint32), (Yi + one).astype(np.uint32)
+    u, v = _fade(fx), _fade(fy)
+    fx1 = (fx.astype(D) - 1.0).astype(F); fy1 = (fy.astype(D) - 1.0).astype(F)
+    v0 = _grad2(hash_uint(Xi, Yi), fx, fy)
+    v1 = _grad2(hash_uint(Xi1, Yi), fx1, fy)
+    v2 = _grad2(hash_uint(Xi, Yi1), fx, fy1)
+    v3 = _grad2(hash_uint(Xi1, Yi1), fx1, fy1)
+    x1 = (1.0 - u.astype(D)).astype(F)
+    a = ((v0 * x1).astype(F) + (v1 * u).astype(F)).astype(F)
+    b = ((v2 * x1).astype(F) + (v3 * u).astype(F)).astype(F)
+    r = (1.0 - v.astype(D)) * a.astype(D) + (v * b).astype(F).astype(D)
+    return r.astype(F)
+
+
+def _perlin_signed2(px, py):
+    corr_x = (F(0.5) * (np.abs(px) >= F(1000000)).astype(F)).astype(F)
+    corr_y = (F(0.5) * (np.abs(py) >= F(1000000)).astype(F)).astype(F)
+    px = (np.fmod(px, F(100000)) + corr_x).astype(F); py = (np.fmod(py, F(100000)) + corr_y).astype(F)
+    return (_perlin2(px, py) * F(0.6616)).astype(F)
+
+
+def node_noise(ev, nid, n):
+    P = n['props']
+    if (P.get('noise_dimensions'), P.get('noise_type', 'FBM')) != ('2D', 'FBM'):
+        raise NotImplementedError('noise ' + str(P))
+    I, dom = pixel_inputs(ev, nid, n)
+    v = convert(I['Vector'], 'float3').data.astype(F)
+    scale = ch(I['Scale']).astype(F)
+    detail = np.clip(ch(I['Detail']).astype(F), F(0), F(15))
+    rough = np.maximum(ch(I['Roughness']).astype(F), F(0))
+    lac = ch(I['Lacunarity']).astype(F); dist = ch(I['Distortion']).astype(F)
+    if not (np.ndim(detail) == 0 or detail.size == 1):
+        raise NotImplementedError('per-pixel noise detail')
+    detail, rough, lac, dist = (F(np.ravel(a)[0]) for a in (detail, rough, lac, dist))
+    px = (v[..., 0] * scale).astype(F); py = (v[..., 1] * scale).astype(F)
+    if dist != 0:
+        o0 = (F(100) + (hash_float_to_float(F(0), F(0)) * F(100)).astype(F)).astype(F)
+        o1 = (F(100) + (hash_float_to_float(F(0), F(1)) * F(100)).astype(F)).astype(F)
+        q0 = (F(100) + (hash_float_to_float(F(1), F(0)) * F(100)).astype(F)).astype(F)
+        q1 = (F(100) + (hash_float_to_float(F(1), F(1)) * F(100)).astype(F)).astype(F)
+        dx = (_perlin_signed2((px + o0).astype(F), (py + o1).astype(F)) * dist).astype(F)
+        dy = (_perlin_signed2((px + q0).astype(F), (py + q1).astype(F)) * dist).astype(F)
+        px, py = (px + dx).astype(F), (py + dy).astype(F)
+    fscale, amp, maxamp = F(1), F(1), F(0)
+    s = np.zeros(px.shape, F)
+    for i in range(int(detail) + 1):
+        t = _perlin_signed2((fscale * px).astype(F), (fscale * py).astype(F))
+        s = (s + (t * amp).astype(F)).astype(F)
+        maxamp = F(maxamp + amp); amp = F(amp * rough); fscale = F(fscale * lac)
+    rmd = F(detail - F(math.floor(detail)))
+    norm = P.get('normalize', True)
+    if rmd != 0:
+        t = _perlin_signed2((fscale * px).astype(F), (fscale * py).astype(F))
+        s2 = (s + (t * amp).astype(F)).astype(F)
+        if norm:
+            a = (((F(0.5) * s).astype(F) / maxamp).astype(F) + F(0.5)).astype(F)
+            b = (((F(0.5) * s2).astype(F) / F(maxamp + amp)).astype(F) + F(0.5)).astype(F)
+        else:
+            a, b = s, s2
+        fac = ((F(1) - rmd) * a + rmd * b).astype(F)
+    else:
+        fac = ((((F(0.5) * s).astype(F) / maxamp).astype(F) + F(0.5)).astype(F)) if norm else s
+    return {'Fac': mkres('float', fac[..., None] if dom is not None else fac, dom),
+            'Color': mkres('color', np.stack([fac, fac, fac, np.ones_like(fac)], -1), dom)}
+
+
+# ----------------------------------------------------------------------------------------------- filters
+
+def node_op_inputs(ev, nid, n, names):
+    """Non-pixel operation: convert first, then realize on the operation domain (Operation input processors)."""
+    ins = ev.ins(nid, n)
+    items = [(k, r, 'domain') for sid, (k, s, r) in ins.items() if sid in names or s['name'] in names]
+    dom = pick_domain(items).realize_transformation(False)
+    out = {}
+    for sid, (k, s, r) in ins.items():
+        out[sid] = r if r.type == 'menu' else realize_onto(r, dom)
+        out[s['name']] = out[sid]
+    return out, dom
+
+
+def extended(data, x, y):
+    H, W = data.shape[:2]
+    return data[np.clip(y, 0, H - 1), np.clip(x, 0, W - 1)]
+
+
+def node_filter(ev, nid, n):
+    typ = menu_value(ev, nid, 'Type')
+    I, dom = node_op_inputs(ev, nid, n, ('Image', 'Fac'))
+    img = I['Image']
+    if img.single:
+        return {'Image': img}
+    K = {'Soften': [[1 / 16, 2 / 16, 1 / 16], [2 / 16, 4 / 16, 2 / 16], [1 / 16, 2 / 16, 1 / 16]],
+         'Box Sharpen': [[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]],
+         'Diamond Sharpen': [[0, -1, 0], [-1, 5, -1], [0, -1, 0]],
+         'Shadow': [[1, 2, 1], [0, 1, 0], [-1, -2, -1]]}[typ]
+    K = np.array(K, F)
+    d = img.data.astype(F)
+    H, W = d.shape[:2]
+    X, Y = np.meshgrid(np.arange(W), np.arange(H))
+    acc = np.zeros_like(d)
+    for j in range(3):
+        for i in range(3):
+            acc = (acc + (extended(d, X + i - 1, Y + j - 1) * K[i, j]).astype(F)).astype(F)
+    fac = I['Fac']
+    f_ = fac.data[..., 0] if not fac.single else F(fac.data[0])
+    f_ = f_[..., None] if np.ndim(f_) else f_
+    out = ((d * (F(1) - f_)).astype(F) + (acc * f_).astype(F)).astype(F)
+    out = np.maximum(out, F(0))
+    return {'Image': Res('color', out, img.domain.copy())}
+
+
+def gauss_weights(radius):
+    scale = F(1.6); two = F(F(F(2) * scale) * scale); k = F(F(3) * scale)
+    c = F(F(1) / F(math.sqrt(float(F(F(math.pi) * two)))))
+
+    def val(x):
+        x = F(abs(x)); x = F(x * k)
+        return F(c * F(math.exp(float(F(F(-x * x) / two)))))
+    n = int(math.ceil(float(radius))) + 1
+    w = [val(F(0))]
+    s = F(w[0])
+    sc = F(F(1) / F(radius)) if radius > 0 else F(0)
+    for i in range(1, n):
+        wi = val(F(F(i) * sc)); w.append(wi); s = F(s + F(wi * F(2)))
+    return np.array([F(x / s) for x in w], F)
+
+
+def blur_pass(d, w):
+    """Horizontal pass, result transposed."""
+    H, W = d.shape[:2]
+    X = np.arange(W)
+    acc = (d * w[0]).astype(F)
+    for i in range(1, len(w)):
+        acc = (acc + (d[:, np.clip(X + i, 0, W - 1)] * w[i]).astype(F)).astype(F)
+        acc = (acc + (d[:, np.clip(X - i, 0, W - 1)] * w[i]).astype(F)).astype(F)
+    return np.ascontiguousarray(np.swapaxes(acc, 0, 1))
+
+
+def node_blur(ev, nid, n):
+    typ = menu_value(ev, nid, 'Type')
+    I, dom = node_op_inputs(ev, nid, n, ('Image',))
+    img = I['Image']
+    size = convert(I['Size'], 'float2')
+    if img.single:
+        return {'Image': img}
+    if not size.single:
+        raise NotImplementedError('variable size blur')
+    rad = np.maximum(size.data, F(0))
+    if rad[0] == 0 and rad[1] == 0:
+        return {'Image': img.share()}
+    ext = convert(I['Extend Bounds'], 'bool'); sep = convert(I['Separable'], 'bool')
+    if bool(ext.data[0]):
+        raise NotImplementedError('extend bounds')
+    if typ != 'Gaussian' or not bool(sep.data[0]):
+        raise NotImplementedError('blur type ' + str(typ))
+    d = img.data.astype(F)
+    h = blur_pass(d, gauss_weights(rad[0]))
+    v = blur_pass(h, gauss_weights(rad[1]))
+    return {'Image': Res(img.type, v, img.domain.copy())}
+
+
+def node_dilate_erode(ev, nid, n):
+    typ = menu_value(ev, nid, 'Type')
+    I, dom = node_op_inputs(ev, nid, n, ('Mask',))
+    m = I['Mask']
+    size = int(convert(I['Size'], 'int').data[0])
+    if m.single or (typ != 'Threshold' and size == 0):
+        return {'Mask': m}
+    if typ != 'Feather':
+        raise NotImplementedError('dilate/erode ' + str(typ))
+    falloff = menu_value(ev, nid, 'Falloff')
+    r = abs(size)
+    w = gauss_weights(F(r)) if False else None
+    # weights: Gaussian over the radius (an int), normalized; falloffs per distance
+    scale = F(1.6); two = F(F(F(2) * scale) * scale); k = F(F(3) * scale)
+    c = F(F(1) / F(math.sqrt(float(F(F(math.pi) * two)))))
+
+    def gv(x):
+        x = F(abs(x)); x = F(x * k)
+        return F(c * F(math.exp(float(F(F(-x * x) / two)))))
+    sc = F(F(1) / F(r)) if r > 0 else F(0)
+    ws = [gv(F(0))]; s = F(ws[0])
+    for i in range(1, r + 1):
+        wi = gv(F(F(i) * sc)); ws.append(wi); s = F(s + F(wi * F(2)))
+    ws = np.array([F(x / s) for x in ws], F)
+
+    def fo(x):
+        x = F(F(1) - x)
+        if falloff == 'Smooth':
+            return F(F(F(F(3) * x) * x) - F(F(F(F(2) * x) * x) * x))
+        if falloff == 'Linear':
+            return x
+        if falloff == 'Sharp':
+            return F(x * x)
+        if falloff == 'Root':
+            return F(math.sqrt(float(x)))
+        if falloff == 'Sphere':
+            return F(math.sqrt(float(F(F(F(2) * x) - F(x * x)))))
+        if falloff == 'Inverse Square':
+            return F(x * F(F(2) - x))
+        raise NotImplementedError('falloff ' + str(falloff))
+    fs = np.array([fo(F(F(i) * sc)) for i in range(r + 1)], F)
+    erode = size < 0
+
+    def fpass(d):
+        H, W = d.shape
+        X = np.arange(W)
+        cval = (F(1) - d).astype(F) if erode else d
+        acc = (cval * ws[0]).astype(F)
+        lim = cval.copy(); limf = np.ones_like(d)
+        for i in range(1, r + 1):
+            for sgn in (-1, 1):
+                val = d[:, np.clip(X + sgn * i, 0, W - 1)]
+                if erode:
+                    val = (F(1) - val).astype(F)
+                acc = (acc + (val * ws[i]).astype(F)).astype(F)
+                fd = (val * fs[i]).astype(F)
+                mm = fd > lim
+                lim = np.where(mm, fd, lim); limf = np.where(mm, fs[i], limf)
+        val = ((acc * (F(1) - limf)).astype(F) + (lim * limf).astype(F)).astype(F)
+        if erode:
+            val = (F(1) - val).astype(F)
+        return np.ascontiguousarray(val.T)
+    d = m.data[..., 0].astype(F)
+    out = fpass(fpass(d))
+    return {'Mask': Res('float', out[..., None], m.domain.copy())}
+
+
+NODES.update({
+    'ShaderNodeFloatCurve': node_float_curve, 'CompositorNodeHueCorrect': node_hue_correct,
+    'CompositorNodeCurveRGB': node_curve_rgb, 'ShaderNodeVectorRotate': node_vector_rotate,
+    'ShaderNodeTexVoronoi': node_voronoi, 'ShaderNodeTexNoise': node_noise,
+    'CompositorNodeFilter': node_filter, 'CompositorNodeBlur': node_blur, 'CompositorNodeDilateErode': node_dilate_erode,
+})

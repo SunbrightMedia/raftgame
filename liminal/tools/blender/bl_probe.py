@@ -3,8 +3,9 @@
 
     bpyenv/bin/python -I tools/blender/bl_probe.py PROJECT.blend INPUT.exr OUT_DIR FRAME PROBE [PROBE ...]
 
-PROBE is MODE:PATH:SOCKET. PATH is the group nodes from the top tree down to the node, joined by '/', for example
-'Group.001/Group.002/Mix.001'. SOCKET is an output name or index. INPUT replaces the render (scene linear).
+PROBE is MODE:PATH:SOCKET. PATH is the group nodes from the top tree down to the node, joined by '>' (or '/' when
+no node name on the path has one), for example 'Group.001>Group.002>Mix.001'. SOCKET is an output identifier
+(e.g. Result_Color), name or index. INPUT replaces the render (scene linear).
 MODE:
   image  the socket's value as an image, realized on the render size (what an output node would show)
   info   the socket's domain from Blender's Image Info node, in three files info<k>_<tag>.exr whose pixels hold
@@ -43,6 +44,18 @@ def open_project():
     return sc, tree
 
 
+def out_socket(n, key):
+    if isinstance(key, int):
+        return n.outputs[key]
+    for o in n.outputs:
+        if o.identifier == key:
+            return o
+    for o in n.outputs:
+        if o.name == key and o.enabled:
+            return o
+    return n.outputs[key]
+
+
 def group_output(tree):
     return next(n for n in tree.nodes if n.bl_idname == 'NodeGroupOutput' and (n.is_active_output or True))
 
@@ -75,19 +88,20 @@ def render(sc, tree, sock, path):
 
 for k, pr in enumerate(probes):
     mode, path, socket = pr.split(':')
-    names = path.split('/')
+    names = path.split('>') if '>' in path else path.split('/')
     socket = int(socket) if socket.isdigit() else socket
+    path = '/'.join(names)
     tag = path.replace('/', '_').replace(' ', '_') + '_' + str(socket).replace(' ', '_')
     if mode == 'image':
         sc, tree = open_project()
-        s = route(tree, names, lambda t, n: n.outputs[socket])
+        s = route(tree, names, lambda t, n: out_socket(n, socket))
         render(sc, tree, s, os.path.join(out, f'image_{tag}.exr'))
     elif mode == 'info':
         for part in (0, 1, 2):
             sc, tree = open_project()
             def mk(t, n, part=part):
                 keep = t.nodes.new('CompositorNodeScale')
-                t.links.new(n.outputs[socket], keep.inputs['Image'])
+                t.links.new(out_socket(n, socket), keep.inputs['Image'])
                 info = t.nodes.new('CompositorNodeImageInfo')
                 t.links.new(keep.outputs[0], info.inputs['Image'])
                 cc = t.nodes.new('CompositorNodeCombineColor'); cc.mode = 'RGB'
