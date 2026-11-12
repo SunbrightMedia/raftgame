@@ -300,6 +300,24 @@ def sample(data, tu, tv, interp, ex, ey):
     raise NotImplementedError(interp)
 
 
+def realize_matrix(ind, target):
+    """RealizeOnDomainOperation's output-texel -> input-sampler matrix (float32, Blender's order)."""
+    corrective = (F(0), F(0))
+    if ind.ro[0] == 'nearest':
+        e = F(np.finfo(F).eps * F(10e3)); corrective = (e, e)
+    else:
+        corrective = (F(-0.5) if (ind.size[0] ^ target.size[0]) & 1 else F(0),
+                      F(-0.5) if (ind.size[1] ^ target.size[1]) & 1 else F(0))
+    ic = (F(ind.display[0]) / F(2), F(ind.display[1]) / F(2))
+    it = (F(F(ind.offset[0]) - ic[0]) + corrective[0], F(F(ind.offset[1]) - ic[1]) + corrective[1])
+    in_d2v = translate(ind.T, it)
+    oc = (F(target.display[0]) / F(2), F(target.display[1]) / F(2))
+    ot = (F(F(target.offset[0]) - oc[0]), F(F(target.offset[1]) - oc[1]))
+    out_d2v = translate(target.T, ot)
+    o2i = mat_mul(mat_inv(in_d2v), out_d2v)
+    return mat_mul(mat_mul(from_scale((F(1) / F(ind.size[0]), F(1) / F(ind.size[1]))), o2i), from_location((0.5, 0.5)))
+
+
 def realize(r, target, mode_translation=False):
     """RealizeOnDomainOperation: resample r onto `target` (an already realized domain)."""
     ind = r.domain
@@ -431,6 +449,7 @@ class Evaluator:
         self.render_size = render_size or image.domain.size
         self.memo = {}
         self.overrides = {}                          # (node id, output id) -> Res, e.g. a stage's output from Blender
+        self.picked = {}                             # switch node id -> the input it passed on
         self.luts = luts or {}
         self.curves = curves or {}
         self.trace = None
@@ -959,6 +978,7 @@ def node_switch(ev, nid, n):
     if not sw.single:
         raise NotImplementedError('per-pixel switch')
     pick = g['True'] if bool(sw.data[0]) else g['False']
+    ev.picked[nid] = pick
     s = next(x for x in n['inputs'] if x['id'] == pick)
     return {'Output': convert(ev.input(nid, pick), sock_type(s)).share()}
 
@@ -977,6 +997,7 @@ def node_menu_switch(ev, nid, n):
                 outs[o['id']] = Res.value(sock_type(o), o.get('value', 0))
             else:
                 s = items[idx]
+                ev.picked[nid] = s['id']
                 outs[o['id']] = convert(ev.input(nid, s['id']), sock_type(o)).share()
         else:
             outs[o['id']] = Res.value('bool', [1.0 if o['name'] == m.data else 0.0])
@@ -992,6 +1013,7 @@ def node_index_switch(ev, nid, n):
     o = n['outputs'][0]
     if not (0 <= k < len(items)):
         return {o['id']: Res.value(sock_type(o), 0)}
+    ev.picked[nid] = items[k]['id']
     return {o['id']: convert(ev.input(nid, items[k]['id']), sock_type(o)).share()}
 
 
@@ -1871,14 +1893,8 @@ def display_matrix(cfg, O, temperature, tint):
     return mat_mul(np.eye(3, dtype=F), m)
 
 
-def view_transform(img, view):
-    """Blender's display transform of a scene-linear image (bottom row first, RGBA), per the scene's view settings
-    (dict: display_device, view_transform, look, exposure, gamma, use_white_balance, white_balance_temperature,
-    white_balance_tint). Returns display-encoded float RGB. Needs Blender's OpenColorIO (run under bpy's Python)."""
-    oc = ocio()
-    if oc is None:
-        raise RuntimeError('view_transform needs the PyOpenColorIO bundled with bpy')
-    O, cfg = oc
+def ocio_view_group(O, cfg, view):
+    """The OCIO transform of Blender's display step for the view settings (see view_transform)."""
     g = O.GroupTransform()
     src = 'Linear Rec.709'
     scale = F(2 ** float(view.get('exposure', 0.0)))
@@ -1900,6 +1916,18 @@ def view_transform(img, view):
     if gamma != 1.0:
         e = 1.0 / gamma
         g.appendTransform(O.ExponentTransform(value=[e, e, e, 1.0]))
+    return g
+
+
+def view_transform(img, view):
+    """Blender's display transform of a scene-linear image (bottom row first, RGBA), per the scene's view settings
+    (dict: display_device, view_transform, look, exposure, gamma, use_white_balance, white_balance_temperature,
+    white_balance_tint). Returns display-encoded float RGB. Needs Blender's OpenColorIO (run under bpy's Python)."""
+    oc = ocio()
+    if oc is None:
+        raise RuntimeError('view_transform needs the PyOpenColorIO bundled with bpy')
+    O, cfg = oc
+    g = ocio_view_group(O, cfg, view)
     cpu = cfg.getProcessor(g).getDefaultCPUProcessor()
     x = np.ascontiguousarray(img.astype(F).copy())
     cpu.applyRGBA(x)
