@@ -155,6 +155,8 @@ export class BlenderPost {
   private rotData: Float32Array;
   private rotW: number;
   readonly outputSize: [number, number];
+  /** Tests: each overridden pass's own result, from before the override. */
+  readonly captured = new Map<string, Float32Array>();
 
   constructor(private gl: WebGL2RenderingContext, private prog: BPProgram, luts: Record<string, Float32Array>) {
     if (!gl.getExtension('EXT_color_buffer_float')) throw new Error('needs EXT_color_buffer_float');
@@ -222,7 +224,7 @@ export class BlenderPost {
   /** The render (scene linear, RGBA float texture of the program's size); `frame` drives the noise seeds.
    * Returns the display output (Blender's 8-bit picture, as bytes / 255) when the program has one, else the
    * compositor's scene-linear output. */
-  run(input: WebGLTexture, frame: number): WebGLTexture {
+  run(input: WebGLTexture, frame: number, overrides?: Record<string, Float32Array>): WebGLTexture {
     const gl = this.gl, prog = this.prog;
     const dyn = evalDynamic(prog, frame, prog.fps ?? 24);
     const value = (r: BPDynRef | { const: number[] }): Val => {
@@ -264,6 +266,12 @@ export class BlenderPost {
         else if (v.length === 3) gl.uniform3f(loc, v[0], v[1], v[2]); else gl.uniform4f(loc, v[0], v[1], v[2], v[3]);
       }
       gl.drawArrays(gl.TRIANGLES, 0, 3);
+      const ov = overrides?.[p.out];
+      if (ov) {   // tests: keep the pass's own result, then replace it with reference values (bottom row first, RGBA)
+        this.captured.set(p.out, this.read(p.out));
+        gl.bindTexture(gl.TEXTURE_2D, this.tex.get(p.out)!);
+        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, p.w, p.h, gl.RGBA, gl.FLOAT, ov);
+      }
     }
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     return this.tex.get(prog.display ?? prog.output)!;

@@ -77,9 +77,9 @@ vec3 hsv2rgb(vec3 hsv) {
 
 // ---- safe math (BLI)
 float sdiv(float a, float b) { return b != 0.0 ? a / b : 0.0; }
-float spow(float a, float b) { return (a < 0.0 && b != trunc(b)) ? 0.0 : pow(a, b); }
-float slog(float a, float b) { return (a <= 0.0 || b <= 0.0) ? 0.0 : sdiv(log(a), log(b)); }
-float ssqrt(float a) { return sqrt(max(a, 0.0)); }
+float spow(float a, float b) { return (a < 0.0 && b != trunc(b)) ? 0.0 : pow_cr(a, b); }
+float slog(float a, float b) { return (a <= 0.0 || b <= 0.0) ? 0.0 : sdiv(log_cr(a), log_cr(b)); }
+float ssqrt(float a) { return sqrt_cr(max(a, 0.0)); }
 float sfmod(float a, float b) { return b != 0.0 ? a - b * trunc(a / b) : 0.0; }
 float sflmod(float a, float b) { return b != 0.0 ? a - floor(a / b) * b : 0.0; }
 
@@ -94,7 +94,9 @@ uint hfinal(uint a, uint b, uint c) {
 uint hash1u(uint kx) { uint a = 0xdeadbeefu + (1u << 2u) + 13u; uint b = a, c = a; a += kx; return hfinal(a, b, c); }
 uint hash2u(uint kx, uint ky) { uint a = 0xdeadbeefu + (2u << 2u) + 13u; uint b = a, c = a; b += ky; a += kx; return hfinal(a, b, c); }
 uint hash3u(uint kx, uint ky, uint kz) { uint a = 0xdeadbeefu + (3u << 2u) + 13u; uint b = a, c = a; c += kz; b += ky; a += kx; return hfinal(a, b, c); }
-float u01(uint h) { return float(h) * (1.0 / 4294967296.0); }
+// float(uint) on some GPUs rounds twice for values >= 2^31 (SwiftShader: 16% of them wrong); this rounds once.
+float u2f(uint h) { return (float(h >> 8u) * 256.0) * xone() + float(h & 255u); }
+float u01(uint h) { return u2f(h) * (1.0 / 4294967296.0); }
 float hashf1(float x) { return u01(hash1u(floatBitsToUint(x))); }
 float hashf2(float x, float y) { return u01(hash2u(floatBitsToUint(x), floatBitsToUint(y))); }
 float hashf3(float x, float y, float z) { return u01(hash3u(floatBitsToUint(x), floatBitsToUint(y), floatBitsToUint(z))); }
@@ -132,11 +134,17 @@ vec4 voronoi_f1(vec2 coord, float r, out vec2 pos) {
   vec2 d = tp - lp;
   ivec3 hc = pcg3d(ivec3(cp + to, 0));
   pos = tp + cf;
-  return vec4(sqrt(d.x * d.x + d.y * d.y), i01(hc.x), i01(hc.y), i01(hc.z));
+  return vec4(sqrt_cr(d.x * d.x + d.y * d.y), i01(hc.x), i01(hc.y), i01(hc.z));
 }
 
 // Perlin noise 2D (BLI noise), fBM with optional distortion
-float fade_(float t) { return t * t * t * (t * (t * 6.0 - 15.0) + 10.0); }
+// Blender: t*t*t in float, the rest in double: (t*t*t) * (t * (t * 6.0 - 15.0) + 10.0)
+float fade_(float t) {
+  float one = xone();
+  float left = (((t * t) * one) * t) * one;
+  vec2 right = df_add(df_mulf(df_add(two_prod(t, 6.0, one), vec2(-15.0, 0.0), one), t, one), vec2(10.0, 0.0), one);
+  return df_mulf(right, left, one).x;
+}
 float grad2(uint h, float x, float y) {
   h = h & 7u;
   float u = h < 4u ? x : y, v = 2.0 * (h < 4u ? y : x);
@@ -148,8 +156,11 @@ float perlin2(vec2 p) {
   float u = fade_(f.x), v = fade_(f.y);
   float v0 = grad2(hash2u(X, Y), f.x, f.y), v1 = grad2(hash2u(X + 1u, Y), f.x - 1.0, f.y);
   float v2 = grad2(hash2u(X, Y + 1u), f.x, f.y - 1.0), v3 = grad2(hash2u(X + 1u, Y + 1u), f.x - 1.0, f.y - 1.0);
+  float one = xone();
   float x1 = 1.0 - u;
-  return (1.0 - v) * (v0 * x1 + v1 * u) + v * (v2 * x1 + v3 * u);
+  float a = (v0 * x1) * one + (v1 * u) * one, b = (v2 * x1) * one + (v3 * u) * one;
+  // Blender: (1.0 - v) * a + v * b, the outer mix in double
+  return df_add(df_mulf(two_sum(1.0, -v, one), a, one), vec2((v * b) * one, 0.0), one).x;
 }
 float perlin_signed2(vec2 p) {
   vec2 corr = 0.5 * vec2(abs(p.x) >= 1000000.0 ? 1.0 : 0.0, abs(p.y) >= 1000000.0 ? 1.0 : 0.0);

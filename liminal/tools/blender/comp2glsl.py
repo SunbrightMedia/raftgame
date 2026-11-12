@@ -20,9 +20,11 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import compeval as C  # noqa: E402
 import ocioport  # noqa: E402
+from glsl_harden import harden  # noqa: E402
 
 F = np.float32
-LIB = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'glsl', 'lib.glsl')).read()
+_GL = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'glsl')
+LIB = open(os.path.join(_GL, 'exactmath.glsl')).read() + open(os.path.join(_GL, 'lib.glsl')).read()
 
 PIXEL = {'ShaderNodeMath', 'ShaderNodeMix', 'ShaderNodeMapRange', 'ShaderNodeClamp', 'ShaderNodeGamma',
          'ShaderNodeFloatCurve', 'ShaderNodeSeparateXYZ', 'ShaderNodeCombineXYZ', 'ShaderNodeVectorMath',
@@ -99,6 +101,7 @@ class Compiler:
         self.data_files = {}      # table name -> file name (3D colour tables, measured by ocioport)
         self.tables = {}          # table name -> float32 [N, N, N, 3]
         self._ocio = {}           # conversion key -> (GLSL, samplers)
+        self.harden = True        # rewrite shaders so every float op rounds once (glsl_harden)
         self.dyn_nodes = self._dynamic_nodes()
 
     # ---- graph helpers
@@ -150,21 +153,6 @@ class Compiler:
             nid, out = picked[1], picked[2]
             n = self.node(nid)
         return nid, out, convs
-
-
-def main():
-    import argparse
-    ap = argparse.ArgumentParser()
-    ap.add_argument('dump'); ap.add_argument('curves'); ap.add_argument('out')
-    ap.add_argument('--size', default='854x480')
-    a = ap.parse_args()
-    W, H = (int(v) for v in a.size.split('x'))
-    comp = Compiler(json.load(open(a.dump)), json.load(open(a.curves)), (W, H))
-    print('nodes', len(comp.ev.trace), 'dynamic', len(comp.dyn_nodes))
-
-
-if __name__ == '__main__':
-    main()
 
 
 # =============================================================================================== compiler body
@@ -312,13 +300,13 @@ Compiler.image_at = _image_at
 MATH_GLSL = {
     'ADD': '{a} + {b}', 'SUBTRACT': '{a} - {b}', 'MULTIPLY': '{a} * {b}', 'DIVIDE': 'sdiv({a}, {b})',
     'MULTIPLY_ADD': '({a} * {b}) + {c}', 'POWER': 'spow({a}, {b})', 'LOGARITHM': 'slog({a}, {b})', 'SQRT': 'ssqrt({a})',
-    'SINE': 'sin({a})', 'COSINE': 'cos({a})', 'MAXIMUM': 'max({a}, {b})', 'MINIMUM': 'min({a}, {b})',
+    'SINE': 'sin_cr({a})', 'COSINE': 'cos_cr({a})', 'MAXIMUM': 'max({a}, {b})', 'MINIMUM': 'min({a}, {b})',
     'GREATER_THAN': '({a} > {b} ? 1.0 : 0.0)', 'LESS_THAN': '({a} < {b} ? 1.0 : 0.0)', 'FLOORED_MODULO': 'sflmod({a}, {b})',
-    'ABSOLUTE': 'abs({a})', 'EXPONENT': 'exp({a})', 'FLOOR': 'floor({a})', 'CEIL': 'ceil({a})', 'ROUND': 'floor({a} + 0.5)',
+    'ABSOLUTE': 'abs({a})', 'EXPONENT': 'exp_cr({a})', 'FLOOR': 'floor({a})', 'CEIL': 'ceil({a})', 'ROUND': 'floor({a} + 0.5)',
     'TRUNC': 'trunc({a})', 'FRACT': '{a} - floor({a})', 'FRACTION': '{a} - floor({a})', 'MODULO': 'sfmod({a}, {b})',
     'SNAP': 'floor(sdiv({a}, {b})) * {b}', 'SIGN': 'sign({a})', 'TANGENT': 'tan({a})', 'ARCTANGENT': 'atan({a})',
     'ARCTAN2': 'atan({a}, {b})', 'TANH': 'tanh({a})', 'RADIANS': '{a} * ' + glf(math.pi / 180.0), 'DEGREES': '{a} * ' + glf(180.0 / math.pi),
-    'INVERSE_SQRT': '({a} > 0.0 ? 1.0 / sqrt({a}) : 0.0)', 'ARCSINE': 'asin(clamp({a}, -1.0, 1.0))', 'ARCCOSINE': 'acos(clamp({a}, -1.0, 1.0))',
+    'INVERSE_SQRT': '({a} > 0.0 ? 1.0 / sqrt_cr({a}) : 0.0)', 'ARCSINE': 'asin(clamp({a}, -1.0, 1.0))', 'ARCCOSINE': 'acos(clamp({a}, -1.0, 1.0))',
     'COMPARE': '(abs({a} - {b}) <= max({c}, 1.1920928955078125e-07) ? 1.0 : 0.0)',
 }
 
@@ -411,7 +399,7 @@ def _emit_node(self, ctx, nid):
         if op == 'SCALE':
             out['Vector'] = (ctx.var('vec3', f'{a} * {V("Scale", "float")}'), 'float3')
         elif op == 'LENGTH':
-            out['Value'] = (ctx.var('float', f'sqrt(({a}.x * {a}.x + {a}.y * {a}.y) + {a}.z * {a}.z)'), 'float')
+            out['Value'] = (ctx.var('float', f'sqrt_cr(({a}.x * {a}.x + {a}.y * {a}.y) + {a}.z * {a}.z)'), 'float')
         else:
             b = ctx.var('vec3', V(ins[1]['id'], 'float3'))
             out['Vector'] = (ctx.var('vec3', {'ADD': f'{a} + {b}', 'SUBTRACT': f'{a} - {b}', 'MULTIPLY': f'{a} * {b}'}[op]), 'float3')
@@ -621,7 +609,7 @@ def _emit_rotate(self, ctx, nid):
     if P.get('invert'):
         ang = ctx.var('float', f'-{ang}')
     t = ctx.var('vec3', f'{v} - {cen}')
-    sn, cs = ctx.var('float', f'sin({ang})'), ctx.var('float', f'cos({ang})')
+    sn, cs = ctx.var('float', f'sin_cr({ang})'), ctx.var('float', f'cos_cr({ang})')
     return ctx.var('vec3', f'vec3(({cs} * {t}.x + (-{sn}) * {t}.y), ({sn} * {t}.x + {cs} * {t}.y), 0.0) + {cen}')
 
 
@@ -1220,6 +1208,9 @@ def _compile(self):
     dither = float(self.d['scene']['render'].get('dither_intensity', 0.0))
     body = DISPLAY_BODY % ocioport._f(F(1.0 - 0.5 / 255.0))
     disp = self.simple_pass(rdom, 'display', body, {'t_in': tid, 't_dither': 'dither', **samplers}, lib_extra=lib)
+    if self.harden:
+        for p in self.passes:
+            p['frag'] = harden(p['frag'])
     return {
         'display': disp, 'dither': dither, 'view': view,
         'size': list(self.ev.render_size),
@@ -1238,9 +1229,11 @@ def main2():
     ap = argparse.ArgumentParser()
     ap.add_argument('dump'); ap.add_argument('curves'); ap.add_argument('out')
     ap.add_argument('--size', default='854x480')
+    ap.add_argument('--no-harden', action='store_true', help='leave the GPU compiler free to fuse and regroup float ops')
     a = ap.parse_args()
     W, H = (int(v) for v in a.size.split('x'))
     comp = Compiler(json.load(open(a.dump)), json.load(open(a.curves)), (W, H))
+    comp.harden = not a.no_harden
     prog = comp.compile()
     os.makedirs(a.out, exist_ok=True)
     json.dump(prog, open(os.path.join(a.out, 'blenderPost.json'), 'w'))
