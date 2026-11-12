@@ -8,6 +8,8 @@ Made by `tools/blender/comp2glsl.py`; the game loads it with `src/engine/render/
   ourselves with Blender's OpenColorIO, on a grid twice as fine as Blender's own tables. Raw float32 RGB, red
   fastest. Each big table is split into parts under 8 MB, because published artifact files must stay under
   15 MB; the program lists each table's parts in order.
+- `files.json`: the list of files above. The published page build (globs.page.ts) fetches them from
+  `data/blender/` next to the page, so they are published as artifact files at those paths.
 
 Source of the compositor graph: [ShuttleworthL/Backrooms_found_footage](https://github.com/ShuttleworthL/Backrooms_found_footage),
 MIT licence, Copyright (c) 2026 Lawrence (full text: `LICENSE-Backrooms_found_footage.txt`). The colour tables

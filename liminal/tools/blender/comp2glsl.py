@@ -1280,6 +1280,8 @@ def main2():
                 open(os.path.join(a.out, fn), 'wb').write(raw[k:k + part]); files.append(fn)
             prog['data'][name] = files
     json.dump(prog, open(os.path.join(a.out, 'blenderPost.json'), 'w'))
+    # the file list, so the published page build knows what to fetch next to it
+    json.dump(['blenderPost.json'] + [f for fs in prog['data'].values() for f in fs], open(os.path.join(a.out, 'files.json'), 'w'))
     print('passes', len(prog['passes']), 'textures', len(prog['textures']), 'curves', len(prog['curves']),
           'coord rows', len(prog['coords']), 'rotations', len(prog['rotations']), 'dynamic nodes', len(prog['dynamic']),
           'tables', {k: v.shape[0] for k, v in comp.tables.items()})
