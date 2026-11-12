@@ -102,6 +102,7 @@ export class Game {
       u.dynBeam.value[i].set(l.dir ? -(1 + (l.spill ?? 0)) : 0, l.n ?? 1, cos(c - sd), cos(c + sd));
       u.dynChan.value[i] = l.channel ?? 0;
       u.dynIso.value[i] = l.iso ?? 0;
+      u.dynSize.value[i] = l.size ?? 2;
     });
   }
 

@@ -27,7 +27,7 @@ export function meshesFromBatches(batches: Map<string, { [K in keyof FaceBatch]:
   const materialFor = (tex: string, order: number): THREE.Material => {
     const entry = textures.get(tex);
     const surf = surfaceFor(tex, entry.material);
-    const height = !entry.emissive && surf.bump > 0 ? textures.heightOf(tex, surf.relief) : undefined;
+    const height = !entry.emissive && surf.bump > 0 ? textures.heightOf(tex, surf.relief, !!surf.reliefInvert) : undefined;
     let mat: THREE.Material;
     // Source sky faces: the skybox shows there (this map's is plain black).
     if (layout?.source && /(^|\/)skybox\//.test(tex)) mat = new THREE.MeshBasicMaterial({ color: 0x000000 });

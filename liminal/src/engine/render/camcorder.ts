@@ -437,17 +437,15 @@ export class CamcorderPost {
       float y = c.x + lumaNoise * (0.35 + 0.65 * d * d) * (h(px) + h(px + vec2(7.0, 13.0)) - 1.0);
       vec2 cc = vec2(0.0); float ws = 0.0;
       if (sigma < 0.3) {
-        vec2 q = vUv - vec2(delay, 0.0) * texel, qp = floor(q / texel);
-        cc = yuv(q).yz + chromaNoise * vec2(h(qp + vec2(31.0, 5.0)) + h(qp + vec2(53.0, 11.0)) - 1.0, h(qp + vec2(71.0, 3.0)) + h(qp + vec2(97.0, 17.0)) - 1.0);
+        cc = yuv(vUv - vec2(delay, 0.0) * texel).yz;
         ws = 1.0;
       } else {
         float step = max(1.0, sigma / 5.0);
         for (int i = -15; i <= 15; i++) {
           float x = float(i) * step;
           float w = exp(-0.5 * x * x / (sigma * sigma));
-          vec2 q = vUv + vec2(x - delay, 0.0) * texel, qp = floor(q / texel);
-          vec2 n = chromaNoise * vec2(h(qp + vec2(31.0, 5.0)) + h(qp + vec2(53.0, 11.0)) - 1.0, h(qp + vec2(71.0, 3.0)) + h(qp + vec2(97.0, 17.0)) - 1.0);
-          cc += (yuv(q).yz + n) * w; ws += w;
+          vec2 q = vUv + vec2(x - delay, 0.0) * texel;
+          cc += yuv(q).yz * w; ws += w;
         }
       }
       gl_FragColor = vec4(y, cc / ws, 1.0);
@@ -456,7 +454,21 @@ export class CamcorderPost {
   // Vertical half of the colour band limit, the codec's edge-keeping smoothing of brightness, back to RGB.
   private sigV = pass(/* glsl */ `
     uniform sampler2D src; uniform vec2 texel; uniform float sigma; uniform float codec; uniform float codecR;
+    uniform float chromaNoise; uniform float frame;
     varying vec2 vUv;
+    float h(vec2 p) {
+      uvec2 q = uvec2(ivec2(p) + ivec2(4096)) * uvec2(1597334673u, 3812015801u);
+      uint n = (q.x ^ q.y ^ (uint(frame) * 2654435761u)) * 1597334677u;
+      n ^= n >> 16u; n *= 0x7feb352du; n ^= n >> 15u;
+      return float(n & 0xffffffu) / 16777215.0;
+    }
+    // value noise on a grid of cell-sized squares, smoothly interpolated: -1..1
+    float vnoise(vec2 p, vec2 o) {
+      vec2 i = floor(p), f = p - i;
+      f = f * f * (3.0 - 2.0 * f);
+      float a = h(i + o), b = h(i + o + vec2(1.0, 0.0)), c = h(i + o + vec2(0.0, 1.0)), d = h(i + o + vec2(1.0, 1.0));
+      return 2.0 * mix(mix(a, b, f.x), mix(c, d, f.x), f.y) - 1.0;
+    }
     void main() {
       vec3 c0 = texture2D(src, vUv).rgb;
       vec2 cc = c0.yz;
@@ -469,6 +481,13 @@ export class CamcorderPost {
           cc += texture2D(src, vUv + vec2(0.0, x) * texel).yz * w; ws += w;
         }
         cc /= ws;
+      }
+      // Sensor colour noise as it comes out of the colour band limit: blotches about the band limit's size, new every
+      // frame. Made smooth here (white noise blurred by sparse taps let fine colour grain through).
+      if (chromaNoise > 0.0) {
+        vec2 p = vUv / texel / max(2.0, 1.2 * sigma);
+        cc += chromaNoise * 0.033 * vec2(vnoise(p, vec2(31.0, 5.0)) + 0.5 * vnoise(p * 2.0, vec2(7.0, 91.0)),
+                                         vnoise(p, vec2(71.0, 3.0)) + 0.5 * vnoise(p * 2.0, vec2(13.0, 57.0)));
       }
       float y = c0.x;
       if (codec > 0.0) {
@@ -484,7 +503,7 @@ export class CamcorderPost {
       float r = y + cc.y / 0.713, b = y + cc.x / 0.564;
       float g = (y - 0.299 * r - 0.114 * b) / 0.587;
       gl_FragColor = vec4(max(vec3(r, g, b), 0.0), 1.0);
-    }`, { src: { value: null }, texel: { value: new THREE.Vector2() }, sigma: { value: 0 }, codec: { value: 0 }, codecR: { value: 1 } });
+    }`, { src: { value: null }, texel: { value: new THREE.Vector2() }, sigma: { value: 0 }, codec: { value: 0 }, codecR: { value: 1 }, chromaNoise: { value: 0 }, frame: { value: 0 } });
 
   private finish = pass(/* glsl */ `
     uniform sampler2D src; uniform sampler2D grainTex; uniform sampler2D streakTex;
@@ -696,6 +715,7 @@ export class CamcorderPost {
       this.draw(gl, this.sigH, this.outA);
       b.src.value = this.outA!.texture; (b.texel.value as THREE.Vector2).set(1 / ow, 1 / oh);
       b.sigma.value = cb; b.codec.value = codec; b.codecR.value = Math.max(0.3, (p.codecRadius ?? 1.5) * 0.001 * ow);
+      b.chromaNoise.value = cn; b.frame.value = this.frame % 65536;
       this.draw(gl, this.sigV, this.outB);
     }
     // banding, grain, tape

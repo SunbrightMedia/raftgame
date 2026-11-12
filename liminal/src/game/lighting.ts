@@ -18,7 +18,7 @@ import { SolidGrid } from '../engine/light/bake';
 const SOURCE_BAKE = { bounces: 100, patchRays: 256, chop: 4, supersample: true };
 
 /** Bump when the baker's output changes meaning, so old caches are ignored. */
-const BAKE_VERSION = 8;
+const BAKE_VERSION = 9;
 /** The same for the Source baker (vrad.ts, vradProps.ts). */
 const SOURCE_BAKE_VERSION = 5;
 
@@ -502,6 +502,8 @@ export class Lighting {
         bounceScale: L.bounceScale,
         bounceSamples: over.bounceSamples ?? L.bounceSamples,
         surfaceSpacing: over.surfaceSpacing ?? 16,
+        // Bounce gathered every 2 base luxels in world units, so fine-luxel faces (doors) are no noisier than walls.
+        gatherSpacing: 2 * layout.luxel,
         aoStrength: L.aoStrength,
         aoRadius: L.aoRadius,
         aoDirect: L.aoDirect,
@@ -524,9 +526,11 @@ type Props = Record<string, unknown>;
  *   type:   "can"  — BR30 flood in a 6" recessed can: cos^1.4 beam, 50° cutoff, 85% efficiency
  *           "bulb" — bare bulb, equal in every direction: I = lm / 4π
  *           "down" / "up" — flat Lambertian emitter facing down/up: I0 = lm / π
- *           "dome" — flush-mount frosted dome on the ceiling: wide downward
- *                    cos^0.6 lobe plus a glow of 6% of its peak every way
- *                    (`up`), so the ceiling round it is lit as a real one's
+ *           "dome" — flush-mount frosted glass bowl on the ceiling: a share
+ *                    `up` (default 0.25) of its light leaves the glass evenly every
+ *                    way (the bowl's sides: what lights the ceiling round it), the
+ *                    rest goes down in a wide cos^0.6 lobe; `size` = the glass's
+ *                    width in inches (its reflection in glossy surfaces)
  *           "spot" — a downward spot with a smooth cone: cos^n lobe (n 2.2 by
  *                    default: an engine spot of 87° outer, 0° inner angle, as
  *                    the reference capture's ceiling panels), cut off at
@@ -558,11 +562,13 @@ export function lightFromEntity(origin: [number, number, number], p: Props): Bak
     return { pos: origin, color: col, I0: cd > 0 ? cd : cosNPeak(lm, n), dir: [0, 0, -1], n, cutoffDeg: num('cutoff', 87), softDeg: 3, spill: 0, ...(num('shadows', 1) === 0 ? { shadows: false } : {}) };
   }
   if (type === 'dome') {
-    // ~80% gets out through the glass. Most goes down in a wide cos^n lobe; the glass also glows sideways and up at
-    // ~6% of the peak (flush-mount photometry: 10-15% of the light above the horizon), which lights the ceiling round
-    // the fixture: the bright patch a camera sees round a ceiling lamp. `up` changes that share.
-    const n = num('n', 0.6), lm = num('lumens', 800) * 0.8;
-    return { pos: origin, color, I0: cosNPeak(lm, n), dir: [0, 0, -1], n, cutoffDeg: 88, softDeg: 2, spill: 0, iso: num('up', 0.06) };
+    // ~80% gets out through the glass. A share `up` leaves it evenly every way: a bowl's sides glow sideways about half
+    // as bright as its bottom does downward, which lights the ceiling round the fixture and is what a glossy ceiling
+    // reflects (the bright patch a camera sees round a ceiling lamp). The rest goes down in a wide cos^n lobe. The two
+    // add up to the lamp's lumens. `iso` is the even part as a fraction of the lobe's peak.
+    const n = num('n', 0.6), lm = num('lumens', 800) * 0.8, up = Math.min(0.95, Math.max(0, num('up', 0.25)));
+    const I0 = cosNPeak(lm * (1 - up), n), iso = (lm * up) / (4 * Math.PI) / I0;
+    return { pos: origin, color, I0, dir: [0, 0, -1], n, cutoffDeg: 88, softDeg: 2, spill: 0, iso, size: num('size', 13) };
   }
   if (type === 'down' || type === 'up') {
     return { pos: origin, color, I0: num('lumens', 400) / Math.PI, dir: [0, 0, type === 'down' ? -1 : 1], n: 1 };

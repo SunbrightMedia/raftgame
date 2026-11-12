@@ -43,6 +43,8 @@ export const worldUniforms = {
   dynChan: { value: new Array<number>(32).fill(0) },
   /** A downward light's glow in every direction, as a fraction of its peak (BakeLight.iso). */
   dynIso: { value: new Array<number>(32).fill(0) },
+  /** Each per-pixel light's size (inches across): its reflection on glossy surfaces widens with it. */
+  dynSize: { value: new Array<number>(32).fill(2) },
   lightmapMask: { value: null as THREE.Texture | null },
   lightScale: { value: 1 },
   // Reflections.
@@ -169,6 +171,7 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
       uniform vec4 dynBeam[32];
       uniform float dynChan[32];
       uniform float dynIso[32];
+      uniform float dynSize[32];
       uniform sampler2D lightmapMask;
       uniform float lightScale;
       uniform float specScale;
@@ -225,6 +228,24 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
         vec3 F = F0 + (1.0 - F0) * pow(1.0 - vdh, 5.0);
         float norm = (a * a) / (a2 * a2);
         return F * D_GGX(a2, ndh) * V_Smith(a2, ndl, ndv) * norm * ndl;
+      }
+      // Specular BRDF × cosθ of a sphere light (radius r, centre at toL from the point). Karis 2013's
+      // "representative point": the light direction moves to the point of the sphere nearest the reflected ray,
+      // so a big glowing lamp's reflection on a glossy surface is as big as its mirror image (a dome's glare on a
+      // satin ceiling), and the lobe is renormalised for the widening.
+      vec3 specSphere(vec3 N, vec3 V, vec3 toL, float r, vec3 F0, float rough) {
+        float a = max(rough * rough, 0.002);
+        float d = max(length(toL), 1e-3);
+        vec3 R = reflect(-V, N);
+        vec3 c2r = dot(toL, R) * R - toL;
+        vec3 l = normalize(toL + c2r * clamp(r / max(length(c2r), 1e-4), 0.0, 1.0));
+        float ndl = dot(N, l);
+        if (ndl <= 0.0) return vec3(0.0);
+        float aw = clamp(a + r / (2.0 * d), 0.002, 1.0);
+        vec3 H = normalize(l + V);
+        float ndh = max(dot(N, H), 0.0), ndv = max(dot(N, V), 1e-4), vdh = max(dot(V, H), 0.0);
+        vec3 F = F0 + (1.0 - F0) * pow(1.0 - vdh, 5.0);
+        return F * D_GGX(a, ndh) * V_Smith(a, ndl, ndv) * (a * a) / (aw * aw) * ndl;
       }
       // Environment BRDF, analytic fit (Karis 2014, "Physically Based Shading on Mobile").
       vec3 envBRDF(vec3 F0, float rough, float ndv) {
@@ -386,7 +407,7 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
               float sh = ch < 0.5 ? mk.r : ch < 1.5 ? mk.g : ch < 2.5 ? mk.b : mk.a;
               vec3 Ei = dynColor[i] * I * sh / max(dm * dm, 0.0025);
               Edyn += Ei * ndl;
-              spec += Ei * specPoint(N, V, u, ndl, F0, rough, 2.0 / max(d, 1.0));
+              spec += Ei * specSphere(N, V, toL, 0.5 * dynSize[i], F0, rough);
             }
             Edyn *= lightScale;
             spec *= lightScale;

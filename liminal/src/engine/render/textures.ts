@@ -26,7 +26,7 @@ export interface TexEntry {
  * (dark navy next to cream, at the same pile height) doesn't turn into holes.
  * Edges wrap, so the height field tiles like the texture.
  */
-export function makeHeightCanvas(src: HTMLCanvasElement, worldW: number, radiusIn: number): HTMLCanvasElement {
+export function makeHeightCanvas(src: HTMLCanvasElement, worldW: number, radiusIn: number, invert = false): HTMLCanvasElement {
   const w = src.width, h = src.height;
   const d = src.getContext('2d', { willReadFrequently: true })!.getImageData(0, 0, w, h).data;
   const L = new Float32Array(w * h);
@@ -66,7 +66,7 @@ export function makeHeightCanvas(src: HTMLCanvasElement, worldW: number, radiusI
   const g = out.getContext('2d')!;
   const img = g.createImageData(w, h);
   for (let i = 0; i < w * h; i++) {
-    const v = 0.5 + 0.5 * Math.max(-1, Math.min(1, hp[i] / (2.2 * (Math.sqrt(varc[i]) + 0.015))));
+    const v = 0.5 + (invert ? -0.5 : 0.5) * Math.max(-1, Math.min(1, hp[i] / (2.2 * (Math.sqrt(varc[i]) + 0.015))));
     const b = Math.round(v * 255);
     img.data[i * 4] = img.data[i * 4 + 1] = img.data[i * 4 + 2] = b; img.data[i * 4 + 3] = 255;
   }
@@ -280,10 +280,10 @@ export class TextureRegistry {
   }
 
   /** The height field for a texture (relief radius in inches from its material). */
-  heightOf(name: string, radiusIn: number): THREE.Texture {
+  heightOf(name: string, radiusIn: number, invert = false): THREE.Texture {
     const e = this.get(name);
     if (!e.height) {
-      const t = new THREE.CanvasTexture(makeHeightCanvas(e.texture.image as HTMLCanvasElement, e.worldW, radiusIn));
+      const t = new THREE.CanvasTexture(makeHeightCanvas(e.texture.image as HTMLCanvasElement, e.worldW, radiusIn, invert));
       t.wrapS = t.wrapT = THREE.RepeatWrapping;
       t.colorSpace = THREE.NoColorSpace;
       t.anisotropy = 16;

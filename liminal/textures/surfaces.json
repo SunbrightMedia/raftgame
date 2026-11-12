@@ -1,5 +1,5 @@
 {
-  "_about": "How each material reflects light. roughness: 0 = mirror, 1 = fully matte (GGX, Disney remap). f0: reflectance straight on; ~0.04 for paint, plastic, varnish, glass (index 1.5); 0.02-0.03 for fibres. metal: 1 = metal (reflection tinted by the texture). bump: relief depth in inches (bump shading and parallax), from a height field built from the texture's fine detail. Only for real geometry in the texture (grout, ceiling-tile grid, carpet pile): on printed or painted surfaces it turns pixels into lumps, so 0. relief: size in inches of the detail read as relief (pile ~0.25, grout ~1). gloss: how much of the specular reflection shows (0 = matte, as paint and carpet look in the references). sheen: fibre sheen at grazing angles. cavity: darkening of the deepest crevices. 'textures' overrides a single texture by name.",
+  "_about": "How each material reflects light. roughness: 0 = mirror, 1 = fully matte (GGX, Disney remap). f0: reflectance straight on; ~0.04 for paint, plastic, varnish, glass (index 1.5); 0.02-0.03 for fibres. metal: 1 = metal (reflection tinted by the texture). bump: relief depth in inches (bump shading and parallax), from a height field built from the texture's fine detail. Only for real geometry in the texture (grout, ceiling-tile grid, carpet pile): on printed or painted surfaces it turns pixels into lumps, so 0. relief: size in inches of the detail read as relief (pile ~0.25, grout ~1). gloss: how much of the specular reflection shows (0 = matte, as paint and carpet look in the references). sheen: fibre sheen at grazing angles. cavity: darkening of the deepest crevices. reliefInvert: the texture's light lines are recesses (pale mortar), so its height field is flipped. 'textures' overrides a single texture by name.",
   "materials": {
     "default": {"roughness": 0.7, "f0": 0.04, "metal": 0, "bump": 0, "relief": 0.4, "gloss": 0, "sheen": 0, "cavity": 0},
     "carpet": {"roughness": 0.78, "f0": 0.03, "metal": 0, "bump": 0.15, "relief": 0.18, "gloss": 0, "sheen": 0.6, "cavity": 0.5},
@@ -27,9 +27,9 @@
     "house6/dark": {"roughness": 0.85, "f0": 0.04, "gloss": 0.3},
     "house6/window": {"roughness": 0.35, "f0": 0.04, "gloss": 0.5},
     "house6/trim_white": {"roughness": 0.3, "f0": 0.04, "gloss": 1},
-    "house6/ceiling_paint": {"roughness": 0.5, "f0": 0.04, "gloss": 0.6},
+    "house6/ceiling_paint": {"roughness": 0.5, "f0": 0.04, "gloss": 1},
     "house6/door_white": {"roughness": 0.3, "f0": 0.04, "gloss": 1, "luxel": 0.4},
-    "house6/brick": {"roughness": 0.45, "gloss": 0.7, "bump": 0.15, "relief": 0.5},
+    "house6/brick": {"roughness": 0.35, "gloss": 1, "bump": 0.35, "relief": 0.45, "reliefInvert": true},
     "house6/carpet_brown": {"roughness": 1, "bump": 0.03, "relief": 0.3, "gloss": 0},
     "house6/soot": {"roughness": 1, "gloss": 0}
   }

@@ -250,8 +250,8 @@
     {
       "name": "house6/carpet_brown",
       "from": "acg/carpet_plush",
-      "color": "#675d4d",
-      "contrast": 0.45
+      "color": "#756958",
+      "contrast": 0.12
     },
     {
       "name": "house6/soot",
@@ -274,14 +274,14 @@
     {
       "name": "house6/brick",
       "from": "acg/brick_smooth_orange",
-      "color": "#5e3b1e",
+      "color": "#5e3a1a",
       "contrast": 0.6,
       "keepHue": true
     },
     {
       "name": "house6/window",
       "from": "office/plaster",
-      "color": "#2e2a26",
+      "color": "#0f0e0d",
       "contrast": 0.3
     },
     {
@@ -299,13 +299,13 @@
     {
       "name": "house6/paint_ivory",
       "from": "ph/beige_wall",
-      "color": "#d8d2c2",
+      "color": "#c6c0b1",
       "contrast": 0.8
     },
     {
       "name": "house6/ceiling_paint",
       "from": "ph/beige_wall_textured",
-      "color": "#cdc8bc",
+      "color": "#bfbaaf",
       "contrast": 0.6
     },
     {
@@ -317,7 +317,7 @@
     {
       "name": "house6/fabric_grey",
       "from": "ph/wool_herringbone",
-      "color": "#58585a",
+      "color": "#6b6c66",
       "contrast": 0.8
     },
     {

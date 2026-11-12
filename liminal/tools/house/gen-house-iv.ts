@@ -32,8 +32,11 @@ import { HouseKit, type HouseTex } from './kit';
 import { HOUSE_IV_ROOMS } from './rooms';
 
 const T = 5;
-/** The domes' glass glow round them (share of their peak, every way): the ceiling patch the camera blows out. */
-const DOME_UP = Number(process.env.DOME_UP ?? 0.3);
+/** Share of the domes' light that leaves the glass bowl evenly every way: it lights the ceiling round each lamp and is
+ *  what the satin ceiling reflects (the glare patch round the video's lamps). */
+const DOME_UP = Number(process.env.DOME_UP ?? 0.5);
+/** Their downward lobe, cos^n: 1 = an even (Lambertian) bowl bottom; the default 0.6 sends more to the walls. */
+const DOME_N = Number(process.env.DOME_N ?? 1);
 const TEX: HouseTex = {
   paint: 'house6/paint_ivory', carpet: 'house6/carpet_brown', ceiling: 'house6/ceiling_paint', trim: 'house6/trim_white',
   brass: 'pmp/brass', dome: 'fixture/dome', chrome: 'fixture/chrome', brick: 'house6/brick', soot: 'house6/soot',
@@ -44,7 +47,7 @@ const m = new MapBuilder();
 
 // ---------------------------------------------------------------- K: the kitchenette room (camera at 0, 0)
 {
-  const k = new HouseKit(m, 101, TEX); k.domeUp = DOME_UP;
+  const k = new HouseKit(m, 101, TEX); k.domeUp = DOME_UP; k.domeN = DOME_N;
   const W = -200, S = -150, N = 189, E = 380, NE = 115;   // the north wall: y 189 west of the block, 115 east of the pilaster
   const bx0 = 90, bx1 = 165, px1 = 177, pz = 94;          // the block (x 90-165, y 115-189) and the pilaster (x 165-177 to y 94)
   k.slabs(W, S, E, N);
@@ -69,7 +72,7 @@ const m = new MapBuilder();
   const dg2 = k.doorGap(264, 32);
   k.wallX(NE, NE + T, px1, E + T, [dg2]);
   k.door('x', NE, -1, 264, 1, { w: 32 });
-  k.sconce('x', NE, -1, 332, 78, 25, 2300);              // dim and orange in the video: a small glow on a dark wall
+  k.sconce('x', NE, -1, 332, 78, 160, 2300, 0.85);       // an uplight: an orange glow and a bright fan on the ceiling above, the corridor dark
   // the kitchenette: base cabinets to x 60 (counter 36"), an upper cabinet 60-95" with open shelves to its left
   k.baseCabinets('x', N, -1, -110, 0, 4);
   k.baseCabinets('x', N, -1, 0, 60, 2);
@@ -85,7 +88,7 @@ const m = new MapBuilder();
 
 // ---------------------------------------------------------------- F: the fireplace room (camera at 1000, 0)
 {
-  const ox = 1000, k = new HouseKit(m, 115.5, TEX); k.domeUp = DOME_UP;
+  const ox = 1000, k = new HouseKit(m, 115.5, TEX); k.domeUp = DOME_UP; k.domeN = DOME_N;
   const W = ox - 118, E = ox + 70, N = 239, S0 = 120, S1 = 131;  // the room: x W..E, y S0..N (S1 east of the passage)
   const PW = ox - 66, PE = ox + 51, PS = -100;                    // the passage the camera stands in
   k.slabs(W, PS, E, N);
@@ -106,9 +109,9 @@ const m = new MapBuilder();
   k.fireplace('x', N, -1, ox - 7, { d: 12, fd: 10 });
   k.door('x', N, -1, ox + 47, 1, { w: 32 });
   k.door('y', E, -1, 182, 1, { w: 30 });
-  // The armchair: soft cushions, not stepped boxes (tools/models/armchair_soft.json); its front faces 118°, turned
-  // away from the camera. The model's front is -y, so its yaw is that + 90.
-  m.prop([ox + 34, 150, 0], 'house/armchair_soft', 118 + 90, 1.15);
+  // The armchair: soft cushions, not stepped boxes (tools/models/armchair_soft.json); it faces away from the camera,
+  // turned left (front at 120°), so its back and left arm show, as in the video. The model's front is -y: yaw = that + 90.
+  m.prop([ox + 24, 150, 0], 'house/armchair_soft', 120 + 90, 1.15);
   // trim
   k.baseRun('x', N, -1, W, ox - 38.5); k.baseRun('x', N, -1, ox + 24.5, fd.a - 3.25); k.baseRun('x', N, -1, fd.b + 3.25, E);
   k.baseRun('y', W, 1, S0, N); k.baseRun('y', E, -1, S1, ed.a - 3.25); k.baseRun('y', E, -1, ed.b + 3.25, N);
@@ -124,7 +127,7 @@ const m = new MapBuilder();
 
 // ---------------------------------------------------------------- D: the hall of doors (camera at 2000, 0)
 {
-  const ox = 2000, k = new HouseKit(m, 115, TEX); k.domeUp = DOME_UP;
+  const ox = 2000, k = new HouseKit(m, 115, TEX); k.domeUp = DOME_UP; k.domeN = DOME_N;
   const W0 = ox - 112, W1 = ox - 90, JOG = 142, N = 312, E = ox + 40, S = -80;
   k.slabs(W0, S, E, N);
   // west wall, near part, with two doors
@@ -161,7 +164,8 @@ const m = new MapBuilder();
 m.start([-0, 0, 18], 4.9, 50.3);
 m.write('house_iv', HOUSE_IV_ROOMS, {
   // A fill in the lamps' colour: the video's renderer lights far walls and ceilings more evenly than bounce alone.
-  light: { luxelSize: 3, bounces: 2, extraBounces: 1, ambientLux: 6, ambientKelvin: 2700 },
+  // Little corner darkening: the video's wall-ceiling line and crown are bright, with no shadow band under them.
+  light: { luxelSize: 3, bounces: 2, extraBounces: 1, ambientLux: 6, ambientKelvin: 2700, aoStrength: 0.25, aoRadius: 24, aoDirect: 0 },
   fog: { enabled: false },
   // full resolution, then the camera's own softness: thin lines (mortar, panel shadows) survive as in the video
   render: { internalHeight: 1080 },
@@ -178,7 +182,7 @@ m.write('house_iv', HOUSE_IV_ROOMS, {
     vignette: 0.15, soften: 1.8, sharpen: 0.5, sharpenRadius: 2.0, posterize: 0, grain: 0, lift: 0.02, lineChroma: 0, hueWobble: 0, streaks: 0, lens: 0, bars: true,
     // The video signal, fitted to the frames (scratchpad meas/metrics.py): brightness edges 3-4 px wide at 960 with no
     // halo, colour edges ~11 px, little fine texture but colour blotches in flat areas.
-    chromaBlur: 5.2, chromaDelay: 0.4, lumaNoise: 0.025, chromaNoise: 0.16, codec: 0.035, codecRadius: 1.5,
+    chromaBlur: 5.2, chromaDelay: 0.4, lumaNoise: 0.025, chromaNoise: 0.13, codec: 0.035, codecRadius: 1.5,
     // a 1/50 s shutter: turning smears the picture (the video's frame 1 is smeared ~9 px sideways)
     motionBlur: 20,
   },

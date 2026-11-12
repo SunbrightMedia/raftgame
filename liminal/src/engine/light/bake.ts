@@ -39,6 +39,8 @@ export interface BakeLight {
   /** A downward light's glow in every direction, as a fraction of its peak (a flush mount's glass sends ~6 % of its
    * peak intensity up and sideways, ~12 % of its light: what lights the ceiling round it). */
   iso?: number;
+  /** Size of the glowing part, inches across (a dome's glass): widens its reflection on glossy surfaces. Default 2. */
+  size?: number;
   /**
    * Direct light from this light is drawn per pixel by the shader (exact beam
    * edges, e.g. a can's scallop), so the lightmap stores only its bounce and
@@ -115,6 +117,19 @@ export interface BakeParams {
   /** Falloff: occlusion is raised to this power before darkening, so open
    *  wall stays untouched and only tight creases darken. 1 = linear. */
   aoCurve?: number;
+  /**
+   * World spacing (units) of the points where bounce light is gathered; the luxels between are interpolated.
+   * Indirect light is smooth, so a fine-luxel face (a door's 0.4" luxels) gathers on this grid like an ordinary
+   * face instead of on every 2nd luxel: its few rays per point then average out over the same area, rather than
+   * showing as specks. Default: every 2nd luxel.
+   */
+  gatherSpacing?: number;
+  /**
+   * Firefly limit. One bounce ray's light is capped at this many times the brightness that 99.5 % of the scene's
+   * surface area stays under. A small, very bright spot (the ceiling an inch from a lamp) is otherwise a blotch
+   * wherever some ray happens to hit it. 0 = off.
+   */
+  bounceClamp?: number;
 }
 
 /** Shadow casters: every solid brush as a convex plane set. */
@@ -362,21 +377,30 @@ export function bake(input: BakeInput): BakeOutput {
   const dirs = hemisphere(Math.max(1, Math.round(p.bounceSamples)));
   const even = clamp(p.bounceEven ?? 0, 0, 1), probe = p.bounceProbe ?? 24;
   const lastGathered = new Map<FaceSamples, Float32Array>(), lastBounce = new Map<FaceSamples, Float32Array>();
+  const clampK = p.bounceClamp ?? 4;
+  let capLum = Infinity;
   for (let pass = 0; pass < Math.min(2, Math.round(p.bounces)); pass++) {
     const gathered = new Map<FaceSamples, Float32Array>();
+    capLum = clampK > 0 ? clampK * exitanceQuantile(samples, input.albedo, 0.995) : Infinity;
+    // A bounce ray's light (exitance of what it hit), capped (see bounceClamp).
+    const cap = (r: number, g: number, b: number) => {
+      const l = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      return l > capLum ? capLum / l : 1;
+    };
     for (const fs of samples) {
       const f = fs.face;
       const out = new Float32Array(fs.direct.length);
       gathered.set(fs, out);
       const gS = new Float32Array(fs.direct.length), gT = new Float32Array(fs.direct.length);
       if (fs.emitting) continue;
-      // Indirect light is smooth: gather on every 2nd luxel (plus the last
-      // row/column) and interpolate the rest.
+      // Indirect light is smooth: gather on a grid (every 2nd luxel, or every `gatherSpacing` units on fine-luxel
+      // faces; plus the last row/column) and interpolate the rest.
       const { w: rw, h: rh } = fs.rect;
-      const onGrid = (i: number, n: number) => i % 2 === 0 || i === n - 1;
+      const si = gatherStride(p, fs.stepS), sj = gatherStride(p, fs.stepT);
+      const onGrid = (i: number, n: number, s: number) => i % s === 0 || i === n - 1;
       for (let k = 0; k < fs.valid.length; k++) {
         const ki = k % rw, kj = (k - ki) / rw;
-        if (!onGrid(ki, rw) || !onGrid(kj, rh)) continue;
+        if (!onGrid(ki, rw, si) || !onGrid(kj, rh, sj)) continue;
         if (!fs.valid[k]) continue;
         const px = fs.pos[k * 3], py = fs.pos[k * 3 + 1], pz = fs.pos[k * 3 + 2];
         const rot = hash(k * 7919 + f.id * 104729) * Math.PI * 2;
@@ -411,8 +435,9 @@ export function bake(input: BakeInput): BakeOutput {
           if (!hs) continue;
           const v = lookup(hs, px + dx * 4096 * hit.t, py + dy * 4096 * hit.t, pz + dz * 4096 * hit.t);
           const alb = hs.emitting ? [0, 0, 0] : (input.albedo[hs.face.tex] ?? [0.5, 0.5, 0.5]);
-          r += v[0] * alb[0]; g += v[1] * alb[1]; b += v[2] * alb[2];
-          acc(v[0] * alb[0], v[1] * alb[1], v[2] * alb[2], dx, dy, dz);
+          const er = v[0] * alb[0], eg = v[1] * alb[1], eb = v[2] * alb[2], kc = cap(er, eg, eb);
+          r += er * kc; g += eg * kc; b += eb * kc;
+          acc(er * kc, eg * kc, eb * kc, dx, dy, dz);
           qr += alb[0]; qg += alb[1]; qb += alb[2];
         }
         if (even > 0) {
@@ -443,7 +468,8 @@ export function bake(input: BakeInput): BakeOutput {
             if (!hs || hs.emitting) continue;
             const v = lookup(hs, ox + dx * 4096 * hit.t, oy + dy * 4096 * hit.t, oz + dz * 4096 * hit.t);
             const alb = input.albedo[hs.face.tex] ?? [0.5, 0.5, 0.5];
-            er += v[0] * alb[0]; eg += v[1] * alb[1]; eb += v[2] * alb[2];
+            const kc = cap(v[0] * alb[0], v[1] * alb[1], v[2] * alb[2]);
+            er += v[0] * alb[0] * kc; eg += v[1] * alb[1] * kc; eb += v[2] * alb[2] * kc;
           }
           const w = even / 2;
           r = r * (1 - w) + er * w; g = g * (1 - w) + eg * w; b = b * (1 - w) + eb * w;
@@ -466,13 +492,16 @@ export function bake(input: BakeInput): BakeOutput {
           fs.ao[k * 3] = fs.ao[k * 3 + 1] = fs.ao[k * 3 + 2] = ao;
         }
       }
-      fillSkipped(out, rw, rh, fs.valid, onGrid);
-      // Indirect light is smooth in reality; blur away sampling noise (blotches).
-      smooth(out, rw, rh, fs.valid, 2);
-      fillSkipped(gS, rw, rh, fs.valid, onGrid); smooth(gS, rw, rh, fs.valid, 2);
-      fillSkipped(gT, rw, rh, fs.valid, onGrid); smooth(gT, rw, rh, fs.valid, 2);
+      // Indirect light is smooth in reality; blur away sampling noise (blotches). On a coarse gather grid the grid
+      // points are first averaged with their neighbours, as the luxel blur does on an ordinary face.
+      const fill = (buf: Float32Array, passes: number) => {
+        if (si > 2 || sj > 2) smoothGrid(buf, rw, rh, fs.valid, si, sj);
+        fillSkipped(buf, rw, rh, fs.valid, si, sj);
+        smooth(buf, rw, rh, fs.valid, passes);
+      };
+      fill(out, 2); fill(gS, 2); fill(gT, 2);
       fs.indS = gS; fs.indT = gT;
-      if (pass === 0) { fillSkipped(fs.ao, rw, rh, fs.valid, onGrid); smooth(fs.ao, rw, rh, fs.valid, 1); fillSkipped(fs.seen, rw, rh, fs.valid, onGrid); smooth(fs.seen, rw, rh, fs.valid, 2); }
+      if (pass === 0) { fill(fs.ao, 1); fill(fs.seen, 2); }
     }
     // Next pass bounces what this one gathered.
     for (const fs of samples) {
@@ -501,7 +530,7 @@ export function bake(input: BakeInput): BakeOutput {
   let probeLight: Float32Array | undefined;
   if (input.probes && input.probes.pos.length >= 3) {
     const own = input.propBoxStart !== undefined && input.propBoxStart < boxes.length ? new SolidGrid(boxes.slice(0, input.propBoxStart)) : grid;
-    probeLight = lightProbes(input.probes, lights, ranges, own, byId, input.albedo, p);
+    probeLight = lightProbes(input.probes, lights, ranges, own, byId, input.albedo, p, capLum);
   }
 
   // ---- write the atlas
@@ -555,7 +584,7 @@ export function bake(input: BakeInput): BakeOutput {
  * per-pixel lights), shadowed by `grid`; the light the finished room reflects towards the point, gathered over
  * its hemisphere; the ambient fill, darkened by what is close round the point.
  */
-function lightProbes(pr: { pos: Float32Array; nrm: Float32Array }, lights: BakeLight[], ranges: number[], grid: SolidGrid, byId: Map<number, FaceSamples>, albedo: Record<string, RGB>, p: BakeParams): Float32Array {
+function lightProbes(pr: { pos: Float32Array; nrm: Float32Array }, lights: BakeLight[], ranges: number[], grid: SolidGrid, byId: Map<number, FaceSamples>, albedo: Record<string, RGB>, p: BakeParams, capLum = Infinity): Float32Array {
   const n = pr.pos.length / 3, out = new Float32Array(n * 3);
   const dirs = hemisphere(Math.max(16, Math.round(p.bounceSamples)));
   const aoR = p.aoRadius ?? 24;
@@ -604,7 +633,9 @@ function lightProbes(pr: { pos: Float32Array; nrm: Float32Array }, lights: BakeL
       if (!hs || hs.emitting) continue;
       const v = lookup(hs, px + dx * 4096 * hit.t, py + dy * 4096 * hit.t, pz + dz * 4096 * hit.t);
       const alb = albedo[hs.face.tex] ?? [0.5, 0.5, 0.5];
-      ir += v[0] * alb[0]; ig += v[1] * alb[1]; ib += v[2] * alb[2];
+      const er = v[0] * alb[0], eg = v[1] * alb[1], eb = v[2] * alb[2], el = 0.2126 * er + 0.7152 * eg + 0.0722 * eb;
+      const kc = el > capLum ? capLum / el : 1;
+      ir += er * kc; ig += eg * kc; ib += eb * kc;
     }
     const k = p.bounceScale / dirs.length;
     const o = Math.min(1, (occ / dirs.length) * 2.2), ao = 1 - (p.aoStrength ?? 0) * Math.pow(o, p.aoCurve ?? 1);
@@ -635,24 +666,90 @@ function smooth(buf: Float32Array, w: number, h: number, valid: Uint8Array, pass
   }
 }
 
-/** Interpolate the luxels the bounce pass skipped from the gathered grid around them. */
-function fillSkipped(buf: Float32Array, w: number, h: number, valid: Uint8Array, onGrid: (i: number, n: number) => boolean): void {
-  const at = (i: number, j: number, c: number) => buf[(j * w + i) * 3 + c];
-  // Rows that were gathered: fill odd columns from left/right neighbours.
-  for (let j = 0; j < h; j++) {
-    if (!onGrid(j, h)) continue;
-    for (let i = 0; i < w; i++) {
-      if (onGrid(i, w)) continue;
-      const a = valid[j * w + i - 1] ? i - 1 : i + 1, b = valid[j * w + i + 1] ? i + 1 : i - 1;
-      for (let c = 0; c < 3; c++) buf[(j * w + i) * 3 + c] = (at(a, j, c) + at(b, j, c)) / 2;
+/** Luxels between bounce-gather points along an axis with this luxel step (see BakeParams.gatherSpacing). */
+function gatherStride(p: BakeParams, step: number): number {
+  return p.gatherSpacing ? Math.max(2, Math.round(p.gatherSpacing / Math.max(1e-3, step))) : 2;
+}
+
+/**
+ * Exitance (luminance of total light × albedo) that fraction `q` of the scene's surface AREA stays under. Area,
+ * not luxel count: fine-luxel faces have many luxels and would otherwise set the level.
+ */
+function exitanceQuantile(samples: FaceSamples[], albedo: Record<string, RGB>, q: number): number {
+  let count = 0;
+  for (const fs of samples) if (!fs.emitting) count += fs.valid.length;
+  const every = Math.max(1, Math.ceil(count / 200000));
+  const vals: number[] = [], wts: number[] = [];
+  let n = 0;
+  for (const fs of samples) {
+    if (fs.emitting) continue;
+    const a = albedo[fs.face.tex] ?? [0.5, 0.5, 0.5], area = fs.stepS * fs.stepT;
+    for (let k = 0; k < fs.valid.length; k++) {
+      if (n++ % every || !fs.valid[k]) continue;
+      vals.push(0.2126 * fs.total[k * 3] * a[0] + 0.7152 * fs.total[k * 3 + 1] * a[1] + 0.0722 * fs.total[k * 3 + 2] * a[2]);
+      wts.push(area);
     }
   }
-  // Remaining rows from the rows above/below.
-  for (let j = 0; j < h; j++) {
-    if (onGrid(j, h)) continue;
-    for (let i = 0; i < w; i++) {
-      for (let c = 0; c < 3; c++) buf[(j * w + i) * 3 + c] = (at(i, j - 1, c) + at(i, j + 1, c)) / 2;
+  if (!vals.length) return Infinity;
+  const idx = vals.map((_, i) => i).sort((x, y) => vals[x] - vals[y]);
+  let total = 0;
+  for (const w of wts) total += w;
+  let acc = 0;
+  for (const i of idx) { acc += wts[i]; if (acc >= q * total) return Math.max(vals[i], 1e-6); }
+  return vals[idx[idx.length - 1]];
+}
+
+/** One 3×3 average of the gather-grid points (every si-th column, sj-th row, plus the last) with their valid grid neighbours. */
+function smoothGrid(buf: Float32Array, w: number, h: number, valid: Uint8Array, si: number, sj: number): void {
+  const cols: number[] = [], rows: number[] = [];
+  for (let i = 0; i < w; i++) if (i % si === 0 || i === w - 1) cols.push(i);
+  for (let j = 0; j < h; j++) if (j % sj === 0 || j === h - 1) rows.push(j);
+  const src = buf.slice();
+  for (let b = 0; b < rows.length; b++) for (let a = 0; a < cols.length; a++) {
+    const k = rows[b] * w + cols[a];
+    if (!valid[k]) continue;
+    let r = 0, g = 0, bl = 0, n = 0;
+    for (let db = -1; db <= 1; db++) for (let da = -1; da <= 1; da++) {
+      const aa = a + da, bb = b + db;
+      if (aa < 0 || bb < 0 || aa >= cols.length || bb >= rows.length) continue;
+      const q = rows[bb] * w + cols[aa];
+      if (!valid[q]) continue;
+      r += src[q * 3]; g += src[q * 3 + 1]; bl += src[q * 3 + 2]; n++;
     }
+    buf[k * 3] = r / n; buf[k * 3 + 1] = g / n; buf[k * 3 + 2] = bl / n;
+  }
+}
+
+/** Interpolate the luxels the bounce pass skipped (linearly) from the gathered grid points around them. */
+function fillSkipped(buf: Float32Array, w: number, h: number, valid: Uint8Array, si = 2, sj = 2): void {
+  const on = (i: number, n: number, s: number) => i % s === 0 || i === n - 1;
+  // Which luxels hold a value: gathered grid points that are valid, then what is interpolated from them.
+  const known = new Uint8Array(w * h);
+  for (let j = 0; j < h; j++) {
+    if (!on(j, h, sj)) continue;
+    for (let i = 0; i < w; i++) if (on(i, w, si) && valid[j * w + i]) known[j * w + i] = 1;
+  }
+  const lerp = (k: number, k0: number, k1: number, t: number) => {
+    const a = known[k0], b = known[k1];
+    if (!a && !b) return;
+    const u = !a ? 1 : !b ? 0 : t;
+    for (let c = 0; c < 3; c++) buf[k * 3 + c] = buf[k0 * 3 + c] * (1 - u) + buf[k1 * 3 + c] * u;
+    known[k] = 1;
+  };
+  // Grid rows: the columns between grid columns.
+  for (let j = 0; j < h; j++) {
+    if (!on(j, h, sj)) continue;
+    for (let i = 0; i < w; i++) {
+      if (on(i, w, si)) continue;
+      const i0 = Math.floor(i / si) * si, i1 = Math.min(i0 + si, w - 1);
+      lerp(j * w + i, j * w + i0, j * w + i1, (i - i0) / (i1 - i0));
+    }
+  }
+  // Other rows: between the grid rows above and below.
+  for (let j = 0; j < h; j++) {
+    if (on(j, h, sj)) continue;
+    const j0 = Math.floor(j / sj) * sj, j1 = Math.min(j0 + sj, h - 1);
+    for (let i = 0; i < w; i++) lerp(j * w + i, j0 * w + i, j1 * w + i, (j - j0) / (j1 - j0));
   }
 }
 

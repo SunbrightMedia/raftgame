@@ -610,6 +610,13 @@ const DEFS: Record<string, Def> = {
     emissive: { kelvin: 2700, luminance: 28, castsLight: false },
     paint: (g, w, h) => { g.fillStyle = '#f4efe4'; g.fillRect(0, 0, w, h); },
   },
+  // A flush dome's frosted glass bowl, glowing evenly: 1600 lm × 0.8 out of a 13" × 5.5" bowl (0.154 m²) is
+  // ~2600 cd/m² (L = flux / (π × area)).
+  'fixture/dome_glass': {
+    px: [32, 32], world: [12, 12], material: 'glass',
+    emissive: { kelvin: 2700, luminance: 2600, castsLight: false },
+    paint: (g, w, h) => { g.fillStyle = '#f4efe4'; g.fillRect(0, 0, w, h); },
+  },
   // Flush dome lens for the house look: a real one is ~4800 cd/m² (1600 lm × 0.8 out of a 13" disc), but the
   // video's lamps read as soft blobs that only just reach white; at 1500 the camera's glow makes that shape.
   'fixture/dome_soft': {

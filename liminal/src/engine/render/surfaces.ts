@@ -19,6 +19,9 @@ export interface Surface {
   /** Lightmap luxel size for faces of this texture (inches), finer than the map's: small relief that casts its own
    * shadows (a door's panel steps). Per texture only. */
   luxel?: number;
+  /** The texture's light lines are recesses (pale mortar between bricks): its height field is turned upside down, so
+   *  the bricks stand out and catch the light on their top edges. */
+  reliefInvert?: boolean;
 }
 
 interface SurfaceFile { materials: Record<string, Surface>; textures?: Record<string, Partial<Surface>> }
