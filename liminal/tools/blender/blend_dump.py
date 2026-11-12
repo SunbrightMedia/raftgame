@@ -14,7 +14,8 @@ sc = bpy.context.scene
 
 def val(x, depth=0):
     if x is None or isinstance(x, (bool, int, str)): return x
-    if isinstance(x, float): return round(x, 6) if math.isfinite(x) else str(x)
+    # full precision: Blender stores float32, and repr() of the double keeps it exactly
+    if isinstance(x, float): return x if math.isfinite(x) else str(x)
     if hasattr(x, 'bl_rna') and hasattr(x, 'name') and not hasattr(x, '__len__'):
         return f'<{type(x).__name__}:{x.name}>'
     if depth < 3:
@@ -45,7 +46,7 @@ def curve_mapping(mp):
     out = {'black': val(mp.black_level), 'white': val(mp.white_level), 'clip': mp.use_clip,
            'clip_min': [mp.clip_min_x, mp.clip_min_y], 'clip_max': [mp.clip_max_x, mp.clip_max_y], 'curves': []}
     for c in mp.curves:
-        out['curves'].append([[round(p.location[0], 6), round(p.location[1], 6), p.handle_type] for p in c.points])
+        out['curves'].append([[p.location[0], p.location[1], p.handle_type] for p in c.points])
     try: out['tone'] = mp.tone; out['extend'] = mp.extend
     except Exception: pass
     return out
@@ -67,7 +68,7 @@ def tree(nt):
         cr = getattr(n, 'color_ramp', None)
         if cr is not None:
             nd['ramp'] = {'interp': cr.interpolation, 'mode': cr.color_mode, 'hue': cr.hue_interpolation,
-                          'elements': [[round(e.position, 6), val(e.color)] for e in cr.elements]}
+                          'elements': [[e.position, val(e.color)] for e in cr.elements]}
         mp = getattr(n, 'mapping', None)
         if mp is not None and hasattr(mp, 'curves'): nd['curve'] = curve_mapping(mp)
         ei = getattr(n, 'enum_items', None)
@@ -122,8 +123,8 @@ def anim(idb):
     for fc in fcs:
         out['fcurves'].append({'path': fc.data_path, 'index': fc.array_index, 'extrapolation': fc.extrapolation,
                                'modifiers': [m.type for m in fc.modifiers],
-                               'keys': [[round(k.co[0], 3), round(k.co[1], 6), k.interpolation, k.easing,
-                                         [round(v, 4) for v in k.handle_left], [round(v, 4) for v in k.handle_right]] for k in fc.keyframe_points]})
+                               'keys': [[k.co[0], k.co[1], k.interpolation, k.easing,
+                                         list(k.handle_left), list(k.handle_right)] for k in fc.keyframe_points]})
     for dr in ad.drivers:
         out['drivers'].append({'path': dr.data_path, 'index': dr.array_index, 'expr': dr.driver.expression})
     return out
@@ -155,7 +156,7 @@ for C in D.cameras:
 R['objects'] = []
 for ob in D.objects:
     o = {'name': ob.name, 'type': ob.type, 'data': ob.data.name if ob.data else None, 'parent': ob.parent.name if ob.parent else None,
-         'matrix_world': [[round(v, 6) for v in row] for row in ob.matrix_world], 'loc': val(ob.location), 'rot': val(ob.rotation_euler),
+         'matrix_world': [list(row) for row in ob.matrix_world], 'loc': val(ob.location), 'rot': val(ob.rotation_euler),
          'rot_mode': ob.rotation_mode, 'scale': val(ob.scale), 'dims': val(ob.dimensions),
          'hide_render': ob.hide_render, 'hide_viewport': ob.hide_viewport,
          'vis': {k: getattr(ob, k, None) for k in ('visible_camera', 'visible_diffuse', 'visible_glossy', 'visible_transmission', 'visible_volume_scatter', 'visible_shadow', 'is_holdout', 'is_shadow_catcher')},
