@@ -17,6 +17,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from compgraph import Graph  # noqa: E402  (flattening of groups and reroutes)
+import compunits  # noqa: E402  (Blender's schedule and pixel compile units)
 
 F = np.float32
 f = F
@@ -453,6 +454,20 @@ class Evaluator:
         self.luts = luts or {}
         self.curves = curves or {}
         self.trace = None
+        # Blender's pixel compile units (compunits.py): pixel nodes take their unit's domain. Off = each pixel
+        # node picks its domain from its own inputs (the same inside the picture; differs at the borders).
+        self.units = True
+        self.tree_views = {}                         # tree prefix -> compunits.TreeView (scheduled, driven)
+        self.unit_of = {}                            # pixel node id -> its unit record
+
+    def run_tree(self, prefix):
+        """Evaluate a node tree in Blender's schedule order, forming its pixel compile units."""
+        if prefix in self.tree_views:
+            return self.tree_views[prefix]
+        tv = compunits.TreeView(self, prefix)
+        self.tree_views[prefix] = tv
+        tv.drive()
+        return tv
 
     def _index_groups(self, tree, prefix):
         for n in tree['nodes']:
@@ -553,6 +568,8 @@ class Evaluator:
 
     def socket(self, path, out=None):
         """The value at a node output: path like 'Group.001/Group.002/Mix.001' (output: first one if None)."""
+        if self.units:
+            self.run_tree('')
         n = self.G.nodes[path]
         out = out or n['outputs'][0]['id']
         if n['type'] == 'CompositorNodeGroup':
@@ -566,6 +583,8 @@ class Evaluator:
         """The compositor's output: the Group Output's first input, realized on the render size."""
         go = next(n['name'] for n in self.d['compositor']['nodes'] if n['type'] == 'NodeGroupOutput')
         sock = self.G.nodes[go]['inputs'][0]
+        if self.units:
+            self.run_tree('')
         r = convert(self.input(go, sock['id']), 'color')
         return self.to_render(r)
 
@@ -605,7 +624,11 @@ def pixel_inputs(ev, nid, n):
         return r if (ty == 'menu' or r.type == 'menu') else convert(r, ty)
     if all(r.single for _, (k, s, r) in ins.items() if r.type != 'menu'):
         return {sid: conv(s, r) for sid, (k, s, r) in ins.items()}, None
-    dom = pick_domain(items).realize_transformation(False)
+    unit = ev.unit_of.get(nid)
+    if unit is not None and not unit['single'] and unit['domain'] is not None:
+        dom = unit['domain'].realize_transformation(False)    # the compile unit's domain (with its realization options)
+    else:
+        dom = pick_domain(items).realize_transformation(False)
     out = {}
     for sid, (k, s, r) in ins.items():
         out[sid] = r if r.type == 'menu' else conv(s, realize_onto(r, dom))

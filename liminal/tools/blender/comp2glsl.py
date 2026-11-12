@@ -679,6 +679,26 @@ def _dyn_program(self):
     return prog
 
 
+def _needed_dynamic(self):
+    """The dynamic program cut to what the passes and rotations read (directly or through other dynamic
+    nodes): Blender schedules switch branches it cannot rule out, so more frame-dependent nodes get evaluated
+    than the picture uses."""
+    prog = self.dyn_program()
+    by_id = {d['id']: d for d in prog}
+    stack = [rec['node'] for p in self.passes for rec in p['uniforms'].values() if 'node' in rec]
+    for rt in self.rotations:
+        stack += [rt[k]['node'] for k in ('center', 'angle') if isinstance(rt[k], dict) and 'node' in rt[k]]
+    need = set()
+    while stack:
+        nid = stack.pop()
+        if nid in need or nid not in by_id:
+            continue
+        need.add(nid)
+        stack += [i['node'] for i in by_id[nid]['inputs'] if 'node' in i]
+    return [d for d in prog if d['id'] in need]
+
+
+Compiler.needed_dynamic = _needed_dynamic
 Compiler.dyn_ref = _dyn_ref
 Compiler.dyn_uniform = _dyn_uniform
 Compiler.dyn_program = _dyn_program
@@ -1222,7 +1242,7 @@ def _compile(self):
         'size': list(self.ev.render_size),
         'textures': self.textures, 'passes': self.passes, 'output': tid,
         'curves': self.curves_used, 'coords': self.coord_table, 'rotations': self.rotations,
-        'dynamic': self.dyn_program(), 'data': self.data_files,
+        'dynamic': self.needed_dynamic(), 'data': self.data_files,
     }
 
 
