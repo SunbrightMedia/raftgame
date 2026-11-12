@@ -10,7 +10,8 @@
  * (noise seeds from the frame number) are computed here in float32, as Blender computes them.
  */
 
-export interface BPTexture { w: number; h: number; label: string }
+/** A pass's output: size, and storage (r / rg for single values and pairs; texelFetch reads them as (v, 0, 0, 1) and (x, y, 0, 1)). */
+export interface BPTexture { w: number; h: number; label: string; fmt?: 'r' | 'rg' | 'rgba' }
 export interface BPPass { label: string; frag: string; out: string; inputs: Record<string, string>; uniforms: Record<string, BPDynRef> }
 export interface BPDynRef { node: string; out: string; convs: string[]; want: string; type?: string }
 export interface BPDynInput { id: string; name: string; type: string; const?: number[] | string; ctype?: string; node?: string; out?: string; convs?: string[]; vtype?: string }
@@ -168,7 +169,9 @@ export class BlenderPost {
    */
   constructor(private gl: WebGL2RenderingContext, private prog: BPProgram, luts: Record<string, Float32Array>, opts: { pool?: boolean } = {}) {
     if (!gl.getExtension('EXT_color_buffer_float')) throw new Error('needs EXT_color_buffer_float');
-    if (opts.pool === false) for (const [id, t] of Object.entries(prog.textures)) this.makeTarget(id, t.w, t.h);
+    this.cleanState();
+    this.vao = gl.createVertexArray()!;
+    if (opts.pool === false) for (const [id, t] of Object.entries(prog.textures)) this.makeTarget(id, t.w, t.h, t.fmt);
     else this.allocate();
     this.outputSize = [prog.textures[prog.output].w, prog.textures[prog.output].h];
     // tables: curves (257 x rows), coordinates (max x rows), rotations (per frame), 3D colour tables
@@ -206,6 +209,23 @@ export class BlenderPost {
   }
 
   private vs: WebGLShader;
+  private vao: WebGLVertexArrayObject;
+
+  /**
+   * GL state that a shared context (three.js) may leave behind and that would change results: pixel unpacking
+   * (three.js leaves FLIP_Y on: data rows would come in upside down and 3D uploads fail), blending, tests,
+   * masks, dithering.
+   */
+  private cleanState(): void {
+    const gl = this.gl;
+    gl.bindBuffer(gl.PIXEL_UNPACK_BUFFER, null); gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false); gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4); gl.pixelStorei(gl.UNPACK_ROW_LENGTH, 0); gl.pixelStorei(gl.UNPACK_IMAGE_HEIGHT, 0);
+    gl.pixelStorei(gl.UNPACK_SKIP_PIXELS, 0); gl.pixelStorei(gl.UNPACK_SKIP_ROWS, 0); gl.pixelStorei(gl.UNPACK_SKIP_IMAGES, 0);
+    gl.pixelStorei(gl.PACK_ALIGNMENT, 4); gl.pixelStorei(gl.PACK_ROW_LENGTH, 0); gl.pixelStorei(gl.PACK_SKIP_PIXELS, 0); gl.pixelStorei(gl.PACK_SKIP_ROWS, 0);
+    for (const cap of [gl.BLEND, gl.DEPTH_TEST, gl.CULL_FACE, gl.SCISSOR_TEST, gl.STENCIL_TEST, gl.POLYGON_OFFSET_FILL, gl.SAMPLE_ALPHA_TO_COVERAGE, gl.SAMPLE_COVERAGE, gl.DITHER, gl.RASTERIZER_DISCARD]) gl.disable(cap);
+    gl.colorMask(true, true, true, true);
+  }
   private inputProg: { prog: WebGLProgram; src: WebGLUniformLocation | null; scale: WebGLUniformLocation | null } | null = null;
   private presentProg: { prog: WebGLProgram; src: WebGLUniformLocation | null; rect: WebGLUniformLocation | null; size: WebGLUniformLocation | null; linear: WebGLUniformLocation | null } | null = null;
 
@@ -254,7 +274,8 @@ void main() {
     }
     const k = Math.min(w / W, h / H), rw = Math.round(W * k), rh = Math.round(H * k), rx = Math.floor((w - rw) / 2), ry = Math.floor((h - rh) / 2);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    gl.disable(gl.BLEND); gl.disable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE); gl.disable(gl.SCISSOR_TEST);
+    this.cleanState();
+    gl.bindVertexArray(this.vao);
     gl.viewport(0, 0, w, h);
     gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
     gl.viewport(rx, ry, rw, rh);
@@ -275,6 +296,7 @@ void main() {
     if (this.inputProg) gl.deleteProgram(this.inputProg.prog);
     if (this.presentProg) gl.deleteProgram(this.presentProg.prog);
     gl.deleteShader(this.vs);
+    gl.deleteVertexArray(this.vao);
     this.tex.clear(); this.fbo.clear(); this.passes = [];
   }
 
@@ -292,29 +314,38 @@ void main() {
     const free = new Map<string, string[]>(), keep = new Set([prog.output, prog.display ?? prog.output]);
     let n = 0;
     prog.passes.forEach((p, i) => {
-      const t = prog.textures[p.out], key = t.w + 'x' + t.h;
+      const t = prog.textures[p.out], key = t.w + 'x' + t.h + (t.fmt ?? 'rgba');
       const phys = free.get(key)?.pop() ?? `pool${n++}`;
-      if (!this.tex.has(phys)) this.makeTarget(phys, t.w, t.h);
+      if (!this.tex.has(phys)) this.makeTarget(phys, t.w, t.h, t.fmt);
       this.tex.set(p.out, this.tex.get(phys)!); this.fbo.set(p.out, this.fbo.get(phys)!); this.physOf.set(p.out, phys);
       for (const tid of new Set(Object.values(p.inputs))) {
         if (last.get(tid) === i && this.physOf.has(tid) && !keep.has(tid)) {
-          const tt = prog.textures[tid], k = tt.w + 'x' + tt.h;
+          const tt = prog.textures[tid], k = tt.w + 'x' + tt.h + (tt.fmt ?? 'rgba');
           free.set(k, [...(free.get(k) ?? []), this.physOf.get(tid)!]);
         }
       }
       if (!last.has(p.out) && !keep.has(p.out)) free.set(key, [...(free.get(key) ?? []), phys]);
     });
     this.poolSize = n;
+    const seen = new Set<string>();
+    this.targetBytes = 0;
+    for (const p of prog.passes) {
+      const ph = this.physOf.get(p.out)!;
+      if (!seen.has(ph)) { seen.add(ph); const t = prog.textures[p.out]; this.targetBytes += t.w * t.h * 4 * (t.fmt === 'r' ? 1 : t.fmt === 'rg' ? 2 : 4); }
+    }
   }
+
+  /** Bytes in float targets (with the pool on). */
+  targetBytes = 0;
 
   private physOf = new Map<string, string>();
   /** Float targets in use (with the pool on). */
   poolSize = 0;
 
-  private makeTarget(id: string, w: number, h: number): void {
+  private makeTarget(id: string, w: number, h: number, fmt: BPTexture['fmt'] = 'rgba'): void {
     const gl = this.gl, t = gl.createTexture()!;
     gl.bindTexture(gl.TEXTURE_2D, t);
-    gl.texStorage2D(gl.TEXTURE_2D, 1, gl.RGBA32F, w, h);
+    gl.texStorage2D(gl.TEXTURE_2D, 1, fmt === 'r' ? gl.R32F : fmt === 'rg' ? gl.RG32F : gl.RGBA32F, w, h);
     for (const p of [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER]) gl.texParameteri(gl.TEXTURE_2D, p, gl.NEAREST);
     const fb = gl.createFramebuffer()!;
     gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
@@ -335,8 +366,8 @@ void main() {
    * compositor's scene-linear output. */
   run(input: WebGLTexture, frame: number, overrides?: Record<string, Float32Array>, stage?: { scale: number }): WebGLTexture {
     const gl = this.gl, prog = this.prog;
-    gl.disable(gl.BLEND); gl.disable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE); gl.disable(gl.SCISSOR_TEST);
-    gl.bindVertexArray(null);
+    this.cleanState();
+    gl.bindVertexArray(this.vao);
     const dyn = evalDynamic(prog, frame, prog.fps ?? 24);
     const value = (r: BPDynRef | { const: number[] }): Val => {
       if ('const' in r) return r.const.map(f);
@@ -381,7 +412,9 @@ void main() {
       if (ov) {   // tests: keep the pass's own result, then replace it with reference values (bottom row first, RGBA)
         this.captured.set(p.out, this.read(p.out));
         gl.bindTexture(gl.TEXTURE_2D, this.tex.get(p.out)!);
-        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, p.w, p.h, gl.RGBA, gl.FLOAT, ov);
+        const fmt = prog.textures[p.out].fmt ?? 'rgba', k = fmt === 'r' ? 1 : fmt === 'rg' ? 2 : 4;
+        const data = k === 4 ? ov : ov.filter((_, i) => i % 4 < k);
+        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, p.w, p.h, k === 1 ? gl.RED : k === 2 ? gl.RG : gl.RGBA, gl.FLOAT, data);
       }
     }
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);

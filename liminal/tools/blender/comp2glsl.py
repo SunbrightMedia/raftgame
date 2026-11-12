@@ -776,6 +776,8 @@ def _pixel_pass(self, dom, root_fn, label, extra=None):
     ctx = Ctx(self, dom)
     e, ty = root_fn(ctx)
     tid = self.new_tex(dom, label)
+    # storage: one or two channels for single values and pairs (texelFetch reads them back as pack() wrote them)
+    self.textures[tid]['fmt'] = {'float': 'r', 'int': 'r', 'bool': 'r', 'float2': 'rg', 'int2': 'rg'}.get(ty, 'rgba')
     self.add_pass(ctx, pack(e, ty), tid, label)
     return tid
 
