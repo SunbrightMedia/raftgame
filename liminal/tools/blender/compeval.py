@@ -706,6 +706,18 @@ def node_mix(ev, nid, n):
             lo = a3 * (facm + ((F(2) * tt).astype(F) * b3).astype(F)).astype(F)
             hi = F(1) - ((facm + ((F(2) * tt).astype(F) * (F(1) - b3)).astype(F)).astype(F) * (F(1) - a3)).astype(F)
             r[..., :3] = np.where(a3 < F(0.5), lo, hi)
+        elif bt == 'SUBTRACT':
+            r[..., :3] = A[..., :3] - (tt * B[..., :3]).astype(F)
+        elif bt == 'MULTIPLY':
+            r[..., :3] = A[..., :3] * (facm + (tt * B[..., :3]).astype(F)).astype(F)
+        elif bt == 'SCREEN':
+            r[..., :3] = F(1) - ((facm + (tt * (F(1) - B[..., :3])).astype(F)).astype(F) * (F(1) - A[..., :3])).astype(F)
+        elif bt == 'DIFFERENCE':
+            r[..., :3] = ((facm * A[..., :3]).astype(F) + (tt * np.abs((A[..., :3] - B[..., :3]).astype(F))).astype(F))
+        elif bt == 'DARKEN':
+            r[..., :3] = ((facm * A[..., :3]).astype(F) + (tt * np.minimum(A[..., :3], B[..., :3])).astype(F))
+        elif bt == 'LIGHTEN':
+            r[..., :3] = ((facm * A[..., :3]).astype(F) + (tt * np.maximum(A[..., :3], B[..., :3])).astype(F))
         else:
             raise NotImplementedError('mix blend ' + bt)
         r = np.asarray(r, F)
@@ -1501,3 +1513,296 @@ NODES.update({
     'ShaderNodeTexVoronoi': node_voronoi, 'ShaderNodeTexNoise': node_noise,
     'CompositorNodeFilter': node_filter, 'CompositorNodeBlur': node_blur, 'CompositorNodeDilateErode': node_dilate_erode,
 })
+
+
+# ----------------------------------------------------------------------------------------------- glare
+
+def sample_n(data, cx, cy, mode):
+    """Result.sample_bilinear_zero / _extended at normalized coordinates (cx, cy) of `data`."""
+    H, W = data.shape[:2]
+    return sample(data, (cx * F(W)).astype(F), (cy * F(H)).astype(F), 'bilinear', mode, mode)
+
+
+def glare_highlights(img, threshold, smooth, maxb, quality):
+    H, W = img.shape[:2]
+    q = 1 << quality
+    h, w = -(-H // q), -(-W // q)
+    if quality == 0:
+        c = img.astype(F)
+    elif quality == 1:
+        X, Y = np.meshgrid(np.arange(w, dtype=F), np.arange(h, dtype=F))
+        cx = (((X * F(2)) + F(1)) / F(W)).astype(F); cy = (((Y * F(2)) + F(1)) / F(H)).astype(F)
+        c = sample_n(img, cx, cy, 'extend')
+    else:
+        raise NotImplementedError('low quality glare')
+    hsv = rgb_to_hsv(c[..., :3])
+    # adaptive smooth clamp
+    rd = F(abs(F(threshold - maxb))) if math.isfinite(float(maxb)) else F(np.finfo(F).max)
+    dmin = F(abs(threshold)); dmax = F(abs(maxb))
+    smin = F(min(smooth, min(dmin, rd))); smax = F(min(smooth, min(dmax, rd)))
+
+    def smooth_min(a, b, k):
+        if k == 0:
+            return np.minimum(a, b)
+        hh = (np.maximum((k - np.abs((a - b).astype(F))).astype(F), F(0)) / k).astype(F)
+        return (np.minimum(a, b) - ((((hh * hh).astype(F) * k).astype(F)) * F(0.25)).astype(F)).astype(F)
+    v = hsv[..., 2]
+    smx = -smooth_min(np.full_like(v, -threshold), -v, smin)
+    cl = smooth_min(np.full_like(v, maxb), smx.astype(F), smax)
+    hsv[..., 2] = (cl - F(threshold)).astype(F)
+    rgb = hsv_to_rgb(hsv)
+    return np.concatenate([rgb, np.ones(rgb.shape[:-1] + (1,), F)], -1).astype(F)
+
+
+def glare_streaks(hl, streaks, angle0, iterations, fade, cmod):
+    H, W = hl.shape[:2]
+    acc = np.zeros_like(hl)
+    att = F(F(1) / F(5 + 1 - iterations))
+    X, Y = np.meshgrid(np.arange(W, dtype=F), np.arange(H, dtype=F))
+    cx = ((X + F(0.5)) / F(W)).astype(F); cy = ((Y + F(0.5)) / F(H)).astype(F)
+    for si in range(streaks):
+        ang = F(float(angle0) + float(F(F(si) / F(streaks))) * (math.pi * float(F(2))))
+        d = (F(math.cos(float(ang))), F(math.sin(float(ang))))
+        inp = hl.copy()
+        for it in range(iterations):
+            cm = F(1.0 - float(cmod) ** (it + 1))
+            mag = F(4.0 ** it)
+            f1 = F(float(fade) ** float(mag))
+            ff = (f1, F(float(f1) ** 2.0), F(float(f1) ** 3.0))
+            sv = (F(d[0] * mag), F(d[1] * mag))
+            vx, vy = F(sv[0] / F(W)), F(sv[1] / F(H))
+            n0 = sample_n(inp, (cx + vx).astype(F), (cy + vy).astype(F), 'clip') * np.array([1, cm, cm, 1], F)
+            n1 = sample_n(inp, (cx + F(vx * F(2))).astype(F), (cy + F(vy * F(2))).astype(F), 'clip') * np.array([cm, cm, 1, 1], F)
+            n2 = sample_n(inp, (cx + F(vx * F(3))).astype(F), (cy + F(vy * F(3))).astype(F), 'clip') * np.array([cm, 1, cm, 1], F)
+            ws = ((ff[0] * n0.astype(F)).astype(F) + (ff[1] * n1.astype(F)).astype(F)).astype(F)
+            ws = (ws + (ff[2] * n2.astype(F)).astype(F)).astype(F)
+            centre = sample_n(inp, cx, cy, 'clip')
+            inp = ((centre + ws).astype(F) / F(2)).astype(F)
+        acc = (acc + (inp * att).astype(F)).astype(F)
+        acc[..., 3] = F(1)
+    return acc
+
+
+def glare_bloom(hl, size):
+    h, w = hl.shape[:2]
+    n = int(math.log2(max(1.0, float(F(F(min(h, w)) * size)))))
+    if n < 2:
+        return hl.copy(), max(1, n)
+    chain = [hl.astype(F)]
+    for i in range(n - 1):
+        src = chain[-1]; sh, sw = src.shape[:2]; oh, ow = sh // 2, sw // 2
+        X, Y = np.meshgrid(np.arange(ow, dtype=F), np.arange(oh, dtype=F))
+        cx = ((X + F(0.5)) / F(ow)).astype(F); cy = ((Y + F(0.5)) / F(oh)).astype(F)
+        px, py = F(F(1) / F(sw)), F(F(1) / F(sh))
+
+        def S(dx, dy):
+            return sample_n(src, (cx + F(px * F(dx))).astype(F), (cy + F(py * F(dy))).astype(F), 'extend')
+        c = S(0, 0); uln, urn, lln, lrn = S(-1, 1), S(1, 1), S(-1, -1), S(1, -1)
+        lf, rf, uf, lof = S(-2, 0), S(2, 0), S(0, 2), S(0, -2)
+        ulf, urf, llf, lrf = S(-2, 2), S(2, 2), S(-2, -2), S(2, -2)
+        if i == 0:
+            def kw(c1, c2, c3, c4):
+                b = [np.max(x[..., :3], -1) for x in (c1, c2, c3, c4)]
+                wts = [(F(1) / (bb + F(1)).astype(F)).astype(F) for bb in b]
+                s_ = ((((c1 * wts[0][..., None]).astype(F) + (c2 * wts[1][..., None]).astype(F)).astype(F)
+                       + (c3 * wts[2][..., None]).astype(F)).astype(F) + (c4 * wts[3][..., None]).astype(F)).astype(F)
+                tot = (((wts[0] + wts[1]).astype(F) + wts[2]).astype(F) + wts[3]).astype(F)
+                rc = np.where(tot != 0, (F(1) / np.where(tot != 0, tot, F(1))).astype(F), F(0))
+                return (s_ * rc[..., None]).astype(F)
+            cw = kw(uln, urn, lrn, lln)
+            a1 = kw(ulf, uf, c, lf); a2 = kw(uf, urf, rf, c); a3 = kw(c, rf, lrf, lof); a4 = kw(lf, c, lof, llf)
+            out = ((F(4.0 / 8.0) * cw).astype(F) + (F(1.0 / 8.0) * (((a1 + a2).astype(F) + a4).astype(F) + a3).astype(F)).astype(F)).astype(F)
+        else:
+            near = (((uln + urn).astype(F) + lln).astype(F) + lrn).astype(F)
+            far = (((lf + rf).astype(F) + uf).astype(F) + lof).astype(F)
+            corner = (((ulf + urf).astype(F) + llf).astype(F) + lrf).astype(F)
+            out = ((((F(4.0 / 32.0) * c).astype(F) + (F(4.0 / 32.0) * near).astype(F)).astype(F)
+                    + (F(2.0 / 32.0) * far).astype(F)).astype(F) + (F(1.0 / 32.0) * corner).astype(F)).astype(F)
+        chain.append(out)
+    for i in range(n - 1):
+        src = chain[n - 1 - i]; dst = chain[n - 2 - i]
+        oh, ow = dst.shape[:2]
+        X, Y = np.meshgrid(np.arange(ow, dtype=F), np.arange(oh, dtype=F))
+        cx = ((X + F(0.5)) / F(ow)).astype(F); cy = ((Y + F(0.5)) / F(oh)).astype(F)
+        px, py = F(F(1) / F(ow)), F(F(1) / F(oh))
+
+        def S(dx, dy):
+            return sample_n(src, (cx + F(px * F(dx))).astype(F), (cy + F(py * F(dy))).astype(F), 'extend')
+        up = np.zeros_like(dst)
+        for wt, (dx, dy) in ((4, (0, 0)), (2, (-1, 0)), (2, (0, 1)), (2, (1, 0)), (2, (0, -1)),
+                             (1, (-1, -1)), (1, (-1, 1)), (1, (1, -1)), (1, (1, 1))):
+            up = (up + (F(wt / 16.0) * S(dx, dy)).astype(F)).astype(F)
+        comb = (dst + up).astype(F); comb[..., 3] = F(1)
+        chain[n - 2 - i] = comb
+    return chain[0], max(1, n)
+
+
+def node_glare(ev, nid, n):
+    I, dom = node_op_inputs(ev, nid, n, ('Image',))
+    img = I['Image']
+    if img.single:
+        return {'Image': img}
+    g = lambda k: I[k]
+
+    def val(k, t='float'):
+        return convert(g(k), t).data[0]
+    typ = menu_value(ev, nid, 'Type'); quality = {'High': 0, 'Medium': 1, 'Low': 2}[menu_value(ev, nid, 'Quality')]
+    thr = F(max(F(0), val('Highlights Threshold'))); smooth = F(max(F(0), val('Highlights Smoothness')))
+    clamp = bool(convert(g('Clamp Highlights'), 'bool').data[0])
+    maxb = F(thr + F(max(F(0), val('Maximum Highlights')))) if clamp else np.finfo(F).max
+    strength = F(max(F(0), val('Strength'))); sat = F(max(F(0), val('Saturation')))
+    tint = convert(g('Tint'), 'color').data[:3].astype(F)
+    d = img.data.astype(F)
+    hl = glare_highlights(d, thr, smooth, maxb, quality)
+    if typ == 'Streaks':
+        glr = glare_streaks(hl, int(np.clip(int(convert(g('Streaks'), 'int').data[0]), 1, 16)), F(val('Streaks Angle')),
+                            int(np.clip(int(convert(g('Iterations'), 'int').data[0]), 2, 5)),
+                            F(np.clip(val('Fade'), F(0.75), F(1))), F(np.clip(val('Color Modulation'), F(0), F(1))))
+        norm = 1
+    elif typ == 'Bloom':
+        glr, norm = glare_bloom(hl, F(np.clip(val('Size'), F(0), F(1))))
+    else:
+        raise NotImplementedError('glare ' + str(typ))
+    ct = ((tint * strength).astype(F) / F(norm)).astype(F)
+    H, W = d.shape[:2]
+    X, Y = np.meshgrid(np.arange(W, dtype=F), np.arange(H, dtype=F))
+    cx = ((X + F(0.5)) / F(W)).astype(F); cy = ((Y + F(0.5)) / F(H)).astype(F)
+    gc = sample_n(glr, cx, cy, 'extend')
+    hsv = rgb_to_hsv(gc[..., :3]); hsv[..., 1] = np.clip((hsv[..., 1] * sat).astype(F), F(0), F(1))
+    grgb = hsv_to_rgb(hsv)
+    inc = np.maximum(F(0), d)
+    out = inc.copy(); out[..., :3] = (inc[..., :3] + (grgb * ct).astype(F)).astype(F)
+    return {'Image': Res('color', out.astype(F), img.domain.copy())}
+
+
+# ----------------------------------------------------------------------------------------------- colour
+
+def node_bright_contrast(ev, nid, n):
+    I, dom = pixel_inputs(ev, nid, n)
+    c = I['Image'].data.astype(F)
+    b = ch(I['Bright']).astype(F); k = ch(I['Contrast']).astype(F)
+    sb = (b / F(100)).astype(F); delta = (k / F(200)).astype(F)
+    m_pos = (F(1) / np.maximum((F(1) - (delta * F(2)).astype(F)).astype(F), np.finfo(F).eps)).astype(F)
+    o_pos = (m_pos * (sb - delta).astype(F)).astype(F)
+    dn = (delta * F(-1)).astype(F)
+    m_neg = np.maximum((F(1) - (dn * F(2)).astype(F)).astype(F), F(0))
+    o_neg = ((m_neg * sb).astype(F) + dn).astype(F)
+    mul = np.where(k > 0, m_pos, m_neg); off = np.where(k > 0, o_pos, o_neg)
+    mm = mul[..., None] if dom is not None else mul; oo = off[..., None] if dom is not None else off
+    out = c.copy(); out[..., :3] = ((c[..., :3] * mm).astype(F) + oo).astype(F)
+    return {'Image': mkres('color', out, dom)}
+
+
+def node_hue_sat(ev, nid, n):
+    I, dom = pixel_inputs(ev, nid, n)
+    c = I['Image'].data.astype(F)
+    hue, sat, val, fac = (ch(I[k]).astype(F) for k in ('Hue', 'Saturation', 'Value', 'Fac'))
+    hsv = rgb_to_hsv(c[..., :3])
+    h = ((hsv[..., 0] + hue).astype(F) + F(0.5)).astype(F)
+    h = (h - np.floor(h)).astype(F)
+    s = (hsv[..., 1] * sat).astype(F); v = (hsv[..., 2] * val).astype(F)
+    rgb = np.maximum(hsv_to_rgb(np.stack([h, s, v], -1)), F(0))
+    ff = fac[..., None] if dom is not None else fac
+    out = c.copy(); out[..., :3] = ((c[..., :3] * (F(1) - ff)).astype(F) + (rgb * ff).astype(F)).astype(F)
+    return {'Image': mkres('color', out, dom)}
+
+
+def lut3d_log(L, x, lo, hi):
+    """Trilinear lookup in a table sampled on a log2 grid from lo to hi (L[b][g][r][3])."""
+    N = L.shape[0]
+    t = (np.log2(np.maximum(x.astype(np.float64), 2.0 ** lo)) - lo) / (hi - lo) * (N - 1)
+    t = np.clip(t, 0, N - 1)
+    i0 = np.minimum(np.floor(t).astype(np.int64), N - 2); f_ = t - i0
+    r, gch, b = i0[..., 0], i0[..., 1], i0[..., 2]; fr, fg, fb = f_[..., 0:1], f_[..., 1:2], f_[..., 2:3]
+    def at(db, dg, dr): return L[b + db, gch + dg, r + dr]
+    c00 = at(0, 0, 0) * (1 - fr) + at(0, 0, 1) * fr; c01 = at(0, 1, 0) * (1 - fr) + at(0, 1, 1) * fr
+    c10 = at(1, 0, 0) * (1 - fr) + at(1, 0, 1) * fr; c11 = at(1, 1, 0) * (1 - fr) + at(1, 1, 1) * fr
+    c0 = c00 * (1 - fg) + c01 * fg; c1 = c10 * (1 - fg) + c11 * fg
+    return (c0 * (1 - fb) + c1 * fb).astype(F)
+
+
+FILMIC_LO, FILMIC_HI, FILMIC_INV_HI = -12.473931188, 12.526068812, 4.026068812
+
+
+def lut3d_tetra_log(L, x, lo, hi):
+    """OCIO-style tetrahedral lookup in a table sampled on a log2 grid from lo to hi (L[b][g][r][3]). Our table
+    is measured from Blender on a grid twice as fine as the config's cube, so its tetrahedra nest inside the
+    cube's and the lookup reproduces the config's own interpolation."""
+    N = L.shape[0]
+    t = ((np.log2(np.maximum(x.astype(np.float64), 2.0 ** -126)) - lo) / (hi - lo)).astype(F)
+    t = np.clip((t * F(N - 1)).astype(F), F(0), F(N - 1))
+    i0 = np.minimum(np.floor(t).astype(np.int64), N - 2)
+    fx, fy, fz = [(t[..., k] - i0[..., k].astype(F)).astype(F)[..., None] for k in range(3)]
+    r, g, b = i0[..., 0], i0[..., 1], i0[..., 2]
+
+    def c(dr, dg, db):
+        return L[b + db, g + dg, r + dr].astype(F)
+    c000, c111 = c(0, 0, 0), c(1, 1, 1)
+    out = np.empty(x.shape, F)
+    cases = [
+        ((fx > fy) & (fy > fz), lambda: (F(1) - fx) * c000 + (fx - fy) * c(1, 0, 0) + (fy - fz) * c(1, 1, 0) + fz * c111),
+        ((fx > fy) & ~(fy > fz) & (fx > fz), lambda: (F(1) - fx) * c000 + (fx - fz) * c(1, 0, 0) + (fz - fy) * c(1, 0, 1) + fy * c111),
+        ((fx > fy) & ~(fy > fz) & ~(fx > fz), lambda: (F(1) - fz) * c000 + (fz - fx) * c(0, 0, 1) + (fx - fy) * c(1, 0, 1) + fy * c111),
+        (~(fx > fy) & (fz > fy), lambda: (F(1) - fz) * c000 + (fz - fy) * c(0, 0, 1) + (fy - fx) * c(0, 1, 1) + fx * c111),
+        (~(fx > fy) & ~(fz > fy) & (fz > fx), lambda: (F(1) - fy) * c000 + (fy - fz) * c(0, 1, 0) + (fz - fx) * c(0, 1, 1) + fx * c111),
+        (~(fx > fy) & ~(fz > fy) & ~(fz > fx), lambda: (F(1) - fy) * c000 + (fy - fx) * c(0, 1, 0) + (fx - fz) * c(1, 1, 0) + fz * c111),
+    ]
+    for m, fn in cases:
+        v = fn().astype(F)
+        mm = m[..., 0]
+        out[mm] = v[mm]
+    return out
+
+
+_OCIO = None
+
+
+def ocio():
+    """Blender's own OpenColorIO (bundled with the bpy module) and its config, when this runs under bpy's Python:
+    the conversions are then Blender's, bit for bit. None otherwise (tables measured from Blender are used)."""
+    global _OCIO
+    if _OCIO is None:
+        _OCIO = False
+        import glob
+        for root in glob.glob(sys.prefix + '/lib/python3*/site-packages/bpy/*/'):
+            sp = glob.glob(root + 'python/lib/python3*/site-packages')
+            cfgp = glob.glob(root + 'datafiles/colormanagement/config.ocio')
+            if sp and cfgp:
+                sys.path.insert(0, sp[0])
+                try:
+                    import PyOpenColorIO as O
+                    _OCIO = (O, O.Config.CreateFromFile(cfgp[0]))
+                except Exception:
+                    _OCIO = False
+                break
+    return _OCIO or None
+
+
+def node_convert_colorspace(ev, nid, n):
+    P = n['props']
+    I, dom = node_op_inputs(ev, nid, n, ('Image',))
+    img = I['Image']
+    if img.single:
+        return {'Image': img}
+    fr, to = P.get('from_color_space'), P.get('to_color_space')
+    d = img.data.astype(F)
+    out = d.copy()
+    oc = ocio()
+    if oc is not None and fr != to:
+        O, cfg = oc
+        x = np.ascontiguousarray(d.copy())
+        cfg.getProcessor(fr, to).getDefaultCPUProcessor().applyRGBA(x)
+        return {'Image': Res('color', x.astype(F), img.domain.copy())}
+    if (fr, to) == ('Linear Rec.709', 'Filmic Log'):
+        out[..., :3] = lut3d_tetra_log(ev.luts['filmiclog'], d[..., :3], FILMIC_LO, FILMIC_HI)
+    elif (fr, to) == ('Filmic Log', 'Linear Rec.709'):
+        out[..., :3] = (2.0 ** (d[..., :3].astype(np.float64) * (FILMIC_INV_HI - FILMIC_LO) + FILMIC_LO)).astype(F)
+    elif fr == to:
+        pass
+    else:
+        raise NotImplementedError(f'colour space {fr} -> {to}')
+    return {'Image': Res('color', out, img.domain.copy())}
+
+
+NODES.update({'CompositorNodeGlare': node_glare, 'CompositorNodeBrightContrast': node_bright_contrast,
+              'CompositorNodeHueSat': node_hue_sat, 'CompositorNodeConvertColorSpace': node_convert_colorspace})
