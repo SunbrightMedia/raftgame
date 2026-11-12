@@ -116,7 +116,7 @@ async function boot(): Promise<void> {
     if (f) void loadDropped(f);
   });
 
-  game.onFrame = (dt) => hud.update(dt, config.values, game.player, game.input.locked, panel.open, game.renderer.renderSize, config.values.sim.tickRate, game.renderer.stats);
+  game.onFrame = (dt) => hud.update(dt, config.values, game.player, game.input.locked, panel.open, game.renderer.renderSize, config.values.sim.tickRate, game.renderer.stats, game.renderer.blenderNote());
   game.start();
   requestAnimationFrame(() => requestAnimationFrame(() => mark('first frames drawn')));
 

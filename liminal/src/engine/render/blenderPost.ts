@@ -150,6 +150,7 @@ function evalDynamic(prog: BPProgram, frame: number, fps: number): Map<string, R
 const VERT = `#version 300 es
 void main() { vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2)); gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0); }`;
 
+interface Compiling { i: number; pr: WebGLProgram; fs: WebGLShader }
 interface GPass { prog: WebGLProgram; out: string; w: number; h: number; samplers: [WebGLUniformLocation, string][]; uniforms: [WebGLUniformLocation, BPDynRef][] }
 
 export class BlenderPost {
@@ -192,24 +193,69 @@ export class BlenderPost {
       for (const p of [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER]) gl.texParameteri(gl.TEXTURE_3D, p, gl.NEAREST);
       this.tex.set(name, t);
     }
-    const vs = this.shader(gl.VERTEX_SHADER, VERT);
-    for (const p of prog.passes) {
-      const fs = this.shader(gl.FRAGMENT_SHADER, p.frag, p.label);
-      const pr = gl.createProgram()!;
-      gl.attachShader(pr, vs); gl.attachShader(pr, fs); gl.linkProgram(pr);
-      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(p.label + ': ' + gl.getProgramInfoLog(pr));
-      const samplers: [WebGLUniformLocation, string][] = [];
-      for (const [u, tid] of Object.entries(p.inputs)) { const loc = gl.getUniformLocation(pr, u); if (loc) samplers.push([loc, tid]); }
-      const uniforms: [WebGLUniformLocation, BPDynRef][] = [];
-      for (const [u, ref] of Object.entries(p.uniforms)) { const loc = gl.getUniformLocation(pr, u); if (loc) uniforms.push([loc, ref]); }
-      const t = prog.textures[p.out];
-      this.passes.push({ prog: pr, out: p.out, w: t.w, h: t.h, samplers, uniforms });
-    }
-    this.vs = vs;
+    this.vs = this.shader(gl.VERTEX_SHADER, VERT);
+    // The pass programs are compiled by prepare(), a few per frame (see there); run() compiles what is left.
+    this.par = gl.getExtension('KHR_parallel_shader_compile') as { COMPLETION_STATUS_KHR: number } | null;
+    this.todo = prog.passes.map((_, i) => i);
   }
 
   private vs: WebGLShader;
   private vao: WebGLVertexArrayObject;
+  private par: { COMPLETION_STATUS_KHR: number } | null;
+  /** Passes not started yet, and started ones the driver is still compiling. */
+  private todo: number[] = [];
+  private compiling: Compiling[] = [];
+  private done = 0;
+
+  /** All pass programs compiled and linked. */
+  get ready(): boolean { return this.todo.length === 0 && this.compiling.length === 0; }
+  /** [compiled, all] pass programs. */
+  get progress(): [number, number] { return [this.done, this.prog.passes.length]; }
+
+  /**
+   * One frame's share of the compile: starts up to `start` more programs and collects the ones that are done.
+   * True once all are ready. A browser shares one GPU process between all its tabs, so a long compile in one
+   * go stalls every tab: with KHR_parallel_shader_compile the driver compiles in the background and this never
+   * waits; without it, this waits for one program per call. Throws on a compile error.
+   */
+  prepare(start = this.par ? 4 : 1): boolean {
+    const gl = this.gl;
+    for (let k = 0; k < start && this.todo.length; k++) {
+      const i = this.todo.shift()!, fs = gl.createShader(gl.FRAGMENT_SHADER)!, pr = gl.createProgram()!;
+      gl.shaderSource(fs, this.prog.passes[i].frag); gl.compileShader(fs);
+      gl.attachShader(pr, this.vs); gl.attachShader(pr, fs); gl.linkProgram(pr);
+      this.compiling.push({ i, pr, fs });
+    }
+    const still: Compiling[] = [];
+    for (const c of this.compiling) {
+      if (this.par && !gl.getProgramParameter(c.pr, this.par.COMPLETION_STATUS_KHR)) still.push(c);
+      else this.finish(c);
+    }
+    this.compiling = still;
+    return this.ready;
+  }
+
+  /** Compile everything left, waiting for it (tools and tests call run() straight away). */
+  finishSync(): void {
+    this.prepare(this.todo.length);
+    for (const c of this.compiling) this.finish(c);
+    this.compiling = [];
+  }
+
+  private finish(c: Compiling): void {
+    const gl = this.gl, p = this.prog.passes[c.i], pr = c.pr;
+    if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) {
+      throw new Error(p.label + ': ' + (gl.getShaderParameter(c.fs, gl.COMPILE_STATUS) ? gl.getProgramInfoLog(pr) : gl.getShaderInfoLog(c.fs)));
+    }
+    gl.detachShader(pr, c.fs); gl.deleteShader(c.fs);
+    const samplers: [WebGLUniformLocation, string][] = [];
+    for (const [u, tid] of Object.entries(p.inputs)) { const loc = gl.getUniformLocation(pr, u); if (loc) samplers.push([loc, tid]); }
+    const uniforms: [WebGLUniformLocation, BPDynRef][] = [];
+    for (const [u, ref] of Object.entries(p.uniforms)) { const loc = gl.getUniformLocation(pr, u); if (loc) uniforms.push([loc, ref]); }
+    const t = this.prog.textures[p.out];
+    this.passes[c.i] = { prog: pr, out: p.out, w: t.w, h: t.h, samplers, uniforms };
+    this.done++;
+  }
 
   /**
    * GL state that a shared context (three.js) may leave behind and that would change results: pixel unpacking
@@ -292,7 +338,9 @@ void main() {
     const gl = this.gl;
     for (const t of new Set([...this.tex].filter(([id]) => id !== 'input').map(([, t]) => t))) gl.deleteTexture(t);   // 'input' may be the caller's
     for (const fb of new Set(this.fbo.values())) gl.deleteFramebuffer(fb);
-    for (const p of this.passes) gl.deleteProgram(p.prog);
+    for (const p of this.passes) if (p) gl.deleteProgram(p.prog);
+    for (const c of this.compiling) { gl.deleteProgram(c.pr); gl.deleteShader(c.fs); }
+    this.compiling = []; this.todo = [];
     if (this.inputProg) gl.deleteProgram(this.inputProg.prog);
     if (this.presentProg) gl.deleteProgram(this.presentProg.prog);
     gl.deleteShader(this.vs);
@@ -366,6 +414,7 @@ void main() {
    * compositor's scene-linear output. */
   run(input: WebGLTexture, frame: number, overrides?: Record<string, Float32Array>, stage?: { scale: number }): WebGLTexture {
     const gl = this.gl, prog = this.prog;
+    if (!this.ready) this.finishSync();
     this.cleanState();
     gl.bindVertexArray(this.vao);
     const dyn = evalDynamic(prog, frame, prog.fps ?? 24);

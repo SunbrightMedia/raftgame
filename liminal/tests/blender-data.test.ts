@@ -7,8 +7,45 @@ import { ditherNoise, type BPProgram } from '../src/engine/render/blenderPost';
 
 const DIR = path.resolve(__dirname, '../data/blender');
 
+/** Code size of main() once every call is inlined (what D3D's shader compiler, behind Chrome on Windows, does). */
+function inlinedSize(src: string): number {
+  const body = new Map<string, string>();
+  for (const m of src.matchAll(/^[A-Za-z_]\w*\s+([A-Za-z_]\w*)\s*\([^;{]*\)\s*\{/gm)) {
+    let d = 1, i = m.index! + m[0].length;
+    const start = i;
+    while (d) { d += src[i] === '{' ? 1 : src[i] === '}' ? -1 : 0; i++; }
+    body.set(m[1], (body.get(m[1]) ?? '') + src.slice(start, i));
+  }
+  const memo = new Map<string, number>();
+  const size = (f: string, stack: string[]): number => {
+    if (memo.has(f)) return memo.get(f)!;
+    const b = body.get(f)!;
+    let n = b.replace(/\s+/g, ' ').length;
+    for (const [, c] of b.matchAll(/([A-Za-z_]\w*)\s*\(/g)) if (body.has(c) && c !== f && !stack.includes(c)) n += size(c, [...stack, f]);
+    memo.set(f, n);
+    return n;
+  };
+  return size('main', []);
+}
+
 describe('blender post data', () => {
   const prog = JSON.parse(fs.readFileSync(path.join(DIR, 'blenderPost.json'), 'utf8')) as BPProgram;
+  const fast = JSON.parse(fs.readFileSync(path.join(DIR, 'blenderPost.fast.json'), 'utf8')) as BPProgram;
+
+  it('the fast program is the exact one on lighter maths: same passes, textures, tables', () => {
+    expect(fast.passes.map((p) => [p.label, p.out, p.inputs])).toEqual(prog.passes.map((p) => [p.label, p.out, p.inputs]));
+    expect(fast.textures).toEqual(prog.textures);
+    expect(fast.data).toEqual(prog.data);
+    expect([fast.display, fast.output, fast.size]).toEqual([prog.display, prog.output, prog.size]);
+    // the published page plays the fast one
+    expect(JSON.parse(fs.readFileSync(path.join(DIR, 'files.json'), 'utf8'))[0]).toBe('blenderPost.fast.json');
+  });
+
+  it('the fast program stays small once inlined (the exact one froze Chrome on Windows while compiling)', () => {
+    const sizes = fast.passes.map((p) => inlinedSize(p.frag));
+    expect(sizes.reduce((a, b) => a + b, 0)).toBeLessThan(3 * 1024 * 1024);
+    expect(Math.max(...sizes)).toBeLessThan(256 * 1024);
+  });
 
   it('every table is complete, in parts under 15 MB', () => {
     expect(Object.keys(prog.data).length).toBeGreaterThan(0);

@@ -75,6 +75,11 @@ it *feels* right; that's the user's call.
     `tools/world/publish-prep.sh x <dir>`, publish to
     https://claude.ai/artifact/39h7z8LBGcPg3DgeNXLd2c (send new files, null
     the old hashed ones), and tell the user to keep that link private.
+- **Blender camera model** (`engine/render/blenderPost.ts`, data in `data/blender/`): the game plays
+  `blenderPost.fast.json` (`comp2glsl.py --fast`); the exact build `blenderPost.json` is for checks only.
+  Its shaders are 81 MB once inlined and froze every Chrome tab on the user's Windows PC. Programs compile a
+  few per frame (`BlenderPost.prepare`); a localStorage guard stops a start that froze from repeating on
+  reload. Keep any new GPU program small, and never compile many in one frame.
 - **The old maps are in `junk/`** (kept, not used). Work follows
   `docs/PIPELINE.md`; the game boots into `maps/blank.json` meanwhile.
 - **Backrooms Planner** (2D map tool, `src/planner/`, page `planner.html`;

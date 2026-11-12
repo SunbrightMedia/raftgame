@@ -5,6 +5,14 @@ import { CamcorderPost, type CamcorderMotion, type CamcorderParams } from './cam
 import { BlenderPost } from './blenderPost';
 import { haveBlenderData, loadBlenderData } from './blenderData';
 
+/** The Blender camera's start, remembered across page loads ('starting' until it has run smoothly; 'lost' after
+ * a context loss), so that a start that froze or crashed the browser is not repeated by itself on the next load. */
+const blenderGuard = {
+  key: 'liminal:blender-guard',
+  get(): string | null { try { return localStorage.getItem(this.key); } catch { return null; } },
+  set(v: string | null): void { try { if (v === null) localStorage.removeItem(this.key); else localStorage.setItem(this.key, v); } catch { /* storage blocked */ } },
+};
+
 THREE.ColorManagement.enabled = false;
 THREE.Object3D.DEFAULT_UP.set(0, 0, 1);
 
@@ -36,16 +44,21 @@ export class LowResRenderer {
   camcorder: CamcorderParams | null = null;
   private camcorderPost = new CamcorderPost();
   /**
-   * Blender's post-processing (blenderPost.ts): the ShuttleworthL project's compositor and AgX view, bit for bit
-   * as Blender computes them, on a picture of the project's size (854 x 480). Wins over the others. The data
-   * loads the first time it is wanted; until then the plain picture shows.
+   * Blender's post-processing (blenderPost.ts): the ShuttleworthL project's compositor and AgX view, on a
+   * picture of the project's size (854 x 480), with the light program (blenderData.ts). Wins over the others.
+   * The data loads and its shaders compile, a few per frame, the first time it is wanted; until then the plain
+   * picture shows.
    */
   blender: { exposure: number; frameRate: number; startFrame: number } | null = null;
   private blenderPost: BlenderPost | null = null;
   private blenderSize: [number, number] = [854, 480];
   private blenderTime = 0;
-  /** For the HUD and tests: loading / ready / failed, the error, the compositor frame last run. */
-  readonly blenderStats = { state: 'idle' as 'idle' | 'loading' | 'ready' | 'failed', error: '', frame: 0 };
+  /** Wall-clock times of the last few Blender frames (the slow-frame guard). */
+  private blenderTimes: number[] = [];
+  /** Three Blender frames in a row slower than this (ms) turn it off. (Headless checks on a software GPU raise it.) */
+  blenderSlowMs = 1000;
+  /** For the HUD and tests: loading / compiling / ready / failed, the error, the compositor frame last run. */
+  readonly blenderStats = { state: 'idle' as 'idle' | 'loading' | 'compiling' | 'ready' | 'failed', error: '', frame: 0, compiled: [0, 0] as [number, number] };
   /** Source light → radiance (see worldUniforms.sourceUnit). */
   sourceUnit = 300 / Math.PI;
   private lastFrame = performance.now();
@@ -133,6 +146,16 @@ export class LowResRenderer {
     this.gl = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance', premultipliedAlpha: false });
     this.gl.outputColorSpace = THREE.LinearSRGBColorSpace;
     this.gl.setPixelRatio(1);
+    // A lost context (the driver reset, or Chrome restarted its GPU process) takes the Blender camera's GL
+    // objects with it: drop it, and do not start it again by itself.
+    canvas.addEventListener('webglcontextlost', () => {
+      const st = this.blenderStats;
+      if (!this.blenderPost && st.state !== 'loading') return;
+      this.blenderPost = null;
+      st.state = 'failed';
+      st.error = 'the graphics driver was reset while it ran';
+      blenderGuard.set('lost');
+    });
     try {
       // The graphics card in use, for the HUD (a slow frame rate means one thing on a laptop's built-in chip and another on a software renderer).
       const c = this.gl.getContext(), ext = c.getExtension('WEBGL_debug_renderer_info');
@@ -311,6 +334,7 @@ export class LowResRenderer {
     const now = performance.now(), dt = Math.min(0.25, (now - this.lastFrame) / 1000);
     this.lastFrame = now;
     if (this.blender && this.runBlender(frame, dt)) return;
+    if (!this.blender) this.blenderOff();
     if (this.camcorder) {
       const hfov = 2 * Math.atan(Math.tan((this.camera.fov * Math.PI) / 360) * this.camera.aspect);
       this.camcorderPost.render(this.gl, frame, this.camcorder, hfov, dt, this.shutterMotion(dt));
@@ -336,22 +360,45 @@ export class LowResRenderer {
     this.gl.render(this.blitScene, this.blitCam);
   }
 
-  /** The 'blender' camera: false while its data loads (or if it cannot run), so the caller shows the plain picture. */
+  /** The 'blender' camera: false while its data loads and compiles (or if it cannot run), so the caller shows
+   * the plain picture. */
   private runBlender(frame: THREE.WebGLRenderTarget, dt: number): boolean {
     const b = this.blender!, st = this.blenderStats;
-    if (!this.blenderPost) {
-      if (st.state === 'idle') {
-        if (!haveBlenderData()) { st.state = 'failed'; st.error = 'the Blender data is not in this build'; return false; }
-        st.state = 'loading';
-        loadBlenderData().then(({ prog, luts }) => {
-          this.blenderPost = new BlenderPost(this.gl.getContext() as WebGL2RenderingContext, prog, luts);
-          this.blenderSize = [prog.size[0], prog.size[1]];
-          this.gl.resetState();
-          st.state = 'ready';
-        }).catch((e: unknown) => { st.state = 'failed'; st.error = String(e); this.gl.resetState(); });
+    if (st.state === 'idle') {
+      if (!haveBlenderData()) { st.state = 'failed'; st.error = 'its data is not in this build'; return false; }
+      // the last start never got to run smoothly: the tab froze, crashed or was closed while it compiled
+      const last = blenderGuard.get();
+      if (last === 'starting' || last === 'lost') {
+        blenderGuard.set(null);   // choosing it again (another model, then 'blender') tries again
+        st.state = 'failed';
+        st.error = last === 'lost' ? 'the graphics driver was reset while it ran last time' : 'it did not finish starting last time (the page froze or closed)';
+        return false;
       }
+      blenderGuard.set('starting');
+      st.state = 'loading';
+      loadBlenderData().then(({ prog, luts }) => {
+        if (st.state !== 'loading') return;
+        this.blenderPost = new BlenderPost(this.gl.getContext() as WebGL2RenderingContext, prog, luts);
+        this.blenderSize = [prog.size[0], prog.size[1]];
+        st.compiled = this.blenderPost.progress;
+        st.state = 'compiling';
+        this.gl.resetState();
+      }).catch((e: unknown) => { st.state = 'failed'; st.error = String(e); blenderGuard.set(null); this.gl.resetState(); });
       return false;
     }
+    if (st.state === 'compiling' && this.blenderPost) {
+      try {
+        const done = this.blenderPost.prepare();
+        st.compiled = this.blenderPost.progress;
+        if (done) { st.state = 'ready'; this.blenderTimes = []; }
+      } catch (e: unknown) {
+        st.state = 'failed'; st.error = String(e); blenderGuard.set(null);
+        this.blenderPost.dispose(); this.blenderPost = null;
+      }
+      this.gl.resetState();
+      return false;
+    }
+    if (st.state !== 'ready' || !this.blenderPost) return false;
     const tex = (this.gl.properties.get(frame.texture) as { __webglTexture?: WebGLTexture }).__webglTexture;
     if (!tex || frame.width !== this.blenderSize[0] || frame.height !== this.blenderSize[1]) return false;
     this.blenderTime += dt;
@@ -361,6 +408,37 @@ export class LowResRenderer {
     this.blenderPost.present(c.width, c.height, this.upscale === 'linear');
     this.gl.resetState();
     st.frame = n;
+    // health: 30 frames in under a second each means it runs here (the guard is cleared); three frames in a row
+    // of over a second each means this GPU cannot carry it, so it turns itself off before it stalls the browser
+    const now = performance.now(), times = this.blenderTimes;
+    times.push(now);
+    if (times.length > 31) times.shift();
+    const gaps = times.slice(1).map((t, i) => t - times[i]);
+    if (gaps.length >= 3 && gaps.slice(-3).every((g) => g > this.blenderSlowMs)) {
+      st.state = 'failed';
+      st.error = `too slow on this graphics card (${(gaps[gaps.length - 1] / 1000).toFixed(1)} s a frame)`;
+      blenderGuard.set(null);
+      this.blenderPost.dispose(); this.blenderPost = null;
+    } else if (gaps.length >= 30 && blenderGuard.get() === 'starting') blenderGuard.set(null);
     return true;
+  }
+
+  /** The model is not 'blender' (any more): a failed start may be tried again, and a start the user left
+   * before it finished is not a crash. The compiled program stays for a quick switch back. */
+  private blenderOff(): void {
+    const st = this.blenderStats;
+    if (st.state !== 'failed' && st.state !== 'loading') return;
+    if (st.state === 'loading') blenderGuard.set(null);
+    st.state = 'idle'; st.error = '';
+  }
+
+  /** One line for the HUD while the Blender camera is chosen but not showing ('' otherwise). */
+  blenderNote(): string {
+    if (!this.blender) return '';
+    const st = this.blenderStats;
+    if (st.state === 'loading') return 'Blender camera: loading its data…';
+    if (st.state === 'compiling') return `Blender camera: compiling shaders ${st.compiled[0]} / ${st.compiled[1]}`;
+    if (st.state === 'failed') return `Blender camera is off: ${st.error}. Choose another camera model, then 'blender' again, to retry.`;
+    return '';
   }
 }

@@ -19,7 +19,7 @@ export class Hud {
     this.prompt.innerHTML = 'click to play<br><span>WASD move · Space jump · C crouch · Shift sprint · Alt walk · V noclip · R respawn · ` tweak panel</span>';
   }
 
-  update(dt: number, s: Settings, p: Player, locked: boolean, panelOpen: boolean, renderSize: { x: number; y: number }, tickRate: number, stats?: { calls: number; triangles: number; frameMs: number; aa: number; gpu: string }): void {
+  update(dt: number, s: Settings, p: Player, locked: boolean, panelOpen: boolean, renderSize: { x: number; y: number }, tickRate: number, stats?: { calls: number; triangles: number; frameMs: number; aa: number; gpu: string }, note = ''): void {
     this.fpsAcc += dt; this.fpsFrames++;
     if (this.fpsAcc >= 0.5) { this.fps = this.fpsFrames / this.fpsAcc; this.fpsAcc = 0; this.fpsFrames = 0; }
 
@@ -48,6 +48,7 @@ export class Hud {
         `${st.noclip ? 'NOCLIP' : st.onGround ? 'ground' : 'air'}${st.ducked ? ' · ducked' : ''}`,
       );
     }
+    if (note) lines.push(note);   // e.g. the Blender camera compiling, or why it is off
     this.info.textContent = lines.join('\n');
     this.info.style.display = lines.length ? '' : 'none';
   }

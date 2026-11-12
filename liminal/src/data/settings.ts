@@ -152,7 +152,7 @@ export const SETTINGS = {
     label: 'Camera',
     help: 'A 2001–2006 consumer digicam: meters the scene and sets exposure itself, has its own white balance and a short dynamic range. The look comes from this, not from filters (STYLE.md, "The medium").',
     defs: {
-      model: select('Camera model', 'digicam', ['digicam', 'source', 'camcorder', 'blender'] as const, 'digicam = the 2000s point-and-shoot look below. source = Source engine\'s own camera (Portal 2): exposure puts the brightest 2% of the picture at 60%, soft whole-frame bloom, clean clip. Source-lit maps set this. camcorder = the capture-matched camcorder (Camcorder group). blender = the ShuttleworthL Blender project\'s own post-processing and AgX view, run exactly as Blender does (Blender group).'),
+      model: select('Camera model', 'digicam', ['digicam', 'source', 'camcorder', 'blender'] as const, 'digicam = the 2000s point-and-shoot look below. source = Source engine\'s own camera (Portal 2): exposure puts the brightest 2% of the picture at 60%, soft whole-frame bloom, clean clip. Source-lit maps set this. camcorder = the capture-matched camcorder (Camcorder group). blender = the ShuttleworthL Blender project\'s own post-processing and AgX view, as Blender does it (Blender group).'),
       sourceHdr: bool('Source: HDR', true, 'on = Source\'s HDR path: auto exposure, bloom, sRGB. off = its non-HDR path (maps compiled without HDR): fixed brightness, no bloom, colour maths in plain 2.2 gamma.'),
       sourceExposureMin: num('Source: exposure min', 0.5, 0.05, 4, 0.01, 'Lowest tonemap scale auto exposure may use (env_tonemap_controller; 0.5 by default).'),
       sourceExposureMax: num('Source: exposure max', 2, 0.1, 8, 0.01, 'Highest tonemap scale (2 by default).'),
@@ -253,7 +253,7 @@ export const SETTINGS = {
   },
   blender: {
     label: 'Blender',
-    help: 'Camera model "blender": the ShuttleworthL project\'s compositor (glare, film grain, sensor noise, lens) and its AgX view with white balance, compiled from the project (tools/blender/comp2glsl.py) to match Blender bit for bit. The picture is the project\'s 854 x 480, scaled to the window with bars.',
+    help: 'Camera model "blender": the ShuttleworthL project\'s compositor (glare, film grain, sensor noise, lens) and its AgX view with white balance, compiled from the project (tools/blender/comp2glsl.py). It plays the light build: the same passes and colour tables on the GPU\'s own maths; in our check it differs from Blender\'s render in 18 of 409,920 pixels, by 1 level of 255. Its shaders compile a few per frame the first time (the HUD shows how far). The picture is the project\'s 854 x 480, scaled to the window with bars.',
     defs: {
       exposure: num('Exposure', 1, 0, 64, 0.01, 'Scene light × this before the compositor, which expects Cycles\' scene light.'),
       frameRate: num('Frame rate', 24, 0, 60, 1, 'How fast the compositor\'s frame number runs. Its grain and noise follow the frame; the project runs at 24. 0 = held at the start frame.', 'fps'),

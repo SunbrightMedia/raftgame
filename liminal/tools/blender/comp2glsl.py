@@ -1,8 +1,8 @@
 """Compile a project's Blender compositor graph to WebGL2 passes, from compeval's evaluation of it.
 
-    bpyenv/bin/python -I tools/blender/comp2glsl.py DUMP.json CURVES.json OUT_DIR [--size 854x480]
+    bpyenv/bin/python -I tools/blender/comp2glsl.py DUMP.json CURVES.json OUT_DIR [--size 854x480] [--fast]
 
-Writes OUT_DIR/blenderPost.json: textures (sizes), passes (GLSL fragment source, inputs, output), constants
+Writes OUT_DIR/blenderPost.json (or, with --fast, blenderPost.fast.json: the light program the game plays with): textures (sizes), passes (GLSL fragment source, inputs, output), constants
 (static ones baked; the few that change with the frame as small expression lists the runtime evaluates in
 float32), curve tables and the image-coordinate tables; and the 3D colour tables (ocioport's measured tables,
 raw float32 RGB, red fastest) as OUT_DIR/<name>.f32, or in parts <name>.f32.0, .1, ... when large. The program's
@@ -27,6 +27,30 @@ from glsl_harden import harden  # noqa: E402
 F = np.float32
 _GL = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'glsl')
 LIB = open(os.path.join(_GL, 'exactmath.glsl')).read() + open(os.path.join(_GL, 'lib.glsl')).read()
+# --fast: the GPU's own sqrt/log/exp/pow/sin/cos under the same names (the program the game plays with)
+FASTLIB = open(os.path.join(_GL, 'fastmath.glsl')).read() + open(os.path.join(_GL, 'lib.glsl')).read()
+# functions that hash a float's bits: a pass that reaches one keeps every float op exact (rn) even in --fast,
+# so its noise pattern stays Blender's
+FLOAT_HASHES = ('hashf1', 'hashf2', 'hashf3')
+
+
+def reaches(src, names):
+    """True if main() in GLSL `src` calls any of `names`, directly or through other functions."""
+    import re as _re
+    body = {}
+    for m in _re.finditer(r'^[A-Za-z_]\w*\s+([A-Za-z_]\w*)\s*\([^;{]*\)\s*\{', src, _re.M):
+        d, i = 1, m.end()
+        while d:
+            d += (src[i] == '{') - (src[i] == '}'); i += 1
+        body[m.group(1)] = body.get(m.group(1), '') + src[m.end():i]
+    seen, todo = set(), ['main']
+    while todo:
+        f = todo.pop()
+        if f in seen or f not in body:
+            continue
+        seen.add(f)
+        todo += _re.findall(r'([A-Za-z_]\w*)\s*\(', body[f])
+    return any(n in seen for n in names)
 
 PIXEL = {'ShaderNodeMath', 'ShaderNodeMix', 'ShaderNodeMapRange', 'ShaderNodeClamp', 'ShaderNodeGamma',
          'ShaderNodeFloatCurve', 'ShaderNodeSeparateXYZ', 'ShaderNodeCombineXYZ', 'ShaderNodeVectorMath',
@@ -103,7 +127,9 @@ class Compiler:
         self.data_files = {}      # table name -> file name (3D colour tables, measured by ocioport)
         self.tables = {}          # table name -> float32 [N, N, N, 3]
         self._ocio = {}           # conversion key -> (GLSL, samplers)
-        self.harden = True        # rewrite shaders so every float op rounds once (glsl_harden)
+        self.harden = True        # rewrite shaders so every float op rounds once (glsl_harden); 'hash': only
+                                  # the passes that hash float bits
+        self.lib = LIB            # FASTLIB for --fast
         self.dyn_nodes = self._dynamic_nodes()
 
     # ---- graph helpers
@@ -809,7 +835,7 @@ def _add_pass(self, ctx, final_expr, tid, label, body_extra=''):
     curves = 'uniform sampler2D t_curves;\n' + CURVE_FN if 'curve_eval(' in '\n'.join(ctx.lines) else ''
     if curves and 't_curves' not in ctx.samplers.values():
         pass
-    src = ('#version 300 es\n' + LIB + '\n' + smp + uni + curves + helpers + '\nout vec4 o_color;\nvoid main() {\n'
+    src = ('#version 300 es\n' + self.lib + '\n' + smp + uni + curves + helpers + '\nout vec4 o_color;\nvoid main() {\n'
            '  int px = int(gl_FragCoord.x), py = int(gl_FragCoord.y);\n  float fx = float(px), fy = float(py);\n'
            + '\n'.join(ctx.lines) + '\n' + body_extra + f'  o_color = {final_expr};\n}}\n')
     ins = {nm: tid_ for tid_, nm in ctx.samplers.items()}
@@ -914,7 +940,7 @@ def _simple_pass(self, dom, label, body, inputs, uniforms=None, lib_extra=''):
     tid = self.new_tex(dom, label)
     smp = ''.join(f'uniform sampler2D {nm};\n' for nm in inputs if f' {nm};' not in lib_extra)
     uni = ''.join(f'uniform {ty} {nm};\n' for nm, (ty, _) in (uniforms or {}).items())
-    src = ('#version 300 es\n' + LIB + '\n' + smp + uni + lib_extra + '\nout vec4 o_color;\nvoid main() {\n'
+    src = ('#version 300 es\n' + self.lib + '\n' + smp + uni + lib_extra + '\nout vec4 o_color;\nvoid main() {\n'
            '  int px = int(gl_FragCoord.x), py = int(gl_FragCoord.y);\n  float fx = float(px), fy = float(py);\n'
            + body + '\n}\n')
     self.passes.append({'label': label, 'frag': src, 'out': tid, 'inputs': dict(inputs),
@@ -1234,7 +1260,8 @@ def _compile(self):
     disp = self.simple_pass(rdom, 'display', body, {'t_in': tid, 't_dither': 'dither', **samplers}, lib_extra=lib)
     if self.harden:
         for p in self.passes:
-            p['frag'] = harden(p['frag'])
+            if self.harden != 'hash' or reaches(p['frag'], FLOAT_HASHES):
+                p['frag'] = harden(p['frag'])
     rs = self.d['scene']['render']
     return {
         'fps': float(rs.get('fps', 24)) / float(rs.get('fps_base', 1.0) or 1.0),
@@ -1256,12 +1283,16 @@ def main2():
     ap.add_argument('dump'); ap.add_argument('curves'); ap.add_argument('out')
     ap.add_argument('--size', default='854x480')
     ap.add_argument('--no-harden', action='store_true', help='leave the GPU compiler free to fuse and regroup float ops')
+    ap.add_argument('--fast', action='store_true', help='the light program for play (blenderPost.fast.json): GPU '
+                    'maths, exact float ops only in the passes that hash float bits; the tables are the same')
     ap.add_argument('--part-mb', type=float, default=8.0, help='tables larger than this are written in parts (artifact files must stay under 15 MB)')
     ap.add_argument('--source', default='', help='where the compositor graph comes from (kept in the program)')
     a = ap.parse_args()
     W, H = (int(v) for v in a.size.split('x'))
     comp = Compiler(json.load(open(a.dump)), json.load(open(a.curves)), (W, H))
-    comp.harden = not a.no_harden
+    comp.harden = False if a.no_harden else 'hash' if a.fast else True
+    if a.fast:
+        comp.lib = FASTLIB
     prog = comp.compile()
     if a.source:
         prog['source'] = a.source
@@ -1279,9 +1310,12 @@ def main2():
                 fn = f'{name}.f32.{k // part}'
                 open(os.path.join(a.out, fn), 'wb').write(raw[k:k + part]); files.append(fn)
             prog['data'][name] = files
-    json.dump(prog, open(os.path.join(a.out, 'blenderPost.json'), 'w'))
-    # the file list, so the published page build knows what to fetch next to it
-    json.dump(['blenderPost.json'] + [f for fs in prog['data'].values() for f in fs], open(os.path.join(a.out, 'files.json'), 'w'))
+    name = 'blenderPost.fast.json' if a.fast else 'blenderPost.json'
+    json.dump(prog, open(os.path.join(a.out, name), 'w'))
+    # the published page's files (globs.page.ts, tools/make-page.mjs): the program it plays (the fast one, once
+    # built) and the tables, which both programs share
+    page = 'blenderPost.fast.json' if os.path.exists(os.path.join(a.out, 'blenderPost.fast.json')) else 'blenderPost.json'
+    json.dump([page] + [f for fs in prog['data'].values() for f in fs], open(os.path.join(a.out, 'files.json'), 'w'))
     print('passes', len(prog['passes']), 'textures', len(prog['textures']), 'curves', len(prog['curves']),
           'coord rows', len(prog['coords']), 'rotations', len(prog['rotations']), 'dynamic nodes', len(prog['dynamic']),
           'tables', {k: v.shape[0] for k, v in comp.tables.items()})
