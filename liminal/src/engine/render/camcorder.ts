@@ -58,6 +58,8 @@ export interface CamcorderParams {
   glowSize: number;
   /** Only light brighter than this (tone-curve input units) glows; 0 = the whole picture, as the capture. */
   glowThreshold: number;
+  /** Light brighter than this feeds the glow only up to this (0 = no cap). */
+  glowClip?: number;
   /** Shares of the glow in its three widths (σ 0.6%, 2.5%, 8% of the width × size); default the capture's 0.612 / 0.241 / 0.147. */
   glowNear?: number;
   glowMid?: number;
@@ -82,6 +84,8 @@ export interface CamcorderParams {
   chromaDelay?: number;
   /** Per-pixel brightness noise before the codec, stronger in the dark. */
   lumaNoise?: number;
+  /** Auto exposure metering: 0 = log-average, 1 = plain average (dark objects pull it down less). */
+  aeLinear?: number;
   /** Per-pixel colour noise before the colour blur (comes out as blotches). */
   chromaNoise?: number;
   /** Codec smoothing: brightness differences under this (picture units) are averaged away; 0 = off. */
@@ -318,16 +322,19 @@ export class CamcorderPost {
   private aeGoal = 0;
 
   private prep = pass(/* glsl */ `
-    uniform sampler2D src; uniform vec2 texel; uniform vec3 scale; uniform float thresh; varying vec2 vUv;
+    uniform sampler2D src; uniform vec2 texel; uniform vec3 scale; uniform float thresh; uniform float clipAt; varying vec2 vUv;
     void main() {
       // 4 bilinear taps = a 4×4 box: the half-size picture, already exposed and tinted
       vec3 c = texture2D(src, vUv + texel * vec2(-0.5, -0.5)).rgb + texture2D(src, vUv + texel * vec2(0.5, -0.5)).rgb
              + texture2D(src, vUv + texel * vec2(-0.5, 0.5)).rgb + texture2D(src, vUv + texel * vec2(0.5, 0.5)).rgb;
       c = max(c * 0.25 * scale, 0.0);
+      // A cap on what feeds the glow (as a sensor saturates): a lamp far over white then glows in its own soft shape,
+      // the halo's size set by the glow's width, not by how bright the lamp is.
+      if (clipAt > 0.0) { float m = max(c.r, max(c.g, c.b)); if (m > clipAt) c *= clipAt / m; }
       // With a threshold only what is brighter glows (as a renderer's glare effect), keeping its colour.
       if (thresh > 0.0) { float l = max(c.r, max(c.g, c.b)); c *= max(l - thresh, 0.0) / max(l, 1e-4); }
       gl_FragColor = vec4(c, 1.0);
-    }`, { src: { value: null }, texel: { value: new THREE.Vector2() }, scale: { value: new THREE.Vector3(1, 1, 1) }, thresh: { value: 0 } });
+    }`, { src: { value: null }, texel: { value: new THREE.Vector2() }, scale: { value: new THREE.Vector3(1, 1, 1) }, thresh: { value: 0 }, clipAt: { value: 0 } });
 
   private half = pass(/* glsl */ `
     uniform sampler2D src; uniform vec2 texel; varying vec2 vUv;
@@ -604,13 +611,16 @@ export class CamcorderPost {
         samples.push([this.meterBuf[(y * METER_W + x) * 4] / 255 * 24 - 16, w]); wall += w;
       }
       samples.sort((q, r) => q[0] - r[0]);
-      let cum = 0, sum = 0, wsum = 0;
+      let cum = 0, sum = 0, lin = 0, wsum = 0;
       for (const [l, w] of samples) {
-        if (cum >= 0.1 * wall && cum + w <= 0.9 * wall) { sum += l * w; wsum += w; }
+        if (cum >= 0.1 * wall && cum + w <= 0.9 * wall) { sum += l * w; lin += Math.pow(2, l) * w; wsum += w; }
         cum += w;
       }
+      // log2 of the metered level: the log-average, or (aeLinear 1) the plain average, which dark objects pull down less
+      const k = Math.min(1, Math.max(0, p.aeLinear ?? 0)), ws = Math.max(wsum, 1e-9);
+      const level = (1 - k) * (sum / ws) + k * Math.log2(Math.max(lin / ws, 1e-9));
       const range = Math.pow(2, p.aeRange);
-      this.aeGoal = Math.min(p.exposure * range, Math.max(p.exposure / range, p.aeKey / Math.pow(2, sum / Math.max(wsum, 1e-9))));
+      this.aeGoal = Math.min(p.exposure * range, Math.max(p.exposure / range, p.aeKey / Math.pow(2, level)));
     }
     if (snap) this.aeExposure = this.aeGoal;
     else this.aeExposure *= Math.pow(this.aeGoal / this.aeExposure, Math.min(1, p.aeRate * dt));
@@ -676,7 +686,7 @@ export class CamcorderPost {
     }
     // glow chain
     const pr = this.prep.u;
-    pr.src.value = src.texture; (pr.texel.value as THREE.Vector2).set(1 / src.width, 1 / src.height); (pr.scale.value as THREE.Vector3).copy(scale); pr.thresh.value = p.glowThreshold ?? 0;
+    pr.src.value = src.texture; (pr.texel.value as THREE.Vector2).set(1 / src.width, 1 / src.height); (pr.scale.value as THREE.Vector3).copy(scale); pr.thresh.value = p.glowThreshold ?? 0; pr.clipAt.value = p.glowClip ?? 0;
     this.draw(gl, this.prep, this.down[0]);
     for (let i = 1; i < 4; i++) {
       const hu = this.half.u;

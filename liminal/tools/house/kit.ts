@@ -216,11 +216,12 @@ export class HouseKit {
 
   // ---- lamps
   /**
-   * A flush ceiling light: a frosted glass bowl `d` across (default 13") and `depth` deep (default 5.5") under a thin
-   * white base, glowing evenly all over, and its light (two 60 W bulbs' worth) at the bowl's middle.
+   * A flush ceiling light: a frosted glass bowl `d` across (default 11") and `depth` deep (default 6") under a thin
+   * white base, glowing evenly all over, and its light (two 60 W bulbs' worth) at the bowl's middle. Seen from below
+   * at a slant a deep bowl is nearly round, as the video's lamps are.
    */
   dome(x: number, y: number, lumens = 1600, kelvin = 2700, o: { n?: number; d?: number; depth?: number; up?: number } = {}): void {
-    const r = (o.d ?? 13) / 2, D = o.depth ?? 5.5, base = 0.6, rings = 6;
+    const r = (o.d ?? 11) / 2, D = o.depth ?? 6, base = 0.6, rings = 6;
     this.m.prism(circle(x, y, r + 0.5, 48), this.H - base, this.H, this.t.trim, { solid: false });
     // the bowl: a half spheroid as stacked rings (each at the spheroid's radius half way down it)
     for (let k = 0; k < rings; k++) {

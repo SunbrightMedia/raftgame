@@ -293,7 +293,7 @@
     {
       "name": "house6/door_white",
       "from": "house/trim_white",
-      "color": "#d4cebe",
+      "color": "#c3bdae",
       "contrast": 0.3
     },
     {

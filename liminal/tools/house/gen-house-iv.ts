@@ -157,7 +157,7 @@ const m = new MapBuilder();
   k.baseRun('y', E, -1, S, N); k.baseRun('x', S, 1, W0, E);
   k.crownRun('y', W0, 1, S, JOG); k.crownRun('x', JOG, 1, W0, W1); k.crownRun('y', W1, 1, JOG, N);
   k.crownRun('x', N, -1, W1, E); k.crownRun('y', E, -1, S, N); k.crownRun('x', S, 1, W0, E);
-  k.dome(ox - 62, 118, 1600, 2700);
+  k.dome(ox - 75, 135, 1600, 2700);                       // close to the stepped wall: its top glows, as in the video
   k.dome(ox - 36, -30, 1600, 2700);                       // behind the camera
 }
 
@@ -175,7 +175,7 @@ m.write('house_iv', HOUSE_IV_ROOMS, {
   // "Cassette": the video's camera, as measured on its frames (STYLE.md): soft but edge-enhanced, warm, lamps
   // blown out with a wide bloom.
   camcorder: {
-    exposure: 0.012, whiteBalance: 2950, autoExposure: true, aeKey: 0.11, aeRange: 3, aeRate: 1.5,
+    exposure: 0.012, whiteBalance: 2950, autoExposure: true, aeKey: 0.12, aeRange: 3, aeRate: 1.5, aeLinear: 1,
     // the lamps: the bright patch round each is the ceiling lit by the fixture's glass (lighting.ts "dome"), not bloom;
     // bloom stays small, as in the reference projects (Unity HDRP 0.13, Blender 0.125)
     tintR: 1, tintG: 1, tintB: 1, glow: 0.15, glowSize: 0.8, glowNear: 0.3, glowMid: 0.6, glowFar: 0.1, glowThreshold: 2, contrast: 0.75, dirt: 0, fringe: 0.15,
