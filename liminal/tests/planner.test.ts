@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { FEATURES, ZONE_FEATURES } from '../src/planner/catalogue';
 import { DEFAULT_PARAMS, emptyEdits, generate } from '../src/planner/generate';
 import { buildZone } from '../src/planner/recipes';
+import { check } from '../src/planner/faults';
 import { Rng } from '../src/world/rng';
 import type { Zone } from '../src/planner/types';
 
@@ -69,4 +70,17 @@ describe('Backrooms planner', () => {
     expect(pool.feature).toBe('pool');
     expect(withPool.links.some((l) => l.a === pool.id || l.b === pool.id)).toBe(true);
   });
+  it('has no stray long runs, overlaps or crossings between floors', () => {
+    const big = { size: 420, turn: 0.15, density: 0.6, loops: 0.35, deadEnds: 0.4, corridors: 0.4, landmarks: 0.4, themes: 0.5, heights: 0.3, anomalies: 0.2 };
+    const runs: [number, Partial<typeof DEFAULT_PARAMS>][] = [[1, {}], [2, {}], [3, { longRuns: 0 }], [4, { longRuns: 0, turn: 0.6 }], [398604, { ...big, longRuns: 0 }], [7, { ...big, longRuns: 0 }]];
+    for (const [seed, over] of runs) {
+      const m = generate({ ...DEFAULT_PARAMS, ...over, seed });
+      const f = check(m);
+      if (over.longRuns === 0) expect(f.long, `seed ${seed}: long runs at 0`).toBeLessThanOrEqual(1);
+      expect(f.roomRoom, `seed ${seed}: rooms on rooms`).toEqual([]);
+      expect(f.corrRoom, `seed ${seed}: corridors through rooms`).toEqual([]);
+      expect(f.crossLevel, `seed ${seed}: corridors crossing between floors`).toEqual([]);
+      expect(Object.values(f.outside).reduce((a, b) => a + b, 0), `seed ${seed}: pieces on other rooms ${JSON.stringify(f.outside)}`).toBe(0);
+    }
+  }, 30_000);
 });

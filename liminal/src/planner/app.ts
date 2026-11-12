@@ -133,6 +133,8 @@ knob('landmarks', 'Landmarks', 0, 1, 0.01, pct, 'Pool rooms, theatres, churches,
 knob('themes', 'Districts', 0, 1, 0.01, pct, 'Areas with their own carpet and walls.');
 knob('heights', 'Floor heights', 0, 1, 0.01, pct, 'Stairs, ramps, sloped and sunken rooms (still one story).');
 knob('anomalies', 'Wrongness', 0, 1, 0.01, pct, 'Portals, impossible stairs, repeat and melted rooms.');
+knob('tight', 'Tight packing', 0, 1, 0.01, pct, 'Rooms pressed together so their walls merge (high), or a small gap between them (low).');
+knob('squish', 'Squish', 0, 1, 0.01, pct, 'Rooms that sink into their neighbour on purpose, as if squeezed together.');
 
 left.append(el('h2', { text: 'Features' }), el('div', { class: 'muted', text: 'Tick to use, slide for how often. Drag a zone feature onto the map to add it.' }));
 const featSyncs: (() => void)[] = [];

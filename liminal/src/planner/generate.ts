@@ -27,7 +27,7 @@ import type { Edits, LinkKind, Link, MapOut, Params, Prim, Zone } from './types'
 
 export const DEFAULT_PARAMS: Params = {
   seed: 1, size: 150, turn: 0.15, density: 0.6, loops: 0.35, deadEnds: 0.4, corridors: 0.55,
-  longRuns: 0.3, landmarks: 0.4, themes: 0.5, heights: 0.3, anomalies: 0.2, weights: {},
+  longRuns: 0.3, landmarks: 0.4, themes: 0.5, heights: 0.3, anomalies: 0.2, tight: 0, squish: 0, weights: {},
 };
 
 export const emptyEdits = (): Edits => ({ zones: {}, added: [], notes: [] });
@@ -89,7 +89,7 @@ function pickLink(r: Rng, p: Params, parent: string, child: string, depth: numbe
   if (child === 'tinyroom' || parent === 'tinyroom') return 'narrow';
   const far = FEATURE[child].role === 'end' && child === 'farm' ? 3 : 1;
   const items: (readonly [LinkKind, number])[] = [
-    ['open', (1 - p.corridors) * 1.3],
+    ['open', (1 - p.corridors) * 1.3 * (1 + 2 * (p.tight ?? 0))],
     ['corridor', p.corridors * wOf(p, 'corridor')],
     ['bent', p.corridors * wOf(p, 'bent') * (1.2 - p.turn * 0.6)],
     ['curved', p.corridors * wOf(p, 'curved') * (0.25 + p.turn)],
@@ -122,7 +122,7 @@ function pickTags(r: Rng, p: Params, feature: string): string[] {
 }
 
 function plan(p: Params, edits: Edits, root: Rng): GNode[] {
-  const N = targetCount(p);
+  const N = Math.ceil(targetCount(p) * 1.25);
   const fr = root.fork('features'), lr = root.fork('links'), cr = root.fork('capacity'), tr = root.fork('tags');
   const nodes: GNode[] = [];
   const make = (parent: number, depth: number, feature: string, link: LinkKind): number => {
@@ -243,13 +243,15 @@ function assignThemes(nodes: GNode[], p: Params, r: Rng, edits: Edits): void {
 /** Obstacles in a coarse grid so collision tests only look nearby. */
 class Hash {
   private cells = new Map<number, number[]>();
-  readonly items: { poly: V2[]; bb: BBox; zone: number; corridor: boolean }[] = [];
+  /** `level`: a flat corridor's floor level (others may cross it on that level: a junction); NaN = rooms and
+   * stairs or ramps, which nothing may cross. `seg`: a corridor piece's centre line and width. */
+  readonly items: { poly: V2[]; bb: BBox; zone: number; corridor: boolean; level: number; seg?: [V2, V2, number] }[] = [];
   private static S = 16;
   private key(i: number, j: number): number { return (i + 4096) * 8192 + (j + 4096); }
-  add(poly: V2[], zone: number, corridor: boolean): void {
+  add(poly: V2[], zone: number, corridor: boolean, level = NaN, seg?: [V2, V2, number]): void {
     const bb = bboxOf(poly);
     const id = this.items.length;
-    this.items.push({ poly, bb, zone, corridor });
+    this.items.push({ poly, bb, zone, corridor, level, seg });
     for (let i = Math.floor(bb.x0 / Hash.S); i <= Math.floor(bb.x1 / Hash.S); i++) for (let j = Math.floor(bb.y0 / Hash.S); j <= Math.floor(bb.y1 / Hash.S); j++) {
       const k = this.key(i, j);
       let c = this.cells.get(k);
@@ -262,11 +264,11 @@ class Hash {
     for (let i = Math.floor(bb.x0 / Hash.S); i <= Math.floor(bb.x1 / Hash.S); i++) for (let j = Math.floor(bb.y0 / Hash.S); j <= Math.floor(bb.y1 / Hash.S); j++) for (const id of this.cells.get(this.key(i, j)) ?? []) out.add(id);
     return [...out];
   }
-  hits(poly: V2[], skip: (zone: number, corridor: boolean) => boolean): boolean {
+  hits(poly: V2[], skip: (zone: number, corridor: boolean, level: number) => boolean): boolean {
     const bb = bboxOf(poly);
     for (const id of this.near(bb)) {
       const it = this.items[id];
-      if (skip(it.zone, it.corridor)) continue;
+      if (skip(it.zone, it.corridor, it.level)) continue;
       if (it.bb.x1 <= bb.x0 || it.bb.x0 >= bb.x1 || it.bb.y1 <= bb.y0 || it.bb.y0 >= bb.y1) continue;
       if (convexOverlap(poly, it.poly)) return true;
     }
@@ -334,14 +336,17 @@ function addPort(z: Zone, world: V2, worldAngle: number, w: number, link: number
 }
 
 /** Try to put node i next to its parent zone. */
-function attach(c: Ctx, i: number, pz: Zone, r: Rng): boolean {
+function attach(c: Ctx, i: number, pz: Zone, r: Rng, tries = 40): boolean {
   const n = c.nodes[i], p = c.p;
   const pf = pz.frame;
-  for (let t = 0; t < 40; t++) {
+  for (let t0 = 0; t0 < tries; t0++) {
+    // fewer tries skip ahead through the same stages (as is, smaller, corridor, stretched)
+    const t = Math.floor((t0 * 40) / tries);
     const shrink = t < 10 ? 1 : t < 20 ? 0.8 : t < 30 ? 0.65 : 0.5;
     let kind: LinkKind = n.link;
     if (t >= 16 && kind === 'open' && n.feature !== 'mass') kind = 'corridor';
-    if (t >= 30 && n.feature !== 'mass' && kind !== 'stair' && kind !== 'ramp' && kind !== 'impossible') kind = 'long';
+    // late tries: longer plain corridors (never a long run unless the plan asked for one)
+    const stretch = t >= 30 ? 2 : 1;
     const [w, h] = n.copyOf !== undefined && c.nodeZone[n.copyOf] >= 0 ? [c.zones[c.nodeZone[n.copyOf]].w, c.zones[c.nodeZone[n.copyOf]].h] : sizeFor(n, r, shrink, p);
     const lw = linkWidth(kind, r);
     const s = r.int(0, 3);
@@ -383,7 +388,7 @@ function attach(c: Ctx, i: number, pz: Zone, r: Rng): boolean {
         break;
       }
       default: {
-        const L = kind === 'long' ? r.range(30, 90) * Math.max(0.6, p.size / 150) : kind === 'narrow' ? r.range(2, 8) : kind === 'stair' || kind === 'ramp' || kind === 'impossible' ? r.range(5, 10) : r.range(3, 12);
+        const L = kind === 'long' ? r.range(30, 90) * Math.max(0.6, p.size / 150) : kind === 'narrow' ? r.range(2, 8) * stretch : kind === 'stair' || kind === 'ramp' || kind === 'impossible' ? r.range(5, 10) : r.range(3, 12) * stretch;
         end = add(P0, mul(nV, L));
         path = [P0, end];
         ca = turnChild(pf.a);
@@ -405,22 +410,29 @@ function attach(c: Ctx, i: number, pz: Zone, r: Rng): boolean {
     const tc = r.range(-halfC + mc, halfC - mc);
     const Ql = sidePoint(sc, tc, w, h);
     const Q = rot(Ql, ca);
-    const frame: Frame = { x: end.x - Q.x, y: end.y - Q.y, a: ca };
-    // collisions
+    let frame: Frame = { x: end.x - Q.x, y: end.y - Q.y, a: ca };
+    // collisions. Clearance to other rooms: 0.8 tiles, down to almost touching with tight packing.
     const parentId = pz.id;
     const touch = kind === 'open';
+    const clear = 0.8 - 0.75 * (p.tight ?? 0);
+    const flat = kind !== 'stair' && kind !== 'ramp' && kind !== 'impossible';
+    // squish: a touching room sinks into its parent on purpose
+    const sink = touch && n.feature !== 'mass' && FEATURE[pz.feature].role !== 'hub' && (p.squish ?? 0) > 0 && r.chance(p.squish * 0.6)
+      ? r.range(0.15, 0.4) * Math.min(w, h) : 0;
+    if (sink > 0) frame = { ...frame, x: frame.x - nV.x * sink, y: frame.y - nV.y * sink };
     if (touch) {
-      if (c.hash.hits(obb(frame, w, h, -0.05), () => false)) continue;
-      if (c.hash.hits(obb(frame, w, h, 0.8), (zone, corr) => zone === parentId && !corr)) continue;
+      if (c.hash.hits(obb(frame, w, h, -0.05), (zone, corr) => sink > 0 && zone === parentId && !corr)) continue;
+      if (c.hash.hits(obb(frame, w, h, clear), (zone, corr) => zone === parentId && !corr)) continue;
     } else {
-      if (c.hash.hits(obb(frame, w, h, 0.8), () => false)) continue;
+      if (c.hash.hits(obb(frame, w, h, clear), () => false)) continue;
       let bad = false;
       for (let k = 0; k + 1 < path.length && !bad; k++) {
         const a = path[k], b = path[k + 1];
         const d = norm(sub(b, a));
         const a2 = k === 0 ? add(a, mul(d, 0.7)) : a, b2 = k + 2 === path.length ? sub(b, mul(d, 0.7)) : b;
         if (dist(a2, b2) < 0.2) continue;
-        if (c.hash.hits(segBox(a2, b2, lw + 1.2), (zone, corr) => zone === parentId || corr)) bad = true;
+        // a corridor may cross another one on the same floor (a junction), never one on another floor or a stair
+        if (c.hash.hits(segBox(a2, b2, lw + 1.2), (zone, corr, lvl) => (zone === parentId && !corr) || (corr && flat && lvl === pz.level))) bad = true;
       }
       if (bad) continue;
     }
@@ -430,9 +442,10 @@ function attach(c: Ctx, i: number, pz: Zone, r: Rng): boolean {
     c.links.push(link);
     addPort(pz, P0, nA, lw, link.id);
     addPort(z, end, ca + sc * HALF_PI, lw, link.id);
-    if (!touch) for (let k = 0; k + 1 < path.length; k++) c.hash.add(segBox(path[k], path[k + 1], lw), parentId, true);
+    if (!touch) for (let k = 0; k + 1 < path.length; k++) c.hash.add(segBox(path[k], path[k + 1], lw), parentId, true, flat ? pz.level : NaN, [path[k], path[k + 1], lw]);
     if (kind === 'stair' || kind === 'ramp') z.level = Math.max(-3, Math.min(3, pz.level + (r.chance(0.6) ? -1 : 1)));
     else z.level = n.level || pz.level;
+    if (sink > 0) z.tags = [...z.tags, 'squished'];
     return true;
   }
   return false;
@@ -441,7 +454,7 @@ function attach(c: Ctx, i: number, pz: Zone, r: Rng): boolean {
 // ------------------------------------------------------------------ 3. loops
 
 /** Grid search between two zones around everything else, then pulled straight. */
-function route(c: Ctx, za: Zone, zb: Zone, w: number, free: boolean, r: Rng): { path: V2[]; pa: V2; aa: number; pb: V2; ab: number } | null {
+function route(c: Ctx, za: Zone, zb: Zone, w: number, free: boolean, r: Rng, level = za.level): { path: V2[]; pa: V2; aa: number; pb: V2; ab: number } | null {
   const portOn = (z: Zone, target: V2): { p: V2; a: number } => {
     let best = -Infinity, s = 0;
     const toT = norm(sub(target, v2(z.frame.x, z.frame.y)));
@@ -463,7 +476,23 @@ function route(c: Ctx, za: Zone, zb: Zone, w: number, free: boolean, r: Rng): { 
   const grow = w / 2 + 0.5;
   for (const id of c.hash.near({ x0, y0, x1: x0 + W, y1: y0 + H })) {
     const it = c.hash.items[id];
-    if (it.corridor || it.zone === za.id || it.zone === zb.id) continue;
+    if (it.corridor) {
+      // corridors on this floor are crossed (junctions); on another floor, or stairs, they are walls to go round
+      if (it.level === level || !it.seg) continue;
+      const [a, b, sw] = it.seg;
+      const g2 = sw / 2 + grow;
+      const pb = { x0: Math.min(a.x, b.x) - g2, y0: Math.min(a.y, b.y) - g2, x1: Math.max(a.x, b.x) + g2, y1: Math.max(a.y, b.y) + g2 };
+      const dx = b.x - a.x, dy = b.y - a.y, L2 = dx * dx + dy * dy || 1;
+      for (let gy = Math.max(0, Math.floor(pb.y0 - y0)); gy <= Math.min(H - 1, Math.ceil(pb.y1 - y0)); gy++) {
+        for (let gx = Math.max(0, Math.floor(pb.x0 - x0)); gx <= Math.min(W - 1, Math.ceil(pb.x1 - x0)); gx++) {
+          const px = x0 + gx + 0.5, py = y0 + gy + 0.5;
+          const t = Math.max(0, Math.min(1, ((px - a.x) * dx + (py - a.y) * dy) / L2));
+          if (Math.hypot(a.x + dx * t - px, a.y + dy * t - py) <= g2) block[gy * W + gx] = 1;
+        }
+      }
+      continue;
+    }
+    if (it.zone === za.id || it.zone === zb.id) continue;
     const z = c.zones[it.zone];
     const poly = obb(z.frame, z.w, z.h, grow);
     const pb = bboxOf(poly);
@@ -701,6 +730,46 @@ function zoneEdgePrims(z: Zone, r: Rng): Prim[] {
   return out;
 }
 
+/** Where two corridors cross on the same floor: a square of floor and a light, so it reads as a crossroads. */
+function junctions(links: Link[], zones: Zone[]): Prim[] {
+  type Seg = { l: Link; a: V2; b: V2; bb: BBox };
+  const segs: Seg[] = [];
+  for (const l of links) {
+    if (l.path.length < 2 || l.kind === 'stair' || l.kind === 'ramp' || l.kind === 'impossible' || l.kind === 'portal') continue;
+    if (zones[l.a].level !== zones[l.b].level) continue;
+    for (let k = 0; k + 1 < l.path.length; k++) segs.push({ l, a: l.path[k], b: l.path[k + 1], bb: bboxOf([l.path[k], l.path[k + 1]]) });
+  }
+  const G = 24, cells = new Map<string, number[]>();
+  segs.forEach((sg, i) => {
+    for (let x = Math.floor(sg.bb.x0 / G); x <= Math.floor(sg.bb.x1 / G); x++) for (let y = Math.floor(sg.bb.y0 / G); y <= Math.floor(sg.bb.y1 / G); y++) {
+      const k = `${x},${y}`; let c = cells.get(k); if (!c) cells.set(k, (c = [])); c.push(i);
+    }
+  });
+  const out: Prim[] = [], seen = new Set<string>();
+  for (const ids of cells.values()) for (let u = 0; u < ids.length; u++) for (let v = u + 1; v < ids.length; v++) {
+    const A = segs[ids[u]], B = segs[ids[v]];
+    if (A.l === B.l || zones[A.l.a].level !== zones[B.l.a].level) continue;
+    const key = ids[u] < ids[v] ? `${ids[u]}:${ids[v]}` : `${ids[v]}:${ids[u]}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    if (A.bb.x1 < B.bb.x0 || B.bb.x1 < A.bb.x0 || A.bb.y1 < B.bb.y0 || B.bb.y1 < A.bb.y0) continue;
+    const r = sub(A.b, A.a), q = sub(B.b, B.a), den = r.x * q.y - r.y * q.x;
+    if (Math.abs(den) < 1e-9) continue;
+    const w0 = sub(B.a, A.a);
+    const t = (w0.x * q.y - w0.y * q.x) / den, s2 = (w0.x * r.y - w0.y * r.x) / den;
+    const La = Math.hypot(r.x, r.y), Lb = Math.hypot(q.x, q.y);
+    // not where a corridor meets its own room
+    const ea = 1.5 / La, eb = 1.5 / Lb;
+    if (t < ea || t > 1 - ea || s2 < eb || s2 > 1 - eb) continue;
+    const at = add(A.a, mul(r, t));
+    const side = Math.max(A.l.w, B.l.w) + 1;
+    const d = norm(r);
+    out.push({ t: 'floor', pts: segBox(sub(at, mul(d, side / 2)), add(at, mul(d, side / 2)), side), zone: A.l.a, corr: true });
+    out.push({ t: 'light', p: at, zone: A.l.a });
+  }
+  return out;
+}
+
 // ------------------------------------------------------------------ 5. layer 2
 
 function layer2(zones: Zone[], links: Link[], p: Params, r: Rng): Prim[] {
@@ -772,10 +841,16 @@ export function generate(p: Params, edits: Edits = emptyEdits()): MapOut {
   const order: number[] = [];
   const q = [0];
   while (q.length) { const i = q.shift()!; order.push(i); q.push(...nodes[i].children); }
+  const goal = targetCount(p);
   for (const i of order) {
     if (i === 0) continue;
     const n = nodes[i];
-    const pz = n.parent >= 0 ? c.nodeZone[n.parent] : -1;
+    // the map is full: planned rooms beyond the count stay out (pinned ones still go in)
+    if (c.zones.length >= goal && !n.pin) continue;
+    // a parent that found no place hands its children up to the nearest placed ancestor
+    let anc = n.parent;
+    while (anc >= 0 && c.nodeZone[anc] < 0) anc = nodes[anc].parent;
+    const pz = anc >= 0 ? c.nodeZone[anc] : -1;
     if (pz < 0) { c.dropped++; continue; }
     const r = placeR.fork(n.key);
     if (n.pin) {
@@ -789,9 +864,9 @@ export function generate(p: Params, edits: Edits = emptyEdits()): MapOut {
     const pzZ = c.zones[pz];
     const others = c.zones.filter((z) => z.id !== pz && z.feature !== 'mass' && FEATURE[z.feature].role !== 'end')
       .map((z) => [z, dist(v2(z.frame.x, z.frame.y), v2(pzZ.frame.x, pzZ.frame.y))] as const)
-      .sort((a, b) => a[1] - b[1]).slice(0, 10);
+      .sort((a, b) => a[1] - b[1]).slice(0, 24);
     let ok = false;
-    for (const [z] of others) if (attach(c, i, z, r.fork(`alt:${z.key}`))) { ok = true; break; }
+    for (const [z] of others) if (attach(c, i, z, r.fork(`alt:${z.key}`), 12)) { ok = true; break; }
     if (!ok) c.dropped++;
   }
   // zones the user added
@@ -842,7 +917,8 @@ export function generate(p: Params, edits: Edits = emptyEdits()): MapOut {
     const za = c.zones[pl.a], zb = c.zones[pl.b];
     const r = loopR.fork(`route:${za.key}:${zb.key}`);
     const w = r.int(2, 3);
-    const res = route(c, za, zb, w, p.turn >= 0.3, r);
+    const sameFloor = za.level === zb.level;
+    const res = route(c, za, zb, w, p.turn >= 0.3, r, sameFloor ? za.level : NaN);
     const d0 = dist(v2(za.frame.x, za.frame.y), v2(zb.frame.x, zb.frame.y));
     const length = res ? res.path.reduce((s, q, k) => (k ? s + dist(res.path[k - 1], q) : 0), 0) : Infinity;
     if (!res || length > d0 * 2.4 + 20) {
@@ -855,11 +931,11 @@ export function generate(p: Params, edits: Edits = emptyEdits()): MapOut {
       }
       continue;
     }
-    const link: Link = { id: c.links.length, a: za.id, b: zb.id, kind: pl.kind, path: res.path, w, loop: pl.loop };
+    const link: Link = { id: c.links.length, a: za.id, b: zb.id, kind: sameFloor ? pl.kind : 'stair', path: res.path, w, loop: pl.loop };
     c.links.push(link);
     addPort(za, res.pa, res.aa, w, link.id);
     addPort(zb, res.pb, res.ab, w, link.id);
-    for (let k = 0; k + 1 < res.path.length; k++) c.hash.add(segBox(res.path[k], res.path[k + 1], w), za.id, true);
+    for (let k = 0; k + 1 < res.path.length; k++) c.hash.add(segBox(res.path[k], res.path[k + 1], w), za.id, true, sameFloor ? za.level : NaN, [res.path[k], res.path[k + 1], w]);
   }
   // fill
   const prims: Prim[] = [];
@@ -881,6 +957,7 @@ export function generate(p: Params, edits: Edits = emptyEdits()): MapOut {
     prims.push(...buildZone(z, new Rng(seed)));
     prims.push(...zoneEdgePrims(z, fillR.fork(`edge:${z.key}`)));
   }
+  prims.push(...junctions(c.links, c.zones));
   prims.push(...layer2(c.zones, c.links, p, root.fork('layer2')));
   for (const note of edits.notes) prims.push({ t: 'label', p: v2(note.x, note.y), text: note.text, zone: -1, size: 1.1 });
   // bounds

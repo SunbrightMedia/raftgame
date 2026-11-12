@@ -94,6 +94,10 @@ export interface Params {
   heights: number;
   /** Impossible links and wrongness (0–1). */
   anomalies: number;
+  /** How tightly rooms pack: 0 = a gap of most of a tile, 1 = pressed together so their walls merge (0–1). */
+  tight: number;
+  /** Rooms that sink into the room they hang on, on purpose (0–1). */
+  squish: number;
   /** Feature weights by id (missing = default, 0 = off). */
   weights: Record<string, number>;
 }

@@ -157,8 +157,9 @@ function connectPorts(z: Zone, prims: Prim[]): Prim[] {
       if (pr.t === 'solid' && pr.kind !== 'mass' && !pr.closed && convexOverlap(lane, pr.pts)) continue;
       next.push(pr);
     }
-    // and make sure there is floor under the lane
-    next.push({ t: 'floor', pts: lane, zone: z.id });
+    // and make sure there is floor under the lane (inside the room's own box; the lane starts just outside the door)
+    const inBox = clipToBox(lane, z.w / 2, z.h / 2);
+    if (inBox.length >= 3) next.push({ t: 'floor', pts: inBox, zone: z.id });
     out = next;
   };
   for (let round = 0; round < z.ports.length + 1; round++) {
@@ -186,6 +187,28 @@ function connectPorts(z: Zone, prims: Prim[]): Prim[] {
       continue;
     }
     break;
+  }
+  return out;
+}
+
+/** A polygon clipped to the box [-hw, hw] x [-hh, hh] (Sutherland-Hodgman; the box is convex). */
+function clipToBox(pts: V2[], hw: number, hh: number): V2[] {
+  let out = pts;
+  const edges: [(p: V2) => number, (a: V2, b: V2) => V2][] = [
+    [(p) => hw - p.x, (a, b) => v2(hw, a.y + ((b.y - a.y) * (hw - a.x)) / (b.x - a.x))],
+    [(p) => p.x + hw, (a, b) => v2(-hw, a.y + ((b.y - a.y) * (-hw - a.x)) / (b.x - a.x))],
+    [(p) => hh - p.y, (a, b) => v2(a.x + ((b.x - a.x) * (hh - a.y)) / (b.y - a.y), hh)],
+    [(p) => p.y + hh, (a, b) => v2(a.x + ((b.x - a.x) * (-hh - a.y)) / (b.y - a.y), -hh)],
+  ];
+  for (const [inside, cut] of edges) {
+    const inp = out;
+    out = [];
+    for (let k = 0; k < inp.length; k++) {
+      const a = inp[k], b = inp[(k + 1) % inp.length];
+      const ia = inside(a) >= 0, ib = inside(b) >= 0;
+      if (ib) { if (!ia) out.push(cut(a, b)); out.push(b); } else if (ia) out.push(cut(a, b));
+    }
+    if (!out.length) break;
   }
   return out;
 }
@@ -302,6 +325,13 @@ function furnish(o: Out, r: Rng, c: Cell): void {
   }
 }
 
+/** A floor strip from a port on the edge in to (cx, cy), clamped to the room's own box. */
+function portStub(o: Out, p: { p: V2; w: number }, cx = 0, cy = 0): void {
+  const x0 = Math.max(-o.hw, Math.min(p.p.x, cx) - p.w / 2), x1 = Math.min(o.hw, Math.max(p.p.x, cx) + p.w / 2);
+  const y0 = Math.max(-o.hh, Math.min(p.p.y, cy) - p.w / 2), y1 = Math.min(o.hh, Math.max(p.p.y, cy) + p.w / 2);
+  if (x1 > x0 && y1 > y0) o.rect(x0, y0, x1, y1);
+}
+
 const RECIPES: Record<string, Recipe> = {
   room(o, r) {
     o.rect(-o.hw, -o.hh, o.hw, o.hh);
@@ -329,7 +359,7 @@ const RECIPES: Record<string, Recipe> = {
       parts.push(c);
     }
     // ports must land on a floor: add a stub from each port to the main box
-    for (const p of o.z.ports) parts.push({ x0: Math.min(p.p.x, 0) - p.w / 2, y0: Math.min(p.p.y, 0) - p.w / 2, x1: Math.max(p.p.x, 0) + p.w / 2, y1: Math.max(p.p.y, 0) + p.w / 2 });
+    for (const p of o.z.ports) parts.push({ x0: Math.max(-o.hw, Math.min(p.p.x, 0) - p.w / 2), y0: Math.max(-o.hh, Math.min(p.p.y, 0) - p.w / 2), x1: Math.min(o.hw, Math.max(p.p.x, 0) + p.w / 2), y1: Math.min(o.hh, Math.max(p.p.y, 0) + p.w / 2) });
     for (const c of parts) o.rect(c.x0, c.y0, c.x1, c.y1);
     o.lights(main.x0, main.y0, main.x1, main.y1, 4, r);
     if (r.chance(0.3)) furnish(o, r, main);
@@ -397,14 +427,16 @@ const RECIPES: Record<string, Recipe> = {
   },
 
   huge(o, r) {
-    o.rect(-o.hw, -o.hh, o.hw, o.hh);
-    // a few notches so it is not a perfect box
-    for (let i = 0; i < 2; i++) if (r.chance(0.6)) {
-      const nw = r.range(4, o.z.w * 0.3), nh = r.range(4, o.z.h * 0.3);
-      const sx = r.chance(0.5) ? 1 : -1, sy = r.chance(0.5) ? 1 : -1;
-      o.rect(sx > 0 ? o.hw - 0.01 : -o.hw - nw * 0.3, sy * o.hh - (sy > 0 ? nh : 0), sx > 0 ? o.hw + nw * 0.3 : -o.hw + 0.01, sy * o.hh + (sy > 0 ? 0 : nh));
+    // a few bumps so it is not a perfect box: the main floor stops short of the side, the bump reaches it
+    const bumps: { sx: number; sy: number; nw: number; nh: number }[] = [];
+    for (let i = 0; i < 2; i++) if (r.chance(0.6)) bumps.push({ nw: r.range(4, o.z.w * 0.3), nh: r.range(4, o.z.h * 0.3), sx: r.chance(0.5) ? 1 : -1, sy: r.chance(0.5) ? 1 : -1 });
+    const inR = Math.max(0, ...bumps.filter((b) => b.sx > 0).map((b) => b.nw * 0.3)), inL = Math.max(0, ...bumps.filter((b) => b.sx < 0).map((b) => b.nw * 0.3));
+    o.rect(-o.hw + inL, -o.hh, o.hw - inR, o.hh);
+    for (const b of bumps) {
+      const d = b.nw * 0.3;
+      o.rect(b.sx > 0 ? o.hw - d - 0.01 : -o.hw, b.sy * o.hh - (b.sy > 0 ? b.nh : 0), b.sx > 0 ? o.hw : -o.hw + d + 0.01, b.sy * o.hh + (b.sy > 0 ? 0 : b.nh));
     }
-    o.lights(-o.hw, -o.hh, o.hw, o.hh, 6, r);
+    o.lights(-o.hw + inL, -o.hh, o.hw - inR, o.hh, 6, r);
   },
 
   openplan(o, r) {
@@ -428,7 +460,7 @@ const RECIPES: Record<string, Recipe> = {
       const x = r.range(-o.hw, o.hw - w), y = r.range(-o.hh, o.hh - h);
       parts.push({ x0: x, y0: y, x1: x + w, y1: y + h });
     }
-    for (const p of o.z.ports) parts.push({ x0: Math.min(p.p.x, 0) - p.w / 2, y0: Math.min(p.p.y, 0) - p.w / 2, x1: Math.max(p.p.x, 0) + p.w / 2, y1: Math.max(p.p.y, 0) + p.w / 2 });
+    for (const p of o.z.ports) parts.push({ x0: Math.max(-o.hw, Math.min(p.p.x, 0) - p.w / 2), y0: Math.max(-o.hh, Math.min(p.p.y, 0) - p.w / 2), x1: Math.min(o.hw, Math.max(p.p.x, 0) + p.w / 2), y1: Math.min(o.hh, Math.max(p.p.y, 0) + p.w / 2) });
     for (const c of parts) o.rect(c.x0, c.y0, c.x1, c.y1);
     for (const c of parts.slice(0, 3)) o.lights(c.x0, c.y0, c.x1, c.y1, 5, r);
     for (let i = 0; i < r.int(3, 8); i++) {
@@ -599,14 +631,14 @@ const RECIPES: Record<string, Recipe> = {
     o.rect(-o.hw + st, -o.hh, o.hw, o.hh - st);
     for (let k = 0; k < steps; k++) o.rect(-o.hw + st * (steps - k) * 0.6, -o.hh + st * k, o.hw - st * k * 0.5, o.hh - st * k * 0.3);
     o.rect(-o.hw, -o.hh, o.hw - st, -o.hh + st * 1.5);
-    for (const p of o.z.ports) o.rect(Math.min(p.p.x, 0) - p.w / 2, Math.min(p.p.y, 0) - p.w / 2, Math.max(p.p.x, 0) + p.w / 2, Math.max(p.p.y, 0) + p.w / 2);
+    for (const p of o.z.ports) portStub(o, p);
     o.lights(-o.hw + st, -o.hh + st, o.hw - st, o.hh - st, 4, r);
   },
 
   wedge(o, r) {
     const c = Math.min(o.z.w * 0.3, o.z.h * 0.6);
     o.floor([v2(-o.hw, 0), v2(-o.hw + c, -o.hh), v2(o.hw - c, -o.hh), v2(o.hw, 0), v2(o.hw - c, o.hh), v2(-o.hw + c, o.hh)]);
-    for (const p of o.z.ports) o.rect(Math.min(p.p.x, 0) - p.w / 2, Math.min(p.p.y, 0) - p.w / 2, Math.max(p.p.x, 0) + p.w / 2, Math.max(p.p.y, 0) + p.w / 2);
+    for (const p of o.z.ports) portStub(o, p);
     o.lights(-o.hw + c, -o.hh + 1, o.hw - c, o.hh - 1, 4, r);
     if (r.chance(0.5)) {
       // bow-tie wedges in the middle
@@ -643,7 +675,7 @@ const RECIPES: Record<string, Recipe> = {
     for (const p of o.z.ports) {
       // join each port to the nearest knot node
       const i = Math.max(0, Math.min(n - 1, Math.round((p.p.x + o.hw - cw / 2) / sx))), j = Math.max(0, Math.min(n - 1, Math.round((p.p.y + o.hh - cw / 2) / sy)));
-      o.rect(Math.min(p.p.x, X(i)) - p.w / 2, Math.min(p.p.y, Y(j)) - p.w / 2, Math.max(p.p.x, X(i)) + p.w / 2, Math.max(p.p.y, Y(j)) + p.w / 2);
+      portStub(o, p, X(i), Y(j));
     }
   },
 
@@ -681,7 +713,7 @@ const RECIPES: Record<string, Recipe> = {
       for (let x = -o.hw + 1; x < o.hw; x += 3) { o.light(x, -o.hh + cw / 2); o.light(x, o.hh - cw / 2); }
       for (let y = -o.hh + 3; y < o.hh - 2; y += 3) { o.light(-o.hw + cw / 2, y); o.light(o.hw - cw / 2, y); }
     }
-    for (const p of o.z.ports) o.rect(Math.min(p.p.x, p.p.x * 0.75) - p.w / 2, Math.min(p.p.y, p.p.y * 0.75) - p.w / 2, Math.max(p.p.x, p.p.x * 0.75) + p.w / 2, Math.max(p.p.y, p.p.y * 0.75) + p.w / 2);
+    for (const p of o.z.ports) portStub(o, p, p.p.x * 0.75, p.p.y * 0.75);
   },
 
   deadend(o, r) {
