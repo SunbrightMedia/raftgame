@@ -25,3 +25,5 @@ export const worlds: Record<string, (seed: number) => unknown> = {
 export const lots: Record<string, { settings: unknown; start: (seed: number, i: number, j: number) => [number, number, number] }> = {
   industrial: { settings: GEOMETRY_SETTINGS, start: lotStart },
 };
+/** Blender post-processing data (data/blender/: the compiled compositor program and its colour tables), fetched only when the 'blender' camera model is chosen. */
+export const blenderData = import.meta.glob(['../../data/blender/*.json', '../../data/blender/*.f32', '../../data/blender/*.f32.*'], { query: '?url', import: 'default' }) as Record<string, () => Promise<string>>;

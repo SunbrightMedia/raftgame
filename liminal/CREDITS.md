@@ -128,3 +128,14 @@ Copyright © 2001-2024 Contributors to the Freedoom project. All rights reserved
 | `ph/wooden_broom` (source: models/src/polyhaven/wooden_broom) | [Wooden Broom by Balen, Poly Haven](https://polyhaven.com/a/wooden_broom) | CC0 1.0 |
 | `ph/propane_torch` (source: models/src/polyhaven/propane_torch) | [Propane Torch by Jan W, Poly Haven](https://polyhaven.com/a/propane_torch) | CC0 1.0 |
 | `ph/old_tyre` (source: models/src/polyhaven/old_tyre) | [Old Tyre by MP, Poly Haven](https://polyhaven.com/a/old_tyre) | CC0 1.0 |
+
+## Post-processing data (`data/blender/`)
+
+The 'blender' camera model runs a program compiled from another project's Blender compositor setup, with colour
+tables measured from Blender's own colour configuration. It is not public domain; check before a public release.
+
+| source | licence | used for |
+|---|---|---|
+| [Backrooms_found_footage by ShuttleworthL](https://github.com/ShuttleworthL/Backrooms_found_footage), Copyright (c) 2026 Lawrence | MIT (`data/blender/LICENSE-Backrooms_found_footage.txt`) | `data/blender/blenderPost.json`: the compositor graph and view settings, compiled |
+| Blender 5.3 colour configuration (Filmic by Troy Sobotka, AgX by Eary Chow), run through [OpenColorIO](https://opencolorio.org) | no separate licence found for Blender's colour files (Blender itself is GPL-3.0-or-later); OpenColorIO is BSD-3-Clause | `data/blender/ocio*.f32`: our own measured tables (not copies of Blender's files) |
+| [OpenColorIO](https://github.com/AcademySoftwareFoundation/OpenColorIO) 2.5.0 maths (fast log2/exp2/pow, op order) | BSD-3-Clause, Contributors to the OpenColorIO Project | ported in `tools/blender/ocioport.py` |

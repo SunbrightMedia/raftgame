@@ -4,7 +4,9 @@
 
 Writes OUT_DIR/blenderPost.json: textures (sizes), passes (GLSL fragment source, inputs, output), constants
 (static ones baked; the few that change with the frame as small expression lists the runtime evaluates in
-float32), curve tables and the image-coordinate tables; and OUT_DIR/*.f32 data (3D colour tables).
+float32), curve tables and the image-coordinate tables; and the 3D colour tables (ocioport's measured tables,
+raw float32 RGB, red fastest) as OUT_DIR/<name>.f32, or in parts <name>.f32.0, .1, ... when large. The program's
+"data" lists each table's files in order. The game's copy lives in data/blender/ (see its README).
 
 How the graph maps to passes: compeval already decided, as Blender does, every node's domain (size, transform,
 realization options). Pixel nodes whose inputs share their domain are fused into one shader; a value becomes a
@@ -1211,7 +1213,9 @@ def _compile(self):
     if self.harden:
         for p in self.passes:
             p['frag'] = harden(p['frag'])
+    rs = self.d['scene']['render']
     return {
+        'fps': float(rs.get('fps', 24)) / float(rs.get('fps_base', 1.0) or 1.0),
         'display': disp, 'dither': dither, 'view': view,
         'size': list(self.ev.render_size),
         'textures': self.textures, 'passes': self.passes, 'output': tid,
@@ -1230,15 +1234,30 @@ def main2():
     ap.add_argument('dump'); ap.add_argument('curves'); ap.add_argument('out')
     ap.add_argument('--size', default='854x480')
     ap.add_argument('--no-harden', action='store_true', help='leave the GPU compiler free to fuse and regroup float ops')
+    ap.add_argument('--part-mb', type=float, default=8.0, help='tables larger than this are written in parts (artifact files must stay under 15 MB)')
+    ap.add_argument('--source', default='', help='where the compositor graph comes from (kept in the program)')
     a = ap.parse_args()
     W, H = (int(v) for v in a.size.split('x'))
     comp = Compiler(json.load(open(a.dump)), json.load(open(a.curves)), (W, H))
     comp.harden = not a.no_harden
     prog = comp.compile()
+    if a.source:
+        prog['source'] = a.source
     os.makedirs(a.out, exist_ok=True)
-    json.dump(prog, open(os.path.join(a.out, 'blenderPost.json'), 'w'))
+    # tables: raw float32 RGB, red fastest; split in parts (name.f32.0, .1, ...) when big
+    part = int(a.part_mb * 1024 * 1024) // 12 * 12
     for name, tab in comp.tables.items():
-        tab.astype('<f4').tofile(os.path.join(a.out, name + '.f32'))
+        raw = tab.astype('<f4').tobytes()
+        if len(raw) <= part:
+            open(os.path.join(a.out, name + '.f32'), 'wb').write(raw)
+            prog['data'][name] = [name + '.f32']
+        else:
+            files = []
+            for k in range(0, len(raw), part):
+                fn = f'{name}.f32.{k // part}'
+                open(os.path.join(a.out, fn), 'wb').write(raw[k:k + part]); files.append(fn)
+            prog['data'][name] = files
+    json.dump(prog, open(os.path.join(a.out, 'blenderPost.json'), 'w'))
     print('passes', len(prog['passes']), 'textures', len(prog['textures']), 'curves', len(prog['curves']),
           'coord rows', len(prog['coords']), 'rotations', len(prog['rotations']), 'dynamic nodes', len(prog['dynamic']),
           'tables', {k: v.shape[0] for k, v in comp.tables.items()})

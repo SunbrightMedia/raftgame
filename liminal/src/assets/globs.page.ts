@@ -13,3 +13,5 @@ export const catalogue: { textures?: unknown; sheets: Record<string, string>; mo
 export const worlds: Record<string, (seed: number) => unknown> = {};
 /** Worlds with no edge, loaded as lots round the player: none in this build (see globs.dev.ts). */
 export const lots: Record<string, { settings: unknown; start: (seed: number, i: number, j: number) => [number, number, number] }> = {};
+/** Blender post-processing data: not in this build (see globs.dev.ts); the 'blender' camera model falls back. */
+export const blenderData: Record<string, () => Promise<string>> = {};

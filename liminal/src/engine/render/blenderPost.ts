@@ -25,8 +25,11 @@ export interface BPProgram {
   coords: number[][];
   rotations: BPRotation[];
   dynamic: BPDynNode[];
-  data: Record<string, string>;
+  /** 3D colour tables: name -> its files, in order (raw float32 RGB, red fastest; big tables come in parts). */
+  data: Record<string, string[]>;
   fps?: number;
+  /** Where the compositor graph comes from. */
+  source?: string;
   /** The display step's output (bytes / 255, Blender's 8-bit render), when the program has one. */
   display?: string;
   /** Blender's dither intensity (render settings) for the display step. */
@@ -158,9 +161,15 @@ export class BlenderPost {
   /** Tests: each overridden pass's own result, from before the override. */
   readonly captured = new Map<string, Float32Array>();
 
-  constructor(private gl: WebGL2RenderingContext, private prog: BPProgram, luts: Record<string, Float32Array>) {
+  /**
+   * `pool` (default on): passes share float textures once every reader of a value has run, which keeps the GPU
+   * memory to a few textures instead of one per pass (77 x 6.5 MB at 854 x 480). Tests that read any pass's
+   * result after the run turn it off.
+   */
+  constructor(private gl: WebGL2RenderingContext, private prog: BPProgram, luts: Record<string, Float32Array>, opts: { pool?: boolean } = {}) {
     if (!gl.getExtension('EXT_color_buffer_float')) throw new Error('needs EXT_color_buffer_float');
-    for (const [id, t] of Object.entries(prog.textures)) this.makeTarget(id, t.w, t.h);
+    if (opts.pool === false) for (const [id, t] of Object.entries(prog.textures)) this.makeTarget(id, t.w, t.h);
+    else this.allocate();
     this.outputSize = [prog.textures[prog.output].w, prog.textures[prog.output].h];
     // tables: curves (257 x rows), coordinates (max x rows), rotations (per frame), 3D colour tables
     this.makeData('curves', 257, Math.max(1, prog.curves.length), prog.curves.flat());
@@ -170,9 +179,9 @@ export class BlenderPost {
     this.rotData = new Float32Array(cw * Math.max(1, 4 * prog.rotations.length));
     this.makeData('rot', cw, Math.max(1, 4 * prog.rotations.length), this.rotData);
     if (prog.display) this.makeData('dither', prog.size[0], prog.size[1], ditherNoise(prog.size[0], prog.size[1], prog.dither ?? 0));
-    for (const [name, file] of Object.entries(prog.data)) {
+    for (const [name, files] of Object.entries(prog.data)) {
       const lut = luts[name];
-      if (!lut) throw new Error('missing table ' + name + ' (' + file + ')');
+      if (!lut) throw new Error('missing table ' + name + ' (' + files.join(', ') + ')');
       const n = Math.round(Math.cbrt(lut.length / 3));
       const t = gl.createTexture()!;
       gl.bindTexture(gl.TEXTURE_3D, t);
@@ -193,6 +202,80 @@ export class BlenderPost {
       const t = prog.textures[p.out];
       this.passes.push({ prog: pr, out: p.out, w: t.w, h: t.h, samplers, uniforms });
     }
+    this.vs = vs;
+  }
+
+  private vs: WebGLShader;
+  private inputProg: { prog: WebGLProgram; src: WebGLUniformLocation | null; scale: WebGLUniformLocation | null } | null = null;
+  private presentProg: { prog: WebGLProgram; src: WebGLUniformLocation | null; rect: WebGLUniformLocation | null; size: WebGLUniformLocation | null; linear: WebGLUniformLocation | null } | null = null;
+
+  private link(frag: string, label: string): WebGLProgram {
+    const gl = this.gl, pr = gl.createProgram()!;
+    gl.attachShader(pr, this.vs); gl.attachShader(pr, this.shader(gl.FRAGMENT_SHADER, frag, label)); gl.linkProgram(pr);
+    if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(label + ': ' + gl.getProgramInfoLog(pr));
+    return pr;
+  }
+
+  /** The game's render as the compositor's input: x exposure (one float multiply), alpha 1 (Blender's opaque film). */
+  private stageInput(input: WebGLTexture, scale: number): void {
+    const gl = this.gl, [W, H] = this.prog.size;
+    if (!this.inputProg) {
+      const pr = this.link(`#version 300 es
+precision highp float; uniform highp sampler2D t_src; uniform float u_scale; out vec4 o;
+void main() { vec4 c = texelFetch(t_src, ivec2(gl_FragCoord.xy), 0); o = vec4(c.rgb * u_scale, 1.0); }`, 'input stage');
+      this.inputProg = { prog: pr, src: gl.getUniformLocation(pr, 't_src'), scale: gl.getUniformLocation(pr, 'u_scale') };
+      this.makeTarget('input0', W, H);
+    }
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo.get('input0')!);
+    gl.viewport(0, 0, W, H);
+    gl.useProgram(this.inputProg.prog);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, input); gl.uniform1i(this.inputProg.src, 0);
+    gl.uniform1f(this.inputProg.scale, f(scale));
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  /**
+   * Draw the display output on the screen (the default framebuffer, w x h), as large as fits with the program's
+   * aspect, black bars round it. At 1:1 every pixel is Blender's byte. `linear` = bilinear when scaled.
+   */
+  present(w: number, h: number, linear: boolean): void {
+    const gl = this.gl, src = this.tex.get(this.prog.display ?? this.prog.output)!, [W, H] = this.prog.size;
+    if (!this.presentProg) {
+      const pr = this.link(`#version 300 es
+precision highp float; uniform highp sampler2D t_src; uniform vec4 u_rect; uniform vec2 u_size; uniform int u_linear; out vec4 o;
+vec4 at(ivec2 p) { return texelFetch(t_src, clamp(p, ivec2(0), ivec2(u_size) - 1), 0); }
+void main() {
+  vec2 uv = (gl_FragCoord.xy - u_rect.xy) / u_rect.zw * u_size;
+  if (u_linear == 0) { o = vec4(at(ivec2(floor(uv))).rgb, 1.0); return; }
+  vec2 q = uv - 0.5, b = floor(q), t = q - b; ivec2 i = ivec2(b);
+  o = vec4(mix(mix(at(i), at(i + ivec2(1, 0)), t.x), mix(at(i + ivec2(0, 1)), at(i + ivec2(1, 1)), t.x), t.y).rgb, 1.0);
+}`, 'present');
+      this.presentProg = { prog: pr, src: gl.getUniformLocation(pr, 't_src'), rect: gl.getUniformLocation(pr, 'u_rect'), size: gl.getUniformLocation(pr, 'u_size'), linear: gl.getUniformLocation(pr, 'u_linear') };
+    }
+    const k = Math.min(w / W, h / H), rw = Math.round(W * k), rh = Math.round(H * k), rx = Math.floor((w - rw) / 2), ry = Math.floor((h - rh) / 2);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.disable(gl.BLEND); gl.disable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE); gl.disable(gl.SCISSOR_TEST);
+    gl.viewport(0, 0, w, h);
+    gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.viewport(rx, ry, rw, rh);
+    gl.useProgram(this.presentProg.prog);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, src); gl.uniform1i(this.presentProg.src, 0);
+    gl.uniform4f(this.presentProg.rect, rx, ry, rw, rh);
+    gl.uniform2f(this.presentProg.size, W, H);
+    gl.uniform1i(this.presentProg.linear, linear && (rw !== W || rh !== H) ? 1 : 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  /** Free every GL object this made. */
+  dispose(): void {
+    const gl = this.gl;
+    for (const t of new Set([...this.tex].filter(([id]) => id !== 'input').map(([, t]) => t))) gl.deleteTexture(t);   // 'input' may be the caller's
+    for (const fb of new Set(this.fbo.values())) gl.deleteFramebuffer(fb);
+    for (const p of this.passes) gl.deleteProgram(p.prog);
+    if (this.inputProg) gl.deleteProgram(this.inputProg.prog);
+    if (this.presentProg) gl.deleteProgram(this.presentProg.prog);
+    gl.deleteShader(this.vs);
+    this.tex.clear(); this.fbo.clear(); this.passes = [];
   }
 
   private shader(type: number, src: string, label = ''): WebGLShader {
@@ -201,6 +284,32 @@ export class BlenderPost {
     if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(`${label}: ${gl.getShaderInfoLog(s)}`);
     return s;
   }
+
+  /** Pass outputs onto shared targets: a target is free again after the last pass that reads its value. */
+  private allocate(): void {
+    const prog = this.prog, last = new Map<string, number>();
+    prog.passes.forEach((p, i) => { for (const tid of Object.values(p.inputs)) if (tid in prog.textures) last.set(tid, i); });
+    const free = new Map<string, string[]>(), keep = new Set([prog.output, prog.display ?? prog.output]);
+    let n = 0;
+    prog.passes.forEach((p, i) => {
+      const t = prog.textures[p.out], key = t.w + 'x' + t.h;
+      const phys = free.get(key)?.pop() ?? `pool${n++}`;
+      if (!this.tex.has(phys)) this.makeTarget(phys, t.w, t.h);
+      this.tex.set(p.out, this.tex.get(phys)!); this.fbo.set(p.out, this.fbo.get(phys)!); this.physOf.set(p.out, phys);
+      for (const tid of new Set(Object.values(p.inputs))) {
+        if (last.get(tid) === i && this.physOf.has(tid) && !keep.has(tid)) {
+          const tt = prog.textures[tid], k = tt.w + 'x' + tt.h;
+          free.set(k, [...(free.get(k) ?? []), this.physOf.get(tid)!]);
+        }
+      }
+      if (!last.has(p.out) && !keep.has(p.out)) free.set(key, [...(free.get(key) ?? []), phys]);
+    });
+    this.poolSize = n;
+  }
+
+  private physOf = new Map<string, string>();
+  /** Float targets in use (with the pool on). */
+  poolSize = 0;
 
   private makeTarget(id: string, w: number, h: number): void {
     const gl = this.gl, t = gl.createTexture()!;
@@ -224,8 +333,10 @@ export class BlenderPost {
   /** The render (scene linear, RGBA float texture of the program's size); `frame` drives the noise seeds.
    * Returns the display output (Blender's 8-bit picture, as bytes / 255) when the program has one, else the
    * compositor's scene-linear output. */
-  run(input: WebGLTexture, frame: number, overrides?: Record<string, Float32Array>): WebGLTexture {
+  run(input: WebGLTexture, frame: number, overrides?: Record<string, Float32Array>, stage?: { scale: number }): WebGLTexture {
     const gl = this.gl, prog = this.prog;
+    gl.disable(gl.BLEND); gl.disable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE); gl.disable(gl.SCISSOR_TEST);
+    gl.bindVertexArray(null);
     const dyn = evalDynamic(prog, frame, prog.fps ?? 24);
     const value = (r: BPDynRef | { const: number[] }): Val => {
       if ('const' in r) return r.const.map(f);
@@ -248,8 +359,8 @@ export class BlenderPost {
       gl.bindTexture(gl.TEXTURE_2D, this.tex.get('rot')!);
       gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, this.rotW, 4 * prog.rotations.length, gl.RED, gl.FLOAT, this.rotData);
     }
-    this.tex.set('input', input);
-    gl.disable(gl.BLEND); gl.disable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE); gl.disable(gl.SCISSOR_TEST);
+    if (stage) { this.stageInput(input, stage.scale); this.tex.set('input', this.tex.get('input0')!); }
+    else this.tex.set('input', input);
     for (const p of this.passes) {
       gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo.get(p.out)!);
       gl.viewport(0, 0, p.w, p.h);

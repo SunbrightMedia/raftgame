@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { Digicam, type CameraParams } from './digicam';
 import { SourcePost, type SourcePostParams } from './sourcePost';
 import { CamcorderPost, type CamcorderMotion, type CamcorderParams } from './camcorder';
+import { BlenderPost } from './blenderPost';
+import { haveBlenderData, loadBlenderData } from './blenderData';
 
 THREE.ColorManagement.enabled = false;
 THREE.Object3D.DEFAULT_UP.set(0, 0, 1);
@@ -33,6 +35,17 @@ export class LowResRenderer {
   /** The capture-matched camcorder (camcorder.ts): fixed exposure, glow, film curve, tape, lens; a 4:3 picture. Wins over the others. */
   camcorder: CamcorderParams | null = null;
   private camcorderPost = new CamcorderPost();
+  /**
+   * Blender's post-processing (blenderPost.ts): the ShuttleworthL project's compositor and AgX view, bit for bit
+   * as Blender computes them, on a picture of the project's size (854 x 480). Wins over the others. The data
+   * loads the first time it is wanted; until then the plain picture shows.
+   */
+  blender: { exposure: number; frameRate: number; startFrame: number } | null = null;
+  private blenderPost: BlenderPost | null = null;
+  private blenderSize: [number, number] = [854, 480];
+  private blenderTime = 0;
+  /** For the HUD and tests: loading / ready / failed, the error, the compositor frame last run. */
+  readonly blenderStats = { state: 'idle' as 'idle' | 'loading' | 'ready' | 'failed', error: '', frame: 0 };
   /** Source light → radiance (see worldUniforms.sourceUnit). */
   sourceUnit = 300 / Math.PI;
   private lastFrame = performance.now();
@@ -199,7 +212,7 @@ export class LowResRenderer {
     const w = this.canvas.clientWidth || window.innerWidth;
     const h = this.canvas.clientHeight || window.innerHeight;
     if (this.canvas.width !== w || this.canvas.height !== h) this.gl.setSize(w, h, false);
-    const aspect = this.camcorder?.bars ? 4 / 3 : w / h;
+    const aspect = this.camcorder?.bars ? 4 / 3 : this.blender ? this.blenderSize[0] / this.blenderSize[1] : w / h;
     if (this.viewMatch) {
       // A window onto a larger image whose centre is the match's image centre.
       const m = this.viewMatch, fullW = w + 2 * Math.abs(m.dx), fullH = h + 2 * Math.abs(m.dy);
@@ -244,8 +257,10 @@ export class LowResRenderer {
       } else if (this.triedUp && this.steady > 2) { this.triedUp = false; this.holdUp = 4; }
     } else { this.scale = 1; this.lowAA = false; }
     // In steps of 16 lines, so the buffers are not remade for every small change.
-    const ih = Math.max(1, Math.min(full, Math.round((full * this.scale) / 16) * 16 || full));
-    const iw = Math.max(1, Math.round(ih * aspect));
+    let ih = Math.max(1, Math.min(full, Math.round((full * this.scale) / 16) * 16 || full));
+    let iw = Math.max(1, Math.round(ih * aspect));
+    // Blender's compositor works on its own picture size (its blurs and grain are in pixels of it)
+    if (this.blender) [iw, ih] = this.blenderSize;
     this.renderSize.set(iw, ih);
     const filter = this.upscale === 'nearest' ? THREE.NearestFilter : THREE.LinearFilter;
     const samples = this.lowAA ? 0 : msaa;
@@ -295,6 +310,7 @@ export class LowResRenderer {
     if (this.blitMat.map !== frame.texture) { this.blitMat.map = frame.texture; this.blitMat.needsUpdate = true; }
     const now = performance.now(), dt = Math.min(0.25, (now - this.lastFrame) / 1000);
     this.lastFrame = now;
+    if (this.blender && this.runBlender(frame, dt)) return;
     if (this.camcorder) {
       const hfov = 2 * Math.atan(Math.tan((this.camera.fov * Math.PI) / 360) * this.camera.aspect);
       this.camcorderPost.render(this.gl, frame, this.camcorder, hfov, dt, this.shutterMotion(dt));
@@ -318,5 +334,33 @@ export class LowResRenderer {
     }
     this.gl.setRenderTarget(null);
     this.gl.render(this.blitScene, this.blitCam);
+  }
+
+  /** The 'blender' camera: false while its data loads (or if it cannot run), so the caller shows the plain picture. */
+  private runBlender(frame: THREE.WebGLRenderTarget, dt: number): boolean {
+    const b = this.blender!, st = this.blenderStats;
+    if (!this.blenderPost) {
+      if (st.state === 'idle') {
+        if (!haveBlenderData()) { st.state = 'failed'; st.error = 'the Blender data is not in this build'; return false; }
+        st.state = 'loading';
+        loadBlenderData().then(({ prog, luts }) => {
+          this.blenderPost = new BlenderPost(this.gl.getContext() as WebGL2RenderingContext, prog, luts);
+          this.blenderSize = [prog.size[0], prog.size[1]];
+          this.gl.resetState();
+          st.state = 'ready';
+        }).catch((e: unknown) => { st.state = 'failed'; st.error = String(e); this.gl.resetState(); });
+      }
+      return false;
+    }
+    const tex = (this.gl.properties.get(frame.texture) as { __webglTexture?: WebGLTexture }).__webglTexture;
+    if (!tex || frame.width !== this.blenderSize[0] || frame.height !== this.blenderSize[1]) return false;
+    this.blenderTime += dt;
+    const n = b.startFrame + (b.frameRate > 0 ? Math.floor(this.blenderTime * b.frameRate) : 0);
+    this.blenderPost.run(tex, n, undefined, { scale: b.exposure });
+    const c = this.gl.domElement;
+    this.blenderPost.present(c.width, c.height, this.upscale === 'linear');
+    this.gl.resetState();
+    st.frame = n;
+    return true;
   }
 }

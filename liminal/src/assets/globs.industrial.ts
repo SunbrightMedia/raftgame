@@ -20,3 +20,5 @@ export const worlds: Record<string, (seed: number) => unknown> = {
 export const lots: Record<string, { settings: unknown; start: (seed: number, i: number, j: number) => [number, number, number] }> = {
   industrial: { settings: GEOMETRY_SETTINGS, start: lotStart },
 };
+/** Blender post-processing data: not in this build (see globs.dev.ts); the 'blender' camera model falls back. */
+export const blenderData: Record<string, () => Promise<string>> = {};
