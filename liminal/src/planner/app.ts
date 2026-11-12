@@ -7,8 +7,9 @@
  */
 import './planner.css';
 import { FEATURE, FEATURES, GROUPS, THEMES, TAG_FEATURES, ZONE_FEATURES } from './catalogue';
-import { CanvasPen, DEFAULT_LAYERS, drawMap, SvgPen, type Layers, type View } from './draw';
+import { BG, CanvasPen, DEFAULT_LAYERS, drawMap, drawOverlay, SvgPen, type Layers, type View } from './draw';
 import { DEFAULT_PARAMS, emptyEdits, generate } from './generate';
+import GenWorker from './genWorker?worker&inline';
 import { toLocal, v2, type V2 } from './geom';
 import type { Edits, MapOut, Params, Zone, ZoneEdit } from './types';
 
@@ -29,6 +30,7 @@ function save(): void {
 const randSeed = () => Math.floor(Math.random() * 1e6);
 
 const state: Saved = load() ?? { params: { ...DEFAULT_PARAMS, seed: randSeed() }, edits: emptyEdits(), layers: { ...DEFAULT_LAYERS } };
+// undefined until the worker sends the first map
 let map!: MapOut;
 const view: View = { cx: 0, cy: 0, scale: 3, w: 800, h: 600 };
 let selKey: string | null = null;
@@ -73,7 +75,7 @@ const g = canvas.getContext('2d')!;
 // ------------------------------------------------------------------ header
 const layerBtn = (key: keyof Layers, label: string) => {
   const b = el('button', { class: `small ${state.layers[key] ? 'on' : ''}`, text: label, title: `Show or hide: ${label}` });
-  b.addEventListener('click', () => { state.layers[key] = !state.layers[key]; b.classList.toggle('on', state.layers[key]); save(); requestDraw(); });
+  b.addEventListener('click', () => { state.layers[key] = !state.layers[key]; b.classList.toggle('on', state.layers[key]); save(); invalidateMap(); });
   return b;
 };
 const noteBtn = el('button', { class: 'small', text: 'Note', title: 'Click on the map to write a note (N)' });
@@ -168,7 +170,7 @@ left.append(el('div', { class: 'btns' }, el('button', { class: 'small', text: 'A
 // ------------------------------------------------------------------ right: selection
 function renderSide(): void {
   right.replaceChildren();
-  const z = selKey ? map.zones.find((q) => q.key === selKey) : undefined;
+  const z = selKey && map ? map.zones.find((q) => q.key === selKey) : undefined;
   if (!z) {
     right.append(
       el('h2', { text: 'How to use' }),
@@ -254,18 +256,46 @@ function deleteZone(z: Zone): void {
 }
 
 // ------------------------------------------------------------------ generate and draw
+// Maps are made in a worker. Only one request runs at a time; while it runs, newer edits wait and only the
+// newest is sent next, so dragging a slider never queues up stale maps. Without workers, it runs here.
 let regenTimer = 0, regenFit = false;
 function scheduleRegen(refit = false): void {
   regenFit ||= refit;
   clearTimeout(regenTimer);
-  regenTimer = window.setTimeout(() => { regenerate(regenFit); regenFit = false; save(); }, 50);
+  regenTimer = window.setTimeout(() => { regenerate(regenFit); regenFit = false; save(); }, 30);
 }
+let worker: Worker | null = null;
+try { worker = new GenWorker(); } catch { worker = null; }
+let reqId = 0, mapId = 0, busy = false, dirty = false, wantFit = false;
+worker?.addEventListener('message', (e: MessageEvent<{ id: number; map?: MapOut; stats?: MapOut['stats']; error?: string }>) => {
+  const d = e.data;
+  if (d.error) { console.error(d.error); busy = false; return; }
+  if (d.map) {
+    busy = false;
+    mapId = d.id;
+    setMap(d.map);
+    if (dirty) regenerate();
+  } else if (d.stats && d.id === mapId && map) { Object.assign(map.stats, d.stats); showStats(); }
+});
+worker?.addEventListener('error', (e) => { console.warn('map worker failed, making maps on the page', e.message); worker = null; busy = false; regenerate(); });
 function regenerate(refit = false): void {
   seedInput.value = String(state.params.seed);
   sliders.forEach((s) => s());
   featSyncs.forEach((s) => s());
-  map = generate(state.params, state.edits);
-  if (refit) fit();
+  wantFit ||= refit;
+  if (!worker) { setMap(generate(state.params, state.edits)); return; }
+  if (busy) { dirty = true; return; }
+  busy = true; dirty = false;
+  worker.postMessage({ id: ++reqId, params: state.params, edits: state.edits });
+}
+function setMap(m: MapOut): void {
+  map = m;
+  if (wantFit) { fit(); wantFit = false; }
+  showStats();
+  renderSide();
+  invalidateMap();
+}
+function showStats(): void {
   const s = map.stats;
   const cut = s.cutOff.length;
   statsEl.replaceChildren(
@@ -273,8 +303,6 @@ function regenerate(refit = false): void {
     `walkable from the hub ${Math.round(s.reached * 100)}% · floor fill ${Math.round(s.floorShare * 100)}% · ${Math.round(s.widthFt)}×${Math.round(s.heightFt)} ft · made in ${s.ms} ms`,
     cut ? el('span', { class: 'warn', text: ` · ${cut} cut off` }) : '',
   );
-  renderSide();
-  requestDraw();
 }
 function fit(): void {
   const b = map.bounds;
@@ -285,15 +313,51 @@ function fit(): void {
 let drawQueued = false;
 let ghost: { z: Zone; dx: number; dy: number; da: number } | null = null;
 function requestDraw(): void { if (!drawQueued) { drawQueued = true; requestAnimationFrame(draw); } }
+// The plan is drawn once into a picture a viewport larger on every side; panning and zooming move and scale that
+// picture. It is drawn again when the view leaves it, when zoom has changed it by 2x, or soon after zooming
+// stops, so it is sharp again.
+const cache = document.createElement('canvas');
+const cg = cache.getContext('2d')!;
+let cacheView: View | null = null, cacheDirty = true, sharpenTimer = 0;
+const MARGIN = 0.5;
+function invalidateMap(): void { cacheDirty = true; requestDraw(); }
+function renderCache(): void {
+  const dpr = window.devicePixelRatio || 1;
+  const W = Math.round(view.w * (1 + 2 * MARGIN)), H = Math.round(view.h * (1 + 2 * MARGIN));
+  if (cache.width !== Math.round(W * dpr) || cache.height !== Math.round(H * dpr)) { cache.width = Math.round(W * dpr); cache.height = Math.round(H * dpr); }
+  cg.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cacheView = { cx: view.cx, cy: view.cy, scale: view.scale, w: W, h: H };
+  drawMap(new CanvasPen(cg), map, cacheView, state.layers, -1, 'base');
+  cacheDirty = false;
+}
+/** Does the cached picture hold all of the current view? */
+function cacheCovers(): boolean {
+  if (!cacheView) return false;
+  const c = cacheView, v = view;
+  return v.cx - v.w / 2 / v.scale >= c.cx - c.w / 2 / c.scale - 1e-6 && v.cx + v.w / 2 / v.scale <= c.cx + c.w / 2 / c.scale + 1e-6
+    && v.cy - v.h / 2 / v.scale >= c.cy - c.h / 2 / c.scale - 1e-6 && v.cy + v.h / 2 / v.scale <= c.cy + c.h / 2 / c.scale + 1e-6;
+}
+function sharpenSoon(ms: number): void {
+  clearTimeout(sharpenTimer);
+  sharpenTimer = window.setTimeout(() => { if (map) { renderCache(); requestDraw(); } }, ms);
+}
 function draw(): void {
   drawQueued = false;
   const dpr = window.devicePixelRatio || 1;
   const cw = canvas.clientWidth, ch = canvas.clientHeight;
-  if (canvas.width !== Math.round(cw * dpr) || canvas.height !== Math.round(ch * dpr)) { canvas.width = Math.round(cw * dpr); canvas.height = Math.round(ch * dpr); }
+  if (canvas.width !== Math.round(cw * dpr) || canvas.height !== Math.round(ch * dpr)) { canvas.width = Math.round(cw * dpr); canvas.height = Math.round(ch * dpr); cacheDirty = true; }
   view.w = cw; view.h = ch;
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.fillStyle = BG; g.fillRect(0, 0, cw, ch);
+  if (!map) return;
+  const ratio = cacheView ? view.scale / cacheView.scale : 1;
+  if (cacheDirty || !cacheCovers() || ratio > 2 || ratio < 0.5) renderCache();
+  else if (Math.abs(ratio - 1) > 1e-9) sharpenSoon(140);
+  const c = cacheView!, k = view.scale / c.scale;
+  g.imageSmoothingEnabled = true;
+  g.drawImage(cache, view.w / 2 + (c.cx - view.cx) * view.scale - (c.w / 2) * k, view.h / 2 + (c.cy - view.cy) * view.scale - (c.h / 2) * k, c.w * k, c.h * k);
   const sel = selKey ? map.zones.findIndex((z) => z.key === selKey) : -1;
-  drawMap(new CanvasPen(g), map, view, state.layers, sel);
+  drawOverlay(new CanvasPen(g), map, view, sel);
   if (ghost) {
     const { z, dx, dy, da } = ghost;
     const c = Math.cos(z.frame.a + da), s = Math.sin(z.frame.a + da);
@@ -310,6 +374,7 @@ function draw(): void {
 const toWorldPt = (cx: number, cy: number): V2 => v2(view.cx + (cx - view.w / 2) / view.scale, view.cy + (cy - view.h / 2) / view.scale);
 function hit(p: V2): Zone | null {
   let best: Zone | null = null, area = Infinity;
+  if (!map) return null;
   for (const z of map.zones) {
     const q = toLocal(z.frame, p);
     if (Math.abs(q.x) <= z.w / 2 && Math.abs(q.y) <= z.h / 2 && z.w * z.h < area) { best = z; area = z.w * z.h; }
@@ -375,6 +440,7 @@ canvas.addEventListener('pointerup', () => {
   drag = null;
   if (!d) return;
   if (d.mode === 'pan' && !d.moved && selKey) { selKey = null; renderSide(); requestDraw(); }
+  if (d.mode === 'pan' && d.moved) sharpenSoon(250);   // re-centre the cached picture so the next pan has room
   if (d.mode === 'move' && d.moved && d.z && ghost) {
     const z = d.z, gh = ghost;
     ghost = null;
@@ -418,9 +484,9 @@ window.addEventListener('keydown', (e) => {
   if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); if (e.shiftKey) doRedo(); else doUndo(); return; }
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') { e.preventDefault(); doRedo(); return; }
-  const z = selKey ? map.zones.find((q) => q.key === selKey) : undefined;
+  const z = selKey && map ? map.zones.find((q) => q.key === selKey) : undefined;
   if (e.key === 'Escape') { selKey = null; setNoteMode(false); renderSide(); requestDraw(); }
-  if (e.key.toLowerCase() === 'f') { fit(); requestDraw(); }
+  if (e.key.toLowerCase() === 'f' && map) { fit(); requestDraw(); }
   if (e.key.toLowerCase() === 'n') setNoteMode(!noteMode);
   if (!z) return;
   if (e.key === 'Delete' || e.key === 'Backspace') deleteZone(z);

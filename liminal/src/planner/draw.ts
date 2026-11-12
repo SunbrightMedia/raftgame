@@ -24,7 +24,7 @@ export interface View { cx: number; cy: number; scale: number; w: number; h: num
 export interface Layers { walls: boolean; lights: boolean; marks: boolean; labels: boolean; notes: boolean; grid: boolean; layer2: boolean; heights: boolean }
 export const DEFAULT_LAYERS: Layers = { walls: true, lights: true, marks: true, labels: false, notes: true, grid: false, layer2: false, heights: false };
 
-const BG = '#575757';
+export const BG = '#575757';
 const HAND = "'Segoe Print', 'Bradley Hand', 'Comic Sans MS', cursive";
 
 export class CanvasPen implements Pen {
@@ -117,7 +117,9 @@ export function viewBox(v: View): BBox {
   return { x0: v.cx - v.w / 2 / v.scale, y0: v.cy - v.h / 2 / v.scale, x1: v.cx + v.w / 2 / v.scale, y1: v.cy + v.h / 2 / v.scale };
 }
 
-export function drawMap(pen: Pen, m: MapOut, v: View, L: Layers, sel = -1): void {
+/** The whole plan. `parts: 'base'` leaves out the selection and scale bar (drawOverlay), so the base can be
+ * cached as a picture while those change. */
+export function drawMap(pen: Pen, m: MapOut, v: View, L: Layers, sel = -1, parts: 'all' | 'base' = 'all'): void {
   const S = v.scale;
   const T = (p: V2): V2 => ({ x: (p.x - v.cx) * S + v.w / 2, y: (p.y - v.cy) * S + v.h / 2 });
   const vb = viewBox(v);
@@ -241,7 +243,13 @@ export function drawMap(pen: Pen, m: MapOut, v: View, L: Layers, sel = -1): void
     pen.text(T(p.p), p.text, { size: Math.max(9, Math.min(user ? 18 : 13, S * (p.size ?? 0.8))), color: user ? '#f4f1e8' : '#3b3328', hand: true, alpha: user ? 1 : 0.8 });
   }
 
-  // 10. selection
+  if (parts === 'all') drawOverlay(pen, m, v, sel);
+}
+
+/** The selected zone's outline and doors, and the scale bar: drawn over the (cached) plan every frame. */
+export function drawOverlay(pen: Pen, m: MapOut, v: View, sel: number): void {
+  const S = v.scale;
+  const T = (p: V2): V2 => ({ x: (p.x - v.cx) * S + v.w / 2, y: (p.y - v.cy) * S + v.h / 2 });
   if (sel >= 0 && m.zones[sel]) {
     const z = m.zones[sel];
     const pts = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([sx, sy]) => T(rotAdd(z.frame, sx * (z.w / 2 + 0.6), sy * (z.h / 2 + 0.6))));

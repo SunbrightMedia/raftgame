@@ -824,7 +824,8 @@ function layer2(zones: Zone[], links: Link[], p: Params, r: Rng): Prim[] {
 
 // ------------------------------------------------------------------ main
 
-export function generate(p: Params, edits: Edits = emptyEdits()): MapOut {
+/** `stats: false` skips the walk/fill raster (analyze), which can follow later with addStats(). */
+export function generate(p: Params, edits: Edits = emptyEdits(), opts: { stats?: boolean } = {}): MapOut {
   const t0 = performance.now();
   const root = new Rng(p.seed >>> 0);
   const nodes = plan(p, edits, root);
@@ -973,7 +974,13 @@ export function generate(p: Params, edits: Edits = emptyEdits()): MapOut {
   out.stats.deadEnds = c.zones.filter((z, i) => deg[i] === 1 && z.feature !== 'mass').length;
   out.stats.loops = Math.max(0, c.links.length - (c.zones.length - 1));
   out.stats.landmarks = c.zones.filter((z) => FEATURE[z.feature].role === 'landmark').length;
-  Object.assign(out.stats, analyze(out));
   out.stats.ms = Math.round(performance.now() - t0);
+  if (opts.stats !== false) addStats(out);
   return out;
+}
+
+/** The walk/fill checks (analyze.ts) into the map's stats. */
+export function addStats(m: MapOut): MapOut {
+  Object.assign(m.stats, analyze(m));
+  return m;
 }
