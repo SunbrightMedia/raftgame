@@ -1,0 +1,63 @@
+{
+ "id": "modular_metal_gutter",
+ "name": "Modular Metal Gutter",
+ "url": "https://polyhaven.com/a/modular_metal_gutter",
+ "authors": [
+  "Maxim Domnin"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "industrial",
+  "structures",
+  "buildings",
+  "collection: hidden_alley"
+ ],
+ "tags": [
+  "drain",
+  "roof",
+  "downspout",
+  "rainwater",
+  "drainage",
+  "gutter system",
+  "rain gutters",
+  "modular",
+  "utility",
+  "infrastructure"
+ ],
+ "dimensions_mm": [
+  2268.4829235076904,
+  1514.7015303373337,
+  1842.6082134246826
+ ],
+ "polycount": 16490,
+ "date_published": 1697414400,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "modular_metal_gutter_1k.gltf",
+   "size": 20545,
+   "md5": "fda9803bb7b7f2d639efa8633469439b"
+  },
+  {
+   "path": "textures/modular_metal_gutter_arm_1k.jpg",
+   "size": 651054,
+   "md5": "b93541cc697f67e1b7bc2ea3f006696f"
+  },
+  {
+   "path": "textures/modular_metal_gutter_diff_1k.jpg",
+   "size": 532828,
+   "md5": "94f55c016d2c4d26d8584ac59254583f"
+  },
+  {
+   "path": "textures/modular_metal_gutter_nor_gl_1k.jpg",
+   "size": 538980,
+   "md5": "e1747c2ff94bf6d0f13b209d894f80a0"
+  },
+  {
+   "path": "modular_metal_gutter.bin",
+   "size": 469948,
+   "md5": "61175678f23d8247a3b2db3926654b03"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

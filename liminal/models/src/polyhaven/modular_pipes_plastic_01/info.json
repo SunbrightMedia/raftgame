@@ -1,0 +1,67 @@
+{
+ "id": "modular_pipes_plastic_01",
+ "name": "Modular Pipes Plastic 01",
+ "url": "https://polyhaven.com/a/modular_pipes_plastic_01",
+ "authors": [
+  "Amal Kumar"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "industrial",
+  "structures",
+  "collection: the_shed"
+ ],
+ "tags": [
+  "pipes",
+  "garden",
+  "shed",
+  "modular",
+  "cable",
+  "valve",
+  "tap",
+  "outdoor",
+  "water",
+  "irrigation",
+  "greenhouse",
+  "farm",
+  "farmhouse",
+  "utility",
+  "infrastructure"
+ ],
+ "dimensions_mm": [
+  879.9068927764893,
+  361.76106333732605,
+  75.73375664651394
+ ],
+ "polycount": 49708,
+ "date_published": 1670371200,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "modular_pipes_plastic_01_1k.gltf",
+   "size": 24759,
+   "md5": "419e42f829f3a4e80ebfa724c2a3a0ca"
+  },
+  {
+   "path": "textures/modular_pipes_plastic_01_diff_1k.jpg",
+   "size": 579649,
+   "md5": "b8d0792ea77af6db8023f09377e81d5e"
+  },
+  {
+   "path": "textures/modular_pipes_plastic_01_nor_gl_1k.jpg",
+   "size": 389959,
+   "md5": "8c359f828d3192568af375254e7532bc"
+  },
+  {
+   "path": "modular_pipes_plastic_01.bin",
+   "size": 1506248,
+   "md5": "e2b25c31fa282f466a451310588fdc5f"
+  },
+  {
+   "path": "textures/modular_pipes_plastic_01_arm_1k.jpg",
+   "size": 619390,
+   "md5": "9e10b42ec4373baa43ceb85ddbd29686"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

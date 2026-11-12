@@ -1,0 +1,63 @@
+{
+ "id": "wooden_broom",
+ "name": "Wooden Broom",
+ "url": "https://polyhaven.com/a/wooden_broom",
+ "authors": [
+  "Balen"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "collection: project_lighthouse",
+  "props",
+  "tools"
+ ],
+ "tags": [
+  "cleaning",
+  "janitorial",
+  "housekeeping",
+  "wood",
+  "worn",
+  "old"
+ ],
+ "dimensions_mm": [
+  490.23744463920593,
+  112.51410469412804,
+  1453.56784760952
+ ],
+ "polycount": 14258,
+ "date_published": 1781913600,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "wooden_broom_1k.gltf",
+   "size": 7588,
+   "md5": "11da4c522ca1a479ec65b17866f2e7be"
+  },
+  {
+   "path": "textures/wooden_broom_bristles_diff_1k.jpg",
+   "size": 388640,
+   "md5": "463e5bd2311720359f4e5cd19720601c"
+  },
+  {
+   "path": "textures/wooden_broom_nor_gl_1k.jpg",
+   "size": 873442,
+   "md5": "20fee130def21a2365679b78bb4e2cbb"
+  },
+  {
+   "path": "textures/wooden_broom_diff_1k.jpg",
+   "size": 759771,
+   "md5": "ff42e9a9b701b859e232d19474e62618"
+  },
+  {
+   "path": "textures/wooden_broom_arm_1k.jpg",
+   "size": 885939,
+   "md5": "5877e946e33ec34b2d344bbda0946ac6"
+  },
+  {
+   "path": "wooden_broom.bin",
+   "size": 508940,
+   "md5": "88cabae1cd73ba54ae7ef0155ed3d3ef"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

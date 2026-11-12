@@ -1,0 +1,62 @@
+{
+ "id": "plastic_bottle_gallon",
+ "name": "Plastic Bottle Gallon",
+ "url": "https://polyhaven.com/a/plastic_bottle_gallon",
+ "authors": [
+  "Rahul Chaudhary"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "containers",
+  "collection: the_shed"
+ ],
+ "tags": [
+  "rubbish",
+  "dirty",
+  "shed",
+  "outdoor",
+  "trash",
+  "clutter",
+  "garage",
+  "old",
+  "plastic",
+  "carton",
+  "milk"
+ ],
+ "dimensions_mm": [
+  166.28039628267288,
+  126.3512596487999,
+  274.4927511084825
+ ],
+ "polycount": 13728,
+ "date_published": 1675987200,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "plastic_bottle_gallon_1k.gltf",
+   "size": 2868,
+   "md5": "a420cbcc75b865e4a0c4f5ee1e4ce684"
+  },
+  {
+   "path": "textures/plastic_bottle_gallon_arm_1k.jpg",
+   "size": 343990,
+   "md5": "8d1149d4c332907ccaf2fda0a4d343c0"
+  },
+  {
+   "path": "textures/plastic_bottle_gallon_diff_1k.jpg",
+   "size": 317396,
+   "md5": "e3655eb80c6bce520865a4f4a2b37bd9"
+  },
+  {
+   "path": "textures/plastic_bottle_gallon_nor_gl_1k.jpg",
+   "size": 407414,
+   "md5": "9c8b20cae8a297d617ba3ec64ddb6209"
+  },
+  {
+   "path": "plastic_bottle_gallon.bin",
+   "size": 313632,
+   "md5": "6c2ca21c091dade524b0ea318ce0a8da"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

@@ -1,0 +1,61 @@
+{
+ "id": "metal_jerrycan",
+ "name": "Metal Jerrycan",
+ "url": "https://polyhaven.com/a/metal_jerrycan",
+ "authors": [
+  "Sean Buckley"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "collection: project_lighthouse",
+  "props",
+  "containers"
+ ],
+ "tags": [
+  "old",
+  "worn",
+  "rusted",
+  "petrol",
+  "gasoline",
+  "gas",
+  "fuel",
+  "red",
+  "metal"
+ ],
+ "dimensions_mm": [
+  350.3298610448837,
+  171.74389213323593,
+  455.1599698197606
+ ],
+ "polycount": 20022,
+ "date_published": 1774015339,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "metal_jerrycan_1k.gltf",
+   "size": 2793,
+   "md5": "bd328cec77ebf1c6889abba620abc4b6"
+  },
+  {
+   "path": "textures/metal_jerrycan_nor_gl_1k.jpg",
+   "size": 885424,
+   "md5": "659b660e67aafc748364fa9d8a23059e"
+  },
+  {
+   "path": "textures/metal_jerrycan_diff_1k.jpg",
+   "size": 673499,
+   "md5": "d265ad6d7ae3583dbd1212743092ecc7"
+  },
+  {
+   "path": "textures/metal_jerrycan_arm_1k.jpg",
+   "size": 988166,
+   "md5": "b1aa1ec8f9944e784b64ef64e3b0f7f1"
+  },
+  {
+   "path": "metal_jerrycan.bin",
+   "size": 484676,
+   "md5": "10b2255555debf5e8e0effb5735b2a39"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

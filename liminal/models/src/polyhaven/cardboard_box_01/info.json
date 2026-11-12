@@ -1,0 +1,62 @@
+{
+ "id": "cardboard_box_01",
+ "name": "Cardboard Box 01",
+ "url": "https://polyhaven.com/a/cardboard_box_01",
+ "authors": [
+  "Rahul Chaudhary"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "industrial",
+  "containers",
+  "collection: the_shed"
+ ],
+ "tags": [
+  "warehouse",
+  "shed",
+  "storage",
+  "box",
+  "paper",
+  "worn",
+  "old",
+  "broken",
+  "damaged",
+  "garage"
+ ],
+ "dimensions_mm": [
+  387.02359795570374,
+  515.8704221248627,
+  341.7995423078537
+ ],
+ "polycount": 16952,
+ "date_published": 1671148800,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "cardboard_box_01_1k.gltf",
+   "size": 2903,
+   "md5": "84572b118cc3640acdd9e978869bb3ee"
+  },
+  {
+   "path": "textures/cardboard_box_01_arm_1k.jpg",
+   "size": 398433,
+   "md5": "39ea452f95d71ec1362e47dff453c706"
+  },
+  {
+   "path": "cardboard_box_01.bin",
+   "size": 381936,
+   "md5": "64bea3a77434981017b8a06da4ccb0df"
+  },
+  {
+   "path": "textures/cardboard_box_01_diff_1k.jpg",
+   "size": 567741,
+   "md5": "a306e586325d1759ba3225d2b6ad5121"
+  },
+  {
+   "path": "textures/cardboard_box_01_nor_gl_1k.jpg",
+   "size": 817424,
+   "md5": "24768abd73f71cfdd7f5be92b18634a7"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

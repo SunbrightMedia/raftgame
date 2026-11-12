@@ -1,0 +1,63 @@
+{
+ "id": "security_camera_01",
+ "name": "Security Camera 01",
+ "url": "https://polyhaven.com/a/security_camera_01",
+ "authors": [
+  "Alexander Otterbeck",
+  "Yann Kervran"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "electronics",
+  "appliances",
+  "industrial",
+  "rigged",
+  "collection: hidden_alley"
+ ],
+ "tags": [
+  "cctv",
+  "surveillance",
+  "monitoring",
+  "police",
+  "security",
+  "camera",
+  "utility",
+  "infrastructure"
+ ],
+ "dimensions_mm": [
+  169.5517897605896,
+  553.6733567714691,
+  286.04651242494583
+ ],
+ "polycount": 13571,
+ "date_published": 1695945600,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "security_camera_01_1k.gltf",
+   "size": 4743,
+   "md5": "e155ea9e3cd650c89904abd79b07a54c"
+  },
+  {
+   "path": "security_camera_01.bin",
+   "size": 386836,
+   "md5": "e48ddbe564323963c0c37e29b4d0ca4b"
+  },
+  {
+   "path": "textures/security_camera_01_diff_1k.jpg",
+   "size": 521174,
+   "md5": "a88344425885875615f1b276fc6f312e"
+  },
+  {
+   "path": "textures/security_camera_01_arm_1k.jpg",
+   "size": 530966,
+   "md5": "0e0eea7f2bfb87f38d24304797336a6d"
+  },
+  {
+   "path": "textures/security_camera_01_nor_gl_1k.jpg",
+   "size": 315604,
+   "md5": "8476d7209627fe850d9926992f39ed0d"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

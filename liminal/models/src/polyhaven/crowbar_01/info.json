@@ -1,0 +1,63 @@
+{
+ "id": "crowbar_01",
+ "name": "Crowbar 01",
+ "url": "https://polyhaven.com/a/crowbar_01",
+ "authors": [
+  "Alexander Otterbeck"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "tools",
+  "industrial",
+  "props",
+  "collection: the_shed"
+ ],
+ "tags": [
+  "metal",
+  "shed",
+  "workshop",
+  "garage",
+  "used",
+  "dirty",
+  "construction",
+  "carpentry",
+  "nails",
+  "farmhouse"
+ ],
+ "dimensions_mm": [
+  40.41172005236149,
+  127.58862972259521,
+  555.3637742996216
+ ],
+ "polycount": 2300,
+ "date_published": 1674777600,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "crowbar_01_1k.gltf",
+   "size": 2741,
+   "md5": "b3cc9d75cecb82956227a4449c02921a"
+  },
+  {
+   "path": "textures/crowbar_01_nor_gl_1k.jpg",
+   "size": 523819,
+   "md5": "edd20b07d164710326340f8badd0cefd"
+  },
+  {
+   "path": "textures/crowbar_01_arm_1k.jpg",
+   "size": 514358,
+   "md5": "9e4c3ac1e4b66d54bbc61cc4f6440d9f"
+  },
+  {
+   "path": "crowbar_01.bin",
+   "size": 58664,
+   "md5": "5fe50025f7bdc916bc704db503a8ca79"
+  },
+  {
+   "path": "textures/crowbar_01_diff_1k.jpg",
+   "size": 488739,
+   "md5": "969ba5b2defceabc84bd4ed843e5b326"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

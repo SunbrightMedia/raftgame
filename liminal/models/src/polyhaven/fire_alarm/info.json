@@ -1,0 +1,58 @@
+{
+ "id": "fire_alarm",
+ "name": "Fire Alarm",
+ "url": "https://polyhaven.com/a/fire_alarm",
+ "authors": [
+  "Slinc"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "collection: project_lighthouse",
+  "industrial",
+  "office",
+  "wall decoration"
+ ],
+ "tags": [
+  "alarm",
+  "emergency",
+  "red",
+  "safety",
+  "firefighting"
+ ],
+ "dimensions_mm": [
+  99.44874793291092,
+  26.374715380370617,
+  143.64254474639893
+ ],
+ "polycount": 2705,
+ "date_published": 1781913600,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "fire_alarm_1k.gltf",
+   "size": 4264,
+   "md5": "d4a586d6eaeb2f3aa74f4914a70153ee"
+  },
+  {
+   "path": "textures/fire_alarm_nor_gl_1k.jpg",
+   "size": 642044,
+   "md5": "45faa21f22b249704acf2ca86d17461d"
+  },
+  {
+   "path": "textures/fire_alarm_diff_1k.jpg",
+   "size": 540983,
+   "md5": "43ddc895bc8eadfc583f0ded6ed4567f"
+  },
+  {
+   "path": "textures/fire_alarm_arm_1k.jpg",
+   "size": 650243,
+   "md5": "d1f8f0db345f229194be811413ca4c5f"
+  },
+  {
+   "path": "fire_alarm.bin",
+   "size": 112072,
+   "md5": "517104e2e304785ae0425efb479bca80"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

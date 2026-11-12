@@ -1,0 +1,59 @@
+{
+ "id": "barrel_stove",
+ "name": "Barrel Stove",
+ "url": "https://polyhaven.com/a/barrel_stove",
+ "authors": [
+  "MP"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "industrial",
+  "containers",
+  "collection: hidden_alley"
+ ],
+ "tags": [
+  "urban",
+  "city",
+  "night",
+  "fire",
+  "heating",
+  "outdoor",
+  "barrel"
+ ],
+ "dimensions_mm": [
+  599.3210971355438,
+  598.1101393699646,
+  855.6039333343506
+ ],
+ "polycount": 11404,
+ "date_published": 1698969600,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "barrel_stove_1k.gltf",
+   "size": 2747,
+   "md5": "a8d7092ddb16690f467e282e5615645f"
+  },
+  {
+   "path": "textures/barrel_stove_diff_1k.jpg",
+   "size": 858608,
+   "md5": "3f20af89cf63352537c3c875dbc61f1e"
+  },
+  {
+   "path": "textures/barrel_stove_nor_gl_1k.jpg",
+   "size": 228496,
+   "md5": "500cf0890066f4223d324131d5672d1c"
+  },
+  {
+   "path": "textures/barrel_stove_arm_1k.jpg",
+   "size": 789380,
+   "md5": "17ee54647d1f2e9b4e43fe700c17fad0"
+  },
+  {
+   "path": "barrel_stove.bin",
+   "size": 267680,
+   "md5": "6f152ba1f02c40efc326247416d18a51"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

@@ -1,0 +1,77 @@
+{
+ "id": "industrial_wall_lamp",
+ "name": "Industrial Wall Lamp",
+ "url": "https://polyhaven.com/a/industrial_wall_lamp",
+ "authors": [
+  "Kuutti Siitonen"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "lighting"
+ ],
+ "tags": [
+  "industrial",
+  "factory",
+  "warehouse",
+  "wall light",
+  "metal",
+  "bunker",
+  "mine"
+ ],
+ "dimensions_mm": [
+  273.4608203172684,
+  140.37844325849136,
+  429.90660667419434
+ ],
+ "polycount": 4446,
+ "date_published": 1748822400,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "industrial_wall_lamp_1k.gltf",
+   "size": 5800,
+   "md5": "3e6245e63698d5b7aef862280ec77d74"
+  },
+  {
+   "path": "textures/industrial_wall_lamp_emissive_1k.jpg",
+   "size": 62349,
+   "md5": "32a123a424debe690c0bde4dc0ddeab0"
+  },
+  {
+   "path": "textures/industrial_wall_lamp_nor_gl_1k.jpg",
+   "size": 673018,
+   "md5": "e1b1f9f223e26c4631418a338f1fe08f"
+  },
+  {
+   "path": "textures/industrial_wall_lamp_diff_1k.jpg",
+   "size": 669629,
+   "md5": "fec1b0755dccb02b19b6a386169460cc"
+  },
+  {
+   "path": "textures/industrial_wall_lamp_arm_1k.jpg",
+   "size": 753080,
+   "md5": "10de18cfac3070f42bc4fcd79d3993f4"
+  },
+  {
+   "path": "textures/industrial_wall_lamp_glass_nor_gl_1k.jpg",
+   "size": 585913,
+   "md5": "05d60c2d147a240b347023e01df7129f"
+  },
+  {
+   "path": "textures/industrial_wall_lamp_glass_diff_1k.jpg",
+   "size": 316099,
+   "md5": "3b92d16c0f316b2648e2c4dbd0ed4776"
+  },
+  {
+   "path": "textures/industrial_wall_lamp_glass_arm_1k.jpg",
+   "size": 570850,
+   "md5": "8e7922054b07fcf58beb8009f88db049"
+  },
+  {
+   "path": "industrial_wall_lamp.bin",
+   "size": 141492,
+   "md5": "86407c4250e46ad39c5a86e1dc1034f9"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

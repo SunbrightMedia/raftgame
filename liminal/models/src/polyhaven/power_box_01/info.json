@@ -1,0 +1,70 @@
+{
+ "id": "power_box_01",
+ "name": "Power Box 01",
+ "url": "https://polyhaven.com/a/power_box_01",
+ "authors": [
+  "Rico Cilliers",
+  "Yann Kervran"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "industrial",
+  "props",
+  "electronics",
+  "tools",
+  "rigged",
+  "collection: the_shed"
+ ],
+ "tags": [
+  "box",
+  "electrical",
+  "power",
+  "wiring",
+  "db board",
+  "circuit",
+  "breakers",
+  "board",
+  "switch",
+  "prop",
+  "modern",
+  "damaged",
+  "utility",
+  "infrastructure"
+ ],
+ "dimensions_mm": [
+  377.4920701980591,
+  418.45703125,
+  503.142774105072
+ ],
+ "polycount": 21272,
+ "date_published": 1635465600,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "power_box_01_1k.gltf",
+   "size": 4417,
+   "md5": "9fbd7f7049a13eb25213f5038c1ef42c"
+  },
+  {
+   "path": "textures/power_box_01_arm_1k.jpg",
+   "size": 801803,
+   "md5": "2173121335747b6b20b747363d530006"
+  },
+  {
+   "path": "textures/power_box_01_nor_gl_1k.jpg",
+   "size": 646545,
+   "md5": "92c88449b0ce7dad3cd1d7e055870af5"
+  },
+  {
+   "path": "power_box_01.bin",
+   "size": 782096,
+   "md5": "e76df413e15ce8a76eb50971266d2450"
+  },
+  {
+   "path": "textures/power_box_01_diff_1k.jpg",
+   "size": 490782,
+   "md5": "c5d43a1a9cf48a616852a05401ad8f20"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

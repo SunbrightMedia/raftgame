@@ -1,0 +1,67 @@
+{
+ "id": "utility_box_01",
+ "name": "Utility Box 01",
+ "url": "https://polyhaven.com/a/utility_box_01",
+ "authors": [
+  "James Ray Cock"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "industrial",
+  "structures",
+  "collection: hidden_alley"
+ ],
+ "tags": [
+  "utility",
+  "box",
+  "electrical",
+  "power",
+  "circuit",
+  "breakers",
+  "transformer",
+  "distributionpanel",
+  "junction box",
+  "control panel",
+  "utility box",
+  "infrastructure",
+  "urban",
+  "city",
+  "road"
+ ],
+ "dimensions_mm": [
+  520.0002193450928,
+  431.999996304512,
+  1120.3334331512451
+ ],
+ "polycount": 4404,
+ "date_published": 1700265600,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "utility_box_01_1k.gltf",
+   "size": 2766,
+   "md5": "a9154d210827ea508c59cb5917ca1d0f"
+  },
+  {
+   "path": "textures/utility_box_01_diff_1k.jpg",
+   "size": 558681,
+   "md5": "3e76f9da5032c98ed48e1b3e4cad2511"
+  },
+  {
+   "path": "textures/utility_box_01_nor_gl_1k.jpg",
+   "size": 557001,
+   "md5": "688a6e1925ad7bbcd562cb714165330e"
+  },
+  {
+   "path": "textures/utility_box_01_arm_1k.jpg",
+   "size": 716061,
+   "md5": "f2b9e218e14b40108b5b84344c3d26ec"
+  },
+  {
+   "path": "utility_box_01.bin",
+   "size": 142552,
+   "md5": "5fa84789b367c3f04786e3ba92333c50"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

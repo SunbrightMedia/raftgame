@@ -79,3 +79,52 @@ Copyright © 2001-2024 Contributors to the Freedoom project. All rights reserved
 |---|---|---|
 | `cc0/padded_chair` | From SchoolChair_01 by Ethan Place, Poly Haven (CC0): shell replaced by a padded seat and back, frame darkened | CC0 1.0 |
 | `house/armchair_soft` | Original: soft upholstered armchair built from rounded cushions (tools/models/armchair_soft.json) | original |
+| `ph/rollershutter_window_01` (source: models/src/polyhaven/rollershutter_window_01) | [Rollershutter Window 01 by MP, Poly Haven](https://polyhaven.com/a/rollershutter_window_01) | CC0 1.0 |
+| `ph/rollershutter_window_02` (source: models/src/polyhaven/rollershutter_window_02) | [Rollershutter Window 02 by MP, Poly Haven](https://polyhaven.com/a/rollershutter_window_02) | CC0 1.0 |
+| `ph/rollershutter_window_03` (source: models/src/polyhaven/rollershutter_window_03) | [Rollershutter Window 03 by MP, Poly Haven](https://polyhaven.com/a/rollershutter_window_03) | CC0 1.0 |
+| `ph/rollershutter_door` (source: models/src/polyhaven/rollershutter_door) | [Rollershutter Door by MP, Poly Haven](https://polyhaven.com/a/rollershutter_door) | CC0 1.0 |
+| `ph/cardboard_box_01` (source: models/src/polyhaven/cardboard_box_01) | [Cardboard Box 01 by Rahul Chaudhary, Poly Haven](https://polyhaven.com/a/cardboard_box_01) | CC0 1.0 |
+| `ph/barrel_03` (source: models/src/polyhaven/barrel_03) | [Barrel 03 by Serhii Khromov, Poly Haven](https://polyhaven.com/a/barrel_03) | CC0 1.0 |
+| `ph/plastic_bottle_gallon` (source: models/src/polyhaven/plastic_bottle_gallon) | [Plastic Bottle Gallon by Rahul Chaudhary, Poly Haven](https://polyhaven.com/a/plastic_bottle_gallon) | CC0 1.0 |
+| `ph/metal_jerrycan` (source: models/src/polyhaven/metal_jerrycan) | [Metal Jerrycan by Sean Buckley, Poly Haven](https://polyhaven.com/a/metal_jerrycan) | CC0 1.0 |
+| `ph/Television_01` (source: models/src/polyhaven/Television_01) | [Television 01 by Gabriel Radić, Poly Haven](https://polyhaven.com/a/Television_01) | CC0 1.0 |
+| `ph/barrel_stove` (source: models/src/polyhaven/barrel_stove) | [Barrel Stove by MP, Poly Haven](https://polyhaven.com/a/barrel_stove) | CC0 1.0 |
+| `ph/vintage_spacecraft_instrument` (source: models/src/polyhaven/vintage_spacecraft_instrument) | [Vintage Spacecraft Instrument by Michał Wiśniewski, Poly Haven](https://polyhaven.com/a/vintage_spacecraft_instrument) | CC0 1.0 |
+| `ph/projector_screen` (source: models/src/polyhaven/projector_screen) | [Projector Screen by PeterM, Poly Haven](https://polyhaven.com/a/projector_screen) | CC0 1.0 |
+| `ph/plastic_monobloc_chair_01` (source: models/src/polyhaven/plastic_monobloc_chair_01) | [Plastic Monobloc Chair 01 by Kuutti Siitonen, Poly Haven](https://polyhaven.com/a/plastic_monobloc_chair_01) | CC0 1.0 |
+| `ph/wooden_picnic_table` (source: models/src/polyhaven/wooden_picnic_table) | [Wooden Picnic Table by Ulan Cabanilla, Poly Haven](https://polyhaven.com/a/wooden_picnic_table) | CC0 1.0 |
+| `ph/SchoolChair_01` (source: models/src/polyhaven/SchoolChair_01) | [School Chair 01 by Ethan Place, Poly Haven](https://polyhaven.com/a/SchoolChair_01) | CC0 1.0 |
+| `ph/Shelf_01` (source: models/src/polyhaven/Shelf_01) | [Shelf 01 by Gabriel Radić, Poly Haven](https://polyhaven.com/a/Shelf_01) | CC0 1.0 |
+| `ph/painted_wooden_chair_02` (source: models/src/polyhaven/painted_wooden_chair_02) | [Painted Wooden Chair 02 by Kirill Sannikov, Poly Haven](https://polyhaven.com/a/painted_wooden_chair_02) | CC0 1.0 |
+| `ph/hand_truck` (source: models/src/polyhaven/hand_truck) | [Hand Truck by Mutanzom3D, Poly Haven](https://polyhaven.com/a/hand_truck) | CC0 1.0 |
+| `ph/wooden_table_02` (source: models/src/polyhaven/wooden_table_02) | [Wooden Table 02 by Serhii Khromov, Poly Haven](https://polyhaven.com/a/wooden_table_02) | CC0 1.0 |
+| `ph/power_box_01` (source: models/src/polyhaven/power_box_01) | [Power Box 01 by Rico Cilliers, Yann Kervran, Poly Haven](https://polyhaven.com/a/power_box_01) | CC0 1.0 |
+| `ph/WetFloorSign_01` (source: models/src/polyhaven/WetFloorSign_01) | [Wet Floor Sign 01 by Fran Calvente, Poly Haven](https://polyhaven.com/a/WetFloorSign_01) | CC0 1.0 |
+| `ph/modular_industrial_pipes_01` (source: models/src/polyhaven/modular_industrial_pipes_01) | [Modular Industrial Pipes 01 by Jorge Camacho, Poly Haven](https://polyhaven.com/a/modular_industrial_pipes_01) | CC0 1.0 |
+| `ph/utility_box_02` (source: models/src/polyhaven/utility_box_02) | [Utility Box 02 by James Ray Cock, Poly Haven](https://polyhaven.com/a/utility_box_02) | CC0 1.0 |
+| `ph/security_camera_01` (source: models/src/polyhaven/security_camera_01) | [Security Camera 01 by Alexander Otterbeck, Yann Kervran, Poly Haven](https://polyhaven.com/a/security_camera_01) | CC0 1.0 |
+| `ph/exterior_aircon_unit` (source: models/src/polyhaven/exterior_aircon_unit) | [Exterior Aircon Unit by Monsta3D, Poly Haven](https://polyhaven.com/a/exterior_aircon_unit) | CC0 1.0 |
+| `ph/modular_electricity_poles` (source: models/src/polyhaven/modular_electricity_poles) | [Modular Electricity Poles by James Ray Cock, Poly Haven](https://polyhaven.com/a/modular_electricity_poles) | CC0 1.0 |
+| `ph/modular_airduct_rectangular_01` (source: models/src/polyhaven/modular_airduct_rectangular_01) | [Modular Airduct Rectangular 01 by James Ray Cock, Poly Haven](https://polyhaven.com/a/modular_airduct_rectangular_01) | CC0 1.0 |
+| `ph/utility_box_01` (source: models/src/polyhaven/utility_box_01) | [Utility Box 01 by James Ray Cock, Poly Haven](https://polyhaven.com/a/utility_box_01) | CC0 1.0 |
+| `ph/modular_pipes` (source: models/src/polyhaven/modular_pipes) | [Modular Pipes by Kuutti Siitonen, Poly Haven](https://polyhaven.com/a/modular_pipes) | CC0 1.0 |
+| `ph/modular_metal_gutter` (source: models/src/polyhaven/modular_metal_gutter) | [Modular Metal Gutter by Maxim Domnin, Poly Haven](https://polyhaven.com/a/modular_metal_gutter) | CC0 1.0 |
+| `ph/modular_airduct_circular_01` (source: models/src/polyhaven/modular_airduct_circular_01) | [Modular Airduct Circular 01 by Riley Queen, Poly Haven](https://polyhaven.com/a/modular_airduct_circular_01) | CC0 1.0 |
+| `ph/modular_pipes_plastic_01` (source: models/src/polyhaven/modular_pipes_plastic_01) | [Modular Pipes Plastic 01 by Amal Kumar, Poly Haven](https://polyhaven.com/a/modular_pipes_plastic_01) | CC0 1.0 |
+| `ph/modular_electric_cables` (source: models/src/polyhaven/modular_electric_cables) | [Modular Electric Cables by Kuutti Siitonen, Poly Haven](https://polyhaven.com/a/modular_electric_cables) | CC0 1.0 |
+| `ph/portable_generator` (source: models/src/polyhaven/portable_generator) | [Portable Generator by James Ray Cock, Poly Haven](https://polyhaven.com/a/portable_generator) | CC0 1.0 |
+| `ph/fire_alarm` (source: models/src/polyhaven/fire_alarm) | [Fire Alarm by Slinc, Poly Haven](https://polyhaven.com/a/fire_alarm) | CC0 1.0 |
+| `ph/industrial_wall_lamp` (source: models/src/polyhaven/industrial_wall_lamp) | [Industrial Wall Lamp by Kuutti Siitonen, Poly Haven](https://polyhaven.com/a/industrial_wall_lamp) | CC0 1.0 |
+| `ph/mounted_fluorescent_lights` (source: models/src/polyhaven/mounted_fluorescent_lights) | [Mounted Fluorescent Lights by Ulan Cabanilla, Poly Haven](https://polyhaven.com/a/mounted_fluorescent_lights) | CC0 1.0 |
+| `ph/industrial_caged_sconce` (source: models/src/polyhaven/industrial_caged_sconce) | [Industrial Caged Sconce by Ulan Cabanilla, Poly Haven](https://polyhaven.com/a/industrial_caged_sconce) | CC0 1.0 |
+| `ph/standing_chalkboard_01` (source: models/src/polyhaven/standing_chalkboard_01) | [Standing Chalkboard 01 by ParzivalCG, Poly Haven](https://polyhaven.com/a/standing_chalkboard_01) | CC0 1.0 |
+| `ph/clipboard` (source: models/src/polyhaven/clipboard) | [Clipboard by ProgrammerOnCoffee, Poly Haven](https://polyhaven.com/a/clipboard) | CC0 1.0 |
+| `ph/wooden_hammer_01` (source: models/src/polyhaven/wooden_hammer_01) | [Wooden Hammer 01 by James Ray Cock, Poly Haven](https://polyhaven.com/a/wooden_hammer_01) | CC0 1.0 |
+| `ph/crowbar_01` (source: models/src/polyhaven/crowbar_01) | [Crowbar 01 by Alexander Otterbeck, Poly Haven](https://polyhaven.com/a/crowbar_01) | CC0 1.0 |
+| `ph/pipe_wrench` (source: models/src/polyhaven/pipe_wrench) | [Pipe Wrench by Will Evarts, Poly Haven](https://polyhaven.com/a/pipe_wrench) | CC0 1.0 |
+| `ph/plunger` (source: models/src/polyhaven/plunger) | [Plunger by James Ray Cock, Poly Haven](https://polyhaven.com/a/plunger) | CC0 1.0 |
+| `ph/wooden_ladder` (source: models/src/polyhaven/wooden_ladder) | [Wooden Ladder by Miroslav Turura, Poly Haven](https://polyhaven.com/a/wooden_ladder) | CC0 1.0 |
+| `ph/wooden_ladder_02` (source: models/src/polyhaven/wooden_ladder_02) | [Wooden Ladder 02 by JN_3DPRINTINGNERD, Poly Haven](https://polyhaven.com/a/wooden_ladder_02) | CC0 1.0 |
+| `ph/wooden_broom` (source: models/src/polyhaven/wooden_broom) | [Wooden Broom by Balen, Poly Haven](https://polyhaven.com/a/wooden_broom) | CC0 1.0 |
+| `ph/propane_torch` (source: models/src/polyhaven/propane_torch) | [Propane Torch by Jan W, Poly Haven](https://polyhaven.com/a/propane_torch) | CC0 1.0 |
+| `ph/old_tyre` (source: models/src/polyhaven/old_tyre) | [Old Tyre by MP, Poly Haven](https://polyhaven.com/a/old_tyre) | CC0 1.0 |

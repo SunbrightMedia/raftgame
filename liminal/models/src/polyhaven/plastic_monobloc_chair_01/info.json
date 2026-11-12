@@ -1,0 +1,59 @@
+{
+ "id": "plastic_monobloc_chair_01",
+ "name": "Plastic Monobloc Chair 01",
+ "url": "https://polyhaven.com/a/plastic_monobloc_chair_01",
+ "authors": [
+  "Kuutti Siitonen"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "furniture",
+  "seating",
+  "collection: the_shed"
+ ],
+ "tags": [
+  "plastic",
+  "dirty",
+  "old",
+  "monobloc",
+  "outdoor",
+  "cheap",
+  "shed"
+ ],
+ "dimensions_mm": [
+  641.8611407279968,
+  627.5919079780579,
+  879.8411972820759
+ ],
+ "polycount": 3356,
+ "date_published": 1668384000,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "plastic_monobloc_chair_01_1k.gltf",
+   "size": 2892,
+   "md5": "b0ac94e52b406e1815af47d9d84eadb4"
+  },
+  {
+   "path": "plastic_monobloc_chair_01.bin",
+   "size": 124808,
+   "md5": "cff97136a9c4bb57c62937cbb7d33a79"
+  },
+  {
+   "path": "textures/plastic_monobloc_chair_01_arm_1k.jpg",
+   "size": 634320,
+   "md5": "ce9271797fd8893a6c84f639f952d0b9"
+  },
+  {
+   "path": "textures/plastic_monobloc_chair_01_diff_1k.jpg",
+   "size": 560823,
+   "md5": "c36dfe0f38d6ca1632ba426c598e6764"
+  },
+  {
+   "path": "textures/plastic_monobloc_chair_01_nor_gl_1k.jpg",
+   "size": 630024,
+   "md5": "387f81f09c0754416298398277fb2a6d"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

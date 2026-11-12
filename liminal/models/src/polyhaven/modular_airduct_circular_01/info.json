@@ -1,0 +1,63 @@
+{
+ "id": "modular_airduct_circular_01",
+ "name": "Modular Airduct Circular 01",
+ "url": "https://polyhaven.com/a/modular_airduct_circular_01",
+ "authors": [
+  "Riley Queen"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "industrial",
+  "structures",
+  "collection: hidden_alley"
+ ],
+ "tags": [
+  "vent",
+  "aircon",
+  "airduct",
+  "hvac",
+  "modular",
+  "pieces",
+  "workshop",
+  "industrial",
+  "warehouse",
+  "utility",
+  "infrastructure"
+ ],
+ "dimensions_mm": [
+  4170.705795288086,
+  1463.481143116951,
+  1324.144184589386
+ ],
+ "polycount": 14280,
+ "date_published": 1693526400,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "modular_airduct_circular_01_1k.gltf",
+   "size": 26467,
+   "md5": "b4612872c97a576c1f2a3351c68d3514"
+  },
+  {
+   "path": "textures/modular_airduct_circular_01_arm_1k.jpg",
+   "size": 620251,
+   "md5": "fcf6c5d505bd8291412bf6f607980ce4"
+  },
+  {
+   "path": "textures/modular_airduct_circular_01_diff_1k.jpg",
+   "size": 542554,
+   "md5": "832ee18e84ea80eab47b042e3440336a"
+  },
+  {
+   "path": "textures/modular_airduct_circular_01_nor_gl_1k.jpg",
+   "size": 317118,
+   "md5": "b9c78219a302fece6630135ef581bcd6"
+  },
+  {
+   "path": "modular_airduct_circular_01.bin",
+   "size": 485456,
+   "md5": "89ddfff523c9edf478aa7441b69d1491"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

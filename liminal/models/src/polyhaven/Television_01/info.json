@@ -1,0 +1,61 @@
+{
+ "id": "Television_01",
+ "name": "Television 01",
+ "url": "https://polyhaven.com/a/Television_01",
+ "authors": [
+  "Gabriel Radi\u0107"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "props",
+  "electronics",
+  "collection: the_shed"
+ ],
+ "tags": [
+  "vintage",
+  "prop",
+  "furniture",
+  "metal",
+  "wood",
+  "tv",
+  "television",
+  "video",
+  "audio"
+ ],
+ "dimensions_mm": [
+  599.9999642372131,
+  470.8106815814972,
+  456.84892892313655
+ ],
+ "polycount": 1918,
+ "date_published": 1585605600,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "Television_01_1k.gltf",
+   "size": 2933,
+   "md5": "9456aa7effd3cb41a0e753d74293b1c3"
+  },
+  {
+   "path": "Television_01.bin",
+   "size": 90548,
+   "md5": "d28775c3746a6e7b0afa5fd217acbc44"
+  },
+  {
+   "path": "textures/Television_01_arm_1k.jpg",
+   "size": 190774,
+   "md5": "b83392294cc663520e448f698b86da56"
+  },
+  {
+   "path": "textures/Television_01_diff_1k.jpg",
+   "size": 102231,
+   "md5": "bf1b3d0563c279557acfed2402c421b1"
+  },
+  {
+   "path": "textures/Television_01_nor_gl_1k.jpg",
+   "size": 144808,
+   "md5": "3adb4f6549cc69edf82ccd8daa8e13cd"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

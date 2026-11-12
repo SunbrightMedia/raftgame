@@ -1,0 +1,79 @@
+{
+ "id": "modular_electricity_poles",
+ "name": "Modular Electricity Poles",
+ "url": "https://polyhaven.com/a/modular_electricity_poles",
+ "authors": [
+  "James Ray Cock"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "industrial",
+  "structures",
+  "collection: hidden_alley"
+ ],
+ "tags": [
+  "urban",
+  "infrastructure",
+  "city",
+  "road",
+  "utility",
+  "street",
+  "electrical",
+  "power",
+  "circuit",
+  "transformer",
+  "junction box",
+  "cables"
+ ],
+ "dimensions_mm": [
+  13119.13776397705,
+  1957.2706818580627,
+  7000.0002812594175
+ ],
+ "polycount": 200610,
+ "date_published": 1701043200,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "modular_electricity_poles_1k.gltf",
+   "size": 149324,
+   "md5": "5c596896d092dfe96b490910f4422743"
+  },
+  {
+   "path": "textures/modular_electricity_poles_pieces_diff_1k.jpg",
+   "size": 802771,
+   "md5": "89d3636e70e2bf7fd8ca25440dbd9f8f"
+  },
+  {
+   "path": "modular_electricity_poles.bin",
+   "size": 7215652,
+   "md5": "c6214884e3bd6ea4a2ea20b795c648f4"
+  },
+  {
+   "path": "textures/modular_electricity_poles_pieces_arm_1k.jpg",
+   "size": 1052303,
+   "md5": "f1557e1cfdaa2f191697f582063ead9d"
+  },
+  {
+   "path": "textures/modular_electricity_poles_pieces_nor_gl_1k.jpg",
+   "size": 865048,
+   "md5": "54b2b71a53740f86fce87be506c1a89f"
+  },
+  {
+   "path": "textures/modular_electricity_poles_arm_1k.jpg",
+   "size": 748382,
+   "md5": "8242b81c3bc7216233199e122023dfb3"
+  },
+  {
+   "path": "textures/modular_electricity_poles_diff_1k.jpg",
+   "size": 658915,
+   "md5": "34df50003850fdc33507c5d0713af802"
+  },
+  {
+   "path": "textures/modular_electricity_poles_nor_gl_1k.jpg",
+   "size": 931236,
+   "md5": "d2f75d2c5f3868c93f8c4c03bbd78144"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

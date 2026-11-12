@@ -1,0 +1,66 @@
+{
+ "id": "rollershutter_window_01",
+ "name": "Rollershutter Window 01",
+ "url": "https://polyhaven.com/a/rollershutter_window_01",
+ "authors": [
+  "MP"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "structures",
+  "industrial",
+  "buildings",
+  "collection: hidden_alley"
+ ],
+ "tags": [
+  "urban",
+  "security",
+  "commercial",
+  "shutters",
+  "garage door",
+  "security shutter",
+  "warehouse door",
+  "roller garage door"
+ ],
+ "dimensions_mm": [
+  5100.001215934753,
+  300.0859081512317,
+  1850.7245529547163
+ ],
+ "polycount": 1104,
+ "date_published": 1696982400,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "rollershutter_window_01_1k.gltf",
+   "size": 4991,
+   "md5": "5228a7253b40de720ad8247757d218f1"
+  },
+  {
+   "path": "textures/rollershutter_window_01_arm_1k.jpg",
+   "size": 592481,
+   "md5": "4ab04fd28873a76e2d84e47147eae6b0"
+  },
+  {
+   "path": "rollershutter_window_01.bin",
+   "size": 54432,
+   "md5": "54837c166c34e1a1ca7f6495a82ab6d9"
+  },
+  {
+   "path": "textures/rollershutter_window_01_graffiti_diff_1k.jpg",
+   "size": 660597,
+   "md5": "10d15a7029c107af920b8f758e96a384"
+  },
+  {
+   "path": "textures/rollershutter_window_01_nor_gl_1k.jpg",
+   "size": 360410,
+   "md5": "ce48690b51f8e17ab3567878158055f1"
+  },
+  {
+   "path": "textures/rollershutter_window_01_diff_1k.jpg",
+   "size": 563314,
+   "md5": "0800d21822ec7199c825caafda90427a"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

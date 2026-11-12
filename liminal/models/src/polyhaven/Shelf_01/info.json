@@ -1,0 +1,67 @@
+{
+ "id": "Shelf_01",
+ "name": "Shelf 01",
+ "url": "https://polyhaven.com/a/Shelf_01",
+ "authors": [
+  "Gabriel Radi\u0107"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "furniture",
+  "shelves"
+ ],
+ "tags": [
+  "wood",
+  "shelf",
+  "furniture",
+  "storage",
+  "home",
+  "organization",
+  "display",
+  "wooden",
+  "bookcase",
+  "shelves",
+  "bookshelf",
+  "dirty",
+  "weathered",
+  "distressed",
+  "aged",
+  "simple"
+ ],
+ "dimensions_mm": [
+  1003.443717956543,
+  256.9795063869833,
+  2080.310344696045
+ ],
+ "polycount": 182,
+ "date_published": 1585605600,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "Shelf_01_1k.gltf",
+   "size": 2617,
+   "md5": "9e852782eeae96108206c888d2b68df1"
+  },
+  {
+   "path": "textures/Shelf_01_diff_1k.jpg",
+   "size": 153220,
+   "md5": "965ce260ce114308026fe98260cd482a"
+  },
+  {
+   "path": "Shelf_01.bin",
+   "size": 12676,
+   "md5": "bf2ff8bef60025c079565fd1926b8476"
+  },
+  {
+   "path": "textures/Shelf_01_nor_gl_1k.jpg",
+   "size": 231393,
+   "md5": "3ccf77ba277b06f29e3e68233a83bae7"
+  },
+  {
+   "path": "textures/Shelf_01_arm_1k.jpg",
+   "size": 205542,
+   "md5": "b0044e2cc568cd2a7f906ca56f473542"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

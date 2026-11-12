@@ -1,0 +1,64 @@
+{
+ "id": "pipe_wrench",
+ "name": "Pipe Wrench",
+ "url": "https://polyhaven.com/a/pipe_wrench",
+ "authors": [
+  "Will Evarts"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "industrial",
+  "tools",
+  "collection: hidden_alley"
+ ],
+ "tags": [
+  "wrench",
+  "garage",
+  "workshop",
+  "construction",
+  "plumbing",
+  "automotive",
+  "used",
+  "mechanics toolbox",
+  "hardware",
+  "adjustable wrench",
+  "monkey wrench",
+  "spanner"
+ ],
+ "dimensions_mm": [
+  83.97936820983887,
+  34.34488922357559,
+  404.66518700122833
+ ],
+ "polycount": 10746,
+ "date_published": 1692921600,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "pipe_wrench_1k.gltf",
+   "size": 2756,
+   "md5": "b15215e590b08501397b3303c17c236e"
+  },
+  {
+   "path": "textures/pipe_wrench_arm_1k.jpg",
+   "size": 820365,
+   "md5": "60d631b218bccdc289330840adcb1e07"
+  },
+  {
+   "path": "textures/pipe_wrench_diff_1k.jpg",
+   "size": 886835,
+   "md5": "8ba0690b6ead89564c63810c2fcfe957"
+  },
+  {
+   "path": "textures/pipe_wrench_nor_gl_1k.jpg",
+   "size": 1020433,
+   "md5": "02e9be9fee27d6faa6fea4d63d5b2a7c"
+  },
+  {
+   "path": "pipe_wrench.bin",
+   "size": 284764,
+   "md5": "1c6c1974d94fc2656055d3d7830dd9fb"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

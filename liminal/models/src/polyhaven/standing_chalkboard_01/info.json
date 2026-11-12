@@ -1,0 +1,76 @@
+{
+ "id": "standing_chalkboard_01",
+ "name": "Standing Chalkboard 01",
+ "url": "https://polyhaven.com/a/standing_chalkboard_01",
+ "authors": [
+  "ParzivalCG"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "decorative"
+ ],
+ "tags": [
+  "resturant",
+  "sign",
+  "signage",
+  "chalk",
+  "board",
+  "coffee",
+  "workshop",
+  "cafe",
+  "urban",
+  "deli",
+  "menu"
+ ],
+ "dimensions_mm": [
+  919.5267558097839,
+  758.704662322998,
+  1509.0324000189241
+ ],
+ "polycount": 2372,
+ "date_published": 1640304000,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "standing_chalkboard_01_1k.gltf",
+   "size": 5145,
+   "md5": "7cdb491ebdea655db8402f7d6fc817c6"
+  },
+  {
+   "path": "standing_chalkboard_01.bin",
+   "size": 100120,
+   "md5": "cd6fb01779de556d67b5a1040713e10c"
+  },
+  {
+   "path": "textures/standing_chalkboard_01_frame_nor_gl_1k.jpg",
+   "size": 503632,
+   "md5": "7b570f34247aa1941034dd4ee4adf818"
+  },
+  {
+   "path": "textures/standing_chalkboard_01_board_arm_1k.jpg",
+   "size": 491057,
+   "md5": "fbfa85956df0e211831097ef2bbbb4b2"
+  },
+  {
+   "path": "textures/standing_chalkboard_01_board_diff_1k.jpg",
+   "size": 142727,
+   "md5": "315f374eeaf271ebbe16b075f963715f"
+  },
+  {
+   "path": "textures/standing_chalkboard_01_frame_arm_1k.jpg",
+   "size": 671800,
+   "md5": "1a0b1fc41babcefaf5636951091bce8d"
+  },
+  {
+   "path": "textures/standing_chalkboard_01_board_nor_gl_1k.jpg",
+   "size": 164130,
+   "md5": "34058a613e1d9766b9ca99513930dbdb"
+  },
+  {
+   "path": "textures/standing_chalkboard_01_frame_diff_1k.jpg",
+   "size": 538645,
+   "md5": "f0cfde6754ea0c32d9c3ba9dcc7126b9"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

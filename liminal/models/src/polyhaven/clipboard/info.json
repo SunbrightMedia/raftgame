@@ -1,0 +1,57 @@
+{
+ "id": "clipboard",
+ "name": "Clipboard",
+ "url": "https://polyhaven.com/a/clipboard",
+ "authors": [
+  "ProgrammerOnCoffee"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "collection: project_lighthouse",
+  "office",
+  "props"
+ ],
+ "tags": [
+  "writing",
+  "desk",
+  "stationery",
+  "metal",
+  "scratched"
+ ],
+ "dimensions_mm": [
+  228.6001443862915,
+  336.55010163784027,
+  41.990341851487756
+ ],
+ "polycount": 6176,
+ "date_published": 1782777600,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "clipboard_1k.gltf",
+   "size": 2738,
+   "md5": "15f5e2ef74129add39b4723c381f7f5c"
+  },
+  {
+   "path": "textures/clipboard_nor_gl_1k.jpg",
+   "size": 406898,
+   "md5": "073ac31d4b1b916ed1d10040f0c1987f"
+  },
+  {
+   "path": "textures/clipboard_diff_1k.jpg",
+   "size": 572026,
+   "md5": "bfcf21f8bd08f8180293fccfefe3428a"
+  },
+  {
+   "path": "textures/clipboard_arm_1k.jpg",
+   "size": 620747,
+   "md5": "0c5d2b64984d32e13fc484aa4df5b98f"
+  },
+  {
+   "path": "clipboard.bin",
+   "size": 184512,
+   "md5": "49e106c37117ba65e72816d3d09f9ea5"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

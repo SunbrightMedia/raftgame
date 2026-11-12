@@ -1,0 +1,58 @@
+{
+ "id": "wooden_ladder_02",
+ "name": "Wooden Ladder 02",
+ "url": "https://polyhaven.com/a/wooden_ladder_02",
+ "authors": [
+  "JN_3DPRINTINGNERD"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "collection: project_lighthouse",
+  "tools"
+ ],
+ "tags": [
+  "wooden",
+  "step-ladder",
+  "vintage",
+  "traditional",
+  "folding",
+  "garage",
+  "freestanding"
+ ],
+ "dimensions_mm": [
+  989.5061254501343,
+  618.1379556655884,
+  1722.179728676565
+ ],
+ "polycount": 6126,
+ "date_published": 1783036800,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "wooden_ladder_02_1k.gltf",
+   "size": 2800,
+   "md5": "0b751a899654330ba1749b737f2e94ef"
+  },
+  {
+   "path": "textures/wooden_ladder_02_nor_gl_1k.jpg",
+   "size": 788043,
+   "md5": "f49bbb01e92846e97058b4da2badd5eb"
+  },
+  {
+   "path": "textures/wooden_ladder_02_diff_1k.jpg",
+   "size": 688874,
+   "md5": "de80fb92a09963214a336657e632afc6"
+  },
+  {
+   "path": "textures/wooden_ladder_02_arm_1k.jpg",
+   "size": 681051,
+   "md5": "0d11d250474a472f7b5a9ba41ed821a8"
+  },
+  {
+   "path": "wooden_ladder_02.bin",
+   "size": 175892,
+   "md5": "735a43bc397ebbc9e245c64313f7bf15"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

@@ -1,0 +1,81 @@
+{
+ "id": "modular_pipes",
+ "name": "Modular Pipes",
+ "url": "https://polyhaven.com/a/modular_pipes",
+ "authors": [
+  "Kuutti Siitonen"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "industrial",
+  "structures"
+ ],
+ "tags": [
+  "construction",
+  "piping",
+  "plumbing",
+  "infrastructure",
+  "metal",
+  "plastic",
+  "rusted",
+  "water supply",
+  "drainage",
+  "maintenance",
+  "engineering",
+  "utility",
+  "underground",
+  "sewer",
+  "drain"
+ ],
+ "dimensions_mm": [
+  4187.440872192383,
+  457.7658101916313,
+  2434.948639709063
+ ],
+ "polycount": 47428,
+ "date_published": 1751241600,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "modular_pipes_1k.gltf",
+   "size": 107409,
+   "md5": "993502b4d8c371bc38a03cba6d6f4008"
+  },
+  {
+   "path": "textures/modular_pipes_metal_nor_gl_1k.jpg",
+   "size": 703461,
+   "md5": "1d46c84cbca6c4be7c8a051e99598aac"
+  },
+  {
+   "path": "textures/modular_pipes_metal_diff_1k.jpg",
+   "size": 765956,
+   "md5": "034a812f97e22b51d3d37209ef33c2dc"
+  },
+  {
+   "path": "textures/modular_pipes_metal_arm_1k.jpg",
+   "size": 746872,
+   "md5": "d6ef54a2189f1deacc20b32207b9b4ba"
+  },
+  {
+   "path": "textures/modular_pipes_pvc_nor_gl_1k.jpg",
+   "size": 546139,
+   "md5": "51bbd10b74e72e32e8b115aaee09c423"
+  },
+  {
+   "path": "textures/modular_pipes_pvc_diff_1k.jpg",
+   "size": 704052,
+   "md5": "231fad0cdebb1cd8ac3538132d22aa20"
+  },
+  {
+   "path": "textures/modular_pipes_pvc_arm_1k.jpg",
+   "size": 776291,
+   "md5": "a1215f352bf91515a1a26b5c9313a35d"
+  },
+  {
+   "path": "modular_pipes.bin",
+   "size": 1465048,
+   "md5": "4e7c0df1fa2fa412cd145ae4907eea52"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

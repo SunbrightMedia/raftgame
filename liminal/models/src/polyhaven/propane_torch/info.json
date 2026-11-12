@@ -1,0 +1,62 @@
+{
+ "id": "propane_torch",
+ "name": "Propane Torch",
+ "url": "https://polyhaven.com/a/propane_torch",
+ "authors": [
+  "Jan W"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "collection: project_lighthouse",
+  "props",
+  "tools"
+ ],
+ "tags": [
+  "garage",
+  "workshop",
+  "maintenance",
+  "propane torch",
+  "gas torch",
+  "welding",
+  "automotive",
+  "repair shop",
+  "construction",
+  "industrial"
+ ],
+ "dimensions_mm": [
+  68.02495755255222,
+  57.90913663804531,
+  328.1470835208893
+ ],
+ "polycount": 4848,
+ "date_published": 1780963200,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "propane_torch_1k.gltf",
+   "size": 2781,
+   "md5": "f33a9cd482fecaa1a9cb107a1ca49718"
+  },
+  {
+   "path": "textures/propane_torch_nor_gl_1k.jpg",
+   "size": 160916,
+   "md5": "4adf5daa54b9720f852b834d2e3cf30d"
+  },
+  {
+   "path": "textures/propane_torch_diff_1k.jpg",
+   "size": 595704,
+   "md5": "f18234e07a7a23f2d8ccc443fe701f24"
+  },
+  {
+   "path": "textures/propane_torch_arm_1k.jpg",
+   "size": 842496,
+   "md5": "468da94c892b0aba6ff2bed064fe8ee3"
+  },
+  {
+   "path": "propane_torch.bin",
+   "size": 133408,
+   "md5": "42d4c4780a500916c7a23a8f9ea5b6f8"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

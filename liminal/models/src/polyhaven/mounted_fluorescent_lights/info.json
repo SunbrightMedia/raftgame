@@ -1,0 +1,64 @@
+{
+ "id": "mounted_fluorescent_lights",
+ "name": "Mounted Fluorescent Lights",
+ "url": "https://polyhaven.com/a/mounted_fluorescent_lights",
+ "authors": [
+  "Ulan Cabanilla"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "collection: project_lighthouse",
+  "lighting",
+  "industrial"
+ ],
+ "tags": [
+  "workshop",
+  "fluorescent_tube",
+  "utility_lighting",
+  "garage_light",
+  "workshop_light",
+  "shed",
+  "garage"
+ ],
+ "dimensions_mm": [
+  912.1809005737305,
+  645.4365849494934,
+  35.35318718786584
+ ],
+ "polycount": 17820,
+ "date_published": 1776330248,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "mounted_fluorescent_lights_1k.gltf",
+   "size": 21071,
+   "md5": "88af3c716ac36b280c60579f4b015119"
+  },
+  {
+   "path": "textures/mounted_fluorescent_lights_nor_gl_1k.jpg",
+   "size": 267596,
+   "md5": "a8dab38ecb28d219153f5825047f1850"
+  },
+  {
+   "path": "textures/mounted_fluorescent_lights_diff_1k.jpg",
+   "size": 299833,
+   "md5": "339f4535ee201a3da7a67f63af51a106"
+  },
+  {
+   "path": "textures/mounted_fluorescent_lights_arm_1k.jpg",
+   "size": 652812,
+   "md5": "323b680f62a64d9cabba46c9ef99f49d"
+  },
+  {
+   "path": "textures/mounted_fluorescent_lights_emission_1k.jpg",
+   "size": 71330,
+   "md5": "ebf1ba7f8fd5ced02d4e372dc12c013e"
+  },
+  {
+   "path": "mounted_fluorescent_lights.bin",
+   "size": 551720,
+   "md5": "8b7c24b1af686525c973f0c9d72440d6"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

@@ -1,0 +1,65 @@
+{
+ "id": "portable_generator",
+ "name": "Portable Generator",
+ "url": "https://polyhaven.com/a/portable_generator",
+ "authors": [
+  "James Ray Cock"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "industrial",
+  "appliances",
+  "collection: project_lighthouse"
+ ],
+ "tags": [
+  "gasoline",
+  "backup power",
+  "construction equipment",
+  "power generator",
+  "petrol",
+  "garage",
+  "power",
+  "engine"
+ ],
+ "dimensions_mm": [
+  818.3408081531525,
+  564.0000104904175,
+  576.9232391612604
+ ],
+ "polycount": 26419,
+ "date_published": 1783036800,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "portable_generator_1k.gltf",
+   "size": 10130,
+   "md5": "13c2380487daae6726443b9f38dd7e53"
+  },
+  {
+   "path": "textures/portable_generator_spec_1k.jpg",
+   "size": 23119,
+   "md5": "b3044dbc984897ed902bd47a450f742f"
+  },
+  {
+   "path": "textures/portable_generator_nor_gl_1k.jpg",
+   "size": 818829,
+   "md5": "89a51a982488c21eddec2c6e02249591"
+  },
+  {
+   "path": "textures/portable_generator_diff_1k.jpg",
+   "size": 755079,
+   "md5": "3d572e1716148ca5d641d8a199fe9192"
+  },
+  {
+   "path": "textures/portable_generator_arm_1k.jpg",
+   "size": 887711,
+   "md5": "7dbb8b9f0aa4e9d3ce6ad37e0326299f"
+  },
+  {
+   "path": "portable_generator.bin",
+   "size": 939572,
+   "md5": "81b2f4c4c6d0b0d7388ae9aa1123563a"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

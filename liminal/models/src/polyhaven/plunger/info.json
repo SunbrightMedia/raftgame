@@ -1,0 +1,60 @@
+{
+ "id": "plunger",
+ "name": "Plunger",
+ "url": "https://polyhaven.com/a/plunger",
+ "authors": [
+  "James Ray Cock"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "tools"
+ ],
+ "tags": [
+  "bathroom",
+  "garage",
+  "cleaning",
+  "cleaning supplies",
+  "janitorial",
+  "sanitation",
+  "toilet",
+  "plumbing",
+  "pipe cleaner",
+  "plumber"
+ ],
+ "dimensions_mm": [
+  172.05405235290527,
+  172.05404490232468,
+  421.1148992180824
+ ],
+ "polycount": 3278,
+ "date_published": 1713916800,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "plunger_1k.gltf",
+   "size": 2741,
+   "md5": "75861c1f92ed15a07df3acdc55d2379f"
+  },
+  {
+   "path": "plunger.bin",
+   "size": 86740,
+   "md5": "1caf35f345a6facc29c6b8d1ef3f5811"
+  },
+  {
+   "path": "textures/plunger_nor_gl_1k.jpg",
+   "size": 496565,
+   "md5": "c0a4315de4239ba9aa70c8ad47346fd8"
+  },
+  {
+   "path": "textures/plunger_diff_1k.jpg",
+   "size": 543234,
+   "md5": "41c5cf266ef3dfdfed7c57e60a1eeb3a"
+  },
+  {
+   "path": "textures/plunger_arm_1k.jpg",
+   "size": 668693,
+   "md5": "32be6dc09ffadc255df736a968d49d6e"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

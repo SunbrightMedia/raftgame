@@ -1,0 +1,61 @@
+{
+ "id": "wooden_ladder",
+ "name": "Wooden Ladder",
+ "url": "https://polyhaven.com/a/wooden_ladder",
+ "authors": [
+  "Miroslav Turura"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "collection: project_lighthouse",
+  "tools",
+  "industrial"
+ ],
+ "tags": [
+  "scaffolding",
+  "steps",
+  "construction",
+  "workshop",
+  "ladder",
+  "step-ladder",
+  "maintenance",
+  "utility",
+  "wooden"
+ ],
+ "dimensions_mm": [
+  959.1718018054962,
+  500.0000149011612,
+  1334.923267364502
+ ],
+ "polycount": 8492,
+ "date_published": 1780963200,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "wooden_ladder_1k.gltf",
+   "size": 4390,
+   "md5": "d50e132958f033f0600b286aafb72a8e"
+  },
+  {
+   "path": "textures/wooden_ladder_nor_gl_1k.jpg",
+   "size": 750034,
+   "md5": "42c32b4f30e33c4c1e815cbb50bfc5d1"
+  },
+  {
+   "path": "textures/wooden_ladder_diff_1k.jpg",
+   "size": 758088,
+   "md5": "b028aa74e7fe0880625a57bf05f9d604"
+  },
+  {
+   "path": "textures/wooden_ladder_arm_1k.jpg",
+   "size": 798553,
+   "md5": "dd4edfea207edfc0c46bad8951171468"
+  },
+  {
+   "path": "wooden_ladder.bin",
+   "size": 282184,
+   "md5": "058aa183bf6ea324a181d003dabe84c9"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

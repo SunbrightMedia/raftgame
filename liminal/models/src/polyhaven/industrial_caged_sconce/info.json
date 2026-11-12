@@ -1,0 +1,67 @@
+{
+ "id": "industrial_caged_sconce",
+ "name": "Industrial Caged Sconce",
+ "url": "https://polyhaven.com/a/industrial_caged_sconce",
+ "authors": [
+  "Ulan Cabanilla"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "collection: project_lighthouse",
+  "lighting",
+  "industrial"
+ ],
+ "tags": [
+  "caged lamp",
+  "pipe fixture",
+  "guarded light",
+  "utility lighting",
+  "warehouse",
+  "factory",
+  "bunker",
+  "wall light",
+  "modular",
+  "heavy duty"
+ ],
+ "dimensions_mm": [
+  1210.1812362670898,
+  389.4345611333847,
+  912.8422662615776
+ ],
+ "polycount": 26576,
+ "date_published": 1776179312,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "industrial_caged_sconce_1k.gltf",
+   "size": 18429,
+   "md5": "c4358ee53f130fb87a1600a47ad1e039"
+  },
+  {
+   "path": "textures/industrial_caged_sconce_emissive_1k.jpg",
+   "size": 49946,
+   "md5": "026950d74053e67bfa01a1a5b1a8a532"
+  },
+  {
+   "path": "textures/industrial_caged_sconce_nor_gl_1k.jpg",
+   "size": 715927,
+   "md5": "abd7149e930c3fcfc2aa3e1bfb755256"
+  },
+  {
+   "path": "textures/industrial_caged_sconce_diff_1k.jpg",
+   "size": 621431,
+   "md5": "b6323d927f287b8f1c8f41436f5873b6"
+  },
+  {
+   "path": "textures/industrial_caged_sconce_arm_1k.jpg",
+   "size": 770330,
+   "md5": "9771c281ca915ead29e9893927c10f68"
+  },
+  {
+   "path": "industrial_caged_sconce.bin",
+   "size": 949472,
+   "md5": "254aeed8e53de6fa20024b275ee0cc19"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

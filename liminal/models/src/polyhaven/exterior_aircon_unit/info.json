@@ -1,0 +1,104 @@
+{
+ "id": "exterior_aircon_unit",
+ "name": "Exterior Aircon Unit",
+ "url": "https://polyhaven.com/a/exterior_aircon_unit",
+ "authors": [
+  "Monsta3D"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "appliances",
+  "industrial",
+  "electronics",
+  "collection: hidden_alley"
+ ],
+ "tags": [
+  "cooling system",
+  "aircon",
+  "climatecontrol",
+  "ventilation",
+  "utility",
+  "infrastructure"
+ ],
+ "dimensions_mm": [
+  1799.971342086792,
+  374.15920197963715,
+  927.8970956802368
+ ],
+ "polycount": 18986,
+ "date_published": 1692144000,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "exterior_aircon_unit_1k.gltf",
+   "size": 9634,
+   "md5": "10beccfb1bf0c973a0729be8970532a9"
+  },
+  {
+   "path": "textures/exterior_aircon_unit_01_nor_gl_1k.jpg",
+   "size": 472088,
+   "md5": "244025f2008cbdc8c8680f0c962ed26f"
+  },
+  {
+   "path": "textures/exterior_aircon_unit_01_opacity_1k.jpg",
+   "size": 333675,
+   "md5": "f253dbcb057612371dd1b6d37095c6ba"
+  },
+  {
+   "path": "textures/exterior_aircon_unit_rusted_01_arm_1k.jpg",
+   "size": 673246,
+   "md5": "f1c2653ac0fb58e8641f9076a2af8a67"
+  },
+  {
+   "path": "textures/exterior_aircon_unit_01_arm_1k.jpg",
+   "size": 651293,
+   "md5": "9af3805e7371643962ffe6079d547b00"
+  },
+  {
+   "path": "textures/exterior_aircon_unit_02_arm_1k.jpg",
+   "size": 484026,
+   "md5": "98b44ba240f832fe4fa94e90d1887c6a"
+  },
+  {
+   "path": "textures/exterior_aircon_unit_rusted_02_arm_1k.jpg",
+   "size": 605557,
+   "md5": "6e2bee1569b55a3b01d18799e942a6af"
+  },
+  {
+   "path": "exterior_aircon_unit.bin",
+   "size": 494784,
+   "md5": "971c2cfcbc29256d7872eafe74352279"
+  },
+  {
+   "path": "textures/exterior_aircon_unit_02_nor_gl_1k.jpg",
+   "size": 942230,
+   "md5": "e00f9c963e9f3dc798d84f7ebcc4185a"
+  },
+  {
+   "path": "textures/exterior_aircon_unit_rusted_01_nor_gl_1k.jpg",
+   "size": 583620,
+   "md5": "5b9df77429c9010ea389aef30fd7d460"
+  },
+  {
+   "path": "textures/exterior_aircon_unit_rusted_01_diff_1k.jpg",
+   "size": 606076,
+   "md5": "7b9fba8819918dc388c49f05b5522575"
+  },
+  {
+   "path": "textures/exterior_aircon_unit_01_diff_1k.jpg",
+   "size": 506664,
+   "md5": "81003ea4afe59ed4dac090791e41f562"
+  },
+  {
+   "path": "textures/exterior_aircon_unit_rusted_02_opacity_1k.jpg",
+   "size": 357558,
+   "md5": "0540ff18330b76e4e55053d5bd21f59e"
+  },
+  {
+   "path": "textures/exterior_aircon_unit_rusted_02_nor_gl_1k.jpg",
+   "size": 947477,
+   "md5": "53f4890e3c9b9fb2efcd96f3143f579b"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

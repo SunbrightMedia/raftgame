@@ -1,0 +1,79 @@
+{
+ "id": "modular_electric_cables",
+ "name": "Modular Electric Cables",
+ "url": "https://polyhaven.com/a/modular_electric_cables",
+ "authors": [
+  "Kuutti Siitonen"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "industrial"
+ ],
+ "tags": [
+  "wiring",
+  "connectors",
+  "power supply",
+  "components",
+  "power",
+  "infrastructure",
+  "maintenance",
+  "junction box",
+  "breakers",
+  "transformer",
+  "circuit",
+  "electrical",
+  "underground",
+  "modular"
+ ],
+ "dimensions_mm": [
+  2076.6327381134033,
+  214.5041599869728,
+  757.2520458308203
+ ],
+ "polycount": 42078,
+ "date_published": 1750204800,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "modular_electric_cables_1k.gltf",
+   "size": 82607,
+   "md5": "452d8189381a17d02467785ec1691f2b"
+  },
+  {
+   "path": "textures/modular_electric_cables_nor_gl_1k.jpg",
+   "size": 848440,
+   "md5": "089c0dda6a7b06fc587eb23a9367fda2"
+  },
+  {
+   "path": "textures/modular_electric_cables_diff_1k.jpg",
+   "size": 474284,
+   "md5": "bf807ef977dc49143dd8ed97c0ffec3c"
+  },
+  {
+   "path": "textures/modular_electric_cables_arm_1k.jpg",
+   "size": 797169,
+   "md5": "196560790b8dcb085c569a7755648d7b"
+  },
+  {
+   "path": "textures/modular_electric_cables_boxes_nor_gl_1k.jpg",
+   "size": 749676,
+   "md5": "cf66abe69419fdaac4afc36c940502d4"
+  },
+  {
+   "path": "textures/modular_electric_cables_boxes_diff_1k.jpg",
+   "size": 646895,
+   "md5": "b561a3ec8790af4033504609e70baa12"
+  },
+  {
+   "path": "textures/modular_electric_cables_boxes_arm_1k.jpg",
+   "size": 856332,
+   "md5": "a0c541de1da2bd138152e45be9383e72"
+  },
+  {
+   "path": "modular_electric_cables.bin",
+   "size": 1563316,
+   "md5": "1444b0e21d201c344a99e86937bbe5fc"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

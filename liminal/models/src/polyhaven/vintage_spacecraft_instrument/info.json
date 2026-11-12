@@ -1,0 +1,62 @@
+{
+ "id": "vintage_spacecraft_instrument",
+ "name": "Vintage Spacecraft Instrument",
+ "url": "https://polyhaven.com/a/vintage_spacecraft_instrument",
+ "authors": [
+  "Micha\u0142 Wi\u015bniewski"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "collection: project_lighthouse",
+  "instrument",
+  "electronics",
+  "industrial"
+ ],
+ "tags": [
+  "vintage",
+  "analog",
+  "retro",
+  "weathered",
+  "russian labels",
+  "cyrillic",
+  "classic",
+  "rocket",
+  "space"
+ ],
+ "dimensions_mm": [
+  410.28693318367004,
+  204.4019252061844,
+  269.28550004959106
+ ],
+ "polycount": 13279,
+ "date_published": 1783036800,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "vintage_spacecraft_instrument_1k.gltf",
+   "size": 10361,
+   "md5": "0d8d58e130422d5d2d471809d0fb5e8c"
+  },
+  {
+   "path": "textures/vintage_spacecraft_instrument_nor_gl_1k.jpg",
+   "size": 546173,
+   "md5": "d5070d599453e8d9ce6efad3e9f539ea"
+  },
+  {
+   "path": "textures/vintage_spacecraft_instrument_diff_1k.jpg",
+   "size": 629038,
+   "md5": "441b91da9b22dc1456b12e851c17b8cd"
+  },
+  {
+   "path": "textures/vintage_spacecraft_instrument_arm_1k.jpg",
+   "size": 756316,
+   "md5": "a2a0080685703928361c566b241a462b"
+  },
+  {
+   "path": "vintage_spacecraft_instrument.bin",
+   "size": 1723676,
+   "md5": "7fc02e56699415527f86ac1aea9e55f3"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

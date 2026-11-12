@@ -1,0 +1,73 @@
+{
+ "id": "modular_industrial_pipes_01",
+ "name": "Modular Industrial Pipes 01",
+ "url": "https://polyhaven.com/a/modular_industrial_pipes_01",
+ "authors": [
+  "Jorge Camacho"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "industrial",
+  "structures"
+ ],
+ "tags": [
+  "pipes",
+  "factory",
+  "steam",
+  "modular",
+  "industrial",
+  "utility",
+  "infrastructure"
+ ],
+ "dimensions_mm": [
+  1402.8016328811646,
+  307.5956106185913,
+  1954.6396136283875
+ ],
+ "polycount": 12340,
+ "date_published": 1623767625,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "modular_industrial_pipes_01_1k.gltf",
+   "size": 15014,
+   "md5": "cb30fdf4d471374ba439bfd5a0c8105d"
+  },
+  {
+   "path": "textures/modular_industrial_pipes_01_group02_arm_1k.jpg",
+   "size": 898932,
+   "md5": "088f90ba0d60c13ff0d6fc43cf734372"
+  },
+  {
+   "path": "textures/modular_industrial_pipes_01_group01_diff_1k.jpg",
+   "size": 553576,
+   "md5": "28678434837d64476cb8d75d0314166e"
+  },
+  {
+   "path": "textures/modular_industrial_pipes_01_group02_nor_gl_1k.jpg",
+   "size": 725187,
+   "md5": "282735667b3cd6e2d0ef058f2c260740"
+  },
+  {
+   "path": "modular_industrial_pipes_01.bin",
+   "size": 515160,
+   "md5": "a18d063dc719e19b9c20d2f8c0a8bec4"
+  },
+  {
+   "path": "textures/modular_industrial_pipes_01_group01_nor_gl_1k.jpg",
+   "size": 674568,
+   "md5": "a5d4deb3ea6772c0af1275edeab7dc94"
+  },
+  {
+   "path": "textures/modular_industrial_pipes_01_group01_arm_1k.jpg",
+   "size": 860825,
+   "md5": "2ab8f10dc9ca832af70cd48183281f97"
+  },
+  {
+   "path": "textures/modular_industrial_pipes_01_group02_diff_1k.jpg",
+   "size": 580676,
+   "md5": "d3d951f471cfcd15e89cedcd43d28606"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

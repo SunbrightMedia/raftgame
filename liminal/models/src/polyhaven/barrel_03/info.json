@@ -1,0 +1,58 @@
+{
+ "id": "barrel_03",
+ "name": "Barrel 03",
+ "url": "https://polyhaven.com/a/barrel_03",
+ "authors": [
+  "Serhii Khromov"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "industrial",
+  "containers"
+ ],
+ "tags": [
+  "industrial",
+  "barrel",
+  "oil",
+  "fuel",
+  "truck",
+  "painted",
+  "blue"
+ ],
+ "dimensions_mm": [
+  633.943498134613,
+  638.5995149612427,
+  930.4736243899824
+ ],
+ "polycount": 1473,
+ "date_published": 1632268800,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "barrel_03_1k.gltf",
+   "size": 2638,
+   "md5": "204eec2159a38a1dc4b826ef255f9468"
+  },
+  {
+   "path": "textures/barrel_03_diff_1k.jpg",
+   "size": 149997,
+   "md5": "6e77dc1af60c48787fd80dbbcf125040"
+  },
+  {
+   "path": "barrel_03.bin",
+   "size": 44872,
+   "md5": "6993587e3ef8e0603334e615ab292288"
+  },
+  {
+   "path": "textures/barrel_03_nor_gl_1k.jpg",
+   "size": 126707,
+   "md5": "fd181365eb7397d55773987d145f0420"
+  },
+  {
+   "path": "textures/barrel_03_arm_1k.jpg",
+   "size": 249922,
+   "md5": "3520338e30b4d257745db34848098688"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

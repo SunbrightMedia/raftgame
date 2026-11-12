@@ -1,0 +1,64 @@
+{
+ "id": "hand_truck",
+ "name": "Hand Truck",
+ "url": "https://polyhaven.com/a/hand_truck",
+ "authors": [
+  "Mutanzom3D"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "collection: project_lighthouse",
+  "industrial",
+  "props"
+ ],
+ "tags": [
+  "dolly",
+  "sack truck",
+  "warehouse equipment",
+  "load carrier",
+  "portable trolley",
+  "cart",
+  "storage",
+  "freight",
+  "tool",
+  "garage",
+  "warehouse",
+  "factory"
+ ],
+ "dimensions_mm": [
+  593.2528674602509,
+  692.5271153450012,
+  1402.51275151968
+ ],
+ "polycount": 13220,
+ "date_published": 1776178726,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "hand_truck_1k.gltf",
+   "size": 2754,
+   "md5": "9f0d19a6fc0418571c9bb8ac6a9527ce"
+  },
+  {
+   "path": "textures/hand_truck_nor_gl_1k.jpg",
+   "size": 944148,
+   "md5": "79838fd3b5cca1b279f214dafc1b49c0"
+  },
+  {
+   "path": "textures/hand_truck_diff_1k.jpg",
+   "size": 802329,
+   "md5": "e9c6cd9441438ab958a12dfb171b2e3c"
+  },
+  {
+   "path": "textures/hand_truck_arm_1k.jpg",
+   "size": 894412,
+   "md5": "01b854e843038d86de83252e132bd8b8"
+  },
+  {
+   "path": "hand_truck.bin",
+   "size": 535704,
+   "md5": "ee7c3a8a47349187da8d605900aac5bf"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

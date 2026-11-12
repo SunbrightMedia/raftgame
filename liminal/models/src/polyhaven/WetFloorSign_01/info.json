@@ -1,0 +1,63 @@
+{
+ "id": "WetFloorSign_01",
+ "name": "Wet Floor Sign 01",
+ "url": "https://polyhaven.com/a/WetFloorSign_01",
+ "authors": [
+  "Fran Calvente"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "props",
+  "industrial",
+  "office"
+ ],
+ "tags": [
+  "prop",
+  "plastic",
+  "sign",
+  "safety",
+  "caution",
+  "warning",
+  "yellow",
+  "hazard",
+  "slippery",
+  "slippery when wet",
+  "utility"
+ ],
+ "dimensions_mm": [
+  300.0548481941223,
+  358.5093021392822,
+  629.5440040994436
+ ],
+ "polycount": 228,
+ "date_published": 1585605600,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "WetFloorSign_01_1k.gltf",
+   "size": 2688,
+   "md5": "d69f7dfcdf087109e5b6269bbd4b2277"
+  },
+  {
+   "path": "textures/WetFloorSign_01_arm_1k.jpg",
+   "size": 126370,
+   "md5": "a77d2ff7c1ecf95da1830d8ec94efebb"
+  },
+  {
+   "path": "textures/WetFloorSign_01_nor_gl_1k.jpg",
+   "size": 88138,
+   "md5": "ee729a65845b94147710d554ffa46b5f"
+  },
+  {
+   "path": "textures/WetFloorSign_01_diff_1k.jpg",
+   "size": 39755,
+   "md5": "831604f9f4bacc1308c4cbe4e05e575d"
+  },
+  {
+   "path": "WetFloorSign_01.bin",
+   "size": 9496,
+   "md5": "2a027a15ce3f42cbc2e9392361fd180b"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

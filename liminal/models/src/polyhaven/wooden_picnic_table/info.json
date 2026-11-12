@@ -1,0 +1,76 @@
+{
+ "id": "wooden_picnic_table",
+ "name": "Wooden Picnic Table",
+ "url": "https://polyhaven.com/a/wooden_picnic_table",
+ "authors": [
+  "Ulan Cabanilla"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "furniture",
+  "seating",
+  "table"
+ ],
+ "tags": [
+  "vintage",
+  "old",
+  "worn",
+  "park",
+  "bench",
+  "outdoor",
+  "weathered",
+  "countryside",
+  "outdoor seating"
+ ],
+ "dimensions_mm": [
+  2240.9759759902954,
+  3022.329568862915,
+  745.9869086742401
+ ],
+ "polycount": 10210,
+ "date_published": 1715558400,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "wooden_picnic_table_1k.gltf",
+   "size": 5099,
+   "md5": "6da01f8a75e559f356b494059f7b0eda"
+  },
+  {
+   "path": "textures/wooden_picnic_table_top_arm_1k.jpg",
+   "size": 747432,
+   "md5": "7455dbd1d31d365961ff55b7a2a67186"
+  },
+  {
+   "path": "textures/wooden_picnic_table_top_nor_gl_1k.jpg",
+   "size": 625681,
+   "md5": "cab70a224d5b87bcb6c0595e14565626"
+  },
+  {
+   "path": "wooden_picnic_table.bin",
+   "size": 279116,
+   "md5": "5d52db76187b9990c328f79612eafe5b"
+  },
+  {
+   "path": "textures/wooden_picnic_table_bottom_arm_1k.jpg",
+   "size": 699984,
+   "md5": "11af6815971a16983c1e70103cd8300e"
+  },
+  {
+   "path": "textures/wooden_picnic_table_top_diff_1k.jpg",
+   "size": 722582,
+   "md5": "5ad2a2cb0ff9f55602ea0ad23096116f"
+  },
+  {
+   "path": "textures/wooden_picnic_table_bottom_nor_gl_1k.jpg",
+   "size": 548315,
+   "md5": "6b9ad57ca60a3dc5bc5e6e57acfd6cc9"
+  },
+  {
+   "path": "textures/wooden_picnic_table_bottom_diff_1k.jpg",
+   "size": 680087,
+   "md5": "496b544a3dded845915431cef92e2f7d"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

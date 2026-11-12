@@ -1,0 +1,63 @@
+{
+ "id": "old_tyre",
+ "name": "Old Tyre",
+ "url": "https://polyhaven.com/a/old_tyre",
+ "authors": [
+  "MP"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "industrial",
+  "props",
+  "collection: hidden_alley"
+ ],
+ "tags": [
+  "wheels",
+  "wheel",
+  "trash",
+  "garbage",
+  "garage",
+  "scrapyard",
+  "junkyard",
+  "abandoned",
+  "automotive",
+  "car",
+  "vehicle"
+ ],
+ "dimensions_mm": [
+  600.0000238418579,
+  164.99999910593033,
+  600.0000238418579
+ ],
+ "polycount": 2880,
+ "date_published": 1698624000,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "old_tyre_1k.gltf",
+   "size": 2734,
+   "md5": "e29d7aee130a850f2224ac0dd103617b"
+  },
+  {
+   "path": "textures/old_tyre_diff_1k.jpg",
+   "size": 650708,
+   "md5": "f52b712b8373b1d1a7c46702613f76cb"
+  },
+  {
+   "path": "textures/old_tyre_arm_1k.jpg",
+   "size": 776823,
+   "md5": "c9256d0d7cac005512cba4744ab29ab4"
+  },
+  {
+   "path": "old_tyre.bin",
+   "size": 84160,
+   "md5": "e29bd9703ad64da8883d8389b0cfb797"
+  },
+  {
+   "path": "textures/old_tyre_nor_gl_1k.jpg",
+   "size": 722778,
+   "md5": "e5eb6dd2cf7a8e80813bbc1bc21a6d3d"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

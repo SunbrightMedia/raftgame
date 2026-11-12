@@ -1,0 +1,59 @@
+{
+ "id": "painted_wooden_chair_02",
+ "name": "Painted Wooden Chair 02",
+ "url": "https://polyhaven.com/a/painted_wooden_chair_02",
+ "authors": [
+  "Kirill Sannikov"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "furniture",
+  "seating"
+ ],
+ "tags": [
+  "old",
+  "wooden",
+  "vintage",
+  "antique",
+  "farmhouse",
+  "seat",
+  "dining",
+  "chair"
+ ],
+ "dimensions_mm": [
+  639.3895149230957,
+  662.097692489624,
+  1263.7710904044432
+ ],
+ "polycount": 1246,
+ "date_published": 1710288000,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "painted_wooden_chair_02_1k.gltf",
+   "size": 2972,
+   "md5": "dde7a74f645ed9d71dbdee8d75984da9"
+  },
+  {
+   "path": "textures/painted_wooden_chair_02_nor_gl_1k.jpg",
+   "size": 973745,
+   "md5": "0e5264fe0c722d667222fca3c5f54fb9"
+  },
+  {
+   "path": "textures/painted_wooden_chair_02_diff_1k.jpg",
+   "size": 662120,
+   "md5": "79fd20a344e8f5ddfa9142e9dfb0fd8a"
+  },
+  {
+   "path": "textures/painted_wooden_chair_02_arm_1k.jpg",
+   "size": 718531,
+   "md5": "f3f2482f1674556ba1541cc478d5d30b"
+  },
+  {
+   "path": "painted_wooden_chair_02.bin",
+   "size": 39028,
+   "md5": "4902f84dc60b9515a0cfde6a0b860a0e"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

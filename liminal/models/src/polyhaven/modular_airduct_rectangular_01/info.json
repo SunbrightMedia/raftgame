@@ -1,0 +1,76 @@
+{
+ "id": "modular_airduct_rectangular_01",
+ "name": "Modular Airduct Rectangular 01",
+ "url": "https://polyhaven.com/a/modular_airduct_rectangular_01",
+ "authors": [
+  "James Ray Cock"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "industrial"
+ ],
+ "tags": [
+  "vent",
+  "airduct",
+  "modular",
+  "pieces",
+  "workshop",
+  "warehouse",
+  "rectangular",
+  "metal",
+  "airvent",
+  "utility",
+  "infrastructure"
+ ],
+ "dimensions_mm": [
+  7663.504123687744,
+  2586.645245552063,
+  1256.1511993408203
+ ],
+ "polycount": 45090,
+ "date_published": 1629331200,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "modular_airduct_rectangular_01_1k.gltf",
+   "size": 37157,
+   "md5": "80509f1d78f7853669d6f7d101cececd"
+  },
+  {
+   "path": "textures/modular_airduct_rectangular_01_parts01_nor_gl_1k.jpg",
+   "size": 63936,
+   "md5": "2742e16a52c9b188d60984ae880d4e24"
+  },
+  {
+   "path": "textures/modular_airduct_rectangular_01_parts02_nor_gl_1k.jpg",
+   "size": 88121,
+   "md5": "1d7ae142cf19bec3526af4138cc2efc2"
+  },
+  {
+   "path": "textures/modular_airduct_rectangular_01_parts02_diff_1k.jpg",
+   "size": 158760,
+   "md5": "b7abe74284ac15a8245f3ad09ff4857b"
+  },
+  {
+   "path": "modular_airduct_rectangular_01.bin",
+   "size": 1795116,
+   "md5": "e9d9ce22429985630952fc26fe24e2f5"
+  },
+  {
+   "path": "textures/modular_airduct_rectangular_01_parts01_arm_1k.jpg",
+   "size": 247732,
+   "md5": "62dd69fb3c04f8665ff5a6d51686b4eb"
+  },
+  {
+   "path": "textures/modular_airduct_rectangular_01_parts02_arm_1k.jpg",
+   "size": 188686,
+   "md5": "a9ff2f1df22d2f6de80b51b15e2c1a87"
+  },
+  {
+   "path": "textures/modular_airduct_rectangular_01_parts01_diff_1k.jpg",
+   "size": 187245,
+   "md5": "c73cefa3a76becf5963cc4e1c483368d"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

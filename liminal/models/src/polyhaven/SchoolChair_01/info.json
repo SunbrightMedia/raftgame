@@ -1,0 +1,57 @@
+{
+ "id": "SchoolChair_01",
+ "name": "School Chair 01",
+ "url": "https://polyhaven.com/a/SchoolChair_01",
+ "authors": [
+  "Ethan Place"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "furniture",
+  "seating"
+ ],
+ "tags": [
+  "prop",
+  "furniture",
+  "metal",
+  "plastic",
+  "chair",
+  "school"
+ ],
+ "dimensions_mm": [
+  565.8532977104187,
+  675.2548813819885,
+  1006.035539903678
+ ],
+ "polycount": 5072,
+ "date_published": 1585605600,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "SchoolChair_01_1k.gltf",
+   "size": 2695,
+   "md5": "dea922d55d029fb99085b50196d1eec0"
+  },
+  {
+   "path": "textures/SchoolChair_01_nor_gl_1k.jpg",
+   "size": 189532,
+   "md5": "223a0e5d115fb86cf1ae675fe73dc04a"
+  },
+  {
+   "path": "textures/SchoolChair_01_diff_1k.jpg",
+   "size": 52590,
+   "md5": "2d5c9c77d97ba2edd5084a9d72b5dd63"
+  },
+  {
+   "path": "textures/SchoolChair_01_arm_1k.jpg",
+   "size": 104994,
+   "md5": "559daea007902aae5b5d5623a34b3a13"
+  },
+  {
+   "path": "SchoolChair_01.bin",
+   "size": 134912,
+   "md5": "d1f13f71f9f9979cde18c798e25dd9d3"
+  }
+ ],
+ "fetched": "2026-11-12"
+}

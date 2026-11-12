@@ -1,0 +1,66 @@
+{
+ "id": "wooden_hammer_01",
+ "name": "Wooden Hammer 01",
+ "url": "https://polyhaven.com/a/wooden_hammer_01",
+ "authors": [
+  "James Ray Cock"
+ ],
+ "licence": "CC0 1.0",
+ "categories": [
+  "industrial",
+  "tools",
+  "props",
+  "collection: the_shed"
+ ],
+ "tags": [
+  "wooden",
+  "worn",
+  "used",
+  "old",
+  "dirty",
+  "mallet",
+  "nails",
+  "woodwork",
+  "workshop",
+  "metal",
+  "hammer",
+  "hardware",
+  "craftsmanship"
+ ],
+ "dimensions_mm": [
+  111.81152239441872,
+  23.39816838502884,
+  279.15042638778687
+ ],
+ "polycount": 3617,
+ "date_published": 1657843200,
+ "resolution": "1k",
+ "files": [
+  {
+   "path": "wooden_hammer_01_1k.gltf",
+   "size": 2709,
+   "md5": "1fa784bf9596aabe6ae63b07541ec8f8"
+  },
+  {
+   "path": "textures/wooden_hammer_01_nor_gl_1k.jpg",
+   "size": 577022,
+   "md5": "a1e06da5b306f9b053353009d1f172ed"
+  },
+  {
+   "path": "wooden_hammer_01.bin",
+   "size": 101960,
+   "md5": "1c6495d23cf3d120897a1655f93750e5"
+  },
+  {
+   "path": "textures/wooden_hammer_01_arm_1k.jpg",
+   "size": 686781,
+   "md5": "7398afa41fa7dc36fc7d08621a9ee0e3"
+  },
+  {
+   "path": "textures/wooden_hammer_01_diff_1k.jpg",
+   "size": 517825,
+   "md5": "f0647f60301b547bf717eab1147c1d30"
+  }
+ ],
+ "fetched": "2026-11-12"
+}
