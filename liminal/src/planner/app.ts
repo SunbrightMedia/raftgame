@@ -7,9 +7,11 @@
  */
 import './planner.css';
 import { FEATURE, FEATURES, GROUPS, THEMES, TAG_FEATURES, ZONE_FEATURES } from './catalogue';
-import { BG, CanvasPen, DEFAULT_LAYERS, drawMap, drawOverlay, SvgPen, type Layers, type View } from './draw';
+import { BG, CanvasPen, DEFAULT_LAYERS, drawMap, drawOverlay, setNameOf, SvgPen, type Layers, type View } from './draw';
 import { DEFAULT_PARAMS, emptyEdits, generate } from './generate';
 import GenWorker from './genWorker?worker&inline';
+import { onNames, typeName } from './names';
+import { openRoomView, type RoomViewHandle } from './roomView';
 import { toLocal, v2, type V2 } from './geom';
 import type { Edits, MapOut, Params, Zone, ZoneEdit } from './types';
 
@@ -67,7 +69,7 @@ const right = el('aside', { class: 'right' });
 app.append(header, left, main, right);
 const canvas = el('canvas', { id: 'map' });
 const tip = el('div', { id: 'tip' });
-const hint = el('div', { id: 'hint', text: 'drag: pan · wheel: zoom · click: pick · drag a zone: move · R: turn · Del: delete · double-click: re-roll' });
+const hint = el('div', { id: 'hint', text: 'drag: pan · wheel: zoom · click: pick · shift-click: 3D view · drag a zone: move · R: turn · Del: delete · double-click: re-roll' });
 const statsEl = el('div', { id: 'stats' });
 main.append(canvas, tip, hint, statsEl);
 const g = canvas.getContext('2d')!;
@@ -140,6 +142,7 @@ knob('squish', 'Squish', 0, 1, 0.01, pct, 'Rooms that sink into their neighbour 
 
 left.append(el('h2', { text: 'Features' }), el('div', { class: 'muted', text: 'Tick to use, slide for how often. Drag a zone feature onto the map to add it.' }));
 const featSyncs: (() => void)[] = [];
+const nameSyncs: (() => void)[] = [];
 for (const grp of GROUPS) {
   const det = el('details', { open: grp === 'Rooms' || grp === 'Grid halls' || grp === 'Wall fields' });
   det.append(el('summary', { text: `${grp} (${FEATURES.filter((f) => f.group === grp).length})` }));
@@ -156,7 +159,8 @@ for (const grp of GROUPS) {
     rng.addEventListener('pointerdown', () => { before = snap(); });
     rng.addEventListener('input', () => { set(Number(rng.value)); cb.checked = Number(rng.value) > 0; scheduleRegen(); });
     rng.addEventListener('change', () => { remember(before || snap()); save(); });
-    const name = el('span', { class: `name ${f.kind === 'zone' ? 'drag' : ''}`, title: `${f.n}. ${f.desc} (seen in: ${f.src})` }, `${f.n}. ${f.name}`);
+    const name = el('span', { class: `name ${f.kind === 'zone' ? 'drag' : ''}`, title: `${f.n}. ${f.name}: ${f.desc} (seen in: ${f.src})` }, `${f.n}. ${typeName(f.id)}`);
+    nameSyncs.push(() => { name.textContent = `${f.n}. ${typeName(f.id)}`; });
     if (f.kind === 'zone') {
       name.draggable = true;
       name.addEventListener('dragstart', (e) => { e.dataTransfer?.setData('text/plain', `feature:${f.id}`); });
@@ -177,6 +181,7 @@ function renderSide(): void {
       el('div', { class: 'muted' },
         el('p', { text: 'Pick a seed and turn the knobs: the map is made again each time.' }),
         el('p', { text: 'Click a zone to change it. Drag it to move it: it stays where you put it, rooms it lands on make space, and the rest of the map stays as it was.' }),
+        el('p', { text: 'Shift-click a room to see it in 3D. Click its name there to give that room type your own name; it is saved with the page.' }),
         el('p', { text: 'Drag a feature from the list onto the map to add it.' }),
         el('p', { text: 'Note: click "Note", then click the map and write.' }),
         el('p', { text: '1 tile = one 2 ft ceiling tile. The walls come from the outline of all floors, so parts merge where they meet.' }),
@@ -202,7 +207,7 @@ function renderSide(): void {
     else { const e = (state.edits.zones[z.key] ??= {}); fn(e); }
   });
   const feat = el('select') as HTMLSelectElement;
-  for (const f of ZONE_FEATURES) feat.append(el('option', { value: f.id, text: `${f.n}. ${f.name}`, selected: f.id === z.feature }));
+  for (const f of ZONE_FEATURES) feat.append(el('option', { value: f.id, text: `${f.n}. ${typeName(f.id)}`, selected: f.id === z.feature }));
   feat.addEventListener('change', () => editZone((e) => { e.feature = feat.value; delete e.w; delete e.h; }));
   const num = (val: number, onSet: (v: number) => void, step = 1) => { const i = el('input', { type: 'number', value: Math.round(val * 10) / 10, step }) as HTMLInputElement; i.addEventListener('change', () => onSet(Number(i.value))); return i; };
   const theme = el('select') as HTMLSelectElement;
@@ -212,14 +217,14 @@ function renderSide(): void {
   for (let l = -3; l <= 3; l++) level.append(el('option', { value: l, text: l === 0 ? 'base floor' : `${l > 0 ? '+' : ''}${l} step${Math.abs(l) > 1 ? 's' : ''}`, selected: l === z.level }));
   level.addEventListener('change', () => editZone((e) => { e.level = Number(level.value); }));
   const tags = el('div', { class: 'tags' });
-  for (const t of [...TAG_FEATURES.map((f) => [f.id, f.name] as const), ['mono', 'Monochrome'] as const]) {
+  for (const t of [...TAG_FEATURES.map((f) => [f.id, typeName(f.id)] as const), ['mono', 'Monochrome'] as const]) {
     const cb = el('input', { type: 'checkbox', checked: z.tags.includes(t[0]) }) as HTMLInputElement;
     cb.addEventListener('change', () => editZone((e) => { const cur = new Set(e.tags ?? z.tags); if (cb.checked) cur.add(t[0]); else cur.delete(t[0]); e.tags = [...cur]; }));
     tags.append(el('label', {}, cb, ` ${t[1]}`));
   }
   const deg = Math.round((z.frame.a * 180) / Math.PI) % 360;
   right.append(
-    el('div', { class: 'sel-title', text: FEATURE[z.feature]?.name ?? z.feature }),
+    el('div', { class: 'sel-title', text: typeName(z.feature), title: 'Shift-click the room on the map for its 3D view (and to rename this room type)' }),
     el('div', { class: 'muted', text: `${added ? 'added by you' : `zone ${z.key}`} · ${Math.round(z.w * 2)}×${Math.round(z.h * 2)} ft · ${z.ports.length} way${z.ports.length === 1 ? '' : 's'} in${z.pinned ? ' · pinned' : ''}` }),
     el('div', { class: 'muted', text: FEATURE[z.feature]?.desc ?? '' }),
     el('div', { class: 'kv' },
@@ -254,6 +259,20 @@ function deleteZone(z: Zone): void {
     selKey = null;
   });
 }
+
+setNameOf(typeName);
+// for tests and the console: open the 3D view of the first room of a type
+(window as unknown as { __planner: unknown }).__planner = {
+  openRoom(feature: string): boolean {
+    const i = map ? map.zones.findIndex((z) => z.feature === feature) : -1;
+    if (i < 0) return false;
+    roomView?.close();
+    roomView = openRoomView(main, main, map, i, () => { roomView = null; });
+    return true;
+  },
+  features(): string[] { return map ? [...new Set(map.zones.map((z) => z.feature))] : []; },
+};
+onNames(() => { nameSyncs.forEach((f) => f()); if (map) { renderSide(); invalidateMap(); } });
 
 // ------------------------------------------------------------------ generate and draw
 // Maps are made in a worker. Only one request runs at a time; while it runs, newer edits wait and only the
@@ -392,6 +411,7 @@ function hit(p: V2): Zone | null {
   return best;
 }
 let drag: { mode: 'pan' | 'move'; x: number; y: number; moved: boolean; z?: Zone; cx: number; cy: number } | null = null;
+let roomView: RoomViewHandle | null = null;
 canvas.addEventListener('pointerdown', (e) => {
   canvas.setPointerCapture(e.pointerId);
   const r = canvas.getBoundingClientRect();
@@ -417,6 +437,13 @@ canvas.addEventListener('pointerdown', (e) => {
     return;
   }
   const z = hit(wp);
+  if (z && e.shiftKey) {
+    // shift-click: the room in 3D
+    selKey = z.key; renderSide(); requestDraw();
+    roomView?.close();
+    roomView = openRoomView(main, main, map, map.zones.indexOf(z), () => { roomView = null; });
+    return;
+  }
   if (z) {
     if (selKey !== z.key) { selKey = z.key; renderSide(); requestDraw(); }
     drag = { mode: 'move', x, y, moved: false, z, cx: view.cx, cy: view.cy };
@@ -437,8 +464,7 @@ canvas.addEventListener('pointermove', (e) => {
   }
   const z = hit(toWorldPt(x, y));
   if (z) {
-    const f = FEATURE[z.feature];
-    tip.replaceChildren(el('b', { text: f?.name ?? z.feature }), el('br'), `${Math.round(z.w * 2)}×${Math.round(z.h * 2)} ft · ${THEMES.find((t) => t.id === z.theme)?.name ?? z.theme}${z.level ? ` · floor ${z.level > 0 ? '+' : ''}${z.level}` : ''}`, z.tags.length ? el('div', { class: 'muted', text: z.tags.map((t) => FEATURE[t]?.name ?? t).join(', ') }) : '');
+    tip.replaceChildren(el('b', { text: typeName(z.feature) }), el('br'), `${Math.round(z.w * 2)}×${Math.round(z.h * 2)} ft · ${THEMES.find((t) => t.id === z.theme)?.name ?? z.theme}${z.level ? ` · floor ${z.level > 0 ? '+' : ''}${z.level}` : ''}`, z.tags.length ? el('div', { class: 'muted', text: z.tags.map((t) => typeName(t)).join(', ') }) : '', el('div', { class: 'muted', text: 'shift-click: 3D view' }));
     tip.style.display = 'block';
     tip.style.left = `${Math.min(x + 14, view.w - 270)}px`;
     tip.style.top = `${y + 14}px`;
@@ -493,6 +519,7 @@ canvas.addEventListener('drop', (e) => {
 window.addEventListener('keydown', (e) => {
   const tag = (e.target as HTMLElement)?.tagName;
   if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+  if (roomView) return;
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); if (e.shiftKey) doRedo(); else doUndo(); return; }
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') { e.preventDefault(); doRedo(); return; }
   const z = selKey && map ? map.zones.find((q) => q.key === selKey) : undefined;

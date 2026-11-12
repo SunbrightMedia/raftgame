@@ -3,6 +3,7 @@ import { FEATURES, ZONE_FEATURES } from '../src/planner/catalogue';
 import { DEFAULT_PARAMS, emptyEdits, generate } from '../src/planner/generate';
 import { buildZone } from '../src/planner/recipes';
 import { check } from '../src/planner/faults';
+import { buildRoom3D } from '../src/planner/room3d';
 import { Rng } from '../src/world/rng';
 import type { Zone } from '../src/planner/types';
 
@@ -112,5 +113,19 @@ describe('Backrooms planner', () => {
       // the same edits give the same map again (what a reload shows)
       expect(JSON.stringify(generate(p, e).zones.map((z) => z.frame))).toBe(JSON.stringify(m.zones.map((z) => z.frame)));
     }
+  });
+  it('builds every room of a few maps in low-poly 3D', () => {
+    const seen = new Set<string>();
+    for (const seed of [1, 2, 3, 4, 5]) {
+      const m = generate({ ...DEFAULT_PARAMS, seed, landmarks: 0.9, heights: 0.6 });
+      m.zones.forEach((z, i) => {
+        const r = buildRoom3D(m, i);
+        seen.add(z.feature);
+        expect(r.triangles, `${z.key}/${z.feature}`).toBeGreaterThan(z.feature === 'mass' ? 4 : 10);
+        expect(r.triangles, `${z.key}/${z.feature}: low-poly`).toBeLessThan(40000);
+        expect(Number.isFinite(r.radius) && Number.isFinite(r.center.x)).toBe(true);
+      });
+    }
+    expect(seen.size).toBeGreaterThan(25);
   });
 });

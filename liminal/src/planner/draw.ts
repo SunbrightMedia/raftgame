@@ -25,6 +25,9 @@ export interface Layers { walls: boolean; lights: boolean; marks: boolean; label
 export const DEFAULT_LAYERS: Layers = { walls: true, lights: true, marks: true, labels: false, notes: true, grid: false, layer2: false, heights: false };
 
 export const BG = '#575757';
+/** Names on the map's labels (the page swaps in the user's own names for room types). */
+let nameOf = (id: string): string => FEATURE[id]?.name ?? id;
+export function setNameOf(fn: (id: string) => string): void { nameOf = fn; }
 const HAND = "'Segoe Print', 'Bradley Hand', 'Comic Sans MS', cursive";
 
 export class CanvasPen implements Pen {
@@ -234,7 +237,7 @@ export function drawMap(pen: Pen, m: MapOut, v: View, L: Layers, sel = -1, parts
   // 9. text
   if (L.labels) for (const z of m.zones) {
     if (!near({ x: z.frame.x, y: z.frame.y }, 10)) continue;
-    pen.text(T({ x: z.frame.x, y: z.frame.y }), FEATURE[z.feature]?.name ?? z.feature, { size: Math.max(9, Math.min(13, S * 1.1)), color: '#2f2a22', alpha: 0.75 });
+    pen.text(T({ x: z.frame.x, y: z.frame.y }), nameOf(z.feature), { size: Math.max(9, Math.min(13, S * 1.1)), color: '#2f2a22', alpha: 0.75 });
   }
   if (L.notes) for (const p of m.prims) {
     if (p.t !== 'label' || !near(p.p, 12)) continue;
