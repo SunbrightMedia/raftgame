@@ -2,8 +2,8 @@
 
 GPU compilers may fuse a * b + c into one rounding, regroup (x + 0.5) + 0.5 into x + 1.0, or turn a / b into
 a * (1 / b). Blender's CPU code does none of that, so a GPU copy of it drifts by an ulp here and there. This
-rewrites every function body: a + b, a - b, a * b become rn(a + b) (rn multiplies by a 1.0 the compiler cannot
-see, so the operation stays on its own), a / b becomes dv(a, b) (an exactly rounded quotient), and compound
+rewrites every function body: a + b, a - b, a * b become rn(a + b) (rn adds an integer 0 the compiler cannot
+see to the result's bits, so the operation stays on its own), a / b becomes dv(a, b) (an exactly rounded quotient), and compound
 assignments are expanded. Integer operations go through identity overloads, so the types need no analysis.
 Constant initializers (const, globals) are left as they are.
 
@@ -12,11 +12,14 @@ Constant initializers (const, globals) are left as they are.
 import re
 
 PRELUDE = '''
-float xone_() { return uintBitsToFloat(0x3F800000u + uint(gl_FragCoord.x < 0.0)); }
-float rn(float x) { return x * xone_(); }
-vec2 rn(vec2 x) { return x * xone_(); }
-vec3 rn(vec3 x) { return x * xone_(); }
-vec4 rn(vec4 x) { return x * xone_(); }
+// rn(x): x unchanged, through an integer add of 0 on its bits. The compiler cannot know the 0 (it comes from
+// gl_FragCoord), so it cannot fuse, regroup or factor across rn() (multiplying by an unknown 1.0 is not enough:
+// a fast-math optimizer still factors v*a + v*b into v*(a + b)).
+uint xz_() { return uint(gl_FragCoord.x < 0.0); }
+float rn(float x) { return uintBitsToFloat(floatBitsToUint(x) + xz_()); }
+vec2 rn(vec2 x) { return uintBitsToFloat(floatBitsToUint(x) + uvec2(xz_())); }
+vec3 rn(vec3 x) { return uintBitsToFloat(floatBitsToUint(x) + uvec3(xz_())); }
+vec4 rn(vec4 x) { return uintBitsToFloat(floatBitsToUint(x) + uvec4(xz_())); }
 int rn(int x) { return x; }
 ivec2 rn(ivec2 x) { return x; }
 ivec3 rn(ivec3 x) { return x; }
@@ -27,16 +30,15 @@ uvec3 rn(uvec3 x) { return x; }
 uvec4 rn(uvec4 x) { return x; }
 // a / b, rounded once: the GPU's quotient, corrected with the exact residual a - q * b (Dekker's product)
 float dv(float a, float b) {
-  float one = xone_();
-  float q = (a / b) * one;
+  float q = rn(a / b);
   float aq = abs(q);
   if (!(aq > 1e-30 && aq < 1e30) || isinf(b) || isinf(a)) return q;
-  float t = (4097.0 * q) * one, qh = (t - (t - q) * one) * one, ql = (q - qh) * one;
-  float u = (4097.0 * b) * one, bh = (u - (u - b) * one) * one, bl = (b - bh) * one;
-  float p = (q * b) * one;
-  float e = ((((qh * bh - p) * one + qh * bl) * one + ql * bh) * one + ql * bl) * one;
-  float r = ((a - p) * one - e) * one;
-  return (q + (r / b) * one) * one;
+  float t = rn(4097.0 * q), qh = rn(t - rn(t - q)), ql = rn(q - qh);
+  float u = rn(4097.0 * b), bh = rn(u - rn(u - b)), bl = rn(b - bh);
+  float p = rn(q * b);
+  float e = rn(rn(rn(rn(rn(qh * bh) - p) + rn(qh * bl)) + rn(ql * bh)) + rn(ql * bl));
+  float r = rn(rn(a - p) - e);
+  return rn(q + rn(r / b));
 }
 vec2 dv(vec2 a, vec2 b) { return vec2(dv(a.x, b.x), dv(a.y, b.y)); }
 vec3 dv(vec3 a, vec3 b) { return vec3(dv(a.x, b.x), dv(a.y, b.y), dv(a.z, b.z)); }
