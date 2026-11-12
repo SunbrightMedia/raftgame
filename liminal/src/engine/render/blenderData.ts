@@ -17,9 +17,15 @@ function urlOf(name: string): (() => Promise<string>) | undefined {
 async function fetchBytes(name: string): Promise<ArrayBuffer> {
   const get = urlOf(name);
   if (!get) throw new Error('blender data: no file ' + name + ' in this build');
-  const r = await fetch(await get());
+  const url = await get();
+  const r = await fetch(url);
   if (!r.ok) throw new Error(`blender data: ${name}: HTTP ${r.status}`);
-  return r.arrayBuffer();
+  if (!url.endsWith('.b64.txt')) return r.arrayBuffer();
+  // the published page gets binary files as base64 text (artifacts serve no raw binary)
+  const bin = atob((await r.text()).trim());
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out.buffer;
 }
 
 /** True when this build carries the data (the dev build does; the published page does not, for now). */

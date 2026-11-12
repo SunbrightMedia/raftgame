@@ -15,8 +15,9 @@ export const catalogue: { textures?: unknown; sheets: Record<string, string>; mo
 export const worlds: Record<string, (seed: number) => unknown> = {};
 /** Worlds with no edge, loaded as lots round the player: none in this build (see globs.dev.ts). */
 export const lots: Record<string, { settings: unknown; start: (seed: number, i: number, j: number) => [number, number, number] }> = {};
-/** Blender post-processing data: published next to the page as data/blender/* (artifact files, too big to inline),
- * fetched the first time the 'blender' camera model is picked. */
+/** Blender post-processing data: published next to the page as data/blender/* (artifact files, too big to inline;
+ * the float tables as base64 text, since artifacts serve no raw binary), fetched the first time the 'blender'
+ * camera model is picked. tools/make-page.mjs stages them. */
 export const blenderData: Record<string, () => Promise<string>> = Object.fromEntries(
-  (blenderFiles as string[]).map((f) => [`data/blender/${f}`, () => Promise.resolve(`data/blender/${f}`)]),
+  (blenderFiles as string[]).map((f) => [`data/blender/${f}`, () => Promise.resolve(f.endsWith('.json') ? `data/blender/${f}` : `data/blender/${f}.b64.txt`)]),
 );
