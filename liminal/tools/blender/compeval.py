@@ -1806,3 +1806,122 @@ def node_convert_colorspace(ev, nid, n):
 
 NODES.update({'CompositorNodeGlare': node_glare, 'CompositorNodeBrightContrast': node_bright_contrast,
               'CompositorNodeHueSat': node_hue_sat, 'CompositorNodeConvertColorSpace': node_convert_colorspace})
+
+
+# ----------------------------------------------------------------------------------------------- display
+
+PLANCK_LOCUS = [  # Robertson's isotherms: mired, CIE 1960 (u, v), isotherm slope (as in Blender's math_color)
+    (0.0, 0.18006, 0.26352, -0.24341), (10.0, 0.18066, 0.26589, -0.25479), (20.0, 0.18133, 0.26846, -0.26876),
+    (30.0, 0.18208, 0.27119, -0.28539), (40.0, 0.18293, 0.27407, -0.30470), (50.0, 0.18388, 0.27709, -0.32675),
+    (60.0, 0.18494, 0.28021, -0.35156), (70.0, 0.18611, 0.28342, -0.37915), (80.0, 0.18740, 0.28668, -0.40955),
+    (90.0, 0.18880, 0.28997, -0.44278), (100.0, 0.19032, 0.29326, -0.47888), (125.0, 0.19462, 0.30141, -0.58204),
+    (150.0, 0.19962, 0.30921, -0.70471), (175.0, 0.20525, 0.31647, -0.84901), (200.0, 0.21142, 0.32312, -1.0182),
+    (225.0, 0.21807, 0.32909, -1.2168), (250.0, 0.22511, 0.33439, -1.4512), (275.0, 0.23247, 0.33904, -1.7298),
+    (300.0, 0.24010, 0.34308, -2.0637), (325.0, 0.24792, 0.34655, -2.4681), (350.0, 0.25591, 0.34951, -2.9641),
+    (375.0, 0.26400, 0.35200, -3.5814), (400.0, 0.27218, 0.35407, -4.3633), (425.0, 0.28039, 0.35577, -5.3762),
+    (450.0, 0.28863, 0.35714, -6.7262), (475.0, 0.29685, 0.35823, -8.5955), (500.0, 0.30505, 0.35907, -11.324),
+    (525.0, 0.31320, 0.35968, -15.628), (550.0, 0.32129, 0.36011, -23.325), (575.0, 0.32931, 0.36038, -40.770),
+    (600.0, 0.33724, 0.36051, -116.45)]
+
+
+def whitepoint_from_temp_tint(temperature, tint):
+    loc = [(F(m), F(u), F(v), F(t)) for m, u, v, t in PLANCK_LOCUS]
+    mired = F(min(max(F(F(1e6) / F(temperature)), loc[0][0]), loc[-1][0]))
+    i = next(k for k, e in enumerate(loc) if not (e[0] < mired))
+    lo, hi = loc[i - 1], loc[i]
+    f_ = F(F(mired - lo[0]) / F(hi[0] - lo[0]))
+    u = F(F(lo[1] * F(1 - f_)) + F(hi[1] * f_)); v = F(F(lo[2] * F(1 - f_)) + F(hi[2] * f_))
+
+    def norm(x, y):
+        l = F(math.sqrt(float(F(F(x * x) + F(y * y)))))
+        return F(x / l), F(y / l)
+    i0 = norm(F(1), lo[3]); i1 = norm(F(1), hi[3])
+    iso = norm(F(F(i0[0] * F(1 - f_)) + F(i1[0] * f_)), F(F(i0[1] * F(1 - f_)) + F(i1[1] * f_)))
+    u = F(u - F(F(iso[0] * F(tint)) / F(3000))); v = F(v - F(F(iso[1] * F(tint)) / F(3000)))
+    den = F(F(F(F(2) * u) - F(F(8) * v)) + F(4))
+    x = F(F(F(3) * u) / den); y = F(F(F(2) * v) / den)
+    return np.array([F(x / y), F(1), F(F(F(1) - x) - y) / y], F)
+
+
+def mat3(a):
+    return np.array(a, F)
+
+
+def mat_vec(M, v):
+    return np.array([F(F(F(M[i, 0] * v[0]) + F(M[i, 1] * v[1])) + F(M[i, 2] * v[2])) for i in range(3)], F)
+
+
+def display_matrix(cfg, O, temperature, tint):
+    """Blender's white balance matrix (calculate_white_point_matrix), float32."""
+    cpu = cfg.getProcessor('aces_interchange', 'scene_linear').getDefaultCPUProcessor()
+    cols = []
+    for e in np.eye(3, dtype=F):
+        v = np.ascontiguousarray(e.copy()); cpu.applyRGB(v); cols.append(v)
+    aces_to_scene = np.stack(cols, 1).astype(F)
+    ACES_TO_XYZ = mat3([[0.938280, -0.004451, 0.016628], [0.337369, 0.729522, -0.066890], [0.001174, -0.003711, 1.091595]])
+    xyz_to_scene = mat_mul(aces_to_scene, mat_inv(ACES_TO_XYZ))
+    scene_to_xyz = mat_inv(xyz_to_scene)
+    target = mat_vec(scene_to_xyz, np.ones(3, F))
+    frm = whitepoint_from_temp_tint(temperature, tint)
+    BR = mat3([[0.8951, 0.2664, -0.1614], [-0.7502, 1.7135, 0.0367], [0.0389, -0.0685, 1.0296]])
+    fl = (mat_vec(BR, frm) / frm[1]).astype(F); tl = (mat_vec(BR, target) / target[1]).astype(F)
+    S_ = np.diag((tl / fl).astype(F)).astype(F)
+    ca = mat_mul(mat_mul(mat_inv(BR), S_), BR)
+    m = mat_mul(mat_mul(xyz_to_scene, ca), scene_to_xyz)
+    return mat_mul(np.eye(3, dtype=F), m)
+
+
+def view_transform(img, view):
+    """Blender's display transform of a scene-linear image (bottom row first, RGBA), per the scene's view settings
+    (dict: display_device, view_transform, look, exposure, gamma, use_white_balance, white_balance_temperature,
+    white_balance_tint). Returns display-encoded float RGB. Needs Blender's OpenColorIO (run under bpy's Python)."""
+    oc = ocio()
+    if oc is None:
+        raise RuntimeError('view_transform needs the PyOpenColorIO bundled with bpy')
+    O, cfg = oc
+    g = O.GroupTransform()
+    src = 'Linear Rec.709'
+    scale = F(2 ** float(view.get('exposure', 0.0)))
+    if scale != 1 or view.get('use_white_balance'):
+        g.appendTransform(O.ColorSpaceTransform(src=src, dst='scene_linear'))
+        src = 'scene_linear'
+        m = (np.eye(3, dtype=F) * scale).astype(F)
+        if view.get('use_white_balance'):
+            m = mat_mul(m, display_matrix(cfg, O, view['white_balance_temperature'], view['white_balance_tint']))
+        m4 = np.eye(4); m4[:3, :3] = m.astype(np.float64)
+        g.appendTransform(O.MatrixTransform(matrix=list(m4.ravel())))
+    look = view.get('look', 'None')
+    dvt = O.DisplayViewTransform(src=src, display=view['display_device'], view=view['view_transform'],
+                                 looksBypass=False)
+    if look and look != 'None':
+        raise NotImplementedError('looks')
+    g.appendTransform(dvt)
+    gamma = float(view.get('gamma', 1.0))
+    if gamma != 1.0:
+        e = 1.0 / gamma
+        g.appendTransform(O.ExponentTransform(value=[e, e, e, 1.0]))
+    cpu = cfg.getProcessor(g).getDefaultCPUProcessor()
+    x = np.ascontiguousarray(img.astype(F).copy())
+    cpu.applyRGBA(x)
+    return x
+
+
+def dither_bytes(disp, dither):
+    """IMB float -> byte with Blender's dither (hash_iqint3, triangle-shaped, 0.0033 * dither), rows from the bottom."""
+    H, W = disp.shape[:2]
+    X, Y = np.meshgrid(np.arange(W, dtype=np.uint32), np.arange(H, dtype=np.uint32))
+    with np.errstate(over='ignore'):
+        qx = (np.uint32(1103515245) * ((X >> np.uint32(1)) ^ Y)).astype(np.uint32)
+        qy = (np.uint32(1103515245) * ((Y >> np.uint32(1)) ^ X)).astype(np.uint32)
+        nn = (np.uint32(1103515245) * (qx ^ (qy >> np.uint32(3)))).astype(np.uint32)
+    v = (nn.astype(F) * F(1.0 / 4294967296.0)).astype(F)
+    v = ((v * F(2)).astype(F) - F(1)).astype(F)
+    sg = np.where(v < 0, F(-1), F(1))
+    v = (sg * (F(1) - np.sqrt((F(1) - np.abs(v)).astype(np.float64)).astype(F))).astype(F)
+    d = ((v * F(0.0033)).astype(F) * F(dither)).astype(F)
+    out = np.empty(disp.shape[:2] + (3,), np.uint8)
+    for c in range(3):
+        x = (d + disp[..., c]).astype(F)
+        b = np.where(x <= 0, F(0), np.where(x > F(1.0 - 0.5 / 255.0), F(255), ((F(255) * x).astype(F) + F(0.5)).astype(F)))
+        out[..., c] = b.astype(np.uint8)
+    return out
