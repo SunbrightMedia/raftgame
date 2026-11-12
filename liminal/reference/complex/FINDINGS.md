@@ -121,6 +121,19 @@ captured scene picture into it and compares every stage with the game's:
 adds the rest). Frame 19893's scene picture was saved over a 0–40 range, too
 coarse for this test.
 
+**Re-checked 2026-11-12** (today's code, default settings): the same numbers (18325: tone 0.024, finished
+0.035; 20732: 0.009, 0.016; mean colour within 0.002). What this check can and cannot show:
+- Its input is the capture's scene picture, which RenderDoc saved as a JPEG (quality 85) of an 8-bit
+  stretch of the HDR picture. Our tone curve and the ×7 sharpen amplify its blocks and steps: in the lit
+  room ours has 1.4× the game's fine detail already after the tone curve (where nothing adds detail) and
+  1.7× after sharpening (`tools/camcorder/detail.py`). The bench's side-by-side looks harsher than the game
+  for that reason. In the game the camera gets a clean float picture.
+- The sharpen step alone, run on the game's own tone-stage picture (`tools/camcorder/sharptest.py`), raises
+  fine detail ×5.01 (ours) vs ×5.31 (game) on 18325 and ×5.05 vs ×5.17 on 20732: the formula is right.
+- So the chain is matched by measurement, on two frames, as closely as JPEG pictures can show. It is not
+  proven exact: the warm multiplier, the glow's shape and the upscaler softness are fitted, and the lens
+  dirt, grain and tape noise are ours.
+
 What the rebuild taught:
 - **A warm multiplier before the tone curve**: the tonemapper multiplies the
   picture by a buffer we could not read. Fitting four frames gave
