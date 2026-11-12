@@ -176,7 +176,7 @@ function renderSide(): void {
       el('h2', { text: 'How to use' }),
       el('div', { class: 'muted' },
         el('p', { text: 'Pick a seed and turn the knobs: the map is made again each time.' }),
-        el('p', { text: 'Click a zone to change it. Drag it to move it; it stays where you put it and the corridors find their way to it.' }),
+        el('p', { text: 'Click a zone to change it. Drag it to move it: it stays where you put it, rooms it lands on make space, and the rest of the map stays as it was.' }),
         el('p', { text: 'Drag a feature from the list onto the map to add it.' }),
         el('p', { text: 'Note: click "Note", then click the map and write.' }),
         el('p', { text: '1 tile = one 2 ft ceiling tile. The walls come from the outline of all floors, so parts merge where they meet.' }),
@@ -288,8 +288,10 @@ function regenerate(refit = false): void {
   busy = true; dirty = false;
   worker.postMessage({ id: ++reqId, params: state.params, edits: state.edits });
 }
+let holdGhost = false;
 function setMap(m: MapOut): void {
   map = m;
+  if (holdGhost) { holdGhost = false; ghost = null; }
   if (wantFit) { fit(); wantFit = false; }
   showStats();
   renderSide();
@@ -370,6 +372,14 @@ function draw(): void {
   }
 }
 
+/** Pin a zone where the user put it. Its edit goes last, so moves replay in the order they were made (each one
+ * pushes the unpinned rooms it lands on). */
+function pinZone(key: string, x: number, y: number, a: number): void {
+  const old = state.edits.zones[key] ?? {};
+  delete state.edits.zones[key];
+  state.edits.zones[key] = { ...old, x, y, a };
+}
+
 // ------------------------------------------------------------------ canvas input
 const toWorldPt = (cx: number, cy: number): V2 => v2(view.cx + (cx - view.w / 2) / view.scale, view.cy + (cy - view.h / 2) / view.scale);
 function hit(p: V2): Zone | null {
@@ -443,14 +453,15 @@ canvas.addEventListener('pointerup', () => {
   if (d.mode === 'pan' && d.moved) sharpenSoon(250);   // re-centre the cached picture so the next pan has room
   if (d.mode === 'move' && d.moved && d.z && ghost) {
     const z = d.z, gh = ghost;
-    ghost = null;
     const added = state.edits.added.find((a) => a.key === z.key);
+    // the outline stays where it was dropped until the new map arrives from the worker
+    holdGhost = true;
     commit(() => {
       if (added) { added.x = z.frame.x + gh.dx; added.y = z.frame.y + gh.dy; }
-      else { const e = (state.edits.zones[z.key] ??= {}); e.x = z.frame.x + gh.dx; e.y = z.frame.y + gh.dy; e.a = z.frame.a; }
+      else pinZone(z.key, z.frame.x + gh.dx, z.frame.y + gh.dy, z.frame.a);
     });
   }
-  ghost = null;
+  if (!holdGhost) ghost = null;
   requestDraw();
 });
 canvas.addEventListener('dblclick', (e) => {
@@ -495,7 +506,7 @@ window.addEventListener('keydown', (e) => {
     const added = state.edits.added.find((a) => a.key === z.key);
     commit(() => {
       if (added) added.a = z.frame.a + da;
-      else { const ed = (state.edits.zones[z.key] ??= {}); ed.x = z.frame.x; ed.y = z.frame.y; ed.a = z.frame.a + da; }
+      else pinZone(z.key, z.frame.x, z.frame.y, z.frame.a + da);
     });
   }
 });

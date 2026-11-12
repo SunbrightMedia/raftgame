@@ -317,6 +317,8 @@ interface Ctx {
   nodeZone: Int32Array;
   pending: { a: number; b: number; kind: LinkKind; edge?: string; loop: boolean }[];
   dropped: number;
+  /** Links between rooms that could not be routed (debug). */
+  unrouted: string[];
 }
 
 function addZone(c: Ctx, i: number, frame: Frame, w: number, h: number, parent: number): Zone {
@@ -449,6 +451,206 @@ function attach(c: Ctx, i: number, pz: Zone, r: Rng, tries = 40): boolean {
     return true;
   }
   return false;
+}
+
+// ------------------------------------------------------------------ 2b. the user's edits, applied locally
+
+/** The smallest move of polygon B that takes it off polygon A (both convex), or null when they do not overlap. */
+function pushOut(A: V2[], B: V2[]): V2 | null {
+  let best = Infinity, axis: V2 | null = null;
+  for (const poly of [A, B]) {
+    for (let i = 0; i < poly.length; i++) {
+      const p0 = poly[i], p1 = poly[(i + 1) % poly.length];
+      const n = norm({ x: p1.y - p0.y, y: p0.x - p1.x });
+      let a0 = Infinity, a1 = -Infinity, b0 = Infinity, b1 = -Infinity;
+      for (const q of A) { const d = q.x * n.x + q.y * n.y; if (d < a0) a0 = d; if (d > a1) a1 = d; }
+      for (const q of B) { const d = q.x * n.x + q.y * n.y; if (d < b0) b0 = d; if (d > b1) b1 = d; }
+      const over = Math.min(a1 - b0, b1 - a0);
+      if (over <= 0) return null;
+      if (over < best) { best = over; axis = n; }
+    }
+  }
+  if (!axis) return null;
+  const ca = A.reduce((s, q) => add(s, q), v2(0, 0)), cb = B.reduce((s, q) => add(s, q), v2(0, 0));
+  const away = dot(sub(mul(cb, 1 / B.length), mul(ca, 1 / A.length)), axis) >= 0 ? 1 : -1;
+  return mul(axis, (best + 0.02) * away);
+}
+
+/** A room at a new place pushes the unpinned rooms it lands on out of the way; they push in turn. */
+function pushApart(c: Ctx, start: number, clear: number, pinned: Set<number>, dead: Set<number>, changed: Set<number>): void {
+  const q = [start];
+  let steps = 0;
+  const squishPair = (a: Zone, b: Zone) => (a.tags.includes('squished') && a.parent === b.id) || (b.tags.includes('squished') && b.parent === a.id);
+  while (q.length && steps++ < 800) {
+    const zi = c.zones[q.shift()!];
+    const A = obb(zi.frame, zi.w, zi.h, clear / 2), ab = bboxOf(A);
+    for (const zj of c.zones) {
+      if (zj === zi || dead.has(zj.id) || pinned.has(zj.id) || squishPair(zi, zj)) continue;
+      const B = obb(zj.frame, zj.w, zj.h, clear / 2), bb = bboxOf(B);
+      if (bb.x1 <= ab.x0 || ab.x1 <= bb.x0 || bb.y1 <= ab.y0 || ab.y1 <= bb.y0) continue;
+      const m = pushOut(A, B);
+      if (!m) continue;
+      zj.frame = { ...zj.frame, x: zj.frame.x + m.x, y: zj.frame.y + m.y };
+      changed.add(zj.id);
+      q.push(zj.id);
+    }
+  }
+}
+
+/** New size for a zone; its doors stay on its walls. */
+function resize(z: Zone, w: number, h: number): void {
+  for (const pt of z.ports) pt.p = v2((pt.p.x * w) / z.w, (pt.p.y * h) / z.h);
+  z.w = w; z.h = h;
+}
+
+/** Is the doorway of a link between two touching rooms still on both rooms' walls? */
+function stillTouching(c: Ctx, l: Link): boolean {
+  const za = c.zones[l.a], zb = c.zones[l.b];
+  const pa = za.ports.find((pt) => pt.link === l.id);
+  if (!pa) return false;
+  const q = toLocal(zb.frame, toWorld(za.frame, pa.p));
+  const ex = Math.abs(Math.abs(q.x) - zb.w / 2), ey = Math.abs(Math.abs(q.y) - zb.h / 2);
+  return (ex < 0.35 && Math.abs(q.y) <= zb.h / 2) || (ey < 0.35 && Math.abs(q.x) <= zb.w / 2);
+}
+
+/**
+ * Hand edits on top of the seed's layout, in a fixed order: what a room is (feature, size, seed, district, tags,
+ * floor), deletions, moves (in the order they were made: each moved room pushes the unpinned rooms it lands on),
+ * added rooms. Links of rooms that changed place or size are routed again; touching rooms that still touch keep
+ * their doorway; corridors that a moved room now sits on are routed round it.
+ */
+function applyEdits(c: Ctx, edits: Edits, root: Rng): void {
+  const p = c.p;
+  const clear = 0.8 - 0.75 * (p.tight ?? 0);
+  const byKey = new Map(c.zones.map((z) => [z.key, z]));
+  const changed = new Set<number>(), dead = new Set<number>(), pinned = new Set<number>(), deadLinks = new Set<number>();
+  const sizeOf = (feature: string, key: string): [number, number] => {
+    const f = FEATURE[feature], r = root.fork(`size:${key}:${feature}`);
+    const [w0, w1] = f.w ?? [6, 10], [h0, h1] = f.h ?? [6, 10];
+    return [Math.max(3, Math.round(w0 + (w1 - w0) * r.next() ** 1.4)), Math.max(3, Math.round(h0 + (h1 - h0) * r.next() ** 1.4))];
+  };
+  // 1. what a room is
+  for (const [key, ed] of Object.entries(edits.zones)) {
+    const z = byKey.get(key);
+    if (!z) continue;
+    if (ed.deleted) { dead.add(z.id); continue; }
+    if (ed.feature && FEATURE[ed.feature]?.kind === 'zone' && ed.feature !== z.feature) {
+      z.feature = ed.feature;
+      if (FEATURE[ed.feature].theme) z.theme = FEATURE[ed.feature].theme!;
+      if (!ed.w || !ed.h) { const [w, h] = sizeOf(ed.feature, key); resize(z, w, h); changed.add(z.id); }
+    }
+    if (ed.w && ed.h && (ed.w !== z.w || ed.h !== z.h)) { resize(z, ed.w, ed.h); changed.add(z.id); }
+    if (ed.seed) z.seed = (z.seed + ed.seed) >>> 0;
+    if (ed.theme) z.theme = ed.theme;
+    if (ed.tags) z.tags = ed.tags.slice();
+    if (ed.level !== undefined && ed.level !== z.level) { z.level = ed.level; changed.add(z.id); }
+  }
+  // 2. deleted rooms: the rooms that hung on them are joined to each other by corridors instead
+  for (const d of dead) {
+    const nb: number[] = [];
+    for (const l of c.links) {
+      if (deadLinks.has(l.id) || (l.a !== d && l.b !== d)) continue;
+      deadLinks.add(l.id);
+      const o = l.a === d ? l.b : l.a;
+      if (!dead.has(o)) nb.push(o);
+    }
+    const parent = c.zones[d].parent;
+    const hub = nb.includes(parent) ? parent : nb[0];
+    for (const o of nb) if (o !== hub) c.pending.push({ a: hub, b: o, kind: 'corridor', loop: false });
+  }
+  // 3. moves, in the order they were made, then added rooms
+  const place = (z: Zone, f: Frame) => { z.frame = f; z.pinned = true; pinned.add(z.id); changed.add(z.id); pushApart(c, z.id, clear, pinned, dead, changed); };
+  for (const [key, ed] of Object.entries(edits.zones)) {
+    if (ed.x === undefined || ed.y === undefined) continue;
+    const z = byKey.get(key);
+    if (z && !dead.has(z.id)) place(z, { x: ed.x, y: ed.y, a: ed.a ?? z.frame.a });
+  }
+  for (const a of edits.added) {
+    const feature = FEATURE[a.feature]?.kind === 'zone' ? a.feature : 'room';
+    const [w0, h0] = sizeOf(feature, a.key);
+    const z: Zone = {
+      id: c.zones.length, key: a.key, feature, frame: { x: a.x, y: a.y, a: a.a }, w: a.w ?? w0, h: a.h ?? h0,
+      seed: root.fork(`seed:${a.key}`).int(0, 1e9), theme: FEATURE[feature].theme ?? 'base', level: 0, tags: [], ports: [],
+      parent: -1, depth: 1, pinned: true, edges: [],
+    };
+    c.zones.push(z);
+    place(z, z.frame);
+    let best = -1, bd = Infinity;
+    for (const o of c.zones) {
+      if (o === z || dead.has(o.id) || o.feature === 'mass') continue;
+      const d0 = dist(v2(o.frame.x, o.frame.y), v2(z.frame.x, z.frame.y));
+      if (d0 < bd) { bd = d0; best = o.id; }
+    }
+    if (best >= 0) { z.parent = best; c.pending.push({ a: best, b: z.id, kind: 'corridor', loop: false }); }
+  }
+  // 4. links of rooms that changed, and corridors that a changed room now sits on, are routed again
+  const boxes = new Map<number, V2[]>();
+  for (const id of changed) { const z = c.zones[id]; boxes.set(id, obb(z.frame, z.w, z.h)); }
+  for (const l of c.links) {
+    if (deadLinks.has(l.id) || l.kind === 'portal') continue;
+    let redo = changed.has(l.a) || changed.has(l.b);
+    if (!redo && l.path.length >= 2) {
+      for (const [id, bx] of boxes) {
+        if (id === l.a || id === l.b) continue;
+        for (let k = 0; k + 1 < l.path.length && !redo; k++) if (dist(l.path[k], l.path[k + 1]) > 0.2 && convexOverlap(segBox(l.path[k], l.path[k + 1], l.w), bx)) redo = true;
+        if (redo) break;
+      }
+    }
+    if (!redo || (l.kind === 'open' && stillTouching(c, l))) continue;
+    deadLinks.add(l.id);
+    const kind: LinkKind = l.kind === 'stair' || l.kind === 'ramp' || l.kind === 'impossible' ? l.kind : 'corridor';
+    c.pending.push({ a: l.a, b: l.b, kind, edge: l.edge, loop: l.loop });
+  }
+  // 5. drop deleted rooms and dead links, renumber
+  const newId = new Int32Array(c.zones.length).fill(-1);
+  const zones = c.zones.filter((z) => !dead.has(z.id));
+  zones.forEach((z, i) => { newId[z.id] = i; });
+  const linkId = new Int32Array(c.links.length).fill(-1);
+  const links = c.links.filter((l) => !deadLinks.has(l.id) && !dead.has(l.a) && !dead.has(l.b));
+  links.forEach((l, i) => { linkId[l.id] = i; });
+  for (const z of zones) {
+    z.ports = z.ports.filter((pt) => linkId[pt.link] >= 0).map((pt) => ({ ...pt, link: linkId[pt.link] }));
+    z.parent = z.parent >= 0 ? newId[z.parent] : -1;
+  }
+  links.forEach((l, i) => { l.id = i; l.a = newId[l.a]; l.b = newId[l.b]; });
+  zones.forEach((z, i) => { z.id = i; });
+  for (let i = 0; i < c.nodeZone.length; i++) if (c.nodeZone[i] >= 0) c.nodeZone[i] = newId[c.nodeZone[i]];
+  c.pending = c.pending.filter((pl) => !dead.has(pl.a) && !dead.has(pl.b) && pl.a !== pl.b).map((pl) => ({ ...pl, a: newId[pl.a], b: newId[pl.b] }));
+  c.zones = zones; c.links = links;
+  // 6. the collision grid again, from the rooms and the corridors that stay
+  c.hash = new Hash();
+  for (const z of zones) c.hash.add(obb(z.frame, z.w, z.h), z.id, false);
+  for (const l of links) {
+    if (l.path.length < 2) continue;
+    const flat = l.kind !== 'stair' && l.kind !== 'ramp' && l.kind !== 'impossible';
+    for (let k = 0; k + 1 < l.path.length; k++) c.hash.add(segBox(l.path[k], l.path[k + 1], l.w), l.a, true, flat ? zones[l.a].level : NaN, [l.path[k], l.path[k + 1], l.w]);
+  }
+}
+
+/**
+ * A doorway between two rooms that sit side by side on one grid: through their shared wall when they touch, or a
+ * very short corridor across the gap. Null when they are not side by side with enough shared wall.
+ */
+function direct(za: Zone, zb: Zone, w: number, maxGap: number): { pa: V2; aa: number; pb: V2; ab: number; gap: number } | null {
+  const da = (((zb.frame.a - za.frame.a) % HALF_PI) + HALF_PI) % HALF_PI;
+  if (Math.min(da, HALF_PI - da) > 1e-3) return null;
+  const cs = obb(zb.frame, zb.w, zb.h).map((q) => toLocal(za.frame, q));
+  const bx0 = Math.min(...cs.map((q) => q.x)), bx1 = Math.max(...cs.map((q) => q.x));
+  const by0 = Math.min(...cs.map((q) => q.y)), by1 = Math.max(...cs.map((q) => q.y));
+  const hw = za.w / 2, hh = za.h / 2;
+  const sides = [
+    { s: 0, gap: bx0 - hw, lo: Math.max(-hh, by0), hi: Math.min(hh, by1) },
+    { s: 2, gap: -hw - bx1, lo: Math.max(-hh, by0), hi: Math.min(hh, by1) },
+    { s: 1, gap: by0 - hh, lo: Math.max(-hw, bx0), hi: Math.min(hw, bx1) },
+    { s: 3, gap: -hh - by1, lo: Math.max(-hw, bx0), hi: Math.min(hw, bx1) },
+  ].filter((q) => q.gap >= -0.3 && q.gap <= maxGap && q.hi - q.lo >= w + 1.6).sort((a, b) => a.gap - b.gap);
+  if (!sides.length) return null;
+  const { s, gap, lo, hi } = sides[0];
+  const t = (lo + hi) / 2;
+  const aa = za.frame.a + s * HALF_PI;
+  const pa = toWorld(za.frame, sidePoint(s, t, za.w, za.h));
+  const pb = add(pa, mul(dir(aa), Math.max(0, gap)));
+  return { pa, aa, pb, ab: aa + Math.PI, gap: Math.max(0, gap) };
 }
 
 // ------------------------------------------------------------------ 3. loops
@@ -828,15 +1030,17 @@ function layer2(zones: Zone[], links: Link[], p: Params, r: Rng): Prim[] {
 export function generate(p: Params, edits: Edits = emptyEdits(), opts: { stats?: boolean } = {}): MapOut {
   const t0 = performance.now();
   const root = new Rng(p.seed >>> 0);
-  const nodes = plan(p, edits, root);
-  const c: Ctx = { p, nodes, zones: [], links: [], hash: new Hash(), nodeZone: new Int32Array(nodes.length).fill(-1), pending: [], dropped: 0 };
+  // the layout comes from the seed and settings alone; the user's edits are applied on top of it afterwards
+  // (applyEdits), so an edit only changes the rooms it touches
+  const nodes = plan(p, emptyEdits(), root);
+  const c: Ctx = { p, nodes, zones: [], links: [], hash: new Hash(), nodeZone: new Int32Array(nodes.length).fill(-1), pending: [], dropped: 0, unrouted: [] };
   const placeR = root.fork('place');
   // the hub
   {
     const n = nodes[0];
     const [w, h] = sizeFor(n, placeR.fork(n.key), 1, p);
-    const f = n.pin ?? { x: 0, y: 0, a: p.turn > 0 ? placeR.fork('rootturn').range(-0.5, 0.5) * p.turn : 0 };
-    addZone(c, 0, f, n.w ?? w, n.h ?? h, -1);
+    const f = { x: 0, y: 0, a: p.turn > 0 ? placeR.fork('rootturn').range(-0.5, 0.5) * p.turn : 0 };
+    addZone(c, 0, f, w, h, -1);
   }
   // breadth first from the hub
   const order: number[] = [];
@@ -846,20 +1050,14 @@ export function generate(p: Params, edits: Edits = emptyEdits(), opts: { stats?:
   for (const i of order) {
     if (i === 0) continue;
     const n = nodes[i];
-    // the map is full: planned rooms beyond the count stay out (pinned ones still go in)
-    if (c.zones.length >= goal && !n.pin) continue;
+    // the map is full: planned rooms beyond the count stay out
+    if (c.zones.length >= goal) continue;
     // a parent that found no place hands its children up to the nearest placed ancestor
     let anc = n.parent;
     while (anc >= 0 && c.nodeZone[anc] < 0) anc = nodes[anc].parent;
     const pz = anc >= 0 ? c.nodeZone[anc] : -1;
     if (pz < 0) { c.dropped++; continue; }
     const r = placeR.fork(n.key);
-    if (n.pin) {
-      const [w, h] = sizeFor(n, r, 1, p);
-      const z = addZone(c, i, n.pin, n.w ?? w, n.h ?? h, pz);
-      c.pending.push({ a: pz, b: z.id, kind: 'corridor', loop: false });
-      continue;
-    }
     if (attach(c, i, c.zones[pz], r)) continue;
     // no room next to the parent: hang it on a nearby zone instead
     const pzZ = c.zones[pz];
@@ -870,18 +1068,7 @@ export function generate(p: Params, edits: Edits = emptyEdits(), opts: { stats?:
     for (const [z] of others) if (attach(c, i, z, r.fork(`alt:${z.key}`), 12)) { ok = true; break; }
     if (!ok) c.dropped++;
   }
-  // zones the user added
-  nodes.forEach((n, i) => {
-    if (n.parent !== -2 || !n.pin) return;
-    const [w, h] = sizeFor(n, placeR.fork(n.key), 1, p);
-    let best = -1, bd = Infinity;
-    for (const z of c.zones) { const d = dist(v2(z.frame.x, z.frame.y), v2(n.pin.x, n.pin.y)); if (d < bd && z.feature !== 'mass') { bd = d; best = z.id; } }
-    const z = addZone(c, i, n.pin, n.w ?? w, n.h ?? h, best);
-    if (best >= 0) c.pending.push({ a: best, b: z.id, kind: 'corridor', loop: false });
-  });
-  // floor levels the user set by hand
-  for (const z of c.zones) { const lv = edits.zones[z.key]?.level; if (lv !== undefined) z.level = lv; }
-  // loops between zones that are close in space but far in the tree
+  // loops between zones that are close in space but far in the tree (chosen on the seed's layout, before edits)
   const loopR = root.fork('loops');
   const adj: number[][] = c.zones.map(() => []);
   for (const l of c.links) { adj[l.a].push(l.b); adj[l.b].push(l.a); }
@@ -913,16 +1100,32 @@ export function generate(p: Params, edits: Edits = emptyEdits(), opts: { stats?:
     adj[i].push(j); adj[j].push(i);
     made++;
   }
+  // the user's edits, on top of the seed's layout
+  applyEdits(c, edits, root);
   // route the pending links
   for (const pl of c.pending) {
     const za = c.zones[pl.a], zb = c.zones[pl.b];
     const r = loopR.fork(`route:${za.key}:${zb.key}`);
     const w = r.int(2, 3);
     const sameFloor = za.level === zb.level;
-    const res = route(c, za, zb, w, p.turn >= 0.3, r, sameFloor ? za.level : NaN);
+    // rooms side by side (often after a move pushed them together): a doorway through the shared wall
+    const dr = sameFloor ? direct(za, zb, w, 2) : null;
+    if (dr) {
+      const touch = dr.gap < 0.15;
+      const link: Link = { id: c.links.length, a: za.id, b: zb.id, kind: touch ? 'open' : 'corridor', path: touch ? [] : [dr.pa, dr.pb], w, loop: pl.loop, edge: pl.edge };
+      c.links.push(link);
+      addPort(za, dr.pa, dr.aa, w, link.id);
+      addPort(zb, dr.pb, dr.ab, w, link.id);
+      if (!touch) c.hash.add(segBox(dr.pa, dr.pb, w), za.id, true, za.level, [dr.pa, dr.pb, w]);
+      continue;
+    }
+    let res = route(c, za, zb, w, p.turn >= 0.3, r, sameFloor ? za.level : NaN);
+    // a link the map needs (not a loop): try the other kind of search before giving up
+    if (!res && !pl.loop) res = route(c, za, zb, w, p.turn < 0.3, r, sameFloor ? za.level : NaN);
     const d0 = dist(v2(za.frame.x, za.frame.y), v2(zb.frame.x, zb.frame.y));
     const length = res ? res.path.reduce((s, q, k) => (k ? s + dist(res.path[k - 1], q) : 0), 0) : Infinity;
-    if (!res || length > d0 * 2.4 + 20) {
+    if (!res || (pl.loop && length > d0 * 2.4 + 20)) {
+      if (!pl.loop) c.unrouted.push(`${za.key}/${za.feature} -> ${zb.key}/${zb.feature}: ${res ? `too long (${length.toFixed(0)} vs ${d0.toFixed(0)})` : 'no route'}`);
       if (pl.loop && r.chance(Math.min(1, p.anomalies * wOf(p, 'portal') * 3))) {
         const link: Link = { id: c.links.length, a: za.id, b: zb.id, kind: 'portal', path: [], w: 1.6, loop: true };
         c.links.push(link);
@@ -932,7 +1135,7 @@ export function generate(p: Params, edits: Edits = emptyEdits(), opts: { stats?:
       }
       continue;
     }
-    const link: Link = { id: c.links.length, a: za.id, b: zb.id, kind: sameFloor ? pl.kind : 'stair', path: res.path, w, loop: pl.loop };
+    const link: Link = { id: c.links.length, a: za.id, b: zb.id, kind: sameFloor ? pl.kind : 'stair', path: res.path, w, loop: pl.loop, edge: pl.edge };
     c.links.push(link);
     addPort(za, res.pa, res.aa, w, link.id);
     addPort(zb, res.pb, res.ab, w, link.id);
@@ -975,6 +1178,7 @@ export function generate(p: Params, edits: Edits = emptyEdits(), opts: { stats?:
   out.stats.loops = Math.max(0, c.links.length - (c.zones.length - 1));
   out.stats.landmarks = c.zones.filter((z) => FEATURE[z.feature].role === 'landmark').length;
   out.stats.ms = Math.round(performance.now() - t0);
+  if (c.unrouted.length) out.stats.unrouted = c.unrouted;
   if (opts.stats !== false) addStats(out);
   return out;
 }

@@ -138,6 +138,8 @@ export interface Stats {
   ms: number;
   widthFt: number;
   heightFt: number;
+  /** Links that could not be routed after edits (debug). */
+  unrouted?: string[];
 }
 
 export interface MapOut {

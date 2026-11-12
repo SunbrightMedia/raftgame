@@ -83,4 +83,34 @@ describe('Backrooms planner', () => {
       expect(Object.values(f.outside).reduce((a, b) => a + b, 0), `seed ${seed}: pieces on other rooms ${JSON.stringify(f.outside)}`).toBe(0);
     }
   }, 30_000);
+  it('moving a room only pushes the rooms it lands on; the rest stays where it was', () => {
+    for (const seed of [11, 5, 23]) {
+      const p = { ...DEFAULT_PARAMS, seed };
+      const base = generate(p);
+      // a room in the middle of the map, dropped half onto its nearest neighbour
+      const mover = base.zones.filter((z) => z.depth >= 2 && z.feature !== 'mass')[3];
+      let near = base.zones[0], nd = Infinity;
+      for (const z of base.zones) {
+        if (z === mover) continue;
+        const d = Math.hypot(z.frame.x - mover.frame.x, z.frame.y - mover.frame.y);
+        if (d < nd) { nd = d; near = z; }
+      }
+      const e = emptyEdits();
+      const to = { x: (mover.frame.x + near.frame.x) / 2, y: (mover.frame.y + near.frame.y) / 2 };
+      e.zones[mover.key] = { x: to.x, y: to.y, a: mover.frame.a };
+      const m = generate(p, e);
+      const after = new Map(m.zones.map((z) => [z.key, z]));
+      const moved = base.zones.filter((z) => { const a = after.get(z.key)!; return Math.hypot(a.frame.x - z.frame.x, a.frame.y - z.frame.y) > 1e-9; });
+      expect(after.get(mover.key)!.frame.x).toBeCloseTo(to.x);
+      expect(moved.length, `seed ${seed}: rooms that moved`).toBeLessThanOrEqual(12);
+      expect(m.zones.length).toBe(base.zones.length);
+      const f = check(m);
+      expect(f.roomRoom, `seed ${seed}: rooms on rooms after the move`).toEqual([]);
+      // no room is cut off by the move (some seeds have a cut-off room already)
+      const cutBefore = new Set(base.stats.cutOff.map((i) => base.zones[i].key));
+      expect(m.stats.cutOff.map((i) => m.zones[i].key).filter((k) => !cutBefore.has(k)), `seed ${seed}: cut off by the move`).toEqual([]);
+      // the same edits give the same map again (what a reload shows)
+      expect(JSON.stringify(generate(p, e).zones.map((z) => z.frame))).toBe(JSON.stringify(m.zones.map((z) => z.frame)));
+    }
+  });
 });
