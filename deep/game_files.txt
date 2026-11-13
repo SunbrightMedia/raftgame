@@ -1,0 +1,3 @@
+﻿global.utoc: 0.0 MB, IoStore table v5, compressed False, encrypted False, signed False, key id set False
+TheComplexExpedition-Windows.pak: 9.9 MB, pak v11, index encrypted False, key id set False
+TheComplexExpedition-Windows.utoc: 3.8 MB, IoStore table v5, compressed True, encrypted False, signed False, key id set False
