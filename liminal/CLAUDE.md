@@ -86,6 +86,9 @@ it *feels* right; that's the user's call.
   is our bake set by measurement (`tools/complex/README.md`). The camera's five pictures are our own, matched to
   measured statistics (`complexPost.ts standInImages`); never the game's files. After changing it, run
   `node tools/complex/ingame.mjs <dir> 18325` (bakes, saves the cache) and `compare_light.py` on 18325 and 19893.
+  The camera's upscaler (`render/complexTAA.ts`) and motion blur (`render/complexMotionBlur.ts`) are the game's,
+  checked by `check_taa.py --ours` and `check_mb.py` on the deep export; after changing either, run those. Headless
+  runs that change settings write `config/settings.json`: delete it (never commit it).
 - **The old maps are in `junk/`** (kept, not used). Work follows
   `docs/PIPELINE.md`; the game boots into `maps/blank.json` meanwhile.
 - **Backrooms Planner** (2D map tool, `src/planner/`, page `planner.html`;

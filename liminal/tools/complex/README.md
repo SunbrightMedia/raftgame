@@ -90,8 +90,24 @@ Our own camera pictures (the game's five image files are not copied; ours match 
   no MSAA; the upscaler gets its depth and this frame's clip -> last frame's clip from our own camera. Checked
   headless (a still camera and a turn of 0.25 degrees a frame, against a 4x MSAA picture drawn at full size):
   the picture lines up within 0.02 px still and 0.04 px turning, and holds still (0.000 px between frames 32
-  and 40). Not ported: the game's motion vectors of moving things and its "responsive" stencil (we draw none),
-  and its motion blur (a copy stands in; 0.6 % of 18325's picture).
+  and 40). Not ported: the game's motion vectors of moving things and its "responsive" stencil (we draw none).
+- The motion blur (Unreal 5's: velocity flatten `cs_9520`, tile scatter `vs_9521`/`ps_9522`, tile kinds `cs_9523`,
+  filters `cs_9525` still / `cs_9526` even / `cs_9528` uneven; `cs_9527` is the "very fast" kind, off in the game's
+  settings): ours is `src/engine/render/complexMotionBlur.ts`, checked by `check_mb.py` on the deep frames 18325 /
+  19893 / 20732 against the card's own pictures: motion per pixel 99.8 / 99.7 / 99.8 % of values equal; the blurred
+  picture 99.76 / 99.93 / 99.74 % (each step alone on the game's own input to it: 99.94 / 99.97 / 99.74 %); tile
+  kinds equal the game's own dispatch counts (3328 + 2792, 4506 + 1614, 5812 + 308). The uneven filter does not run
+  in those frames: `check_mb.py --uneven` runs the game's step in the emulator on made-up motion (near things 30x
+  faster): ours equals it in 100 % of values (300 tiles, 62 % of their pixels changed). What the card does that the
+  shader text does not say, found by these checks: it stores R11G11B10 by cutting toward zero (as its half floats);
+  the blur reads the picture by nearest pixel (with a smooth read, 83 % equal; nearest, 99.97 %); and the tile
+  step's reduction has no barriers in its last five steps, so the card's tiles miss some pixels (no fixed pattern:
+  a race; ours takes the true shortest and longest, tile lengths within about 1 % of the card's). The blur's length
+  follows the frame time (Unreal: amount / (target fps x frame time)); the deep frames' constants fit Unreal's
+  defaults (0.5, 30) at 70-104 fps, which the game uses.
+- Not ported: the game's depth of field (Unreal 5's DiaphragmDOF, 15 steps before the upscaler: CoC setup, its own
+  temporal pass, dilate, reduce, bokeh table, three gathers, post filter, bokeh sprites, recombine). In 18325 it
+  changes 0.9 % of the picture (3 % of pixels).
 
 Earlier, from the first export's JPEGs (superseded by the lossless numbers above):
 Measured against the capture (frame 18325; the game's own step with an image, minus the same step without it):
