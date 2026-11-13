@@ -58,13 +58,16 @@ def setup(frame_dir):
     want = out[ys, xs].reshape(-1, 3)
     sc = scene[ys, xs].reshape(-1, 3)
     keep = (sc.max(1) < 0.95 * w0) & (want.max(1) < 0.97)
+    # the JPEG stores the scene linearly in 8 bits (steps of w0 / 255): too coarse in the darkest pixels
+    keep &= sc.max(1) > 8 * w0 / 255
     # the bloom near its stored limit is clipped too
     bly = np.clip((uv[:, 1] * c0[33, 1] + c0[33, 3]) * bloom.shape[0], 0, bloom.shape[0] - 1).astype(int)
     blx = np.clip((uv[:, 0] * c0[33, 0] + c0[33, 2]) * bloom.shape[1], 0, bloom.shape[1] - 1).astype(int)
     keep &= bloom[bly, blx].max(1) < 0.95 * w1
     lut = C.our_tone_table()
     pre = np.float32(34.1333275)
-    tex = {1: dxbc.Texture(C.rgba(scene * pre)), 2: dxbc.Texture(C.rgba(bloom * pre)),
+    # the stored scene and glow are already exposed (x pre): the step takes them as they are
+    tex = {1: dxbc.Texture(C.rgba(scene)), 2: dxbc.Texture(C.rgba(bloom)),
            4: dxbc.Texture(np.full((8, 8, 4), 0.022, np.float32)), 5: dxbc.Texture(lut, dim=3),
            0: dxbc.Buffer(np.array([pre, 0, 0, 0], np.float32).view(np.uint32), stride=16)}
     return fr, cbs, tex, inputs, want, keep
@@ -88,23 +91,22 @@ def run(fr, cbs, tex, inputs, apply_):
 def main():
     for frame_dir in sys.argv[1:]:
         fr, cbs, tex, inputs, want, keep = setup(frame_dir)
-        err = lambda a: float(np.mean((run(fr, cbs, tex, inputs, a)[keep] - want[keep]) ** 2))   # noqa: E731
-        a = np.array([0.84, 0.83, 0.64])
-        best = err(a)
-        for step in (0.08, 0.04, 0.02, 0.01, 0.005, 0.0025):
-            improved = True
-            while improved:
-                improved = False
-                for c in range(3):
-                    for s in (step, -step):
-                        b = a.copy()
-                        b[c] += s
-                        e = err(b)
-                        if e < best:
-                            a, best, improved = b, e, True
-        got = run(fr, cbs, tex, inputs, a)[keep]
-        print(f'{os.path.basename(frame_dir)}: scene multiplier {np.round(a, 4)}  rms {np.sqrt(best):.4f}  '
-              f'mean ours {np.round(got.mean(0), 4)} game {np.round(want[keep].mean(0), 4)}  pixels {int(keep.sum())}')
+        f = lambda a: run(fr, cbs, tex, inputs, a)[keep]   # noqa: E731
+        target = want[keep]
+        # Gauss-Newton: each round, the output's slope per multiplier (3 extra runs), then the least-squares step
+        a, h = np.array([0.84, 0.83, 0.64]), 0.01
+        for it in range(8):
+            f0 = f(a)
+            r = (target - f0).ravel()
+            J = np.stack([((f(a + h * np.eye(3)[c]) - f0) / h).ravel() for c in range(3)], 1)
+            d = np.linalg.solve(J.T @ J, J.T @ r)
+            a = a + d
+            print(f'  round {it}: rms before {np.sqrt(np.mean(r * r)):.5f}  multiplier now {np.round(a, 4)}', flush=True)
+            if np.abs(d).max() < 2e-4:
+                break
+        got = f(a)
+        print(f'{os.path.basename(frame_dir)}: scene multiplier {np.round(a, 4)}  rms {np.sqrt(np.mean((got - target) ** 2)):.4f}  '
+              f'mean ours {np.round(got.mean(0), 4)} game {np.round(target.mean(0), 4)}  pixels {int(keep.sum())}', flush=True)
 
 
 if __name__ == '__main__':

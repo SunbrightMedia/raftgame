@@ -32,6 +32,82 @@ export interface ComplexParams {
 }
 
 interface Prog { p: WebGLProgram; u: Map<string, WebGLUniformLocation | null> }
+
+/** One of our stand-ins for the game's own image files (RGBA8, row 0 = top). */
+export interface StandIn { w: number; h: number; data: Uint8Array; wrap: 'clamp' | 'repeat'; mips: boolean }
+
+/**
+ * Our stand-ins for four of the game's own image files (the fifth, the glow kernel, is the glow pass's shape),
+ * the sizes and mip settings of the game's (from the capture's binding list), the strengths measured:
+ *  - dirt: lens dirt, an even film with soft variations and a few specks, mean about 0.022 (the game's photo is
+ *    5184 x 3456; the tonemapper adds glow x (1 + 20 x dirt)).
+ *  - grain: 1400 x 1050, no mips: sparse specks, mean 0.01 / 0.01 / 0.04, so x 0.2 gives the measured
+ *    +0.002 / +0.002 / +0.008.
+ *  - streak: the tape's streak noise n, 944 x 1260, no mips (the game's is BC1 there): fine per-texel noise,
+ *    mean 0.064 / 0.069 / 0.040.
+ *  - band: the tape's band image s, 512 x 512 with mips, read stretched 10x along x: soft rows.
+ * Measured in the capture (the game's own tape step run with its streak images off, subtracted from its output;
+ * frames 18325 and 20732): the streaks add +0.003 / +0.003 / +0.002, fine-grained; 0.3 x n x s (1 - s) with
+ * these (mean s (1 - s) about 0.17) gives that.
+ */
+export function standInImages(): { dirt: StandIn; grain: StandIn; streak: StandIn; band: StandIn } {
+  // lens dirt
+  const dirt = (() => {
+    const W = 432, H = 288, d = new Uint8Array(W * H * 4), r = new Rng(9137);
+    const a = new Float32Array(W * H).fill(0.0205);
+    for (const [cells, amp] of [[3, 0.006], [7, 0.003], [15, 0.0015]] as const) {
+      const gw = cells + 2, grid = Array.from({ length: gw * gw }, () => r.range(-1, 1));
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        const gx = (x / W) * cells, gy = (y / W) * cells, ix = Math.floor(gx), iy = Math.floor(gy), fx = gx - ix, fy = gy - iy;
+        const sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy), g = (i: number, j: number) => grid[j * gw + i];
+        a[y * W + x] += amp * ((g(ix, iy) * (1 - sx) + g(ix + 1, iy) * sx) * (1 - sy) + (g(ix, iy + 1) * (1 - sx) + g(ix + 1, iy + 1) * sx) * sy);
+      }
+    }
+    for (let i = 0; i < 120; i++) {
+      const cx = r.range(0, W), cy = r.range(0, H), rad = r.range(0.8, 2.2), amp = r.range(0.004, 0.02);
+      for (let y = Math.max(0, Math.floor(cy - 5)); y < Math.min(H, cy + 5); y++) for (let x = Math.max(0, Math.floor(cx - 5)); x < Math.min(W, cx + 5); x++) {
+        a[y * W + x] += amp * Math.exp(-((x - cx) ** 2 + (y - cy) ** 2) / (rad * rad));
+      }
+    }
+    for (let i = 0; i < W * H; i++) { const v = Math.round(Math.max(0, a[i]) * 255); d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = v; d[i * 4 + 3] = 255; }
+    return { w: W, h: H, data: d, wrap: 'clamp' as const, mips: false };
+  })();
+  // grain
+  const grain = (() => {
+    const W = 1400, H = 1050, d = new Uint8Array(W * H * 4), r = new Rng(4421);
+    for (let i = 0; i < W * H; i++) {
+      const v = Math.pow(r.next(), 7) * 0.32;
+      d[i * 4] = d[i * 4 + 1] = Math.min(255, Math.round(v * 0.25 * 255)); d[i * 4 + 2] = Math.min(255, Math.round(v * 255)); d[i * 4 + 3] = 255;
+    }
+    return { w: W, h: H, data: d, wrap: 'repeat' as const, mips: false };
+  })();
+  // tape streak noise n
+  const streak = (() => {
+    const W = 944, H = 1260, d = new Uint8Array(W * H * 4), r = new Rng(77), m = [0.064, 0.069, 0.04];
+    for (let i = 0; i < W * H; i++) {
+      const u = r.next();
+      for (let c = 0; c < 3; c++) d[i * 4 + c] = Math.round(Math.min(1, u * 2 * m[c]) * 255);
+      d[i * 4 + 3] = 255;
+    }
+    return { w: W, h: H, data: d, wrap: 'repeat' as const, mips: false };
+  })();
+  // tape band s
+  const band = (() => {
+    const N = 512, d = new Uint8Array(N * N * 4), r = new Rng(5309);
+    const rows = Array.from({ length: 64 }, () => r.next());
+    for (let y = 0; y < N; y++) {
+      const t = (y / N) * 64, i = Math.floor(t), f = t - i, sm = f * f * (3 - 2 * f);
+      const base = rows[i % 64] * (1 - sm) + rows[(i + 1) % 64] * sm;
+      for (let x = 0; x < N; x++) {
+        const v = Math.min(1, Math.max(0, base + 0.15 * Math.sin((x / N) * Math.PI * 6 + y * 0.01)));
+        const o = (y * N + x) * 4;
+        d[o] = d[o + 1] = d[o + 2] = Math.round(v * 255); d[o + 3] = 255;
+      }
+    }
+    return { w: N, h: N, data: d, wrap: 'repeat' as const, mips: true };
+  })();
+  return { dirt, grain, streak, band };
+}
 interface Target { tex: WebGLTexture; fb: WebGLFramebuffer; w: number; h: number }
 
 const PRE = 34.1333275;     // the game's pre-exposure: the scene is stored x this, the tonemapper undoes it
@@ -91,10 +167,12 @@ export class ComplexPost {
     gl.pixelStorei(gl.UNPACK_SKIP_PIXELS, 0); gl.pixelStorei(gl.UNPACK_SKIP_ROWS, 0); gl.pixelStorei(gl.UNPACK_SKIP_IMAGES, 0);
     this.vao = gl.createVertexArray()!;
     this.lut = this.makeLut();
-    this.dirt = this.makeDirt();
-    this.grain = this.makeGrain();
-    this.streak = this.makeStreak();
-    this.band = this.makeBand();
+    const im = standInImages();
+    const up = (t: StandIn) => this.tex2d(t.w, t.h, t.data, t.wrap === 'repeat' ? gl.REPEAT : gl.CLAMP_TO_EDGE, t.mips);
+    this.dirt = up(im.dirt);
+    this.grain = up(im.grain);
+    this.streak = up(im.streak);
+    this.band = up(im.band);
   }
 
   // ---------------------------------------------------------------- textures (ours)
@@ -124,71 +202,6 @@ export class ComplexPost {
     for (const p of [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER]) gl.texParameteri(gl.TEXTURE_3D, p, gl.LINEAR);
     for (const p of [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T, gl.TEXTURE_WRAP_R]) gl.texParameteri(gl.TEXTURE_3D, p, gl.CLAMP_TO_EDGE);
     return t;
-  }
-
-  /** Lens dirt (ours): an even film with soft variations and a few specks, mean about 0.022. */
-  private makeDirt(): WebGLTexture {
-    const W = 432, H = 288, d = new Uint8Array(W * H * 4), r = new Rng(9137);
-    const a = new Float32Array(W * H).fill(0.0205);
-    for (const [cells, amp] of [[3, 0.006], [7, 0.003], [15, 0.0015]] as const) {
-      const gw = cells + 2, grid = Array.from({ length: gw * gw }, () => r.range(-1, 1));
-      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-        const gx = (x / W) * cells, gy = (y / W) * cells, ix = Math.floor(gx), iy = Math.floor(gy), fx = gx - ix, fy = gy - iy;
-        const sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy), g = (i: number, j: number) => grid[j * gw + i];
-        a[y * W + x] += amp * ((g(ix, iy) * (1 - sx) + g(ix + 1, iy) * sx) * (1 - sy) + (g(ix, iy + 1) * (1 - sx) + g(ix + 1, iy + 1) * sx) * sy);
-      }
-    }
-    for (let i = 0; i < 120; i++) {
-      const cx = r.range(0, W), cy = r.range(0, H), rad = r.range(0.8, 2.2), amp = r.range(0.004, 0.02);
-      for (let y = Math.max(0, Math.floor(cy - 5)); y < Math.min(H, cy + 5); y++) for (let x = Math.max(0, Math.floor(cx - 5)); x < Math.min(W, cx + 5); x++) {
-        a[y * W + x] += amp * Math.exp(-((x - cx) ** 2 + (y - cy) ** 2) / (rad * rad));
-      }
-    }
-    for (let i = 0; i < W * H; i++) { const v = Math.round(Math.max(0, a[i]) * 255); d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = v; d[i * 4 + 3] = 255; }
-    return this.tex2d(W, H, d, this.gl.CLAMP_TO_EDGE, false);
-  }
-
-  /** Grain noise (ours), the size of the game's (1400 x 1050, no mips): sparse specks, mean 0.01 / 0.01 / 0.04,
-   *  so x 0.2 gives the measured +0.002 / +0.002 / +0.008. */
-  private makeGrain(): WebGLTexture {
-    const W = 1400, H = 1050, d = new Uint8Array(W * H * 4), r = new Rng(4421);
-    for (let i = 0; i < W * H; i++) {
-      const v = Math.pow(r.next(), 7) * 0.32;
-      d[i * 4] = d[i * 4 + 1] = Math.min(255, Math.round(v * 0.25 * 255)); d[i * 4 + 2] = Math.min(255, Math.round(v * 255)); d[i * 4 + 3] = 255;
-    }
-    return this.tex2d(W, H, d, this.gl.REPEAT, false);
-  }
-
-  /**
-   * Tape streak noise (ours), 512 x 512 with mips like the game's: fine per-texel noise, mean 0.064 / 0.069 / 0.040.
-   * Measured in the capture (the game's own tape step run with its streak images set to zero, subtracted from
-   * its output; frames 18325 and 20732): the streaks add +0.003 / +0.003 / +0.002 on average, fine-grained,
-   * spread under 0.005. With our band's mean s(1 - s) of about 0.17, 0.3 x n x s(1 - s) gives that.
-   */
-  private makeStreak(): WebGLTexture {
-    const N = 512, d = new Uint8Array(N * N * 4), r = new Rng(77), m = [0.064, 0.069, 0.04];
-    for (let i = 0; i < N * N; i++) {
-      const u = r.next();
-      for (let c = 0; c < 3; c++) d[i * 4 + c] = Math.round(Math.min(1, u * 2 * m[c]) * 255);
-      d[i * 4 + 3] = 255;
-    }
-    return this.tex2d(N, N, d, this.gl.REPEAT, true);
-  }
-
-  /** Tape band (ours): soft horizontal bands, 944 x 1260 like the game's, read as s (1 - s). */
-  private makeBand(): WebGLTexture {
-    const W = 944, H = 1260, d = new Uint8Array(W * H * 4), r = new Rng(5309);
-    const rows = Array.from({ length: 64 }, () => r.next());
-    for (let y = 0; y < H; y++) {
-      const t = (y / H) * 64, i = Math.floor(t), f = t - i, s = f * f * (3 - 2 * f);
-      const base = rows[i % 64] * (1 - s) + rows[(i + 1) % 64] * s;
-      for (let x = 0; x < W; x++) {
-        const v = Math.min(1, Math.max(0, base + 0.15 * Math.sin((x / W) * Math.PI * 6 + y * 0.01)));
-        const o = (y * W + x) * 4;
-        d[o] = d[o + 1] = d[o + 2] = Math.round(v * 255); d[o + 3] = 255;
-      }
-    }
-    return this.tex2d(W, H, d, this.gl.REPEAT, false);
   }
 
   // ---------------------------------------------------------------- programs and targets

@@ -28,12 +28,30 @@ code is our own, written from what the steps compute.
   texel.
 - `trace_tone.ts`: our tone cell's intermediate values, for tracing a difference step by step against
   `dxbc.Machine.run(trace=...)`.
+- `fit_apply.py <frame dir> [...]`: the scene multiplier the glow step hands the tonemapper (the first
+  export could not read that buffer), fitted with the game's own tonemapper on the game's own scene and glow.
+  Result: red 0.765 / 0.771, green 0.752 / 0.757 (frames 18325 / 20732); blue cannot be fitted (those frames
+  hold almost no blue), so it follows the kernel's colour. The stored scene and glow are already exposed:
+  an earlier version multiplied them by the exposure again (34x too bright) and never converged.
+- `dump_standins.ts OUT_DIR`: writes our stand-ins for the game's image files (`standInImages()` in
+  `complexPost.ts`) as raw RGBA8, to compare them with what the game's images do in the capture.
+
+Measured against the capture (frame 18325; the game's own step with an image, minus the same step without it):
+- Glow: the game's glow holds 0.19 of the light (our three blurs held 0.16; the default is now 0.19). The light
+  spread by distance (Wiener deconvolution of the game's glow by its own downsampled scene) follows ours to
+  64 glow pixels; the game has a little more far glow.
+- Grain: the same average as ours, but it varies about 4x more and is coarser. The grain repeats every
+  320 x 240 screen pixels (tiled 4.5x), so the part that repeats is free of the capture's JPEG noise: std
+  0.0065 / 0.0064 / 0.0086 there, ours 0.0015 / 0.0015 / 0.0017 through the same JPEG. Our stand-in needs
+  stronger, larger specks (statistics only: the game's image is not copied).
+- Tape streaks: the same average as ours; the variation is harder to separate from JPEG noise.
 
 Limits, said plainly:
 - The first export's disassembly prints float numbers with 6 decimals. `dxbc.py` snaps them to simple
   values (p/q with q <= 64, powers of two >= 0.001) when one prints the same; others stay as printed.
   Our code uses the same numbers, so the checks compare like with like. `complex_deep.ps1` now saves
   each shader's bytes; with them, both switch to the exact numbers.
-- Four camera inputs are the game's own image files (glow kernel, lens dirt, two noise images). By the
-  user's rule they are not copied; ours match their measured statistics only.
+- Five camera inputs are the game's own image files: glow kernel (bound only as its FFT, 2048 x 1026 float),
+  lens dirt (5184 x 3456), grain (1400 x 1050), tape streak noise (944 x 1260, BC1) and tape band (512 x 512,
+  10 mips). By the user's rule they are not copied; ours match their measured statistics only.
 - Lumen (the bounce light) is not copied; its result is matched per surface.
