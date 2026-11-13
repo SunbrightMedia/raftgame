@@ -218,15 +218,21 @@ void main() {
   vec2 uv = vec2(gl_FragCoord.x, u_size.y - gl_FragCoord.y) / u_size;   // flip: three.js rows start at the bottom
   o = vec4(max(texture(t_src, uv).rgb * u_scale, 0.0), 1.0);
 }`;
+// u_zero = 1: nothing outside the picture (the game's glow is an FFT blur with zero padding: no light comes from
+// outside; measured on its own glow, the band along the edges then matches: 1.008 of the game's, against 1.072 with
+// the edge pixels repeated)
 const BLUR = `#version 300 es
 precision highp float; precision highp sampler2D;
-uniform sampler2D t_src; uniform vec2 u_dir, u_out; uniform float u_sigma; out vec4 o;
+uniform sampler2D t_src; uniform vec2 u_dir, u_out; uniform float u_sigma, u_zero; out vec4 o;
 void main() {
   vec2 px = gl_FragCoord.xy / u_out;
   vec3 sum = vec3(0.0); float ws = 0.0; float step = max(1.0, u_sigma / 5.0);
   for (int i = -15; i <= 15; i++) {
     float x = float(i) * step, w = exp(-0.5 * x * x / (u_sigma * u_sigma));
-    sum += texture(t_src, px + u_dir * x).rgb * w; ws += w;
+    vec2 q = px + u_dir * x;
+    vec3 c = texture(t_src, q).rgb;
+    if (u_zero > 0.5 && (any(lessThan(q, vec2(0.0))) || any(greaterThan(q, vec2(1.0))))) c = vec3(0.0);
+    sum += c * w; ws += w;
   }
   o = vec4(sum / ws, 1.0);
 }`;
@@ -439,20 +445,20 @@ export class ComplexPost {
     }
     if (!(p.taa && taa) && p.soften > 0) {     // with the upscaler off: a blur stands in
       const a = this.target('softA', ow, oh, R11), b = this.target('softB', ow, oh, R11);
-      this.run('blur', BLUR, a, { t_src: [scene.tex] }, { u_dir: [1 / ow, 0], u_out: [ow, oh], u_sigma: p.soften });
-      this.run('blur', BLUR, b, { t_src: [a.tex] }, { u_dir: [0, 1 / oh], u_out: [ow, oh], u_sigma: p.soften });
+      this.run('blur', BLUR, a, { t_src: [scene.tex] }, { u_dir: [1 / ow, 0], u_out: [ow, oh], u_sigma: p.soften, u_zero: 0 });
+      this.run('blur', BLUR, b, { t_src: [a.tex] }, { u_dir: [0, 1 / oh], u_out: [ow, oh], u_sigma: p.soften, u_zero: 0 });
       sceneT = b;
     }
     // 2. glow (stand-in shape), at about the game's glow size (1020 x 764 for a 1440 x 1080 picture)
     const bw = Math.max(1, Math.round(ow * (1020 / 1440))), bh = Math.max(1, Math.round(oh * (764 / 1080)));
     const g0 = this.target('g0', bw, bh, R11), gt = this.target('gt', bw, bh, R11);
     const ga = this.target('ga', bw, bh, R11), gb = this.target('gb', bw, bh, R11), gc = this.target('gc', bw, bh, R11);
-    this.run('blur', BLUR, g0, { t_src: [sceneT.tex] }, { u_dir: [0, 0], u_out: [bw, bh], u_sigma: 1 });   // resample (dir 0: no blur)
+    this.run('blur', BLUR, g0, { t_src: [sceneT.tex] }, { u_dir: [0, 0], u_out: [bw, bh], u_sigma: 1, u_zero: 0 });   // resample (dir 0: no blur)
     // three blurs (widths as a share of the glow picture's width), fitted to the game's glow shape measured on its own
     // lossless pictures (deep export: its glow deconvolved by its own downsampled scene, frames 18325 and 20732)
     for (const [t, sigma] of [[ga, 0.00165], [gb, 0.00621], [gc, 0.0317]] as const) {
-      this.run('blur', BLUR, gt, { t_src: [g0.tex] }, { u_dir: [1 / bw, 0], u_out: [bw, bh], u_sigma: sigma * bw });
-      this.run('blur', BLUR, t, { t_src: [gt.tex] }, { u_dir: [0, 1 / bh], u_out: [bw, bh], u_sigma: sigma * bw });
+      this.run('blur', BLUR, gt, { t_src: [g0.tex] }, { u_dir: [1 / bw, 0], u_out: [bw, bh], u_sigma: sigma * bw, u_zero: 1 });
+      this.run('blur', BLUR, t, { t_src: [gt.tex] }, { u_dir: [0, 1 / bh], u_out: [bw, bh], u_sigma: sigma * bw, u_zero: 1 });
     }
     const bloom = this.target('bloom', bw, bh, R11);
     this.run('glowmix', GLOW_MIX, bloom, { t_a: [ga.tex], t_b: [gb.tex], t_c: [gc.tex] },

@@ -105,9 +105,26 @@ Our own camera pictures (the game's five image files are not copied; ours match 
   a race; ours takes the true shortest and longest, tile lengths within about 1 % of the card's). The blur's length
   follows the frame time (Unreal: amount / (target fps x frame time)); the deep frames' constants fit Unreal's
   defaults (0.5, 30) at 70-104 fps, which the game uses.
-- Not ported: the game's depth of field (Unreal 5's DiaphragmDOF, 15 steps before the upscaler: CoC setup, its own
-  temporal pass, dilate, reduce, bokeh table, three gathers, post filter, bokeh sprites, recombine). In 18325 it
-  changes 0.9 % of the picture (3 % of pixels).
+- The depth of field (Unreal 5's DiaphragmDOF, before the upscaler): the game's focus is 67.9 cm with blur at
+  infinity 0.086 % of the width, the same in all ten frames, so everything past arm's length is a little soft.
+  Ours is `src/engine/render/complexDOF.ts`: the steps that run with these settings (setup `cs_8836`, its own
+  temporal step `cs_8837`, blur-size tiles `cs_19313` / `cs_19314`, reduce `cs_19315`, the slightly-out-of-focus
+  gather `cs_8849`, recombine `cs_19317`). `check_dof.py` runs the game's own steps in the emulator on the deep
+  export and ours on the same inputs: each step 95.6-100 % of values equal, 99.6-100 % within 0.1 %. The emulator
+  needs the card's 8-bit filter weights (`Sampler(weight_bits=8)`): with exact float filtering the game's own chain
+  matched the card in 57 % of values, with 8-bit weights 88 %. Against the card's output (19595), ours 86.8 % equal,
+  96.2 % within 0.1 %, the same as the game's own emulated chain; the rest is the temporal step's history from
+  earlier frames, which the export did not save. The picture changes by 0.93 % (ours) / 0.94 % (the card). In the
+  game, our blur sizes in our room match the game's in the same view (median 0.368 px both). Left out: the
+  near-field gathers (`cs_8844`, `cs_8848`), post filter, bokeh table and sprites: they need a near blur over 3.3
+  half-size pixels (closer than about 11 cm to the lens), which our player cannot reach; in the frames they draw
+  nothing.
+- The glow: the game's is an FFT blur with zero padding (no light from outside the picture); ours now has that too
+  (the band along the edges: 1.008 of the game's, against 1.072 before). Its shape is the game's own image (not
+  copied). Fitted on the game's own input and output (frames 19893, 18325, 20732), no round kernel (3 or 9 blurs, a
+  centre spike) or streaked one gets under 22-35 % per-pixel difference near bright lamps (7.6 % in 20732, which
+  has none); the game's glow there has a star of 8 spikes, but a star of ours fitted to it lowers that only to 31 %
+  of 32 %, so it is not added. Ours stays the round blur fitted to the measured spread.
 
 Earlier, from the first export's JPEGs (superseded by the lossless numbers above):
 Measured against the capture (frame 18325; the game's own step with an image, minus the same step without it):
