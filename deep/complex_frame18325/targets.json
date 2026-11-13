@@ -1,0 +1,1377 @@
+[
+ {
+  "step": 62,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "PrePass %s %s",
+   "DepthPassParallel"
+  ],
+  "file": "targets/0062_0_19356.bin.z",
+  "id": "ResourceId::19356",
+  "name": "2D Depth Target 19356",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "D32S8_TYPELESS",
+  "bytes": 8128512,
+  "role": "output",
+  "bytes_per_texel": 8.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "max": [
+   0.0007951897569000721,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "z_bytes": 1895990
+ },
+ {
+  "step": 306,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "BasePass",
+   "BasePassParallel"
+  ],
+  "file": "targets/0306_0_47190.bin.z",
+  "id": "ResourceId::47190",
+  "name": "2D Render Target 47190",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "R16G16B16A16_FLOAT",
+  "bytes": 8128512,
+  "role": "output",
+  "bytes_per_texel": 8.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "max": [
+   6.82421875,
+   5.6328125,
+   3.732421875,
+   1.0
+  ],
+  "z_bytes": 52399
+ },
+ {
+  "step": 306,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "BasePass",
+   "BasePassParallel"
+  ],
+  "file": "targets/0306_1_45664.bin.z",
+  "id": "ResourceId::45664",
+  "name": "2D Render Target 45664",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "R10G10B10A2_UNORM",
+  "bytes": 4064256,
+  "role": "output",
+  "bytes_per_texel": 4.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "max": [
+   1.0,
+   1.0,
+   1.0,
+   0.3333333432674408
+  ],
+  "z_bytes": 1322035
+ },
+ {
+  "step": 306,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "BasePass",
+   "BasePassParallel"
+  ],
+  "file": "targets/0306_2_45673.bin.z",
+  "id": "ResourceId::45673",
+  "name": "2D Render Target 45673",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "B8G8R8A8_TYPELESS",
+  "bytes": 4064256,
+  "role": "output",
+  "bytes_per_texel": 4.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "max": [
+   1.0,
+   1.0,
+   1.0,
+   0.5058823823928833
+  ],
+  "z_bytes": 261347
+ },
+ {
+  "step": 306,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "BasePass",
+   "BasePassParallel"
+  ],
+  "file": "targets/0306_3_45670.bin.z",
+  "id": "ResourceId::45670",
+  "name": "2D Render Target 45670",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "B8G8R8A8_TYPELESS",
+  "bytes": 4064256,
+  "role": "output",
+  "bytes_per_texel": 4.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "max": [
+   1.0,
+   0.9450980424880981,
+   0.9450980424880981,
+   0.0
+  ],
+  "z_bytes": 711193
+ },
+ {
+  "step": 306,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "BasePass",
+   "BasePassParallel"
+  ],
+  "file": "targets/0306_4_45676.bin.z",
+  "id": "ResourceId::45676",
+  "name": "2D Render Target 45676",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "B8G8R8A8_TYPELESS",
+  "bytes": 4064256,
+  "role": "output",
+  "bytes_per_texel": 4.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "max": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "z_bytes": 3960
+ },
+ {
+  "step": 306,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "BasePass",
+   "BasePassParallel"
+  ],
+  "file": "targets/0306_5_78801.bin.z",
+  "id": "ResourceId::78801",
+  "name": "2D Render Target 78801",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "B8G8R8A8_TYPELESS",
+  "bytes": 4064256,
+  "role": "output",
+  "bytes_per_texel": 4.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "max": [
+   1.0,
+   1.0,
+   1.0,
+   1.0
+  ],
+  "z_bytes": 9400
+ },
+ {
+  "step": 306,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "BasePass",
+   "BasePassParallel"
+  ],
+  "file": "targets/0306_6_19356.bin.z",
+  "id": "ResourceId::19356",
+  "name": "2D Depth Target 19356",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "D32S8_TYPELESS",
+  "bytes": 8128512,
+  "role": "output",
+  "bytes_per_texel": 8.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "max": [
+   0.0007951897569000721,
+   0.5176470875740051,
+   0.0,
+   1.0
+  ],
+  "z_bytes": 1898215
+ },
+ {
+  "step": 358,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "DiffuseIndirectAndAO",
+   "LumenScreenProbeGather",
+   "ShortRangeAO_ScreenSpace(Rays=%u)"
+  ],
+  "file": "targets/0358_0_45767.bin.z",
+  "id": "ResourceId::45767",
+  "name": "2D Texture 45767",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "R10G10B10A2_UNORM",
+  "bytes": 4064256,
+  "role": "output",
+  "bytes_per_texel": 4.0,
+  "min": [
+   0.07820136845111847,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "max": [
+   1.0,
+   1.0,
+   1.0,
+   0.0
+  ],
+  "z_bytes": 3639208
+ },
+ {
+  "step": 359,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "DiffuseIndirectAndAO",
+   "LumenScreenProbeGather",
+   "Integrate",
+   "TileClassificationMark"
+  ],
+  "file": "targets/0359_0_47967.bin.z",
+  "id": "ResourceId::47967",
+  "name": "2D Texture 47967",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "R16G16B16A16_FLOAT",
+  "bytes": 8128512,
+  "role": "output",
+  "bytes_per_texel": 8.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "max": [
+   99.8125,
+   86.9375,
+   38.5625,
+   0.417724609375
+  ],
+  "z_bytes": 3978117
+ },
+ {
+  "step": 359,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "DiffuseIndirectAndAO",
+   "LumenScreenProbeGather",
+   "Integrate",
+   "TileClassificationMark"
+  ],
+  "file": "targets/0359_1_47973.bin.z",
+  "id": "ResourceId::47973",
+  "name": "2D Texture 47973",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "R11G11B10_FLOAT",
+  "bytes": 4064256,
+  "role": "output",
+  "bytes_per_texel": 4.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "max": [
+   1.109375,
+   0.8984375,
+   0.3828125,
+   1.0
+  ],
+  "z_bytes": 1358046
+ },
+ {
+  "step": 359,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "DiffuseIndirectAndAO",
+   "LumenScreenProbeGather",
+   "Integrate",
+   "TileClassificationMark"
+  ],
+  "file": "targets/0359_2_45771.bin.z",
+  "id": "ResourceId::45771",
+  "name": "2D Texture 45771",
+  "w": 168,
+  "h": 95,
+  "depth": 1,
+  "format": "R8_UINT",
+  "bytes": 15960,
+  "role": "output",
+  "bytes_per_texel": 1.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   1.401298464324817e-45
+  ],
+  "max": [
+   3.5733110840282835e-43,
+   0.0,
+   0.0,
+   1.401298464324817e-45
+  ],
+  "z_bytes": 306
+ },
+ {
+  "step": 363,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "DiffuseIndirectAndAO",
+   "LumenScreenProbeGather",
+   "Integrate",
+   "%s%s"
+  ],
+  "file": "targets/0363_0_47967.bin.z",
+  "id": "ResourceId::47967",
+  "name": "2D Texture 47967",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "R16G16B16A16_FLOAT",
+  "bytes": 8128512,
+  "role": "output",
+  "bytes_per_texel": 8.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "max": [
+   0.6630859375,
+   0.517578125,
+   0.09588623046875,
+   0.00099945068359375
+  ],
+  "z_bytes": 1980091
+ },
+ {
+  "step": 363,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "DiffuseIndirectAndAO",
+   "LumenScreenProbeGather",
+   "Integrate",
+   "%s%s"
+  ],
+  "file": "targets/0363_1_47973.bin.z",
+  "id": "ResourceId::47973",
+  "name": "2D Texture 47973",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "R11G11B10_FLOAT",
+  "bytes": 4064256,
+  "role": "output",
+  "bytes_per_texel": 4.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "max": [
+   1.234375,
+   1.0,
+   0.28125,
+   1.0
+  ],
+  "z_bytes": 1358605
+ },
+ {
+  "step": 364,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "DiffuseIndirectAndAO",
+   "LumenScreenProbeGather",
+   "TemporalReprojection(%ux%u)"
+  ],
+  "file": "targets/0364_0_19471.bin.z",
+  "id": "ResourceId::19471",
+  "name": "2D Texture 19471",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "R16G16B16A16_FLOAT",
+  "bytes": 8128512,
+  "role": "output",
+  "bytes_per_texel": 8.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   -0.00099945068359375
+  ],
+  "max": [
+   0.66162109375,
+   0.52001953125,
+   0.079345703125,
+   0.66162109375
+  ],
+  "z_bytes": 5279132
+ },
+ {
+  "step": 364,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "DiffuseIndirectAndAO",
+   "LumenScreenProbeGather",
+   "TemporalReprojection(%ux%u)"
+  ],
+  "file": "targets/0364_1_19477.bin.z",
+  "id": "ResourceId::19477",
+  "name": "2D Texture 19477",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "R11G11B10_FLOAT",
+  "bytes": 4064256,
+  "role": "output",
+  "bytes_per_texel": 4.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "max": [
+   0.953125,
+   0.765625,
+   0.09375,
+   1.0
+  ],
+  "z_bytes": 1359031
+ },
+ {
+  "step": 364,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "DiffuseIndirectAndAO",
+   "LumenScreenProbeGather",
+   "TemporalReprojection(%ux%u)"
+  ],
+  "file": "targets/0364_2_50996.bin.z",
+  "id": "ResourceId::50996",
+  "name": "2D Texture 50996",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "R8_UNORM",
+  "bytes": 1016064,
+  "role": "output",
+  "bytes_per_texel": 1.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "max": [
+   1.0,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "z_bytes": 8532
+ },
+ {
+  "step": 364,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "DiffuseIndirectAndAO",
+   "LumenScreenProbeGather",
+   "TemporalReprojection(%ux%u)"
+  ],
+  "file": "targets/0364_3_50993.bin.z",
+  "id": "ResourceId::50993",
+  "name": "2D Texture 50993",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "R8_UNORM",
+  "bytes": 1016064,
+  "role": "output",
+  "bytes_per_texel": 1.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "max": [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "z_bytes": 1007
+ },
+ {
+  "step": 370,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "DiffuseIndirectAndAO",
+   "DiffuseIndirectComposite(DiffuseIndirect=%s%s%s) %dx%d"
+  ],
+  "file": "targets/0370_0_47190.bin.z",
+  "id": "ResourceId::47190",
+  "name": "2D Render Target 47190",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "R16G16B16A16_FLOAT",
+  "bytes": 8128512,
+  "role": "output",
+  "bytes_per_texel": 8.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "max": [
+   6.82421875,
+   5.6328125,
+   3.732421875,
+   1.0
+  ],
+  "z_bytes": 3785899
+ },
+ {
+  "step": 374,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "Lights",
+   "DirectLighting",
+   "BatchedLights",
+   "%s"
+  ],
+  "file": "targets/0374_0_47190.bin.z",
+  "id": "ResourceId::47190",
+  "name": "2D Render Target 47190",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "R16G16B16A16_FLOAT",
+  "bytes": 8128512,
+  "role": "output",
+  "bytes_per_texel": 8.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "max": [
+   7.8046875,
+   6.796875,
+   3.732421875,
+   1.0
+  ],
+  "z_bytes": 3805193
+ },
+ {
+  "step": 374,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "Lights",
+   "DirectLighting",
+   "BatchedLights",
+   "%s"
+  ],
+  "file": "targets/0374_1_19356.bin.z",
+  "id": "ResourceId::19356",
+  "name": "2D Depth Target 19356",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "D32S8_TYPELESS",
+  "bytes": 8128512,
+  "role": "output",
+  "bytes_per_texel": 8.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "max": [
+   0.0007951897569000721,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "z_bytes": 1898577
+ },
+ {
+  "step": 377,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "ExponentialHeightFog",
+   "Fog"
+  ],
+  "file": "targets/0377_0_47190.bin.z",
+  "id": "ResourceId::47190",
+  "name": "2D Render Target 47190",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "R16G16B16A16_FLOAT",
+  "bytes": 8128512,
+  "role": "output",
+  "bytes_per_texel": 8.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "max": [
+   7.7578125,
+   6.7578125,
+   3.7109375,
+   1.0
+  ],
+  "z_bytes": 3805060
+ },
+ {
+  "step": 377,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "ExponentialHeightFog",
+   "Fog"
+  ],
+  "file": "targets/0377_1_19356.bin.z",
+  "id": "ResourceId::19356",
+  "name": "2D Depth Target 19356",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "D32S8_TYPELESS",
+  "bytes": 8128512,
+  "role": "output",
+  "bytes_per_texel": 8.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "max": [
+   0.0007951897569000721,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "z_bytes": 1898577
+ },
+ {
+  "step": 394,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "PostProcessing",
+   "TAA(%s Quality=%s) %dx%d -> %dx%d"
+  ],
+  "file": "targets/0394_101_19595_input.bin.z",
+  "id": "ResourceId::19595",
+  "name": "2D Render Target 19595",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "R16G16B16A16_FLOAT",
+  "bytes": 8128512,
+  "role": "input",
+  "bytes_per_texel": 8.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "max": [
+   6.12890625,
+   5.06640625,
+   3.349609375,
+   1.0
+  ],
+  "z_bytes": 3794092
+ },
+ {
+  "step": 394,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "PostProcessing",
+   "TAA(%s Quality=%s) %dx%d -> %dx%d"
+  ],
+  "file": "targets/0394_103_78786_input.bin.z",
+  "id": "ResourceId::78786",
+  "name": "2D Render Target 78786",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "R16G16B16A16_UNORM",
+  "bytes": 8128512,
+  "role": "input",
+  "bytes_per_texel": 8.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "max": [
+   0.495963990688324,
+   0.5084458589553833,
+   0.693461537361145,
+   0.999420166015625
+  ],
+  "z_bytes": 37495
+ },
+ {
+  "step": 394,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "PostProcessing",
+   "TAA(%s Quality=%s) %dx%d -> %dx%d"
+  ],
+  "file": "targets/0394_105_48013_input.bin.z",
+  "id": "ResourceId::48013",
+  "name": "2D Texture 48013",
+  "w": 1440,
+  "h": 1080,
+  "depth": 1,
+  "format": "R16G16B16A16_FLOAT",
+  "bytes": 12441600,
+  "role": "input",
+  "bytes_per_texel": 8.0,
+  "min": [
+   8.279085159301758e-05,
+   6.115436553955078e-05,
+   -0.0,
+   0.0
+  ],
+  "max": [
+   4.8046875,
+   3.953125,
+   2.62890625,
+   1.0
+  ],
+  "z_bytes": 7488695
+ },
+ {
+  "step": 394,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "PostProcessing",
+   "TAA(%s Quality=%s) %dx%d -> %dx%d"
+  ],
+  "file": "targets/0394_0_19709.bin.z",
+  "id": "ResourceId::19709",
+  "name": "2D Texture 19709",
+  "w": 1440,
+  "h": 1080,
+  "depth": 1,
+  "format": "R16G16B16A16_FLOAT",
+  "bytes": 12441600,
+  "role": "output",
+  "bytes_per_texel": 8.0,
+  "min": [
+   2.0265579223632812e-06,
+   3.6954879760742188e-06,
+   -0.0,
+   0.0
+  ],
+  "max": [
+   4.67578125,
+   3.888671875,
+   2.55859375,
+   1.0
+  ],
+  "z_bytes": 7489908
+ },
+ {
+  "step": 395,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "PostProcessing",
+   "MotionBlur",
+   "Velocity Flatten(CameraMotionBlur%s) %dx%d"
+  ],
+  "file": "targets/0395_0_48017.bin.z",
+  "id": "ResourceId::48017",
+  "name": "2D Texture 48017",
+  "w": 1344,
+  "h": 756,
+  "depth": 1,
+  "format": "R11G11B10_FLOAT",
+  "bytes": 4064256,
+  "role": "output",
+  "bytes_per_texel": 4.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "max": [
+   1.0625,
+   0.248046875,
+   1824.0,
+   1.0
+  ],
+  "z_bytes": 225352
+ },
+ {
+  "step": 395,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "PostProcessing",
+   "MotionBlur",
+   "Velocity Flatten(CameraMotionBlur%s) %dx%d"
+  ],
+  "file": "targets/0395_1_48020.bin.z",
+  "id": "ResourceId::48020",
+  "name": "2D Texture 48020",
+  "w": 63,
+  "h": 48,
+  "depth": 1,
+  "format": "R16G16B16A16_FLOAT",
+  "bytes": 24192,
+  "role": "output",
+  "bytes_per_texel": 8.0,
+  "min": [
+   -0.74951171875,
+   -0.7939453125,
+   -0.775390625,
+   -0.81884765625
+  ],
+  "max": [
+   -0.01132965087890625,
+   -0.26904296875,
+   -0.0020503997802734375,
+   -0.26708984375
+  ],
+  "z_bytes": 19477
+ },
+ {
+  "step": 399,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "PostProcessing",
+   "MotionBlur",
+   "MotionBlur FilterTileClassify %dx%d"
+  ],
+  "file": "targets/0399_100_48025_input.bin.z",
+  "id": "ResourceId::48025",
+  "name": "2D Render Target 48025",
+  "w": 63,
+  "h": 48,
+  "depth": 1,
+  "format": "R16G16B16A16_FLOAT",
+  "bytes": 24192,
+  "role": "input",
+  "bytes_per_texel": 8.0,
+  "min": [
+   -0.70947265625,
+   -0.75927734375,
+   -0.775390625,
+   -0.81884765625
+  ],
+  "max": [
+   -0.01132965087890625,
+   -0.26904296875,
+   -0.0020503997802734375,
+   -0.26708984375
+  ],
+  "z_bytes": 19120
+ },
+ {
+  "step": 404,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "PostProcessing",
+   "MotionBlur",
+   "MotionBlur FullResFilter(BlurDirections=%d MaxSamples=%d%s%s%s) %dx%d",
+   "MotionBlur Filter(%s)"
+  ],
+  "file": "targets/0404_0_48034.bin.z",
+  "id": "ResourceId::48034",
+  "name": "2D Texture 48034",
+  "w": 1440,
+  "h": 1080,
+  "depth": 1,
+  "format": "R11G11B10_FLOAT",
+  "bytes": 6220800,
+  "role": "output",
+  "bytes_per_texel": 4.0,
+  "min": [
+   1.9073486328125e-06,
+   2.86102294921875e-06,
+   0.0,
+   1.0
+  ],
+  "max": [
+   4.625,
+   3.875,
+   2.5,
+   1.0
+  ],
+  "z_bytes": 2418348
+ },
+ {
+  "step": 404,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "PostProcessing",
+   "MotionBlur",
+   "MotionBlur FullResFilter(BlurDirections=%d MaxSamples=%d%s%s%s) %dx%d",
+   "MotionBlur Filter(%s)"
+  ],
+  "file": "targets/0404_1_48037.bin.z",
+  "id": "ResourceId::48037",
+  "name": "2D Texture 48037",
+  "w": 720,
+  "h": 540,
+  "depth": 1,
+  "format": "R11G11B10_FLOAT",
+  "bytes": 1555200,
+  "role": "output",
+  "bytes_per_texel": 4.0,
+  "min": [
+   3.337860107421875e-05,
+   1.811981201171875e-05,
+   0.0,
+   1.0
+  ],
+  "max": [
+   4.5625,
+   3.8125,
+   2.5,
+   1.0
+  ],
+  "z_bytes": 668329
+ },
+ {
+  "step": 404,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "PostProcessing",
+   "MotionBlur",
+   "MotionBlur FullResFilter(BlurDirections=%d MaxSamples=%d%s%s%s) %dx%d",
+   "MotionBlur Filter(%s)"
+  ],
+  "file": "targets/0404_2_48040.bin.z",
+  "id": "ResourceId::48040",
+  "name": "2D Texture 48040",
+  "w": 1,
+  "h": 1,
+  "depth": 1,
+  "format": "R11G11B10_FLOAT",
+  "bytes": 4,
+  "role": "output",
+  "bytes_per_texel": 4.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "max": [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "z_bytes": 12
+ },
+ {
+  "step": 408,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "PostProcessing",
+   "Bloom %dx%d",
+   "Downsample(%s Quality=%s CS) %dx%d -> %dx%d"
+  ],
+  "file": "targets/0408_0_48046.bin.z",
+  "id": "ResourceId::48046",
+  "name": "2D Texture 48046",
+  "w": 1020,
+  "h": 764,
+  "depth": 1,
+  "format": "R11G11B10_FLOAT",
+  "bytes": 3117120,
+  "role": "output",
+  "bytes_per_texel": 4.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "max": [
+   4.5,
+   3.75,
+   2.4375,
+   1.0
+  ],
+  "z_bytes": 1273959
+ },
+ {
+  "step": 412,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "PostProcessing",
+   "Bloom %dx%d",
+   "FFT: Two-For-One %s of size %d of buffer %d x %d"
+  ],
+  "file": "targets/0412_0_48046.bin.z",
+  "id": "ResourceId::48046",
+  "name": "2D Texture 48046",
+  "w": 1020,
+  "h": 764,
+  "depth": 1,
+  "format": "R11G11B10_FLOAT",
+  "bytes": 3117120,
+  "role": "output",
+  "bytes_per_texel": 4.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "max": [
+   0.4921875,
+   0.40625,
+   0.2578125,
+   1.0
+  ],
+  "z_bytes": 577724
+ },
+ {
+  "step": 413,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "PostProcessing",
+   "CombineLUTS %d (PS)"
+  ],
+  "file": "targets/0413_0_6676.bin.z",
+  "id": "ResourceId::6676",
+  "name": "3D Render Target 6676",
+  "w": 32,
+  "h": 32,
+  "depth": 32,
+  "format": "R10G10B10A2_UNORM",
+  "bytes": 131072,
+  "role": "output",
+  "bytes_per_texel": 4.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "max": [
+   1.0,
+   0.9784946441650391,
+   0.9188660979270935,
+   0.0
+  ],
+  "z_bytes": 73884
+ },
+ {
+  "step": 415,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "PostProcessing",
+   "Tonemap %dx%d (PS GammaOnly=%d)"
+  ],
+  "file": "targets/0415_0_47207.bin.z",
+  "id": "ResourceId::47207",
+  "name": "2D Render Target 47207",
+  "w": 1440,
+  "h": 1080,
+  "depth": 1,
+  "format": "R10G10B10A2_UNORM",
+  "bytes": 6220800,
+  "role": "output",
+  "bytes_per_texel": 4.0,
+  "min": [
+   0.09579667448997498,
+   0.07233626395463943,
+   0.0,
+   0.0
+  ],
+  "max": [
+   0.9716520309448242,
+   0.9628543257713318,
+   0.9403714537620544,
+   0.0
+  ],
+  "z_bytes": 4237565
+ },
+ {
+  "step": 417,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "PostProcessing",
+   "PostProcessMaterial %dx%d Material=%s",
+   "\ubb30\u65d8\u0192"
+  ],
+  "file": "targets/0417_100_47213_input.bin.z",
+  "id": "ResourceId::47213",
+  "name": "2D Render Target 47213",
+  "w": 1440,
+  "h": 1080,
+  "depth": 1,
+  "format": "R10G10B10A2_UNORM",
+  "bytes": 6220800,
+  "role": "input",
+  "bytes_per_texel": 4.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "max": [
+   1.0,
+   1.0,
+   1.0,
+   0.0
+  ],
+  "z_bytes": 5062223
+ },
+ {
+  "step": 417,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "PostProcessing",
+   "PostProcessMaterial %dx%d Material=%s",
+   "\ubb30\u65d8\u0192"
+  ],
+  "file": "targets/0417_0_47210.bin.z",
+  "id": "ResourceId::47210",
+  "name": "2D Render Target 47210",
+  "w": 1440,
+  "h": 1080,
+  "depth": 1,
+  "format": "R10G10B10A2_UNORM",
+  "bytes": 6220800,
+  "role": "output",
+  "bytes_per_texel": 4.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "max": [
+   1.0,
+   1.0,
+   1.0,
+   0.0
+  ],
+  "z_bytes": 899878
+ },
+ {
+  "step": 418,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "PostProcessing",
+   "PostProcessMaterial %dx%d Material=%s",
+   "\uf7e0\ub2aa\u0192"
+  ],
+  "file": "targets/0418_0_47213.bin.z",
+  "id": "ResourceId::47213",
+  "name": "2D Render Target 47213",
+  "w": 1440,
+  "h": 1080,
+  "depth": 1,
+  "format": "R10G10B10A2_UNORM",
+  "bytes": 6220800,
+  "role": "output",
+  "bytes_per_texel": 4.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "max": [
+   1.0,
+   1.0,
+   1.0,
+   0.0
+  ],
+  "z_bytes": 2625668
+ },
+ {
+  "step": 421,
+  "markers": [
+   "FRAME",
+   "Scene",
+   "PostProcessing",
+   "PostProcessMaterial %dx%d Material=%s",
+   "\ua660\u755f\u0192"
+  ],
+  "file": "targets/0421_0_690.bin.z",
+  "id": "ResourceId::690",
+  "name": "Swapchain Image 690",
+  "w": 1920,
+  "h": 1080,
+  "depth": 1,
+  "format": "R10G10B10A2_UNORM",
+  "bytes": 8294400,
+  "role": "output",
+  "bytes_per_texel": 4.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "max": [
+   1.0,
+   1.0,
+   1.0,
+   0.0
+  ],
+  "z_bytes": 2882890
+ },
+ {
+  "step": 428,
+  "markers": [
+   "final"
+  ],
+  "file": "targets/0428_0_690.bin.z",
+  "id": "ResourceId::690",
+  "name": "Swapchain Image 690",
+  "w": 1920,
+  "h": 1080,
+  "depth": 1,
+  "format": "R10G10B10A2_UNORM",
+  "bytes": 8294400,
+  "role": "output",
+  "bytes_per_texel": 4.0,
+  "min": [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "max": [
+   0.9931573867797852,
+   0.9892473220825195,
+   0.9843597412109375,
+   1.0
+  ],
+  "z_bytes": 5245402
+ }
+]
