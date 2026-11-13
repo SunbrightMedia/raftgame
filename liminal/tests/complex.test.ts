@@ -8,17 +8,18 @@ const bits = (x: number) => { const b = new DataView(new ArrayBuffer(4)); b.setF
 
 describe('complex camera', () => {
   it('tone table cells equal the game CombineLUTs step to the last bit', () => {
-    // float32 bit patterns of the game's step (exactly rounded exp2/log2), cell "r,g,b" -> RGB
+    // float32 bit patterns of the game's step (exactly rounded exp2/log2; every number in the step exact, from its
+    // bytes in the deep export), cell "r,g,b" -> RGB
     const game: Record<string, number[]> = {
-      '0,0,0': [0, 0, 0],
-      '16,16,16': [1059635961, 1059635905, 1059635944],
-      '31,31,31': [1064765013, 1064764914, 1064764964],
-      '31,0,0': [1065561871, 1063501826, 1059228235],
-      '0,31,0': [1064349075, 1064899093, 1063750843],
-      '0,0,31': [1063062867, 1064259119, 1064813667],
-      '7,19,6': [1036390402, 1063195457, 1038175243],
-      '12,19,5': [1053292441, 1063144423, 1034045977],
-      '29,31,31': [1064723154, 1064765291, 1064765211],
+      '0,0,0': [630433922, 630433790, 630433849],
+      '16,16,16': [1059635991, 1059635935, 1059635968],
+      '31,31,31': [1064765012, 1064764919, 1064764961],
+      '31,0,0': [1065561872, 1063501816, 1059228264],
+      '0,31,0': [1064349079, 1064899098, 1063750850],
+      '0,0,31': [1063062898, 1064259131, 1064813662],
+      '7,19,6': [1036391612, 1063195472, 1038175877],
+      '12,19,5': [1053292538, 1063144436, 1034046805],
+      '29,31,31': [1064723150, 1064765294, 1064765209],
     };
     const t = makeToneTable(COMPLEX_TONE), n = COMPLEX_TONE.size;
     for (const [k, want] of Object.entries(game)) {
@@ -29,7 +30,7 @@ describe('complex camera', () => {
 
   it('lens numbers equal the game lens step (FOV 1.71452 rad, render 1008 x 756)', () => {
     const L = lensConstants(1.71451998, 1008, 756);
-    expect(bits(L.k)).toBe(bits(0.9549195));     // the step's own sin(atan(diag / f)), register r0.y
+    expect(bits(L.k)).toBe(1064596894);          // the step's own sin(atan(diag / f)), register r0.y (exact numbers)
     expect(L.a).toBe(Math.fround(1.200164));
     expect(L.diagW).toBe(1.25);
     expect(L.hw).toEqual([1, 0.75]);

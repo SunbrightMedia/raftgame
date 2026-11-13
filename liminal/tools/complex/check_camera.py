@@ -29,6 +29,8 @@ import dxbc  # noqa: E402
 W, H = 1440, 1080
 CLAMP = dxbc.Sampler('linear', ('clamp', 'clamp', 'clamp'))
 WRAP = dxbc.Sampler('linear', ('wrap', 'wrap', 'wrap'))
+# the post-process materials read their input picture by nearest pixel (checked against the real output)
+POINT = dxbc.Sampler('point', ('clamp', 'clamp', 'clamp'))
 
 
 def q10(a):
@@ -118,7 +120,7 @@ def check_posterize(fr):
     st = fr.find('ps_19321')
     cbs = fr.constants(st, 'ps')
     src = ldr_picture()
-    game = emu(fr.program('ps_19321'), W, H, cbs, {0: dxbc.Texture(rgba(src))}, {0: CLAMP})
+    game = emu(fr.program('ps_19321'), W, H, cbs, {0: dxbc.Texture(rgba(src))}, {0: POINT})
     cb1 = vals(cbs[1], 1)
     ours = gpu('posterize', W, H, {'t_src': (src, 'clamp')}, {**view_uniforms(cbs[0]), 'u_blend': cb1[0], 'u_blendColor': cb1[1:4]})
     return report('posterize', game, ours)
@@ -128,7 +130,7 @@ def check_sharpen(fr):
     st = fr.find('ps_8881')
     cbs = fr.constants(st, 'ps')
     src = ldr_picture()
-    game = emu(fr.program('ps_8881'), W, H, cbs, {0: dxbc.Texture(rgba(src))}, {0: CLAMP})
+    game = emu(fr.program('ps_8881'), W, H, cbs, {0: dxbc.Texture(rgba(src))}, {0: POINT})
     cb1 = cbs[1].view(np.float32)
     ours = gpu('sharpen', W, H, {'t_src': (src, 'clamp')}, {**view_uniforms(cbs[0]), 'u_amount': cb1[1, 0], 'u_blend': cb1[1, 1], 'u_blendColor': cb1[2, :3]})
     return report('sharpen', game, ours)
@@ -142,7 +144,7 @@ def check_grain(fr, clock=None):
         c1[143, 1] = clock
         cbs[1] = c1.view(np.uint32)
     src, noise = ldr_picture(), noise_picture(350, 262, sparse=True)
-    game = emu(fr.program('ps_19323'), W, H, cbs, {0: dxbc.Texture(rgba(noise)), 1: dxbc.Texture(rgba(src))}, {0: WRAP, 1: CLAMP})
+    game = emu(fr.program('ps_19323'), W, H, cbs, {0: dxbc.Texture(rgba(noise)), 1: dxbc.Texture(rgba(src))}, {0: WRAP, 1: POINT})
     c1, c2 = cbs[1].view(np.float32), cbs[2].view(np.float32)
     ours = gpu('grain', W, H, {'t_noise': (noise, 'repeat'), 't_src': (src, 'clamp')},
                {**view_uniforms(cbs[0]), 'u_time': c1[143, 1], 'u_tile': c2[1, 0], 'u_keep': c2[1, 3], 'u_lift': c2[2, 1],
@@ -158,6 +160,8 @@ def tape_program(fr):
     hash constant 1013904223 (printed as the float 0.014584) and the hash's 16-bit scale (printed 0.000015,
     taken as 1/65536). Our code uses the same; the shader's bytes (deep export) will settle the second."""
     p = fr.program('ps_19325')
+    if getattr(p, 'exact', False):      # from the shader's bytes: nothing to set
+        return p
     for ins in p.code:
         for a in ins.args:
             if a.file != 'l':
@@ -175,7 +179,7 @@ def check_tape(fr):
     st = fr.find('ps_19325')
     cbs = fr.constants(st, 'ps')
     src, noise, band = ldr_picture(), noise_picture(128, 128), noise_picture(236, 315)
-    game = emu(tape_program(fr), W, H, cbs, {0: dxbc.Texture(rgba(noise)), 1: dxbc.Texture(rgba(band)), 2: dxbc.Texture(rgba(src))}, {0: WRAP, 1: WRAP, 2: CLAMP})
+    game = emu(tape_program(fr), W, H, cbs, {0: dxbc.Texture(rgba(noise)), 1: dxbc.Texture(rgba(band)), 2: dxbc.Texture(rgba(src))}, {0: WRAP, 1: WRAP, 2: POINT})
     c1, c2 = cbs[1].view(np.float32), cbs[2].view(np.float32)
     ours = gpu('tape', W, H, {'t_noise': (noise, 'repeat'), 't_band': (band, 'repeat'), 't_src': (src, 'clamp')},
                {**view_uniforms(cbs[0]), 'u_time': c1[143, 1], 'u_rows': c1[129, 1], 'u_rate': c2[4, 3], 'u_tile': c2[1, 0],
@@ -188,21 +192,22 @@ def lens_constants(fov, W_, H_):
     """complexCamera.ts lensConstants, the same float32 steps (checked against the TS by tests/complex.test.ts)."""
     f = np.float32
     a = f(f(fov) * f(0.7))
-    tn = f(f(np.sin(np.float64(a))) / f(np.cos(np.float64(a))))
+    a2 = f(f(fov) * f(0.70000005))      # the step's tangent uses this one (its bytes say so)
+    tn = f(f(np.sin(np.float64(a2))) / f(np.cos(np.float64(a2))))
     fpx = f(f(W_) / tn)
     diag = f(np.sqrt(np.float64(f(f(f(W_) * f(W_)) + f(f(H_) * f(H_))))))
     x = f(diag / fpx)
     ax = abs(x)
     m = f(f(1 / max(ax, f(1))) * min(ax, f(1)))
     m2 = f(m * m)
-    p = f(np.float64(m2) * f(0.020835) + f(-0.085133))
+    p = f(np.float64(m2) * f(0.0208351) + f(-0.085133))
     p = f(np.float64(m2) * p + f(0.180141))
-    p = f(np.float64(m2) * p + f(-0.330299))
+    p = f(np.float64(m2) * p + f(-0.3302995))
     p = f(np.float64(m2) * p + f(0.999866))
-    corr = f(np.float64(f(m * p)) * -2 + f(1.570796)) if 1 < ax else f(0)
+    corr = f(np.float64(f(m * p)) * -2 + f(1.5707964)) if 1 < ax else f(0)
     r = f(np.float64(m) * p + corr)
     r = -r if min(x, 1) < -min(x, 1) else r
-    k = f(np.sin(np.float64(f(r * 1))))
+    k = f(np.sin(np.float64(f(r * f(1.0000001)))))
     return {'a': a, 'k': k, 'diagW': f(diag / f(W_)), 'hw': [1.0, f(f(H_) / f(W_))]}
 
 
@@ -210,7 +215,7 @@ def check_lens(fr):
     st = fr.find('ps_19327')
     cbs = fr.constants(st, 'ps')
     src = ldr_picture()
-    game = emu(fr.program('ps_19327'), W, H, cbs, {0: dxbc.Texture(rgba(src))}, {0: CLAMP})
+    game = emu(fr.program('ps_19327'), W, H, cbs, {0: dxbc.Texture(rgba(src))}, {0: POINT})
     c1, c2 = cbs[1].view(np.float32), cbs[2].view(np.float32)
     L = lens_constants(c1[127, 0], c1[129, 0], c1[129, 1])
     ours = gpu('lens', W, H, {'t_src': (src, 'clamp')}, {**view_uniforms(cbs[0]), 'u_a': L['a'], 'u_k': L['k'], 'u_diagW': L['diagW'],
@@ -245,7 +250,7 @@ def check_tonemap(fr):
     c0, c1 = cbs[0].view(np.float32), cbs[1].view(np.float32)
     scene, bloom, dirt = tonemap_inputs()
     lut = our_tone_table()
-    exposure, apply_ = np.float32(34.1333275), np.array([0.84, 0.83, 0.64, 1], np.float32)
+    exposure, apply_ = np.float32(34.1333275), np.array([0.8, 0.8, 0.8, 1], np.float32)   # the game's (deep export)
     vig_scale = np.array([1, 0.75], np.float32) * np.float32(np.sqrt(2) / np.sqrt(1 + 0.75 ** 2))
     dither_off = np.array([0.123, 0.456], np.float32)
     # the vertex step's interpolants, computed as our shader computes them from gl_FragCoord

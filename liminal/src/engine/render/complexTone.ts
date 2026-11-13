@@ -95,25 +95,26 @@ export const COMPLEX_TONE: ToneSettings = {
 };
 
 // ---- fixed matrices and constants of the path (standard ACES / colour-science values, as the step uses them)
-const AP1_Y: V3 = F3([0.272229, 0.674082, 0.05369]);
+const AP1_Y: V3 = F3([0.27222872, 0.67408174, 0.053689517]);
 /** sRGB-ish wide gamut used by the gamut expansion, as a matrix on AP1 colours */
-const EXPAND: M3 = M([[1.370413, -0.329291, -0.063683], [-0.083434, 1.097091, -0.010862], [-0.025793, -0.098626, 1.203694]]);
-const BLUE: M3 = M([[0.938639, 0, 0.061361], [0, 0.830794, 0.169206], [0, -0, 1]]);
-const BLUE_INV: M3 = M([[1.065375, 0.000001, -0.065371], [-0, 1.203663, -0.203668], [0, 0, 1]]);
-const AP1_AP0: M3 = M([[0.695452, 0.140679, 0.163869], [0.044795, 0.859671, 0.095534], [-0.005526, 0.004025, 1.001501]]);
-const AP0_AP1: M3 = M([[1.451439, -0.236511, -0.214929], [-0.076554, 1.17623, -0.099676], [0.008316, -0.006032, 0.997716]]);
+const EXPAND: M3 = M([[1.3704127, -0.3292913, -0.063682765], [-0.08343419, 1.097091, -0.010861573], [-0.025793258, -0.09862564, 1.2036943]]);
+// the step's exact numbers: its "0" and "1" entries are not exactly 0 and 1
+const BLUE: M3 = M([[0.9386394, 1.02359565e-10, 0.061360624], [8.3600855e-11, 0.83079416, 0.16920587], [2.1318737e-12, -5.633072e-12, 1]]);
+const BLUE_INV: M3 = M([[1.0653749, 1.4467851e-06, -0.06537101], [-3.455256e-07, 1.2036635, -0.20366772], [1.9865448e-08, 2.1207958e-08, 0.9999996]]);
+const AP1_AP0: M3 = M([[0.6954522, 0.1406787, 0.16386907], [0.044794563, 0.8596711, 0.09553432], [-0.0055258824, 0.00402521, 1.0015007]]);
+const AP0_AP1: M3 = M([[1.4514393, -0.23651075, -0.21492857], [-0.07655378, 1.1762297, -0.09967592], [0.008316148, -0.0060324497, 0.9977163]]);
 /** AP1 -> sRGB output gamut */
-const AP1_OUT: M3 = M([[1.705052, -0.621791, -0.083258], [-0.130257, 1.140803, -0.010549], [-0.024003, -0.128969, 1.152972]]);
-const LOG_MID = f(0.434018);      // 444 / 1023
-const LOG_BLACK = f(0.002668);    // the light at log code 0
-const INV_GREY = f(5.555555);     // 1 / 0.18
-const SQRT3 = f(1.732051);
+const AP1_OUT: M3 = M([[1.7050515, -0.6217907, -0.0832584], [-0.13025714, 1.1408029, -0.010548528], [-0.024003275, -0.12896878, 1.1529717]]);
+const LOG_MID = f(0.4340176);      // 444 / 1023
+const LOG_BLACK = f(0.0026677193);    // the light at log code 0
+const INV_GREY = f(5.5555553);     // 1 / 0.18
+const SQRT3 = f(1.7320508);
 const RAD2DEG = f(57.29578);
 const LOG10_2 = f(0.30103);
 const LOG2_E = f(1.442695);
-const HALF_LN2 = f(0.346574);
-const LOG10_GREY = f(-0.744727);  // log10(0.18)
-const INV_RED_WIDTH = f(0.014815); // 2 / 135
+const HALF_LN2 = f(0.3465736);
+const LOG10_GREY = f(-0.7447275);  // log10(0.18)
+const INV_RED_WIDTH = f(0.014814815); // 2 / 135
 
 /** The compiler's arctangent: a 9th-order odd polynomial on [0, 1] and the usual quadrant fix-ups. */
 function atan2gpu(y: number, x: number): number {
@@ -121,14 +122,14 @@ function atan2gpu(y: number, x: number): number {
   const lo = min(ay, ax), hi = max(ay, ax);
   const t = mul(div(1, hi), lo);
   const t2 = mul(t, t);
-  let p = mad(t2, f(0.020835), f(-0.085133));
+  let p = mad(t2, f(0.0208351), f(-0.085133));
   p = mad(t2, p, f(0.180141));
-  p = mad(t2, p, f(-0.330299));
+  p = mad(t2, p, f(-0.3302995));
   const q = mad(t2, p, f(0.999866));
-  let corr = mad(mul(q, t), -2, f(1.570796));
+  let corr = mad(mul(q, t), -2, f(1.5707964));
   corr = ax < ay ? corr : 0;
   let a = mad(t, q, corr);
-  a = add(x < -x ? f(-3.141593) : 0, a);
+  a = add(x < -x ? f(-3.1415927) : 0, a);
   const lo2 = min(y, x), hi2 = max(y, x);
   return lo2 < -lo2 && hi2 >= -hi2 ? -a : a;
 }
@@ -216,8 +217,8 @@ export function toneCell(s: ToneSettings, enc: V3): V3 {
   // 7. output gamut, transfer curve, / 1.05
   const out = xf(AP1_OUT, xf(s.toAP1, rgb));
   return out.map((v) => {
-    const enc2 = v >= f(0.003131) ? mad(exp2(mul(log2(v), f(1 / 2.4))), f(1.055), f(-0.055)) : mul(v, f(12.92));
-    return mul(enc2, f(1 / 1.05));
+    const enc2 = v >= f(0.00313067) ? mad(exp2(mul(log2(v), f(1 / 2.4))), f(1.055), f(-0.055)) : mul(v, f(12.92));
+    return mul(enc2, f(0.952381));
   }) as V3;
 }
 
@@ -226,9 +227,10 @@ function filmToneMap(s: ToneSettings, ap1: V3): V3 {
   const a0 = xf(AP1_AP0, ap1);
   tr('a0', a0);
   // saturation and "yc"
-  const mn = max(min(min(a0[1], a0[0]), a0[2]), 0);
+  const TINY = f(1e-10);
+  const mn = max(min(min(a0[1], a0[0]), a0[2]), TINY);
   const mx = max(max(a0[1], a0[0]), a0[2]);
-  const sat0 = div(sub(max(mx, 0), mn), max(mx, f(0.01)));
+  const sat0 = div(sub(max(mx, TINY), mn), max(mx, f(0.01)));
   // chroma = sqrt(r (r - b) + g (g - r) + b (b - g)), summed as the step does: (g (g - r) + b (b - g)) first
   const R = a0[0], G = a0[1], B = a0[2];
   const chroma = f(Math.sqrt(mad(R, sub(R, B), add(mul(G, sub(G, R)), mul(B, sub(B, G))))));

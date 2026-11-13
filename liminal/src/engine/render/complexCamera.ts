@@ -71,8 +71,8 @@ void main() {
   vec2 vv = vig * u_vig;
   float v = 1.0 / (dot(vv, vv) + 1.0);
   v = v * v;
-  x = x * v + 0.002668;
-  x = clamp(log2(x) * (1.0 / 14.0) + 0.610727, 0.0, 1.0);
+  x = x * v + 0.0026677193;
+  x = clamp(log2(x) * (1.0 / 14.0) + 0.61072695, 0.0, 1.0);
   x = x * u_lut.x + u_lut.y;
   vec3 g = texture(t_lut, x).xyz;
   float d = fract(sin(dith.y * 543.31 + dith.x) * 493013.0) * (1.0 / 256.0) - (1.0 / 512.0);
@@ -85,6 +85,14 @@ void main() {
 const VIEW = `
 uniform vec2 u_view, u_inv;
 uniform vec4 u_map, u_clampP;
+// The game's post-process materials read their input picture by nearest pixel (Unreal's scene-texture lookup
+// without "Filtered"): checked against the real graphics card's own pictures in the deep export (sharpen 17 %
+// equal with blending, 95.8 % by nearest pixel; lens mean difference 11.4 -> 3.2 steps).
+vec3 nearest(sampler2D t, vec2 uv) {
+  ivec2 s = textureSize(t, 0);
+  ivec2 p = clamp(ivec2(floor(uv * vec2(s))), ivec2(0), s - ivec2(1));
+  return texelFetch(t, p, 0).xyz;
+}
 `;
 
 /** Sharpen: luma unsharp mask, taps 0.001 of the picture away, amount u_amount; then a blend to a colour
@@ -93,7 +101,7 @@ export const SHARPEN = HEAD + VIEW + `
 uniform sampler2D t_src;
 uniform float u_amount, u_blend;
 uniform vec3 u_blendColor;
-vec3 at(vec2 a) { return texture(t_src, min(max(a * u_map.xy + u_map.zw, u_clampP.xy), u_clampP.zw)).xyz; }
+vec3 at(vec2 a) { return nearest(t_src, min(max(a * u_map.xy + u_map.zw, u_clampP.xy), u_clampP.zw)); }
 void main() {
   vec2 r = gl_FragCoord.xy - u_view;
   vec4 v = r.xyxy * u_inv.xyxy + vec4(0.0, 0.001, 0.0, -0.001);
@@ -115,7 +123,7 @@ uniform float u_blend;
 uniform vec3 u_blendColor;
 void main() {
   vec2 uv = (gl_FragCoord.xy - u_view) * u_inv;
-  vec3 c = texture(t_src, uv * u_map.xy + u_map.zw).xyz;
+  vec3 c = nearest(t_src, uv * u_map.xy + u_map.zw);
   vec3 q = roundEven(c * 24.0);
   vec3 a = q * (1.0 / 24.0);
   vec3 b = -q * (1.0 / 24.0) + u_blendColor;
@@ -134,7 +142,7 @@ void main() {
   vec2 nuv = u_time * vec2(9.0, 4.0) + r * u_tile;
   vec3 n = texture(t_noise, nuv).xyz;
   n = u_keep * -n + n;
-  vec3 s = texture(t_src, suv).xyz;
+  vec3 s = nearest(t_src, suv);
   vec3 hi = (1.0 - s) * u_hi;
   hi = -hi * 2.0 + 1.0;
   vec3 lo = s * u_lo;
@@ -169,21 +177,21 @@ void main() {
   c = a.x * a.y + c;
   uint d = a.y * c + a.x;
   vec2 h = vec2(uvec2(c, d) >> 16u);
-  float fr = max(h.x * (1.0 / 65536.0), 0.0001);
-  float ph = h.y * (1.0 / 65536.0) + r.x / fr;
-  float w = (sin(ph * 6.283185) + 1.0) * 0.5;
+  float fr = max(h.x * 1.5259022e-05, 0.0001);
+  float ph = h.y * 1.5259022e-05 + r.x / fr;
+  float w = (sin(ph * 6.2831855) + 1.0) * 0.5;
   vec3 line = w * (u_colB - u_colA) + u_colA;
-  vec3 s = texture(t_src, r * u_map.xy + u_map.zw).xyz;
-  const float K = 0.57735;
+  vec3 s = nearest(t_src, r * u_map.xy + u_map.zw);
+  const float K = 0.57735026;
   float g = dot(vec3(K), s);
   vec3 perp = -g * K + s;
   vec3 cr = perp.zxy * K;
   cr = perp.zxy * K - cr.zxy;
-  vec3 tt = u_time * vec3(9.0, 0.05, 0.523599);
+  vec3 tt = u_time * vec3(9.0, 0.05, 0.5235988);
   vec3 n = texture(t_noise, r * u_tile + tt.xy).xyz;
-  float ang = sin(tt.z) * sin(u_time * 0.174533);
-  ang = sin(u_time * 0.10472) * ang;
-  ang = ang * 0.10472;
+  float ang = sin(tt.z) * sin(u_time * 0.17453294);
+  ang = sin(u_time * 0.10471976) * ang;
+  ang = ang * 0.104719765;
   vec3 rot = perp * cos(ang) + cr * sin(ang);
   rot = g * K + rot;
   rot = u_liftK * (1.0 - rot) + rot;
@@ -203,11 +211,11 @@ function atanGpu(x: number): number {
   const ax = Math.abs(x);
   const m = f(f(1 / Math.max(ax, 1)) * Math.min(ax, 1));
   const m2 = f(m * m);
-  let p = f(m2 * f(0.020835) + f(-0.085133));
+  let p = f(m2 * f(0.0208351) + f(-0.085133));
   p = f(m2 * p + f(0.180141));
-  p = f(m2 * p + f(-0.330299));
+  p = f(m2 * p + f(-0.3302995));
   p = f(m2 * p + f(0.999866));
-  const corr = 1 < ax ? f(f(m * p) * -2 + f(1.570796)) : 0;
+  const corr = 1 < ax ? f(f(m * p) * -2 + f(1.5707964)) : 0;
   const r = f(m * p + corr);
   return Math.min(x, 1) < -Math.min(x, 1) ? -r : r;
 }
@@ -219,11 +227,14 @@ function atanGpu(x: number): number {
  */
 export function lensConstants(fov: number, W: number, H: number): { a: number; k: number; diagW: number; hw: [number, number] } {
   const f = Math.fround;
+  // the step's own numbers (from its bytes): fov x 0.7 for the last division, fov x 0.70000005 for the
+  // tangent, and the arctangent x 1.0000001
   const a = f(f(fov) * f(0.7));
-  const tn = f(f(Math.sin(a)) / f(Math.cos(a)));
+  const a2 = f(f(fov) * f(0.70000005));
+  const tn = f(f(Math.sin(a2)) / f(Math.cos(a2)));
   const fpx = f(f(W) / tn);
   const diag = f(Math.sqrt(f(f(f(W) * f(W)) + f(f(H) * f(H)))));
-  const k = f(Math.sin(f(atanGpu(f(diag / fpx)) * 1)));
+  const k = f(Math.sin(f(atanGpu(f(diag / fpx)) * f(1.0000001))));
   return { a, k, diagW: f(diag / f(W)), hw: [1, f(f(H) / f(W))] };
 }
 
@@ -247,16 +258,16 @@ void main() {
   float c2 = 1.0 - qq;
   vec2 dir = inversesqrt(qq) * q;
   float x = sqrt(max(c2, 0.0));
-  float ac = x * -0.018729 + 0.074261;
-  ac = ac * x - 0.212114;
-  ac = ac * x + 1.570729;
+  float ac = x * -0.0187293 + 0.074261;
+  ac = ac * x - 0.2121144;
+  ac = ac * x + 1.5707288;
   float th = sqrt(1.0 - x) * ac;
   vec2 i = (th / u_a) * dir;
   i = i / u_hw;
   i = (i + 1.0) * u_map.xy;
   i = i * 0.5 + u_map.zw;
   i = min(max(i, u_clampP.xy), u_clampP.zw);
-  vec3 c = texture(t_src, i).xyz;
+  vec3 c = nearest(t_src, i);
   o = vec4(max(u_blend * (u_blendColor - c) + c, 0.0), 0.0);
 }`;
 
