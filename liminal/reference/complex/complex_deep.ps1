@@ -136,6 +136,10 @@ $DeepPy = @'
 #    tone table and small ones too), the data buffers the steps read (exposure, the tonemapper's colour
 #    multiplier, the glow's constants), and the pictures from an earlier frame they read (the upscaler's
 #    history). About 90 MB more per frame.
+#  - shaders/<id>.dxbc.z
+#                  the bytes of each shader program used (zlib): the disassembly in the first export prints
+#                  numbers with 6 decimals, and exact checks of our re-written camera and lamp maths need them
+#                  exact
 #  - errors.txt
 #
 # Step numbers are the same as in complex_export.py's export (same way of splitting the frame into steps),
@@ -205,7 +209,8 @@ class Deep:
         self.buf = {rid(b.resourceId): b for b in controller.GetBuffers()}
         self.names = {rid(r.resourceId): r.name for r in controller.GetResources()}
         self.saved_buffers = {}
-        for sub in ('targets', 'buffers'):
+        self.saved_shaders = set()
+        for sub in ('targets', 'buffers', 'shaders'):
             os.makedirs(os.path.join(out, sub), exist_ok=True)
 
     def err(self, where, e):
@@ -352,6 +357,13 @@ class Deep:
                     continue
                 sn = {rd.ShaderStage.Vertex: 'vs', rd.ShaderStage.Pixel: 'ps', rd.ShaderStage.Compute: 'cs'}[st]
                 d[sn] = rid(sh)
+                if rid(sh) not in self.saved_shaders:
+                    self.saved_shaders.add(rid(sh))
+                    try:
+                        raw = pipe.GetShaderReflection(st).rawBytes
+                        self.write_z('shaders/%s_%s.dxbc.z' % (sn, ''.join(ch for ch in rid(sh) if ch.isdigit())), bytes(raw))
+                    except Exception as e:
+                        self.err('shader bytes at %d' % a.eventId, e)
                 try:
                     bl = self.blocks(pipe, st, sh)
                 except Exception as e:
@@ -505,7 +517,8 @@ class Deep:
         self.write_json('targets.json', targets)
         self.write_json('buffers.json', {'saved': self.saved_buffers})
         self.write_json('deep.json', {'steps': n, 'light_steps': len(lights), 'targets': len(targets),
-                                      'buffers': len(self.saved_buffers), 'seconds': round(time.time() - t0, 1)})
+                                      'buffers': len(self.saved_buffers), 'shaders': len(self.saved_shaders),
+                                      'seconds': round(time.time() - t0, 1)})
         with open(os.path.join(self.out, 'errors.txt'), 'w', encoding='utf-8') as f:
             f.write('\n\n'.join(self.errors) if self.errors else 'no errors\n')
         return n, len(lights), len(targets)
