@@ -54,13 +54,14 @@ def gpu(pass_name, w, h, textures, uniforms, frag=None):
     """textures: {uniform name: (array (H, W, 4) or (D, H, W, 4), 'clamp'|'repeat')}"""
     job = {'pass': pass_name, 'frag': frag, 'w': w, 'h': h, 'uniforms': {k: [float(x) for x in np.atleast_1d(v)] for k, v in uniforms.items()},
            'textures': {}}
-    for name, (arr, wrap) in textures.items():
-        arr = rgba(arr)
-        t = {'w': arr.shape[-2], 'h': arr.shape[-3], 'wrap': wrap, 'data': b64(arr)}
-        if arr.ndim == 4:
-            t['d'] = arr.shape[0]
-        job['textures'][name] = t
     with tempfile.TemporaryDirectory() as td:
+        for name, (arr, wrap) in textures.items():
+            arr = rgba(arr)
+            t = {'w': arr.shape[-2], 'h': arr.shape[-3], 'wrap': wrap, 'file': os.path.join(td, name + '.f32')}
+            np.ascontiguousarray(arr, np.float32).tofile(t['file'])
+            if arr.ndim == 4:
+                t['d'] = arr.shape[0]
+            job['textures'][name] = t
         jf, of = os.path.join(td, 'job.json'), os.path.join(td, 'out.json')
         json.dump(job, open(jf, 'w'))
         r = subprocess.run(['node', os.path.join(HERE, 'run_camera.cjs'), jf, of], cwd=ROOT, capture_output=True, text=True)

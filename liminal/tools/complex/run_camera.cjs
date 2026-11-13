@@ -10,9 +10,17 @@ const esbuild = require(require.resolve('esbuild', { paths: [root] }));
   const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const page = await browser.newPage();
   page.on('pageerror', (e) => console.log('[pageerror]', e.message));
-  await page.setContent('<!doctype html><html><body></body></html>');
-  await page.addScriptTag({ content: bundle });
+  // big inputs come as files (job.textures[name].file): served to the page, which fetches them
   const job = JSON.parse(fs.readFileSync(jobFile, 'utf8'));
+  const files = {};
+  for (const [name, t] of Object.entries(job.textures)) if (t.file) { files[name] = t.file; t.url = 'http://job.local/tex/' + name; delete t.file; }
+  await page.route('http://job.local/**', (route) => {
+    const u = new URL(route.request().url());
+    if (u.pathname.startsWith('/tex/')) return route.fulfill({ status: 200, contentType: 'application/octet-stream', body: fs.readFileSync(files[u.pathname.slice(5)]) });
+    return route.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><html><body></body></html>' });
+  });
+  await page.goto('http://job.local/');
+  await page.addScriptTag({ content: bundle });
   const res = await page.evaluate((j) => window.runJob(j), job);
   fs.writeFileSync(outFile, JSON.stringify(res));
   await browser.close();
