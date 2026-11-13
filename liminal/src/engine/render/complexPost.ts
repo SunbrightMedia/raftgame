@@ -39,55 +39,108 @@ export interface StandIn { w: number; h: number; data: Uint8Array; wrap: 'clamp'
 /**
  * Our stand-ins for four of the game's own image files (the fifth, the glow kernel, is the glow pass's shape),
  * the sizes and mip settings of the game's (from the capture's binding list), the strengths measured:
- *  - dirt: lens dirt, an even film with soft variations and a few specks, mean about 0.022 (the game's photo is
- *    5184 x 3456; the tonemapper adds glow x (1 + 20 x dirt)).
- *  - grain: 1400 x 1050, no mips: sparse specks, mean 0.01 / 0.01 / 0.04, so x 0.2 gives the measured
- *    +0.002 / +0.002 / +0.008.
- *  - streak: the tape's streak noise n, 944 x 1260, no mips (the game's is BC1 there): fine per-texel noise,
- *    mean 0.064 / 0.069 / 0.040.
+ *  - dirt: lens dirt, our own bokeh discs matched to the game's measured dirt (see below; the game's photo is
+ *    5184 x 3456, ours 864 x 576, both 3:2 stretched over the 4:3 screen; the tonemapper adds glow x (1 + 20 x dirt)).
+ *  - grain: 1400 x 1050, no mips: our own soft specks matched to the game's grain measured losslessly (see below).
+ *  - streak: the tape's streak noise n, 944 x 1260, no mips (the game's is BC1 there): grey rows, see below.
  *  - band: the tape's band image s, 512 x 512 with mips, read stretched 10x along x: soft rows.
  * Measured in the capture (the game's own tape step run with its streak images off, subtracted from its output;
  * frames 18325 and 20732): the streaks add +0.003 / +0.003 / +0.002, fine-grained; 0.3 x n x s (1 - s) with
  * these (mean s (1 - s) about 0.17) gives that.
  */
+/** Our lens dirt is stored x this (its values are ~0.01: 8 bits alone would lose the faint ground). */
+export const DIRT_STORE = 12;
+/** Our lens dirt's discs: count, median radius (texels of 864) and its spread, median strength and its spread, edge
+ * softness (share of the radius), mottling of the insides, and the faint ground under them (fitted: see standInImages). */
+/** Our tape streak noise: each row's mean level, how skewed the levels are (exponent on an exponential draw), how
+ * much a row drifts along its length, and its fine per-texel noise (fitted: see standInImages). */
+export const STREAK_PARAMS = { level: 0.0685, shape: 0.6, drift: 0.3, fine: 0.6 };
+export const DIRT_PARAMS = { n: 130, radius: 50, radiusSpread: 0.3, amp: 0.0025, ampSpread: 1.3, soft: 0.4, mottle: 0.25, base: 0.0008 };
+
 export function standInImages(): { dirt: StandIn; grain: StandIn; streak: StandIn; band: StandIn } {
-  // lens dirt
+  // lens dirt: our own bokeh discs (own random layout), matched to the game's lens dirt as measured losslessly (deep
+  // export: the game's tonemapper run with flat dirt, against what it drew; frames 18325 / 20732 / 19893 agree): soft
+  // eight-sided discs, one orientation, 60-130 screen pixels across, mostly faint; mean 0.0105, spread 0.013, median
+  // 0.0057, top 1 % 0.06. Stored x DIRT_STORE (8 bits would lose the faint ground); the tonemapper divides it back.
   const dirt = (() => {
-    const W = 432, H = 288, d = new Uint8Array(W * H * 4), r = new Rng(9137);
-    const a = new Float32Array(W * H).fill(0.0205);
-    for (const [cells, amp] of [[3, 0.006], [7, 0.003], [15, 0.0015]] as const) {
-      const gw = cells + 2, grid = Array.from({ length: gw * gw }, () => r.range(-1, 1));
-      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-        const gx = (x / W) * cells, gy = (y / W) * cells, ix = Math.floor(gx), iy = Math.floor(gy), fx = gx - ix, fy = gy - iy;
-        const sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy), g = (i: number, j: number) => grid[j * gw + i];
-        a[y * W + x] += amp * ((g(ix, iy) * (1 - sx) + g(ix + 1, iy) * sx) * (1 - sy) + (g(ix, iy + 1) * (1 - sx) + g(ix + 1, iy + 1) * sx) * sy);
+    const W = 864, H = 576, r = new Rng(211), a = new Float32Array(W * H).fill(DIRT_PARAMS.base);
+    const P = DIRT_PARAMS;
+    const gauss = () => Math.sqrt(-2 * Math.log(Math.max(1e-12, r.next()))) * Math.cos(2 * Math.PI * r.next());
+    // smooth value noise for the discs' mottled insides (~12-texel features)
+    const NG = 80, grid = Array.from({ length: NG * NG }, () => r.next());
+    const noise = (x: number, y: number) => {
+      const gx = x / 12, gy = y / 12, ix = Math.floor(gx), iy = Math.floor(gy), fx = gx - ix, fy = gy - iy;
+      const sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy), g = (i: number, j: number) => grid[(((j % NG) + NG) % NG) * NG + (((i % NG) + NG) % NG)];
+      return (g(ix, iy) * (1 - sx) + g(ix + 1, iy) * sx) * (1 - sy) + (g(ix, iy + 1) * (1 - sx) + g(ix + 1, iy + 1) * sx) * sy;
+    };
+    const sides = 8, seg = (2 * Math.PI) / sides, rot = 0.2;
+    for (let k = 0; k < P.n; k++) {
+      const cx = r.range(-40, W + 40), cy = r.range(-40, H + 40);
+      const rad = P.radius * Math.exp(P.radiusSpread * gauss()), amp = P.amp * Math.exp(P.ampSpread * gauss());
+      const soft = Math.max(2.5, P.soft * rad);
+      const x0 = Math.max(0, Math.floor(cx - rad - soft)), x1 = Math.min(W, Math.ceil(cx + rad + soft));
+      const y0 = Math.max(0, Math.floor(cy - rad - soft)), y1 = Math.min(H, Math.ceil(cy + rad + soft));
+      for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+        const dx = x - cx, dy = y - cy, dist = Math.hypot(dx, dy);
+        const ang = Math.atan2(dy, dx) - rot, m = ((ang % seg) + seg) % seg;
+        const rp = (rad * Math.cos(Math.PI / sides)) / Math.cos(m - seg / 2);        // the polygon's edge at this angle
+        const t = Math.min(1, Math.max(0, (rp - dist) / soft + 0.5));
+        if (t <= 0) continue;
+        const edge = t * t * (3 - 2 * t);
+        a[y * W + x] += amp * edge * (1 - P.mottle + 2 * P.mottle * noise(x + k * 37, y + k * 53));
       }
     }
-    for (let i = 0; i < 120; i++) {
-      const cx = r.range(0, W), cy = r.range(0, H), rad = r.range(0.8, 2.2), amp = r.range(0.004, 0.02);
-      for (let y = Math.max(0, Math.floor(cy - 5)); y < Math.min(H, cy + 5); y++) for (let x = Math.max(0, Math.floor(cx - 5)); x < Math.min(W, cx + 5); x++) {
-        a[y * W + x] += amp * Math.exp(-((x - cx) ** 2 + (y - cy) ** 2) / (rad * rad));
-      }
+    const d = new Uint8Array(W * H * 4);
+    for (let i = 0; i < W * H; i++) {
+      const v = Math.round(Math.min(1, a[i] * DIRT_STORE) * 255);
+      d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = v; d[i * 4 + 3] = 255;
     }
-    for (let i = 0; i < W * H; i++) { const v = Math.round(Math.max(0, a[i]) * 255); d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = v; d[i * 4 + 3] = 255; }
     return { w: W, h: H, data: d, wrap: 'clamp' as const, mips: false };
   })();
-  // grain
+  // grain: our own soft specks (own random layout), matched to the game's grain as its step adds it, measured
+  // losslessly (deep export, frames 18325 / 20732: the step run without its image, subtracted from what it drew):
+  // mean 0.0021 / 0.0022 / 0.0092, spread 0.0085 / 0.0071 / 0.023, specks ~2 x 1.3 screen pixels, 37 % of pixels
+  // touched, mostly bluish (R/B 0.17, G/B 0.24), some reddish and a few white. 10000 specks, exponential strengths.
   const grain = (() => {
-    const W = 1400, H = 1050, d = new Uint8Array(W * H * 4), r = new Rng(4421);
+    const W = 1400, H = 1050, r = new Rng(4421), acc = new Float32Array(W * H * 3);
+    const gauss = () => Math.sqrt(-2 * Math.log(Math.max(1e-12, r.next()))) * Math.cos(2 * Math.PI * r.next());
+    const kinds: [number, [number, number, number], number][] = [[0.79, [0.05, 0.21, 1.0], 1.0], [0.17, [1.0, 0.12, 0.3], 0.75], [0.04, [1, 1, 1], 0.8]];
+    for (let i = 0; i < 10000; i++) {
+      const u = r.next();
+      const k = u < kinds[0][0] ? kinds[0] : u < kinds[0][0] + kinds[1][0] ? kinds[1] : kinds[2];
+      const cx = r.range(0, W), cy = r.range(0, H), amp = -0.32 * Math.log(Math.max(1e-12, r.next())), s = Math.exp(0.25 * gauss());
+      const sx = 2.4 * s * k[2], sy = 1.5 * s * k[2], ix = Math.floor(cx), iy = Math.floor(cy);
+      for (let oy = -8; oy <= 8; oy++) for (let ox = -8; ox <= 8; ox++) {
+        const dx = (ix + ox - cx) / sx, dy = (iy + oy - cy) / sy;
+        const g = amp * Math.exp(-0.5 * (dx * dx + dy * dy));
+        if (g < 1e-5) continue;
+        const o = ((((iy + oy) % H) + H) % H * W + ((((ix + ox) % W) + W) % W)) * 3;
+        acc[o] += g * k[1][0]; acc[o + 1] += g * k[1][1]; acc[o + 2] += g * k[1][2];
+      }
+    }
+    const d = new Uint8Array(W * H * 4);
     for (let i = 0; i < W * H; i++) {
-      const v = Math.pow(r.next(), 7) * 0.32;
-      d[i * 4] = d[i * 4 + 1] = Math.min(255, Math.round(v * 0.25 * 255)); d[i * 4 + 2] = Math.min(255, Math.round(v * 255)); d[i * 4 + 3] = 255;
+      for (let c = 0; c < 3; c++) d[i * 4 + c] = Math.round(Math.min(1, acc[i * 3 + c]) * 255);
+      d[i * 4 + 3] = 255;
     }
     return { w: W, h: H, data: d, wrap: 'repeat' as const, mips: false };
   })();
-  // tape streak noise n
+  // tape streak noise n: our own (own random values), matched to the game's streaks as measured losslessly (deep
+  // export: the screen after the lens traced back to the tape step's pixels, minus that step run without its images):
+  // grey, long along each row (correlation 0.89 at 1 px, 0.80 at 32 px), different from row to row; mean addition
+  // 0.0031, spread 0.0025. Each texel row: one random level, drifting slowly along the row.
   const streak = (() => {
-    const W = 944, H = 1260, d = new Uint8Array(W * H * 4), r = new Rng(77), m = [0.064, 0.069, 0.04];
-    for (let i = 0; i < W * H; i++) {
-      const u = r.next();
-      for (let c = 0; c < 3; c++) d[i * 4 + c] = Math.round(Math.min(1, u * 2 * m[c]) * 255);
-      d[i * 4 + 3] = 255;
+    const W = 944, H = 1260, d = new Uint8Array(W * H * 4), r = new Rng(77), P = STREAK_PARAMS;
+    for (let y = 0; y < H; y++) {
+      const level = P.level * Math.pow(-Math.log(Math.max(1e-12, r.next())), P.shape);       // this row's level
+      const k = 16, knots = Array.from({ length: k }, () => 1 + P.drift * (2 * r.next() - 1));
+      for (let x = 0; x < W; x++) {
+        const t = (x / W) * k, i = Math.floor(t), f = t - i, sm = f * f * (3 - 2 * f);
+        const drift = knots[i] * (1 - sm) + knots[(i + 1) % k] * sm;           // wraps round: the image repeats
+        const v = Math.min(1, level * drift * (1 + P.fine * (2 * r.next() - 1)));
+        const o = (y * W + x) * 4;
+        d[o] = d[o + 1] = d[o + 2] = Math.round(v * 255); d[o + 3] = 255;
+      }
     }
     return { w: W, h: H, data: d, wrap: 'repeat' as const, mips: false };
   })();
@@ -297,7 +350,9 @@ export class ComplexPost {
     const g0 = this.target('g0', bw, bh, R11), gt = this.target('gt', bw, bh, R11);
     const ga = this.target('ga', bw, bh, R11), gb = this.target('gb', bw, bh, R11), gc = this.target('gc', bw, bh, R11);
     this.run('blur', BLUR, g0, { t_src: [sceneT.tex] }, { u_dir: [0, 0], u_out: [bw, bh], u_sigma: 1 });   // resample (dir 0: no blur)
-    for (const [t, sigma] of [[ga, 0.006], [gb, 0.025], [gc, 0.08]] as const) {
+    // three blurs (widths as a share of the glow picture's width), fitted to the game's glow shape measured on its own
+    // lossless pictures (deep export: its glow deconvolved by its own downsampled scene, frames 18325 and 20732)
+    for (const [t, sigma] of [[ga, 0.00165], [gb, 0.00621], [gc, 0.0317]] as const) {
       this.run('blur', BLUR, gt, { t_src: [g0.tex] }, { u_dir: [1 / bw, 0], u_out: [bw, bh], u_sigma: sigma * bw });
       this.run('blur', BLUR, t, { t_src: [gt.tex] }, { u_dir: [0, 1 / bh], u_out: [bw, bh], u_sigma: sigma * bw });
     }
@@ -311,7 +366,7 @@ export class ComplexPost {
       u_pos: [0, 0, 1, 1], u_ca: [0.003087, 0.001781, 0, 0], u_caMap: [0, 0, 1, 1], u_vp: [ow / 2, -oh / 2, ow / 2, oh / 2],
       u_size: [ow, oh, 1 / ow, 1 / oh], u_clamp: [0.5 / ow, 0.5 / oh, 1 - 0.5 / ow, 1 - 0.5 / oh],
       u_bloomUV: [1, 1, 0, 0], u_bloomClamp: [0.5 / bw, 0.5 / bh, 1 - 0.5 / bw, 1 - 0.5 / bh],
-      u_tint: [1, 1, 1], u_dirtK: [p.dirt, p.dirt, p.dirt], u_apply: [p.sceneR, p.sceneG, p.sceneB],
+      u_tint: [1, 1, 1], u_dirtK: [p.dirt / DIRT_STORE, p.dirt / DIRT_STORE, p.dirt / DIRT_STORE], u_apply: [p.sceneR, p.sceneG, p.sceneB],
       u_lut: [31 / 32, 0.5 / 32], u_vigScale: [vig, (oh / ow) * vig], u_dither: [Math.random(), Math.random()],
       u_vig: 0.4, u_invPre: 1 / PRE, u_exposure: PRE,
     });
@@ -343,9 +398,10 @@ export class ComplexPost {
 
   /** Tests: the mean RGB of a step's picture (scene, bloom, A = after tonemap/posterize/tape, B = after sharpen/
    *  grain/lens), copied to a float target and read back. */
-  debugMean(name: string): number[] {
+  /** Tests: a target's pixels as float RGBA (rows as stored: row 0 = the picture's top), or null. */
+  debugRead(name: string): { w: number; h: number; data: Float32Array } | null {
     const gl = this.gl, t = this.t[name];
-    if (!t) return [];
+    if (!t) return null;
     const COPY = `#version 300 es
 precision highp float; precision highp sampler2D; uniform sampler2D t_src; out vec4 o;
 void main() { o = texelFetch(t_src, ivec2(gl_FragCoord.xy), 0); }`;
@@ -356,8 +412,14 @@ void main() { o = texelFetch(t_src, ivec2(gl_FragCoord.xy), 0); }`;
     const px = new Float32Array(t.w * t.h * 4);
     gl.readPixels(0, 0, t.w, t.h, gl.RGBA, gl.FLOAT, px);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    const m = [0, 0, 0];
+    return { w: t.w, h: t.h, data: px };
+  }
+
+  debugMean(name: string): number[] {
+    const r = this.debugRead(name);
+    if (!r) return [];
+    const m = [0, 0, 0], px = r.data;
     for (let i = 0; i < px.length; i += 4) { m[0] += px[i]; m[1] += px[i + 1]; m[2] += px[i + 2]; }
-    return m.map((v) => v / (t.w * t.h));
+    return m.map((v) => v / (r.w * r.h));
   }
 }

@@ -5,6 +5,7 @@ import type { SourceMaterial } from './textures';
 import { sourceUniforms } from './sourceMaterial';
 import { fogUniforms, FOG_PARS } from './fog';
 import { lightGridUniforms, LIGHT_GRID_PARS } from './lightGrid';
+import { UE_LIGHT_GLSL } from './ueLight';
 
 /** Most light-emitting rectangles (troffers) whose reflections are drawn at once. */
 export const MAX_RECTS = 64;
@@ -45,6 +46,10 @@ export const worldUniforms = {
   dynIso: { value: new Array<number>(32).fill(0) },
   /** Each per-pixel light's size (inches across): its reflection on glossy surfaces widens with it. */
   dynSize: { value: new Array<number>(32).fill(2) },
+  /** Unreal lamps (ueLight.ts): x = 1 / reach (1/inch), y = cos outer cone, z = 1 / (cos inner - cos outer), w = 1 for an Unreal lamp. */
+  dynUE: { value: Array.from({ length: 32 }, () => new THREE.Vector4()) },
+  /** An Unreal lamp's axis, pointing back towards the lamp (its beam goes the other way). */
+  dynAxis: { value: Array.from({ length: 32 }, () => new THREE.Vector3(0, 0, 1)) },
   lightmapMask: { value: null as THREE.Texture | null },
   lightScale: { value: 1 },
   // Reflections.
@@ -172,6 +177,8 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
       uniform float dynChan[32];
       uniform float dynIso[32];
       uniform float dynSize[32];
+      uniform vec4 dynUE[32];
+      uniform vec3 dynAxis[32];
       uniform sampler2D lightmapMask;
       uniform float lightScale;
       uniform float specScale;
@@ -209,6 +216,7 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
       }
       vec3 toLinear(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }
       float height(vec2 uv) { return texture2D(hmap, uv).r; }
+      ${UE_LIGHT_GLSL}
 
       // ---- GGX (Walter et al. 2007; height-correlated Smith, Heitz 2014)
       float D_GGX(float a, float ndh) { float a2 = a * a; float d = ndh * ndh * (a2 - 1.0) + 1.0; return a2 / (PI * d * d); }
@@ -381,6 +389,8 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
           // Baked light reflected: diffuse loses what the surface reflects specularly.
           vec3 Lbaked = E / PI * (diffuseColor * (1.0 - env) + env);
           vec3 Edyn = vec3(0.0);
+          // Unreal lamps (ueLight.ts): their own diffuse and specular, added as Unreal adds them.
+          vec3 Eue = vec3(0.0), specUe = vec3(0.0);
           if (lightmapOn > 0.5) {
             // Direct light from cans/bulbs, exact per pixel, times its own channel of the baked shadow mask.
             vec4 mk = texture2D(lightmapMask, vLm);
@@ -390,6 +400,15 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
               float d = length(toL);
               vec3 u = toL / max(d, 0.001);
               if (dot(n0, u) <= 0.0) continue;
+              if (dynUE[i].w > 0.5) {
+                float fu = ueFalloff(toL, dynUE[i], dynAxis[i]);
+                if (fu <= 0.0) continue;
+                vec3 Ei = dynColor[i] * fu;
+                float NoL = clamp(dot(N, u), 0.0, 1.0);
+                Eue += Ei * NoL;
+                specUe += Ei * ueSpecular(N, V, u, NoL, F0, rough);
+                continue;
+              }
               float ndl = max(dot(N, u), 0.0);
               vec4 bm = dynBeam[i];
               float I = 1.0;
@@ -441,7 +460,7 @@ export function makeWorldMaterial(map: THREE.Texture, surf: Surface, source?: { 
             Edyn += Ef * ndl;
             spec += Ef * specPoint(N, V, u, ndl, F0, rough, 1.0 / max(d, 1.0));
           }
-          L = (Lbaked + Edyn / PI * diffuseColor * (1.0 - env) + spec * gloss * occl) * brightness;
+          L = (Lbaked + Edyn / PI * diffuseColor * (1.0 - env) + spec * gloss * occl + (Eue / PI * diffuseColor + specUe) * lightScale) * brightness;
           if (selfIllum > 0.5) L = mix(L, rho * selfIllumTint * sourceUnit, tx.a);
         }
         // Alpha marks light sources (lamp lenses, panels) for the camera pass:

@@ -49,6 +49,37 @@ code is our own, written from what the steps compute.
 - `dump_standins.ts OUT_DIR`: writes our stand-ins for the game's image files (`standInImages()` in
   `complexPost.ts`) as raw RGBA8, to compare them with what the game's images do in the capture.
 
+The lighting (deep export; `COMPLEX_DEEP` set):
+- `check_lamps.py`: the game's own deferred-light step (ps_7913) for all 71 lamps of a frame, on its own G-buffer
+  and depth, summed, against what the card added: median 0.06 % per pixel (base colour is read through an sRGB
+  view: GBufferC). `ue_lamps.py`: our own Python of Unreal's point/spot light (inverse square + 1 cm^2, reach
+  window, squared-ramp cone, Lambert + GGX / Smith-joint / Schlick): median 0.07 %, the same as the step.
+  `check_uelight.py`: our GLSL (`src/engine/render/ueLight.ts`, used by the world shader) against that Python on
+  the same G-buffer: median 5.5e-8. The 30 lamps whose reach touches cx_area_a (all ten frames' light constants)
+  are `tools/recreate/cx-lamps.json`; no shadows, as in the game (their light reaches through walls).
+- Fog (ExponentialHeightFog): black, density 2e-5 / cm at 10 cm, falloff 2e-4 / cm; our `fog.unreal` mode;
+  checked against the game's own before / after pictures to half-float rounding.
+- Bounce (Lumen) by measurement: `ingame.mjs` renders our map from a frame's camera (the complex camera's
+  scene light, with and without the lamps' direct light), `compare_light.py` compares per surface. Direct light:
+  1.00-1.04. Bounce: the hall wants more than a physical bake gives, the corridor less (Lumen most likely leaks
+  bounce through the hall's walls from the lit rooms round it, not built here): 3 bounces x 1.06 splits it,
+  hall 0.89, corridor 1.10 (whole view, with fog).
+
+Our own camera pictures (the game's five image files are not copied; ours match their measured statistics):
+- Glow shape: three blurs (1.7 / 6.3 / 32 px of a 1020-wide glow, weights 0.057 / 0.56 / 0.383) fitted to the
+  game's kernel as its own lossless glow deconvolved by its own downsampled scene gives it (rms 0.0065 of the
+  light within each radius); glow share 0.2, scene 0.8 (the game's buffers).
+- Lens dirt: our own soft eight-sided bokeh discs; the game's dirt estimated losslessly (its tonemapper with flat
+  dirt, three frames agree): mean 0.0105, spread 0.0133; ours 0.0109 / 0.0126.
+- Grain: our own soft specks; the game's grain addition losslessly (grain step without its image, subtracted):
+  mean 0.0021 / 0.0022 / 0.0092, spread 0.0085 / 0.0071 / 0.023, specks ~2 x 1.3 px; ours within ~10 %.
+- Tape streaks: the screen after the lens traced back to the tape step's pixels (`ps_19327` run on a picture of
+  coordinates; the lens reads by nearest pixel): grey, long along rows; ours: mean 0.00312 (game 0.00312),
+  spread 0.0024 (0.0025), along-row correlation 0.86 (0.89), row spread 0.0021 (0.0021).
+- The upscaler (TAAU, `cs_19050`): `check_taa.py` runs it on the exact inputs (frame, depth / stencil, motion,
+  previous output, exposure) against the card's own output: mean equal to 0.04 %, median 0.04 % per pixel.
+
+Earlier, from the first export's JPEGs (superseded by the lossless numbers above):
 Measured against the capture (frame 18325; the game's own step with an image, minus the same step without it):
 - Glow: the game's glow holds 0.19 of the light (our three blurs held 0.16; the deep export gave the exact
   share, 0.2, now the default). The light

@@ -80,6 +80,12 @@ it *feels* right; that's the user's call.
   Its shaders are 81 MB once inlined and froze every Chrome tab on the user's Windows PC. Programs compile a
   few per frame (`BlenderPost.prepare`); a localStorage guard stops a start that froze from repeating on
   reload. Keep any new GPU program small, and never compile many in one frame.
+- **The Complex rebuild (`maps/cx_area_a.json`, made by `tools/recreate/cx-area-a.ts`; never edit the JSON by hand)**:
+  its lamps are the game's own (`tools/recreate/cx-lamps.json`, read from the deep export) drawn per pixel with
+  Unreal's formula (`render/ueLight.ts`, light type `ue`), its fog is Unreal's height fog (`fog.unreal`), its bounce
+  is our bake set by measurement (`tools/complex/README.md`). The camera's five pictures are our own, matched to
+  measured statistics (`complexPost.ts standInImages`); never the game's files. After changing it, run
+  `node tools/complex/ingame.mjs <dir> 18325` (bakes, saves the cache) and `compare_light.py` on 18325 and 19893.
 - **The old maps are in `junk/`** (kept, not used). Work follows
   `docs/PIPELINE.md`; the game boots into `maps/blank.json` meanwhile.
 - **Backrooms Planner** (2D map tool, `src/planner/`, page `planner.html`;

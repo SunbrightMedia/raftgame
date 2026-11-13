@@ -42,6 +42,13 @@ export interface BakeLight {
   /** Size of the glowing part, inches across (a dome's glass): widens its reflection on glossy surfaces. Default 2. */
   size?: number;
   /**
+   * An Unreal engine lamp (The Complex's): its light falls off as Unreal's does, inverse square plus 1 cm² times
+   * saturate(1 - (d/R)^4)^2 (R = reach), and its cone is saturate((cos - cosOuter) k)^2 round `dir`
+   * (k = 1 / (cos inner - cos outer)); `n`, `cutoffDeg`, `softDeg`, `spill` and `iso` do not apply. See
+   * render/ueLight.ts (the same formula per pixel).
+   */
+  ue?: { reach: number; cosOuter: number; k: number };
+  /**
    * Direct light from this light is drawn per pixel by the shader (exact beam
    * edges, e.g. a can's scallop), so the lightmap stores only its bounce and
    * how shadowed each spot is (alpha channel), not its direct light.
@@ -72,12 +79,16 @@ export interface BakeLight {
 /** A light-emitting surface: its luminance in cd/m² (e.g. a fluorescent troffer ≈ 2000). */
 export interface SurfaceEmitter { color: RGB; luminance: number }
 
+/** Most simulated bounce passes (the rest: extraBounces' series). Bright rooms (The Complex's yellow walls reflect
+ * 87 % of red) need several: Lumen feeds its bounce back every frame. */
+export const MAX_BOUNCES = 8;
+
 export interface BakeParams {
   /** Flat extra irradiance, lux. Physically 0; a fill for taste. */
   ambient: RGB;
   /** Multiplies every light (an artist control; 1 = physical). */
   lightScale: number;
-  /** 0..2 bounce passes. */
+  /** 0..MAX_BOUNCES bounce passes. */
   bounces: number;
   /** 1 = physically correct bounce. */
   bounceScale: number;
@@ -191,6 +202,10 @@ const MIN_LUX = 0.02;
 export function intensityToward(l: BakeLight, ux: number, uy: number, uz: number): number {
   if (!l.dir) return l.I0;
   const c = ux * l.dir[0] + uy * l.dir[1] + uz * l.dir[2];
+  if (l.ue) {
+    const t = Math.min(1, Math.max(0, (c - l.ue.cosOuter) * l.ue.k));
+    return l.I0 * t * t;
+  }
   const iso = l.iso ? l.I0 * l.iso : 0;
   if (c <= 0) return iso;
   let I = l.I0 * Math.pow(c, l.n ?? 1);
@@ -204,8 +219,16 @@ export function intensityToward(l: BakeLight, ux: number, uy: number, uz: number
   return I + iso;
 }
 
-/** Distance (world units) beyond which a light gives less than MIN_LUX. */
-const rangeOf = (l: BakeLight) => Math.sqrt((l.I0 * Math.max(...l.color)) / MIN_LUX) / INCH;
+/** Distance (world units) beyond which a light gives less than MIN_LUX (an Unreal lamp: its reach). */
+const rangeOf = (l: BakeLight) => (l.ue ? l.ue.reach : Math.sqrt((l.I0 * Math.max(...l.color)) / MIN_LUX) / INCH);
+
+/** An Unreal lamp's distance factor at d (inches): saturate(1 - (d/R)^4)^2 / (d² + 1 cm²), d in metres (ueLight.ts). */
+export function ueDistance(l: BakeLight, d: number): number {
+  const r2 = (d * d) / (l.ue!.reach * l.ue!.reach);
+  const w = Math.max(0, 1 - r2 * r2);
+  const dm = d * INCH;
+  return (w * w) / (dm * dm + 1e-4);
+}
 
 interface FaceSamples {
   face: Face;
@@ -343,9 +366,9 @@ export function bake(input: BakeInput): BakeOutput {
         if (ndotl <= 0) continue;
         const I = intensityToward(l, -dx / d, -dy / d, -dz / d);
         if (I <= 0) continue;
-        // E = I·cosθ / d²  (lux, with d in metres)
+        // E = I·cosθ / d²  (lux, with d in metres); an Unreal lamp: its own distance falloff
         const dm = d * INCH;
-        const w = (I * ndotl) / (dm * dm);
+        const w = l.ue ? I * ndotl * ueDistance(l, d) : (I * ndotl) / (dm * dm);
         const perPixel = l.dynamic || l.reflected;
         if (perPixel) unshadowed += w;
         const ch = l.dynamic ? (l.channel ?? 0) : -1;
@@ -379,7 +402,7 @@ export function bake(input: BakeInput): BakeOutput {
   const lastGathered = new Map<FaceSamples, Float32Array>(), lastBounce = new Map<FaceSamples, Float32Array>();
   const clampK = p.bounceClamp ?? 4;
   let capLum = Infinity;
-  for (let pass = 0; pass < Math.min(2, Math.round(p.bounces)); pass++) {
+  for (let pass = 0; pass < Math.min(MAX_BOUNCES, Math.round(p.bounces)); pass++) {
     const gathered = new Map<FaceSamples, Float32Array>();
     capLum = clampK > 0 ? clampK * exitanceQuantile(samples, input.albedo, 0.995) : Infinity;
     // A bounce ray's light (exitance of what it hit), capped (see bounceClamp).
@@ -604,7 +627,7 @@ function lightProbes(pr: { pos: Float32Array; nrm: Float32Array }, lights: BakeL
       const I = intensityToward(l, -dx / d, -dy / d, -dz / d);
       if (I <= 0) continue;
       if (l.shadows !== false && grid.occluded(px, py, pz, l.pos[0], l.pos[1], l.pos[2])) continue;
-      const dm = d * INCH, w = (I * ndotl) / (dm * dm);
+      const dm = d * INCH, w = l.ue ? I * ndotl * ueDistance(l, d) : (I * ndotl) / (dm * dm);
       r += l.color[0] * w; g += l.color[1] * w; b += l.color[2] * w;
     }
     // a frame round the normal for the gather

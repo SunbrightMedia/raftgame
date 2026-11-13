@@ -538,6 +538,8 @@ type Props = Record<string, unknown>;
  *                    `shadows: 0` = its direct light ignores geometry, as the
  *                    capture's unshadowed engine lights (its bounce stays shadowed);
  *                    `candela` = peak intensity straight down, instead of lumens
+ *           "ue"   — an Unreal engine lamp as The Complex's (render/ueLight.ts): `rgb`
+ *                    candela per channel, `radius` reach, `cosOuter` / `k` cone, `dir`
  * Units and sources: see engine/light/units.ts.
  */
 export function lightFromEntity(origin: [number, number, number], p: Props): BakeLight {
@@ -560,6 +562,19 @@ export function lightFromEntity(origin: [number, number, number], p: Props): Bak
     const n = num('n', 2.2), lm = num('lumens', 3000), cd = num('candela', 0);
     const col = typeof p.color === 'string' ? emitterColor({ kelvin: num('kelvin', 4000), color: p.color }) : color;
     return { pos: origin, color: col, I0: cd > 0 ? cd : cosNPeak(lm, n), dir: [0, 0, -1], n, cutoffDeg: num('cutoff', 87), softDeg: 3, spill: 0, ...(num('shadows', 1) === 0 ? { shadows: false } : {}) };
+  }
+  if (type === 'ue') {
+    // An Unreal engine lamp (The Complex's, read from the game's own light constants): `rgb` = candela per channel
+    // (linear), `radius` = its reach (inches), `cosOuter` / `k` = its cone (k = 1 / (cos inner - cos outer)), `dir` =
+    // where its beam points (default straight down). No shadows (the game's lamps cast none); its bounce is baked.
+    const rgb = (Array.isArray(p.rgb) ? p.rgb : [1, 1, 1]) as number[];
+    const lum = Math.max(1e-9, 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]);
+    const d = (Array.isArray(p.dir) ? p.dir : [0, 0, -1]) as number[];
+    const dl = Math.hypot(d[0], d[1], d[2]) || 1;
+    return {
+      pos: origin, color: [rgb[0] / lum, rgb[1] / lum, rgb[2] / lum], I0: lum, dir: [d[0] / dl, d[1] / dl, d[2] / dl],
+      ue: { reach: num('radius', 512), cosOuter: num('cosOuter', 0.0523), k: num('k', 1.0552) }, shadows: false,
+    };
   }
   if (type === 'dome') {
     // ~80% gets out through the glass. A share `up` leaves it evenly every way: a bowl's sides glow sideways about half
@@ -589,7 +604,7 @@ export function mapLights(level: Level): BakeLight[] {
   const lights = level.map.entities.filter((e) => e.class === 'light').map((e) => {
     const l = lightFromEntity(e.origin, e.props ?? {});
     const t = (e.props ?? {}).type ?? 'bulb';
-    if ((t === 'can' || t === 'bulb' || t === 'dome' || t === 'spot') && dyn < MAX_DYNAMIC) { l.dynamic = true; dyn++; }
+    if ((t === 'can' || t === 'bulb' || t === 'dome' || t === 'spot' || t === 'ue') && dyn < MAX_DYNAMIC) { l.dynamic = true; dyn++; }
     return l;
   });
   // Shadow-mask channels: each light takes the channel whose nearest light is

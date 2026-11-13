@@ -43,6 +43,18 @@ def decode(raw, fmt, w, h, depth=1):
         return np.frombuffer(raw, np.float32).reshape(shape + (4,)).copy()
     if fmt.startswith('R16G16B16A16_UNORM'):
         return np.frombuffer(raw, np.uint16).reshape(shape + (4,)).astype(np.float32) / 65535
+    if fmt.startswith('D32S8') or fmt.startswith('R32G8X24'):
+        # depth (float) and stencil, 8 bytes a texel: R = depth, G = stencil
+        v = np.frombuffer(raw, np.uint32).reshape(shape + (2,))
+        d = v[..., 0].view(np.float32)
+        st = (v[..., 1] & 255).astype(np.float32)
+        return np.stack([d, st, d * 0, d * 0 + 1], -1)
+    if fmt in ('B8G8R8A8_TYPELESS', 'R8G8B8A8_TYPELESS'):     # read as UNORM (raw / 255)
+        fmt = fmt.replace('TYPELESS', 'UNORM')
+    if fmt.startswith(('R8_UNORM', 'R8_UINT')):
+        a = np.frombuffer(raw, np.uint8).reshape(shape).astype(np.float32)
+        a = a / 255 if fmt.startswith('R8_UNORM') else a
+        return np.stack([a, a * 0, a * 0, a * 0 + 1], -1)
     if fmt.startswith(('R8G8B8A8_UNORM', 'B8G8R8A8_UNORM')):
         a = np.frombuffer(raw, np.uint8).reshape(shape + (4,)).astype(np.float32) / 255
         return a[..., [2, 1, 0, 3]] if fmt.startswith('B8') else a
@@ -72,6 +84,18 @@ class Deep:
     def target(self, step, role='output', k=None):
         rec = self.find(step, role, k)
         return decode(self.raw(rec), rec['format'], rec['w'], rec['h'], rec.get('depth', 1) or 1)
+
+    def light_steps(self):
+        """The frame's lighting steps by name: base pass, bounce composite, lamps, fog; and the scene light's
+        resource number (the lamps' render target)."""
+        def last(word):
+            hits = [t['step'] for t in self.targets if word in ' / '.join(t['markers'])]
+            return max(hits) if hits else None
+        out = {'base': last('BasePass'), 'bounce': last('DiffuseIndirectComposite'), 'lamps': last('BatchedLights'),
+               'fog': last('ExponentialHeightFog')}
+        rt = [t for t in self.targets if t['step'] == out['lamps'] and t['format'].startswith('R16G16B16A16_FLOAT')]
+        out['scene'] = int(rt[0]['id'].split('::')[1]) if rt else None
+        return out
 
     def buffer(self, resource):
         key = 'ResourceId::%d' % resource

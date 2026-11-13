@@ -1,6 +1,7 @@
 // Browser side of tools/complex/check_camera.py: runs one of our camera passes (complexCamera.ts) on given
 // inputs and returns the float output. Bundled with esbuild into a page by run_camera.cjs.
 import { COMPLEX_PASSES, COMPLEX_VERT } from '../../src/engine/render/complexCamera';
+import { UE_LIGHT_GLSL } from '../../src/engine/render/ueLight';
 
 interface TexIn { w: number; h: number; d?: number; wrap?: 'clamp' | 'repeat'; data: string /* base64 float32 RGBA, row 0 = top */ }
 interface Job { pass: keyof typeof COMPLEX_PASSES; frag?: string; w: number; h: number; textures: Record<string, TexIn>; uniforms: Record<string, number[]> }
@@ -29,7 +30,8 @@ function b64(a: Float32Array): string {
   };
   const prog = gl.createProgram()!;
   gl.attachShader(prog, sh(gl.VERTEX_SHADER, COMPLEX_VERT));
-  gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, job.frag ?? COMPLEX_PASSES[job.pass]));   // frag: debugging variants
+  // frag: debugging variants and other checks; %UE_LIGHT% = our Unreal lamp GLSL (ueLight.ts)
+  gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, (job.frag ?? COMPLEX_PASSES[job.pass]).replace('%UE_LIGHT%', UE_LIGHT_GLSL)));
   gl.linkProgram(prog);
   if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog) ?? 'link');
   gl.useProgram(prog);

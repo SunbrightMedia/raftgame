@@ -36,3 +36,23 @@ describe('complex camera', () => {
     expect(L.hw).toEqual([1, 0.75]);
   });
 });
+
+import { ueDistance, intensityToward, type BakeLight } from '../src/engine/light/bake';
+
+describe('Unreal lamps (The Complex: tools/complex/ue_lamps.py matches the game\'s own lamp step)', () => {
+  // a hall lamp from tools/recreate/cx-lamps.json: reach 511.81", cone cos 0.052336 / k 1.055226, beam down
+  const lamp: BakeLight = { pos: [0, 0, 0], color: [1, 1, 1], I0: 1, dir: [0, 0, -1], ue: { reach: 511.81, cosOuter: 0.052336, k: 1.055226 } };
+  it('falls off as Unreal\'s: saturate(1 - (d/R)^4)^2 / (d^2 + 1 cm^2)', () => {
+    const d = 100;                                   // inches
+    const r2 = (d / 511.81) ** 2, w = (1 - r2 * r2) ** 2, dm = d * 0.0254;
+    expect(ueDistance(lamp, d)).toBeCloseTo(w / (dm * dm + 1e-4), 10);
+    expect(ueDistance(lamp, 511.81)).toBe(0);
+    expect(ueDistance(lamp, 600)).toBe(0);
+  });
+  it('has Unreal\'s cone: saturate((cos - cosOuter) k)^2', () => {
+    expect(intensityToward(lamp, 0, 0, -1)).toBeCloseTo(((1 - 0.052336) * 1.055226) ** 2, 10);
+    const c = Math.cos((60 * Math.PI) / 180);
+    expect(intensityToward(lamp, Math.sin((60 * Math.PI) / 180), 0, -c)).toBeCloseTo(((c - 0.052336) * 1.055226) ** 2, 10);
+    expect(intensityToward(lamp, 1, 0, 0)).toBe(0);
+  });
+});

@@ -103,6 +103,11 @@ export class Game {
       u.dynChan.value[i] = l.channel ?? 0;
       u.dynIso.value[i] = l.iso ?? 0;
       u.dynSize.value[i] = l.size ?? 2;
+      // Unreal lamps (ueLight.ts): reach and cone; the axis points back towards the lamp.
+      if (l.ue) u.dynUE.value[i].set(1 / l.ue.reach, l.ue.cosOuter, l.ue.k, 1);
+      else u.dynUE.value[i].set(0, 0, 0, 0);
+      const ax = l.dir ?? [0, 0, -1];
+      u.dynAxis.value[i].set(-ax[0], -ax[1], -ax[2]);
     });
   }
 
@@ -283,6 +288,8 @@ export class Game {
     u.fogLow.value.set(F.lowTop, Math.max(1, F.lowDepth), F.lowOn ? F.lowThicken : 0, F.lowOn ? F.lowTint : 0);
     u.fogHigh.value.set(F.highBase, Math.max(1, F.highRise), F.highOn ? F.highThicken : 0, F.highOn ? F.highTint : 0);
     radiance(F.lowColor, u.fogLowC.value); radiance(F.highColor, u.fogHighC.value);
+    // Unreal's height fog (fog.ts ueFogShows): its own numbers per cm, here per inch.
+    u.fogUE.value.set(F.ueDensity * 2.54, F.ueFalloff * 2.54, F.ueHeight, F.enabled && F.unreal ? 1 : 0);
     // Behind everything: the fog at its end in every direction (FogBackdrop), over the void's own colour.
     const clear = new THREE.Color(s.render.clearColor);
     const voidRadiance = new THREE.Vector3(lin(clear.r), lin(clear.g), lin(clear.b)).multiplyScalar(F.enabled ? 0 : 1);

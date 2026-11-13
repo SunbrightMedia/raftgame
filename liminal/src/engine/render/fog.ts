@@ -45,6 +45,12 @@ export const fogUniforms = {
   /** High fog: the same, above a height. */
   fogHigh: { value: new THREE.Vector4(0, 1000, 0, 0) },
   fogHighC: { value: new THREE.Vector3() },
+  /**
+   * Unreal's exponential height fog (The Complex's): x = density at the fog's height (per inch), y = height falloff
+   * (log2 units per inch), z = that height (world z, inches), w = 1 on. Replaces the modes above; its colour is
+   * fogRadiance (The Complex's is black: it only darkens).
+   */
+  fogUE: { value: new THREE.Vector4(0, 0, 0, 0) },
 };
 
 /**
@@ -68,6 +74,16 @@ export const FOG_PARS = /* glsl */ `
   uniform vec3 fogLowC;
   uniform vec4 fogHigh;
   uniform vec3 fogHighC;
+  uniform vec4 fogUE;
+  // Unreal's height fog along the view ray (HeightFogCommon: one fog, no start distance, no cut-off): how much of
+  // what lies behind still shows. Units: inches.
+  float ueFogShows(float depth, float z) {
+    float zc = cameraPosition.z;
+    float origin = fogUE.x * exp2(-max(fogUE.y * (zc - fogUE.z), -127.0));
+    float f = max(fogUE.y * (z - zc), -127.0);
+    float li = abs(f) > 0.01 ? (1.0 - exp2(-f)) / f : 0.693147 - 0.240227 * f;
+    return clamp(exp2(-origin * li * depth), 0.0, 1.0);
+  }
   float fogFactor(float depth) {
     float fd = max(0.0, depth - fogNear) / max(1.0, fogFar - fogNear);
     float f = min(fogMaxDensity, fogHaze > 0.5 ? 1.0 - exp(-3.0 * fd) : clamp(fd, 0.0, 1.0));
@@ -76,6 +92,7 @@ export const FOG_PARS = /* glsl */ `
   }
   vec4 fogOver(float depth, float z) {
     if (fogOn < 0.5) return vec4(0.0, 0.0, 0.0, 1.0);
+    if (fogUE.w > 0.5) { float t = ueFogShows(depth, z); return vec4(fogRadiance * (1.0 - t), t); }
     float dEnd = fogLayers > 0.5 ? fogStopD.w : fogFar;
     float zc = cameraPosition.z;
     float zf = zc + (z - zc) * min(1.0, dEnd / max(depth, 1.0));

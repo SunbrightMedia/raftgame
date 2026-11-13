@@ -1,4 +1,5 @@
 import './style.css';
+import { worldUniforms } from './engine/render/worldMaterial';
 import * as THREE from 'three';
 import { openStorage } from './data/storage';
 import { ConfigStore } from './data/config';
@@ -122,7 +123,7 @@ async function boot(): Promise<void> {
 
   // For poking at things from the browser console.
   // THREE too, for dev tools driving the page (tools/studio).
-  (window as unknown as { liminal: unknown }).liminal = { game, config, panel, bootTimes, THREE };
+  (window as unknown as { liminal: unknown }).liminal = { game, config, panel, bootTimes, THREE, worldUniforms };
 }
 
 function showError(msg: string): void {
