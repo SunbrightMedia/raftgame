@@ -253,7 +253,7 @@ export const SETTINGS = {
   },
   complex: {
     label: 'Complex',
-    help: 'Camera model "complex": The Complex\'s camera, step by step as that game draws it. Its upscaler, motion blur, tone table, tonemapper and five camera passes (sharpen, posterize, grain, tape, lens) are checked against the game\'s own compiled steps (tools/complex/): the stored values agree with the game\'s in most pixels, the rest by one step. Not the game\'s own yet: the glow\'s shape (a fitted stand-in). The lens dirt and the noises are ours (the game\'s are its own image files).',
+    help: 'Camera model "complex": The Complex\'s camera, step by step as that game draws it. Its depth of field, upscaler, motion blur, tone table, tonemapper and five camera passes (sharpen, posterize, grain, tape, lens) are checked against the game\'s own compiled steps (tools/complex/): the stored values agree with the game\'s in most pixels, the rest by one step. Not the game\'s own yet: the glow\'s shape (a fitted stand-in). The lens dirt and the noises are ours (the game\'s are its own image files).',
     defs: {
       exposure: num('Exposure', 1, 0, 64, 0.0001, 'Scene light × this = the game\'s exposed light (the game: × 34.13; maps lit ×1000 brighter use 0.03413).'),
       sceneR: num('Scene share: red', 0.8, 0, 2, 0.001, 'What the game\'s glow step leaves of the scene: 0.8 in every colour, read from the tonemapper\'s own multiplier buffer (deep export, frames 18325 / 20732 / 19893).'),
@@ -269,6 +269,10 @@ export const SETTINGS = {
       taa: bool('Upscaler (TAAU)', true, 'The game\'s own upscaler: the scene is drawn at 70 % of the picture, moved by a new part of a pixel each frame (16 places), and the picture is built up over frames from those (Unreal\'s TAAU, checked against the game\'s own step). It is also the antialiasing. Off: the scene is drawn at the render size and scaled up.'),
       screenPct: num('Upscaler: drawn at', 0.7, 0.3, 1, 0.01, 'With the upscaler: the share of the picture\'s width and height the scene is drawn at (the game: 0.7). The frame-rate hold lowers it further when frames run long.'),
       soften: num('Upscaler softness (upscaler off)', 0.7, 0, 4, 0.05, 'With the upscaler off: a blur after scaling up, σ in picture pixels.', 'px'),
+      dof: bool('Depth of field', true, 'The game\'s own depth of field (Unreal 5\'s, checked against the game\'s own steps): things past the focus get softer with distance, a little (at most about 1 pixel of 1440 far away, with the game\'s settings). Needs the upscaler.'),
+      dofFocus: num('Depth of field: focus', 67.92, 1, 10000, 0.1, 'The focus distance (the game: 67.92 cm, fixed: no autofocus).', 'cm'),
+      dofInfinity: num('Depth of field: blur far away', 0.00086085, 0, 0.05, 0.00001, 'The blur radius of things at infinity, as a share of the picture\'s width (the game: 0.00086).'),
+      dofMax: num('Depth of field: largest blur', 0.025, 0, 0.1, 0.001, 'The largest blur radius, near or far, as a share of the width (the game: 0.025).'),
       motionBlur: bool('Motion blur', true, 'The game\'s own motion blur (Unreal 5\'s, checked against the game\'s own steps): the picture smears along the camera\'s motion, by tiles, with near and far things kept apart. Needs the upscaler.'),
       mbAmount: num('Motion blur amount', 0.5, 0, 2, 0.05, 'Unreal\'s motion blur amount: the blur lasts amount ÷ target frame rate seconds (0.5 ÷ 30 = 1/60 s; Unreal\'s defaults, which fit the game\'s captured frames at 70-104 fps).'),
       mbTargetFps: num('Motion blur target frame rate', 30, 1, 240, 1, 'Unreal\'s motion blur target frame rate (see the amount).', 'fps'),

@@ -4,7 +4,8 @@
  * picture is stored in the game's own format: the scene and its glow as R11G11B10 floats, the pictures between
  * passes as 10-bit RGB, the tone table as a 32^3 10-bit 3D texture. Image row 0 is the top inside the chain.
  *
- * Steps: scene (x exposure, flipped to row 0 = top, at 70 % of the picture) -> upscaler (the game's TAAU,
+ * Steps: scene (x exposure, flipped to row 0 = top, at 70 % of the picture) -> depth of field (the game's,
+ * complexDOF.ts) -> upscaler (the game's TAAU,
  * complexTAA.ts: the scene is drawn with a new sub-pixel jitter each frame and the picture is made over frames) ->
  * motion blur -> glow -> tonemapper -> sharpen -> posterize -> grain -> tape -> lens -> the screen, 4:3 with bars.
  *
@@ -16,6 +17,7 @@ import { COMPLEX_VERT, TONEMAP, SHARPEN, POSTERIZE, GRAIN, TAPE, LENS, lensConst
 import { makeToneTable, COMPLEX_TONE } from './complexTone';
 import { TAAU } from './complexTAA';
 import { ComplexMotionBlur } from './complexMotionBlur';
+import { ComplexDOF } from './complexDOF';
 import { Rng } from '../../world/rng';
 
 export interface ComplexParams {
@@ -34,6 +36,9 @@ export interface ComplexParams {
   screenPct: number;
   /** With the upscaler off: the scene scaled up, then this blur (sigma in output pixels). */
   soften: number;
+  /** The game's depth of field (complexDOF.ts), before the upscaler: focus distance (cm), blur at infinity and the
+   *  largest blur (shares of the width). The game: 67.92 cm, 0.00086085, 0.025. */
+  dof: boolean; dofFocus: number; dofInfinity: number; dofMax: number;
   /** The game's motion blur (complexMotionBlur.ts), after the upscaler. */
   motionBlur: boolean;
   /** Unreal's motion blur amount and target frame rate: the blur lasts amount / target fps seconds (0.5 / 30 = 1/60 s). */
@@ -260,6 +265,7 @@ export class ComplexPost {
   private taaFlip = false;
   private taaKey = '';
   private mb: ComplexMotionBlur | null = null;
+  private dof: ComplexDOF | null = null;
 
   constructor(private gl: WebGL2RenderingContext) {
     if (!gl.getExtension('EXT_color_buffer_float')) throw new Error('complex camera: needs EXT_color_buffer_float');
@@ -399,7 +405,17 @@ export class ComplexPost {
       const read = this.target(this.taaFlip ? 'taaB' : 'taaA', ow, oh, gl.RGBA16F), write = this.target(this.taaFlip ? 'taaA' : 'taaB', ow, oh, gl.RGBA16F);
       this.taaFlip = !this.taaFlip;
       const m = taa.clipToPrev, row = (i: number) => [m[4 * i], m[4 * i + 1], m[4 * i + 2], m[4 * i + 3]];
-      this.run('taa', TAAU, write, { t_scene: [sin.tex], t_depth: [taa.depth], t_vel: [this.zero], t_stencil: [this.zero], t_hist: [read.tex] }, {
+      const zc = (taa.far - taa.near) / (2.54 * taa.far * taa.near), wc = -1 / (2.54 * taa.far);   // our depth -> cm, as the game's
+      // 2a. the game's depth of field, on the input picture
+      let input = sin.tex;
+      if (p.dof) {
+        this.dof ??= new ComplexDOF(gl);
+        input = this.dof.run({ scene: sin.tex, depth: taa.depth, vel: this.zero, stencil: this.zero, inW: iw, inH: ih, bufW: iw, bufH: ih, outW: ow, outH: oh,
+          depthMap: [-1, 1, 1, 0], zToCm: [0, 0, zc, wc], focus: p.dofFocus, cocInf: p.dofInfinity, cocMax: p.dofMax,
+          jitter: taa.jitter, c2p: [row(0), row(1), row(2), row(3)], cut: taa.cut || fresh, frame: taa.frame, exposure: TAA_EXPOSURE });
+        this.clean();
+      }
+      this.run('taa', TAAU, write, { t_scene: [input], t_depth: [taa.depth], t_vel: [this.zero], t_stencil: [this.zero], t_hist: [read.tex] }, {
         u_out: [ow, oh, 1 / ow, 1 / oh], u_in: [iw, ih, 1 / iw, 1 / ih], u_inMin: [0, 0, taa.jitter[0], taa.jitter[1]],
         u_buf: [iw, ih, 1 / iw, 1 / ih], u_bufUV: [1, 1, 0, 0], u_inClamp: [0, 0, iw - 1, ih - 1],
         u_hist: [ow, oh, 1 / ow, 1 / oh], u_histClamp: [0.5 / ow, 0.5 / oh, 1 - 0.5 / ow, 1 - 0.5 / oh], u_toHist: [0.5, -0.5, 0.5, 0.5],
@@ -412,7 +428,6 @@ export class ComplexPost {
       if (p.motionBlur) {
         this.mb ??= new ComplexMotionBlur(gl);
         const k = dt > 0 && !taa.cut && !fresh ? p.mbAmount / (Math.max(1, p.mbTargetFps) * dt) : 0;
-        const zc = (taa.far - taa.near) / (2.54 * taa.far * taa.near), wc = -1 / (2.54 * taa.far);   // depth -> cm, as the game's
         blurred = this.mb.run({ scene: write.tex, depth: taa.depth, vel: this.zero, inW: iw, inH: ih, bufW: iw, bufH: ih, outW: ow, outH: oh,
           c2p: [row(0), row(1), row(2), row(3)], depthMap: [-1, 1, 1, 0], zToCm: [0, 0, zc, wc], shutter: k, maxBlur: p.mbMax * ow, maxSamples: 16 });
         this.clean();
