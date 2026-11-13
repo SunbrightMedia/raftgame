@@ -78,6 +78,20 @@ Our own camera pictures (the game's five image files are not copied; ours match 
   spread 0.0024 (0.0025), along-row correlation 0.86 (0.89), row spread 0.0021 (0.0021).
 - The upscaler (TAAU, `cs_19050`): `check_taa.py` runs it on the exact inputs (frame, depth / stencil, motion,
   previous output, exposure) against the card's own output: mean equal to 0.04 %, median 0.04 % per pixel.
+  `check_taa.py --ours` runs our own port (`src/engine/render/complexTAA.ts`) on the same inputs: vs the
+  emulator 99.3 % of pixels bit-identical (18325); vs the real card, frames 18325 / 20732 / 19893: means equal to
+  5 digits, 78 / 64 / 78 % of pixels bit-identical, 90 / 84 / 90 % of values identical, 4-7 % one half-float step
+  either way, under 1 % further (a few dark pixels near (315, 1000) of 18325 by up to 10 %). The card stores half
+  floats by cutting toward zero, not rounding (with rounding only 13.5 % were identical and the mean was 0.035 %
+  high); the dither of up to one step is what makes that unbiased. Our shader cuts toward zero itself, so every
+  card stores the same values.
+- The upscaler in the game (renderer.ts + complexPost.ts): the scene is drawn at 70 % of the picture, moved each
+  frame by Unreal's Halton 2, 3 jitter over 16 places (the deep frames' constants fit (frame + 2) mod 16), with
+  no MSAA; the upscaler gets its depth and this frame's clip -> last frame's clip from our own camera. Checked
+  headless (a still camera and a turn of 0.25 degrees a frame, against a 4x MSAA picture drawn at full size):
+  the picture lines up within 0.02 px still and 0.04 px turning, and holds still (0.000 px between frames 32
+  and 40). Not ported: the game's motion vectors of moving things and its "responsive" stencil (we draw none),
+  and its motion blur (a copy stands in; 0.6 % of 18325's picture).
 
 Earlier, from the first export's JPEGs (superseded by the lossless numbers above):
 Measured against the capture (frame 18325; the game's own step with an image, minus the same step without it):

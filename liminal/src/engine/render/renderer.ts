@@ -3,7 +3,8 @@ import { Digicam, type CameraParams } from './digicam';
 import { SourcePost, type SourcePostParams } from './sourcePost';
 import { CamcorderPost, type CamcorderMotion, type CamcorderParams } from './camcorder';
 import { BlenderPost } from './blenderPost';
-import { ComplexPost, type ComplexParams } from './complexPost';
+import { ComplexPost, complexPictureSize, type ComplexParams, type ComplexTAAFrame } from './complexPost';
+import { haltonJitter, jitterCount } from './complexTAA';
 import { haveBlenderData, loadBlenderData } from './blenderData';
 
 /** The Blender camera's start, remembered across page loads ('starting' until it has run smoothly; 'lost' after
@@ -58,6 +59,13 @@ export class LowResRenderer {
   private complexPost: ComplexPost | null = null;
   /** Why the complex camera could not start ('' = fine). */
   complexError = '';
+  /** The complex camera's upscaler: last frame's camera (unjittered view-projection, place, direction), the input and
+   *  picture sizes it was for, and a frame counter (the jitter cycles with it). */
+  private taa = { frame: 0, have: false, key: '', prevVP: new THREE.Matrix4(), pos: new THREE.Vector3(), dir: new THREE.Vector3(),
+    proj: new THREE.Matrix4(), projInv: new THREE.Matrix4(), vp: new THREE.Matrix4(), inv: new THREE.Matrix4(), c2p: new THREE.Matrix4() };
+  /** Tools: hold the upscaler's jitter at this (input pixels, x right, y down) instead of cycling it. */
+  taaJitter: [number, number] | null = null;
+  private taaFrame: Omit<ComplexTAAFrame, 'depth'> | null = null;
   private blenderSize: [number, number] = [854, 480];
   private blenderTime = 0;
   /** Wall-clock times of the last few Blender frames (the slow-frame guard). */
@@ -291,11 +299,19 @@ export class LowResRenderer {
     let iw = Math.max(1, Math.round(ih * aspect));
     // Blender's compositor works on its own picture size (its blurs and grain are in pixels of it)
     if (this.blender) [iw, ih] = this.blenderSize;
+    // The complex camera's upscaler: the game draws at 70 % of its picture (screenPct) and makes the picture over frames
+    const taa = !this.blender && !!this.complex?.taa && !this.complexError;
+    let pic: [number, number] = [iw, ih];
+    if (taa) {
+      pic = complexPictureSize(w, h);
+      const sp = Math.min(1, Math.max(0.1, this.complex!.screenPct)) * this.scale;
+      iw = Math.max(1, Math.round(pic[0] * sp)); ih = Math.max(1, Math.round(pic[1] * sp));
+    }
     this.renderSize.set(iw, ih);
     const filter = this.upscale === 'nearest' ? THREE.NearestFilter : THREE.LinearFilter;
-    const samples = this.lowAA ? 0 : msaa;
+    const samples = this.lowAA || taa ? 0 : msaa;   // the upscaler is the antialiasing, as in the game
     this.stats.aa = samples;
-    const wantDepth = this.distanceBlur !== null || (this.camcorder?.motionBlur ?? 0) > 0;
+    const wantDepth = this.distanceBlur !== null || (this.camcorder?.motionBlur ?? 0) > 0 || taa;
     if (!this.target || this.target.width !== iw || this.target.height !== ih || this.target.texture.magFilter !== filter || this.target.samples !== samples || (this.target.depthTexture !== null) !== wantDepth) {
       this.target?.depthTexture?.dispose();
       this.target?.dispose();
@@ -308,6 +324,7 @@ export class LowResRenderer {
       this.blurTarget?.dispose();
       this.blurTarget = wantDepth ? new THREE.WebGLRenderTarget(iw, ih, { depthBuffer: false, colorSpace: THREE.NoColorSpace, magFilter: filter, minFilter: filter, generateMipmaps: false, type: THREE.HalfFloatType }) : null;
     }
+    this.taaFrame = taa ? this.taaJitterOn(iw, ih, pic) : null;
     this.gl.setRenderTarget(this.target);
     this.gl.info.autoReset = false;
     this.gl.info.reset();
@@ -322,6 +339,10 @@ export class LowResRenderer {
       this.gl.render(scene, this.camera);
       this.gl.autoClear = true;
     } else this.gl.render(scene, this.camera);
+    if (this.taaFrame) {      // the jitter was for the scene only
+      this.camera.projectionMatrix.copy(this.taa.proj);
+      this.camera.projectionMatrixInverse.copy(this.taa.projInv);
+    }
     this.stats.calls = this.gl.info.render.calls;
     this.stats.triangles = this.gl.info.render.triangles;
     let frame = this.target;
@@ -440,6 +461,33 @@ export class LowResRenderer {
     st.state = 'idle'; st.error = '';
   }
 
+  /**
+   * The upscaler's jitter for this frame (Unreal's: Halton 2, 3 over 16 places for 70 %), put into the camera's
+   * projection until the scene is drawn, and this frame's clip space -> last frame's (unjittered), with whether last
+   * frame can be used: not after a jump (more than 48" or 25 degrees in one frame) or a new size.
+   */
+  private taaJitterOn(iw: number, ih: number, pic: [number, number]): Omit<ComplexTAAFrame, 'depth'> {
+    const T = this.taa, cam = this.camera;
+    cam.updateMatrixWorld();
+    T.proj.copy(cam.projectionMatrix); T.projInv.copy(cam.projectionMatrixInverse);
+    const [jx, jy] = this.taaJitter ?? haltonJitter(T.frame % jitterCount(iw / pic[0]));
+    const e = cam.projectionMatrix.elements;
+    e[8] -= (2 * jx) / iw;      // three.js: ndc.x = -(x / z) e0 - e8, so the scene moves right by jx pixels
+    e[9] += (2 * jy) / ih;      // and down by jy (rows run down, as the game's)
+    cam.projectionMatrixInverse.copy(cam.projectionMatrix).invert();
+    T.vp.multiplyMatrices(T.proj, cam.matrixWorldInverse);
+    const pos = cam.getWorldPosition(new THREE.Vector3()), dir = cam.getWorldDirection(new THREE.Vector3());
+    const key = `${iw}x${ih}>${pic[0]}x${pic[1]}`;
+    const cut = !T.have || key !== T.key || pos.distanceTo(T.pos) > 48 || dir.angleTo(T.dir) > (25 * Math.PI) / 180;
+    // (x, y, 1 - depth, 1) -> ndc (x, y, 2 depth - 1, 1) -> world -> last frame's clip
+    const toNdc = new THREE.Matrix4().set(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -2, 1, 0, 0, 0, 1);
+    T.inv.copy(T.vp).invert();
+    T.c2p.copy(cut ? T.vp : T.prevVP).multiply(T.inv).multiply(toNdc);
+    T.prevVP.copy(T.vp); T.pos.copy(pos); T.dir.copy(dir); T.key = key; T.have = true;
+    const frame = T.frame++;
+    return { inW: iw, inH: ih, jitter: [jx, jy], clipToPrev: T.c2p.elements, cut, frame };
+  }
+
   /** The 'complex' camera; false (the plain picture) if it cannot run here. */
   private runComplex(frame: THREE.WebGLRenderTarget, dt: number): boolean {
     if (this.complexError) return false;
@@ -449,7 +497,10 @@ export class LowResRenderer {
       this.complexPost ??= new ComplexPost(this.gl.getContext() as WebGL2RenderingContext);
       const hfov = 2 * Math.atan(Math.tan((this.camera.fov * Math.PI) / 360) * this.camera.aspect);
       const c = this.gl.domElement;
-      this.complexPost.render(tex, c.width, c.height, { ...this.complex!, hfov }, dt);
+      const dtex = this.taaFrame && this.target?.depthTexture
+        ? (this.gl.properties.get(this.target.depthTexture) as { __webglTexture?: WebGLTexture }).__webglTexture : undefined;
+      const taa = this.taaFrame && dtex ? { ...this.taaFrame, depth: dtex } : undefined;
+      this.complexPost.render(tex, c.width, c.height, { ...this.complex!, hfov }, dt, taa);
     } catch (e) {
       this.complexError = String(e);
       console.error(e);

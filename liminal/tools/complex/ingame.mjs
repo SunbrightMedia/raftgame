@@ -1,7 +1,8 @@
-// Our cx_area_a seen from a capture frame's camera: the light before the camera passes (the complex camera's
-// 'scene' target, 1008 x 756 = the game's view), with everything and with the lamps' direct light off (the baked
-// bounce and the panels only), as raw float32 RGBA files for tools/complex/compare_light.py. Lets the page save the
-// map's lightmap cache (a fresh bake when the map or its lights changed).
+// Our cx_area_a seen from a capture frame's camera: the light before the camera passes and its upscaler (the complex
+// camera's 'sceneIn' target: a 1440 x 1080 picture drawn at 70 % = 1008 x 756, the game's view, with the game's own
+// jitter for that frame), with everything and with the lamps' direct light off (the baked bounce and the panels
+// only), as raw float32 RGBA files for tools/complex/compare_light.py. Lets the page save the map's lightmap cache
+// (a fresh bake when the map or its lights changed). It writes config/settings.json: delete it after.
 //   node tools/complex/ingame.mjs OUT_DIR [frame] [map]
 import { createRequire } from 'node:module';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
@@ -14,7 +15,9 @@ const frames = JSON.parse(readFileSync(ROOT + 'tools/recreate/frames.json', 'utf
 const vite = await createServer({ root: ROOT, server: { port: 5198, strictPort: true }, logLevel: 'error' });
 await vite.listen();
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
-const page = await browser.newPage({ viewport: { width: 1008, height: 756 } });
+const page = await browser.newPage({ viewport: { width: 1440, height: 1080 } });
+// the game's jitter in these frames (its upscaler's constants, deep export): Halton 2, 3, places 12, 12 and 3
+const JITTER = { 18325: [0.1875, -0.01851852], 19893: [0.1875, -0.01851852], 20732: [-0.375, -0.05555552] };
 const log = [];
 page.on('pageerror', (e) => log.push('pageerror: ' + e.message));
 await page.goto(`http://localhost:5198/?map=${MAP}`);
@@ -23,7 +26,12 @@ const t0 = Date.now();
 await page.waitForFunction(() => /cached|from cache/.test(window.liminal.game.lighting.status), null, { timeout: 3600000, polling: 2000 });
 console.log('lighting:', await page.evaluate(() => window.liminal.game.lighting.status), `(${((Date.now() - t0) / 1000).toFixed(0)} s)`);
 await page.evaluate(() => { window.liminal.game.paused = true; document.querySelectorAll('.hud-cross,.hud-speed,.hud-info,.hud-prompt').forEach((e) => e.remove()); });
-await page.evaluate(() => { const l = window.liminal; l.config.set('camera', 'model', 'complex'); l.config.set('complex', 'exposure', 0.03413); l.game.applySettings(); });
+await page.evaluate((j) => {
+  const l = window.liminal;
+  l.config.set('camera', 'model', 'complex'); l.config.set('complex', 'exposure', 0.03413); l.config.set('complex', 'taa', true); l.config.set('complex', 'screenPct', 0.7); l.config.set('render', 'targetFps', 0);
+  l.game.applySettings();
+  l.game.renderer.taaJitter = j;
+}, JITTER[frame] ?? [0, 0]);
 const f = frames[frame];
 const [x, y, z, yaw, pitch] = f.pose.split(',').map(Number);
 const feet = (f.eyeExact ?? f.eye ?? 63.4) - 48;
@@ -36,7 +44,7 @@ const shot = async (name) => {
   const r = await page.evaluate(() => {
     const g = window.liminal.game;
     for (let i = 0; i < 3; i++) g.renderNow(1 / 60);
-    const cp = g.renderer.complexPost, d = cp.debugRead('scene');
+    const cp = g.renderer.complexPost, d = cp.debugRead('sceneIn');
     g.renderer.gl.resetState();
     const u = new Uint8Array(d.data.buffer); let s = '';
     for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000));

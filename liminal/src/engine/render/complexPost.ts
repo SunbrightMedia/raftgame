@@ -4,15 +4,18 @@
  * picture is stored in the game's own format: the scene and its glow as R11G11B10 floats, the pictures between
  * passes as 10-bit RGB, the tone table as a 32^3 10-bit 3D texture. Image row 0 is the top inside the chain.
  *
- * Steps: scene (x exposure, flipped to row 0 = top) -> glow -> tonemapper -> sharpen -> posterize -> grain ->
- * tape -> lens -> the screen, 4:3 with bars.
+ * Steps: scene (x exposure, flipped to row 0 = top, at 70 % of the picture) -> upscaler (the game's TAAU,
+ * complexTAA.ts: the scene is drawn with a new sub-pixel jitter each frame and the picture is made over frames) ->
+ * glow -> tonemapper -> sharpen -> posterize -> grain -> tape -> lens -> the screen, 4:3 with bars.
  *
  * Not yet the game's own (said in the HUD help): the glow (a three-width blur fitted to the capture's measured
- * spread, split into the game's scene / glow weights), and the upscaler (the scene is scaled up bilinearly,
- * then softened). The lens dirt and the grain and tape noises are ours (the game's are its own image files).
+ * spread, split into the game's scene / glow weights), and its motion blur (a copy stands in: in the capture it
+ * changes 0.6 % of the picture). The lens dirt and the grain and tape noises are ours (the game's are its own
+ * image files).
  */
 import { COMPLEX_VERT, TONEMAP, SHARPEN, POSTERIZE, GRAIN, TAPE, LENS, lensConstants } from './complexCamera';
 import { makeToneTable, COMPLEX_TONE } from './complexTone';
+import { TAAU } from './complexTAA';
 import { Rng } from '../../world/rng';
 
 export interface ComplexParams {
@@ -25,13 +28,43 @@ export interface ComplexParams {
   /** Glow shape (stand-in): shares of three widths, sigma 0.6 %, 2.5 %, 8 % of the width. */
   glowNear: number; glowMid: number; glowFar: number;
   dirt: number;
-  /** Upscaler stand-in: blur before the glow and tone, sigma in output pixels. */
+  /** The game's upscaler (TAAU, complexTAA.ts): the scene drawn at `screenPct` of the picture, the picture made over frames. */
+  taa: boolean;
+  /** The share of the picture's width and height the scene is drawn at with the upscaler (the game: 0.7). */
+  screenPct: number;
+  /** With the upscaler off: the scene scaled up, then this blur (sigma in output pixels). */
   soften: number;
   /** Horizontal field of view the lens bend uses (radians; the game's camera: 98.2 degrees). */
   hfov?: number;
 }
 
 interface Prog { p: WebGLProgram; u: Map<string, WebGLUniformLocation | null> }
+
+/** What the upscaler needs from the renderer for one frame (renderer.ts). */
+export interface ComplexTAAFrame {
+  /** The scene's depth: three.js's depth texture (rows from the bottom, 0 near .. 1 far). */
+  depth: WebGLTexture;
+  /** The input picture's size (the scene and its depth). */
+  inW: number; inH: number;
+  /** This frame's jitter, input pixels (x right, y down): the scene was drawn moved by this. */
+  jitter: [number, number];
+  /** Column-major 4 x 4: (x, y, 1 - depth, 1) in this frame's clip space -> last frame's clip space, both unjittered. */
+  clipToPrev: ArrayLike<number>;
+  /** No usable history: the first frame, a jump, a new size. */
+  cut: boolean;
+  /** A frame counter (the dither uses it mod 8, as the game). */
+  frame: number;
+}
+
+/** The picture in a canvas: the biggest centred 4:3 box (width, height). */
+export function complexPictureSize(cw: number, ch: number): [number, number] {
+  let ow = cw, oh = Math.round(cw * 0.75);
+  if (oh > ch) { oh = ch; ow = Math.round(ch * 4 / 3); }
+  return [ow, oh];
+}
+
+/** The game's exposure / pre-exposure as its upscaler computes it (eye adaptation 34.13 x 1 / 34.13, in float32). */
+const TAA_EXPOSURE = Math.fround(Math.fround(34.133327) * Math.fround(0.029296881));
 
 /** One of our stand-ins for the game's own image files (RGBA8, row 0 = top). */
 export interface StandIn { w: number; h: number; data: Uint8Array; wrap: 'clamp' | 'repeat'; mips: boolean }
@@ -191,6 +224,9 @@ void main() {
   vec2 uv = gl_FragCoord.xy / vec2(textureSize(t_a, 0));
   o = vec4((texture(t_a, uv).rgb * u_w.x + texture(t_b, uv).rgb * u_w.y + texture(t_c, uv).rgb * u_w.z) * u_k, 1.0);
 }`;
+const COPY = `#version 300 es
+precision highp float; precision highp sampler2D; uniform sampler2D t_src; out vec4 o;
+void main() { o = texelFetch(t_src, ivec2(gl_FragCoord.xy), 0); }`;
 const PRESENT = `#version 300 es
 precision highp float; precision highp sampler2D;
 uniform sampler2D t_src; uniform vec4 u_rect; out vec4 o;
@@ -210,6 +246,11 @@ export class ComplexPost {
   private t: Record<string, Target> = {};
   private size: [number, number] = [0, 0];
   private time = 0;
+  /** 1 x 1 zero: the upscaler's motion vectors and stencil (we draw none: nothing is "responsive", nothing moves by itself). */
+  private zero: WebGLTexture;
+  /** The upscaler's two pictures: last frame's output is read, this frame's written; which is which flips each frame. */
+  private taaFlip = false;
+  private taaKey = '';
 
   constructor(private gl: WebGL2RenderingContext) {
     if (!gl.getExtension('EXT_color_buffer_float')) throw new Error('complex camera: needs EXT_color_buffer_float');
@@ -226,6 +267,7 @@ export class ComplexPost {
     this.grain = up(im.grain);
     this.streak = up(im.streak);
     this.band = up(im.band);
+    this.zero = this.tex2d(1, 1, new Uint8Array(4), gl.CLAMP_TO_EDGE, false);
   }
 
   // ---------------------------------------------------------------- textures (ours)
@@ -324,22 +366,44 @@ export class ComplexPost {
   }
 
   /**
-   * src: three.js's scene picture (linear light, rows from the bottom), srcW x srcH. Draws the finished picture
-   * into the canvas (cw x ch), a centred 4:3 box with black bars.
+   * src: three.js's scene picture (linear light, rows from the bottom). Draws the finished picture into the canvas
+   * (cw x ch), a centred 4:3 box with black bars. taa: this frame's upscaler inputs (with p.taa; src is then
+   * taa.inW x taa.inH, drawn with the jitter), else src is scaled up.
    */
-  render(src: WebGLTexture, cw: number, ch: number, p: ComplexParams, dt: number): void {
+  render(src: WebGLTexture, cw: number, ch: number, p: ComplexParams, dt: number, taa?: ComplexTAAFrame): void {
     const gl = this.gl;
     this.time += dt;
     this.clean();
-    let ow = cw, oh = Math.round(cw * 0.75);
-    if (oh > ch) { oh = ch; ow = Math.round(ch * 4 / 3); }
+    const [ow, oh] = complexPictureSize(cw, ch);
     const R11 = gl.R11F_G11F_B10F, R10 = gl.RGB10_A2;
-    // 1. the scene, exposed as the game stores it (R11G11B10), at the picture's size
-    const scene = this.target('scene', ow, oh, R11);
     // the game stores its scene pre-exposed by the same 34.13 its exposure is: the stored value IS the exposed light
-    this.run('in', SCENE_IN, scene, { t_src: [src] }, { u_size: [ow, oh], u_scale: p.exposure });
+    const scene = this.target('scene', ow, oh, R11);
     let sceneT = scene;
-    if (p.soften > 0) {     // upscaler stand-in
+    if (p.taa && taa) {
+      // 1. the scene as the game stores it before its upscaler (half float), at the size it was drawn
+      const iw = taa.inW, ih = taa.inH;
+      const sin = this.target('sceneIn', iw, ih, gl.RGBA16F);
+      this.run('in', SCENE_IN, sin, { t_src: [src] }, { u_size: [iw, ih], u_scale: p.exposure });
+      // 2. the upscaler: this frame and last frame's picture -> this frame's picture (half float, kept for next frame)
+      const key = `${iw}x${ih}>${ow}x${oh}`, fresh = key !== this.taaKey;
+      this.taaKey = key;
+      const read = this.target(this.taaFlip ? 'taaB' : 'taaA', ow, oh, gl.RGBA16F), write = this.target(this.taaFlip ? 'taaA' : 'taaB', ow, oh, gl.RGBA16F);
+      this.taaFlip = !this.taaFlip;
+      const m = taa.clipToPrev, row = (i: number) => [m[4 * i], m[4 * i + 1], m[4 * i + 2], m[4 * i + 3]];
+      this.run('taa', TAAU, write, { t_scene: [sin.tex], t_depth: [taa.depth], t_vel: [this.zero], t_stencil: [this.zero], t_hist: [read.tex] }, {
+        u_out: [ow, oh, 1 / ow, 1 / oh], u_in: [iw, ih, 1 / iw, 1 / ih], u_inMin: [0, 0, taa.jitter[0], taa.jitter[1]],
+        u_buf: [iw, ih, 1 / iw, 1 / ih], u_bufUV: [1, 1, 0, 0], u_inClamp: [0, 0, iw - 1, ih - 1],
+        u_hist: [ow, oh, 1 / ow, 1 / oh], u_histClamp: [0.5 / ow, 0.5 / oh, 1 - 0.5 / ow, 1 - 0.5 / oh], u_toHist: [0.5, -0.5, 0.5, 0.5],
+        u_resp: [0, 0, 1, 0.04], u_misc: [taa.cut || fresh ? 1 : 0, iw / ow, ow / iw, taa.frame % 8], u_dither: [1 / 1024, 1 / 1024, 1 / 1024, 0],
+        u_c2p0: row(0), u_c2p1: row(1), u_c2p2: row(2), u_c2p3: row(3), u_depthMap: [-1, 1, 1, 0], u_exposure: TAA_EXPOSURE,
+      });
+      // 3. the game's motion blur comes next and stores the scene as R11G11B10; it is not ours yet: a copy
+      this.run('copy', COPY, scene, { t_src: [write.tex] }, {});
+    } else {
+      // 1. the scene, exposed as the game stores it (R11G11B10), at the picture's size
+      this.run('in', SCENE_IN, scene, { t_src: [src] }, { u_size: [ow, oh], u_scale: p.exposure });
+    }
+    if (!(p.taa && taa) && p.soften > 0) {     // with the upscaler off: a blur stands in
       const a = this.target('softA', ow, oh, R11), b = this.target('softB', ow, oh, R11);
       this.run('blur', BLUR, a, { t_src: [scene.tex] }, { u_dir: [1 / ow, 0], u_out: [ow, oh], u_sigma: p.soften });
       this.run('blur', BLUR, b, { t_src: [a.tex] }, { u_dir: [0, 1 / oh], u_out: [ow, oh], u_sigma: p.soften });
@@ -402,9 +466,6 @@ export class ComplexPost {
   debugRead(name: string): { w: number; h: number; data: Float32Array } | null {
     const gl = this.gl, t = this.t[name];
     if (!t) return null;
-    const COPY = `#version 300 es
-precision highp float; precision highp sampler2D; uniform sampler2D t_src; out vec4 o;
-void main() { o = texelFetch(t_src, ivec2(gl_FragCoord.xy), 0); }`;
     const f = this.target('dbg_' + name, t.w, t.h, gl.RGBA32F);
     this.clean();
     this.run('copy', COPY, f, { t_src: [t.tex] }, {});
