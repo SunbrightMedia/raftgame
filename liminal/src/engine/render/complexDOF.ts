@@ -245,7 +245,7 @@ void ring(ivec2 t, int r, inout float a[6]) {
     ivec2 q = t + ivec2(x, y);
     if (any(lessThan(q, ivec2(0))) || any(greaterThanEqual(q, ivec2(u_tiles.zw)))) continue;
     vec4 n = texelFetch(t_near, q, 0), f = texelFetch(t_far, q, 0);
-    float add = r == 2 ? u_k.w * 8.0 : 0.0;
+    float add = r == 2 ? u_k.w * (abs(x) == 2 && abs(y) == 2 ? 11.3137083 : 8.0) : 0.0;   // ring 2's corners: 8 x sqrt 2
     a[0] = min(a[0], n.x); a[1] = max(a[1], n.y); a[2] = min(a[2], f.y); a[3] = max(a[3], f.x);
     a[4] = min(a[4], f.z + add); a[5] = min(a[5], f.w + add);
   }
@@ -371,6 +371,30 @@ void main() {
   o = h16(vec4(col, alpha));
 }`;
 
+/** 8a. Each 8 x 8 group of full-size pixels: its largest small blur (each pixel looks at itself and at four pixels 6
+ *  away diagonally, keeping sizes under 3; the group takes the most). The game does this per group in shared memory. */
+export const DOF_GROUP_MAX = COMMON + /* glsl */ `
+uniform sampler2D t_full;
+uniform vec4 u_vp, u_viewSize, u_viewMin, u_buf, u_uvClamp;
+out vec4 o;
+vec4 full(vec2 uv) { return pointUV(t_full, min(max(uv, u_uvClamp.xy), u_uvClamp.zw)); }
+void main() {
+  ivec2 g = ivec2(gl_FragCoord.xy) * 8;
+  float gm = 0.0;
+  for (int i = 0; i < 64; i++) {
+    vec2 uv = min(max(((vec2(g + ivec2(i % 8, i / 8)) + 0.5) * u_vp.zw * u_viewSize.xy + u_viewMin.xy) * u_buf.zw, u_uvClamp.xy), u_uvClamp.zw);
+    float c = abs(full(uv).w);
+    float m = c < 3.0 ? c : 0.0;
+    for (int k = 0; k < 4; k++) {
+      vec2 off = vec2(k == 0 || k == 2 ? -1.0 : 1.0, k < 2 ? -1.0 : 1.0);
+      float s = abs(full(off * u_buf.zw * 6.0 + uv).w);
+      m = max(m, s < 3.0 ? s : m);
+    }
+    gm = max(gm, m);
+  }
+  o = vec4(gm, 0.0, 0.0, 0.0);
+}`;
+
 /** 8. Recombine (full size): where an 8 x 8 group has any blur over 0.125 pixels, a small disk of up to 12 pairs of
  *  samples (rotated by a hash per pixel and frame), each weighed by its blur's area and reach, held near the half-size
  *  gather's range; elsewhere the sharp pixel. The game's near, background and translucency layers mixed in after are
@@ -382,29 +406,23 @@ uniform vec4 u_viewSize, u_viewMin, u_buf, u_uvClamp;   // view size, first pixe
 uniform vec4 u_half;        // xy: half-size offset; zw: half-size uv max      (cb0[5])
 uniform vec4 u_halfInv;     // zw: 1 / half-size buffer                        (cb0[12])
 uniform vec4 u_squash;      // x: x scale of the disk                          (cb0[2])
+uniform sampler2D t_gmax;   // each 8 x 8 group's largest small blur (DOF_GROUP_MAX)
 uniform float u_frame;
 out vec4 o;
 vec4 full(vec2 uv) { return pointUV(t_full, min(max(uv, u_uvClamp.xy), u_uvClamp.zw)); }
-float groupMaxAt(ivec2 t) {
-  vec2 uv = min(max(((vec2(t) + 0.5) * u_vp.zw * u_viewSize.xy + u_viewMin.xy) * u_buf.zw, u_uvClamp.xy), u_uvClamp.zw);
-  float c = abs(full(uv).w);
-  float m = c < 3.0 ? c : 0.0;
-  for (int i = 0; i < 4; i++) {
-    vec2 off = vec2(i == 0 || i == 2 ? -1.0 : 1.0, i < 2 ? -1.0 : 1.0);
-    float s = abs(full(off * u_buf.zw * 6.0 + uv).w);
-    m = max(m, s < 3.0 ? s : m);
-  }
-  return m;
+uint brev(uint x) {          // bit reverse (GLSL ES 3.0 has no bitfieldReverse)
+  x = ((x >> 1u) & 0x55555555u) | ((x & 0x55555555u) << 1u);
+  x = ((x >> 2u) & 0x33333333u) | ((x & 0x33333333u) << 2u);
+  x = ((x >> 4u) & 0x0f0f0f0fu) | ((x & 0x0f0f0f0fu) << 4u);
+  x = ((x >> 8u) & 0x00ff00ffu) | ((x & 0x00ff00ffu) << 8u);
+  return (x >> 16u) | (x << 16u);
 }
 float smooth01(float x) { return x * x * (3.0 - 2.0 * x); }
 void main() {
   ivec2 t = ivec2(gl_FragCoord.xy);
   vec2 uv = min(max(((vec2(t) + 0.5) * u_vp.zw * u_viewSize.xy + u_viewMin.xy) * u_buf.zw, u_uvClamp.xy), u_uvClamp.zw);
   vec4 here = full(uv);
-  // the group's largest small blur (each pixel looks at itself and four pixels 6 away; the group takes the most)
-  ivec2 g = (t / 8) * 8;
-  float gmax = 0.0;
-  for (int i = 0; i < 64; i++) gmax = max(gmax, groupMaxAt(g + ivec2(i % 8, i / 8)));
+  float gmax = texelFetch(t_gmax, t / 8, 0).x;
   vec2 huv = min(((vec2(t) + 0.5) * 0.5 - u_half.xy * 0.5) * u_halfInv.zw, u_half.zw);
   vec3 col; float a;
   if (0.125 < gmax) {
@@ -419,7 +437,7 @@ void main() {
     float s1 = wC, s2 = clamp(3.0 - here.w, 0.0, 1.0), cnt = 1.0;
     for (uint i = 0u; i < 12u; i++) {
       if (i >= count) break;
-      vec2 sq = vec2(fract(float(i) * 0.0833333358 + rnd), float((bitfieldReverse(i) ^ v.y) >> 16u)) * vec2(1.41421354, 2.15790861e-05) - 0.707106769;
+      vec2 sq = vec2(fract(float(i) * 0.0833333358 + rnd), float((brev(i) ^ v.y) >> 16u)) * vec2(1.41421354, 2.15791861e-05) - 0.707106769;
       vec2 sq2 = sq * sq;
       float R = sqrt(max(sq2.y, sq2.x) * 2.0 - min(sq2.y, sq2.x));
       vec2 sr = vec2(0.0 < sq.x ? R : -R, 0.0 < sq.y ? R : -R);
@@ -464,3 +482,155 @@ void main() {
   }
   o = h16(vec4(col, 0.0));
 }`;
+
+const FULL_VS = `#version 300 es
+void main() { vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2)); gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0); }`;
+
+/** What the depth of field needs for one frame. Sizes: the input view (inW x inH) in its buffer (bufW x bufH), and
+ *  the upscaler's output (outW x outH): the temporal step works at half of it, as the game's. */
+export interface DOFInputs {
+  scene: WebGLTexture; depth: WebGLTexture; vel: WebGLTexture; stencil: WebGLTexture;
+  inW: number; inH: number; bufW: number; bufH: number; outW: number; outH: number;
+  depthMap: [number, number, number, number];
+  zToCm: [number, number, number, number];
+  /** Focus distance (cm), blur at infinity (share of the width), the largest blur (share of the width). The game: 67.92, 0.00086085, 0.025. */
+  focus: number; cocInf: number; cocMax: number;
+  /** This frame's jitter (full-size input pixels), clip -> last frame's clip (rows), camera cut, frame counter, exposure (eye / pre-exposure). */
+  jitter: [number, number]; c2p: number[][]; cut: boolean; frame: number; exposure: number;
+  /** For checks: the temporal step's history in place of ours. */
+  histIn?: WebGLTexture;
+}
+
+interface DTarget { tex: WebGLTexture; fb: WebGLFramebuffer; w: number; h: number; tex2?: WebGLTexture }
+
+/** Runs the depth of field's steps on raw WebGL2; `run` returns the result (the input's buffer size, half floats). */
+export class ComplexDOF {
+  private progs = new Map<string, { p: WebGLProgram; u: Map<string, WebGLUniformLocation | null> }>();
+  private t: Record<string, DTarget> = {};
+  private vao: WebGLVertexArrayObject;
+  private flip = false;
+  private key = '';
+
+  constructor(private gl: WebGL2RenderingContext) { this.vao = gl.createVertexArray()!; }
+
+  get targets(): Record<string, DTarget> { return this.t; }
+
+  private prog(name: string, fs: string) {
+    let p = this.progs.get(name);
+    if (p) return p;
+    const gl = this.gl, sh = (type: number, src: string) => {
+      const s = gl.createShader(type)!;
+      gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(`depth of field ${name}: ${gl.getShaderInfoLog(s)}`);
+      return s;
+    };
+    const pr = gl.createProgram()!;
+    gl.attachShader(pr, sh(gl.VERTEX_SHADER, FULL_VS)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, fs));
+    gl.linkProgram(pr);
+    if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(`depth of field ${name}: ${gl.getProgramInfoLog(pr)}`);
+    p = { p: pr, u: new Map() };
+    this.progs.set(name, p);
+    return p;
+  }
+
+  /** A picture (two for `fmt2`: drawn together), remade when its size changes. */
+  target(name: string, w: number, h: number, fmt: number, linear = false, fmt2 = 0): DTarget {
+    const old = this.t[name];
+    if (old && old.w === w && old.h === h) return old;
+    const gl = this.gl;
+    if (old) { gl.deleteTexture(old.tex); if (old.tex2) gl.deleteTexture(old.tex2); gl.deleteFramebuffer(old.fb); }
+    const mk = (f: number) => {
+      const tex = gl.createTexture()!;
+      gl.bindTexture(gl.TEXTURE_2D, tex);
+      gl.texStorage2D(gl.TEXTURE_2D, 1, f, w, h);
+      const m = linear ? gl.LINEAR : gl.NEAREST;
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, m); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, m);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      return tex;
+    };
+    const tex = mk(fmt), tex2 = fmt2 ? mk(fmt2) : undefined;
+    const fb = gl.createFramebuffer()!;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+    if (tex2) { gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT1, gl.TEXTURE_2D, tex2, 0); gl.drawBuffers([gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1]); }
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    return (this.t[name] = { tex, fb, w, h, tex2 });
+  }
+
+  private draw(name: string, fs: string, out: DTarget, tex: Record<string, WebGLTexture>, uni: Record<string, number[]>, area?: [number, number]): void {
+    const gl = this.gl, P = this.prog(name, fs);
+    gl.useProgram(P.p);
+    const loc = (k: string) => { if (!P.u.has(k)) P.u.set(k, gl.getUniformLocation(P.p, k)); return P.u.get(k)!; };
+    let unit = 0;
+    for (const [k, t] of Object.entries(tex)) { gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t); gl.uniform1i(loc(k), unit++); }
+    for (const [k, v] of Object.entries(uni)) {
+      const l = loc(k);
+      if (!l) continue;
+      [gl.uniform1f, gl.uniform2f, gl.uniform3f, gl.uniform4f][v.length - 1].call(gl, l, ...(v as [number, number, number, number]));
+    }
+    gl.bindFramebuffer(gl.FRAMEBUFFER, out.fb);
+    gl.viewport(0, 0, area?.[0] ?? out.w, area?.[1] ?? out.h);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    for (let i = 0; i < unit; i++) { gl.activeTexture(gl.TEXTURE0 + i); gl.bindTexture(gl.TEXTURE_2D, null); }
+  }
+
+  run(m: DOFInputs): WebGLTexture {
+    const gl = this.gl, { inW, inH, bufW, bufH } = m;
+    for (const cap of [gl.BLEND, gl.DEPTH_TEST, gl.CULL_FACE, gl.SCISSOR_TEST, gl.STENCIL_TEST]) gl.disable(cap);
+    gl.colorMask(true, true, true, true);
+    gl.bindVertexArray(this.vao);
+    const F = gl.RGBA16F;
+    const hbW = Math.floor(bufW / 2), hbH = Math.floor(bufH / 2), hvW = Math.floor(inW / 2), hvH = Math.floor(inH / 2);
+    const tW = Math.floor(m.outW / 2), tH = Math.floor(m.outH / 2);
+    const tlW = Math.ceil(hvW / 8), tlH = Math.ceil(hvH / 8), rW = Math.ceil(tW / 8) * 8, rH = Math.ceil(tH / 8) * 8;
+    const sp = hvW / tW;     // the game: 504 / 720 = 0.7
+    const uvClamp = [0.5 / bufW, 0.5 / bufH, (inW - 0.5) / bufW, (inH - 0.5) / bufH];
+    const c2p = { u_c2p0: m.c2p[0], u_c2p1: m.c2p[1], u_c2p2: m.c2p[2], u_c2p3: m.c2p[3] };
+    // 1. setup
+    const setupU = { u_buf: [bufW, bufH, 1 / bufW, 1 / bufH], u_uvClamp: uvClamp, u_zToCm: m.zToCm, u_depthMap: m.depthMap,
+      u_coc: [m.cocInf, -m.cocMax, m.cocMax, 1], u_blur: [1, 0, 1e-5, 0], u_focus: [m.focus], u_scale: [inW / 2, tW] };
+    const full = this.target('full', bufW, bufH, F);
+    this.draw('setupFull', DOF_SETUP_FULL, full, { t_scene: m.scene, t_depth: m.depth }, setupU, [inW, inH]);
+    const half = this.target('half', hbW, hbH, F);
+    this.draw('setupHalf', DOF_SETUP_HALF, half, { t_scene: m.scene, t_depth: m.depth }, setupU, [hvW, hvH]);
+    // 2. its own temporal step, at half the output size (history kept between frames)
+    const key = `${inW}x${inH}>${tW}x${tH}`, fresh = key !== this.key;
+    this.key = key;
+    const read = this.target(this.flip ? 'taaB' : 'taaA', tW, tH, F, true), write = this.target(this.flip ? 'taaA' : 'taaB', tW, tH, F, true);
+    this.flip = !this.flip;
+    this.draw('taa', DOF_TAA, write, { t_scene: half.tex, t_depth: m.depth, t_vel: m.vel, t_stencil: m.stencil, t_hist: m.histIn ?? read.tex }, {
+      u_uvMax: [1 - 1 / tW, 1 - 1 / tH, 1 / tW, 1 / tH], u_out: [tW, tH, 1 / tW, 1 / tH], u_in: [hvW, hvH, 1 / hvW, 1 / hvH],
+      u_inMin: [0, 0, m.jitter[0] / 2, m.jitter[1] / 2], u_buf: [hbW, hbH, 1 / hbW, 1 / hbH], u_bufUV: [inW / bufW, inH / bufH, 0, 0],
+      u_inClamp: [0, 0, hvW - 1, hvH - 1], u_hist: [tW, tH, 1 / tW, 1 / tH], u_histClamp: [0.5 / tW, 0.5 / tH, 1 - 0.5 / tW, 1 - 0.5 / tH],
+      u_toHist: [0.5, -0.5, 0.5, 0.5], u_resp: [0, 0, 1, 0.04], u_dither: [1 / 1024, 1 / 1024, 1 / 1024, 0],
+      u_misc: [m.cut || fresh ? 1 : 0, sp, 1 / sp, m.frame % 8], u_depthMap: m.depthMap, u_exposure: [m.exposure], ...c2p,
+    });
+    // 3, 4. blur-size tiles, spread
+    const tiles = this.target('tiles', tlW, tlH, gl.RG16F, false, F);
+    this.draw('flatten', DOF_FLATTEN, tiles, { t_src: write.tex }, { u_uv: [1 / hvW, 1 / hvH, 1 - 1 / tW, 1 - 1 / tH] });
+    const dil = this.target('dilated', tlW, tlH, gl.RG16F, false, F);
+    const kz = 0.855555534 * (sp / 0.7);
+    this.draw('dilate', DOF_DILATE, dil, { t_near: tiles.tex, t_far: tiles.tex2! }, { u_tiles: [0, 0, tlW, tlH], u_k: [1, 1, kz, 1 / kz] });
+    // 6. the gathers' input (level 0)
+    const red = this.target('reduce', rW, rH, F, true);
+    this.draw('reduce', DOF_REDUCE, red, { t_src: write.tex }, { u_uv: [1 - 0.5 / tW, 1 - 0.5 / tH, 0, 0], u_inv: [tW, tH, 1 / tW, 1 / tH] });
+    // 7. the slightly-out-of-focus gather (half size)
+    const slight = this.target('slight', hbW, hbH, F, true);
+    const yScale = hvH * (rH / tH);
+    this.draw('slight', DOF_GATHER_SLIGHT, slight, { t_src: red.tex, t_near: dil.tex, t_far: dil.tex2! }, {
+      u_view: [0, 0, hvW, hvH], u_uvScale: [m.jitter[0], m.jitter[1], 1 / hvW, 1 / yScale], u_back: [0, 0, hvW, yScale],
+      u_k: [0, 3 / sp, 1, 1], u_rings: [2.3 / sp, 3 / sp, 0, 0], u_src: [rW, rH, 1 / rW, 1 / rH], u_srcView: [tW, tH, 0, 0],
+    }, [hvW, hvH]);
+    // 8. recombine (full size)
+    const view = { u_vp: [inW, inH, 1 / inW, 1 / inH], u_viewSize: [inW, inH, 1 / inW, 1 / inH], u_viewMin: [0, 0, 0, 0], u_buf: [bufW, bufH, 1 / bufW, 1 / bufH], u_uvClamp: uvClamp };
+    const gmax = this.target('groupMax', Math.ceil(inW / 8), Math.ceil(inH / 8), gl.R32F);
+    this.draw('groupMax', DOF_GROUP_MAX, gmax, { t_full: full.tex }, view);
+    const out = this.target('out', bufW, bufH, F);
+    this.draw('recombine', DOF_RECOMBINE, out, { t_full: full.tex, t_slight: slight.tex, t_gmax: gmax.tex }, {
+      ...view, u_half: [m.jitter[0], m.jitter[1], (hvW - 0.5) / hbW, (hvH - 0.5) / hbH], u_halfInv: [hbW, hbH, 1 / hbW, 1 / hbH],
+      u_squash: [1, 0, 0, 0], u_frame: [m.frame % 8],
+    }, [inW, inH]);
+    gl.bindVertexArray(null);
+    return out.tex;
+  }
+}
