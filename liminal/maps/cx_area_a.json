@@ -2,7 +2,7 @@
   "format": "liminal-map",
   "version": 1,
   "name": "cx_area_a",
-  "settings": {"camera":{"model":"camcorder","flash":false},"view":{"fov":98.2,"viewBob":0},"render":{"internalHeight":756},"fog":{"enabled":false},"camcorder":{"exposure":0.03413},"light":{"bounceEven":0,"bounces":2,"extraBounces":1}},
+  "settings": {"camera":{"model":"complex","flash":false},"view":{"fov":98.2,"viewBob":0},"render":{"internalHeight":756},"fog":{"enabled":false},"camcorder":{"exposure":0.03413},"complex":{"exposure":0.03413},"light":{"bounceEven":0,"bounces":2,"extraBounces":1}},
   "brushes": [
     {"id":1,"type":"box","min":[30,-1568,-8],"max":[1097.9,-582,0],"tex":"cx/carpet"},
     {"id":2,"type":"box","min":[30,-1568,159],"max":[1097.9,-582,167],"tex":"cx/ceiling"},

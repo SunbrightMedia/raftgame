@@ -3,6 +3,7 @@ import { Digicam, type CameraParams } from './digicam';
 import { SourcePost, type SourcePostParams } from './sourcePost';
 import { CamcorderPost, type CamcorderMotion, type CamcorderParams } from './camcorder';
 import { BlenderPost } from './blenderPost';
+import { ComplexPost, type ComplexParams } from './complexPost';
 import { haveBlenderData, loadBlenderData } from './blenderData';
 
 /** The Blender camera's start, remembered across page loads ('starting' until it has run smoothly; 'lost' after
@@ -51,6 +52,12 @@ export class LowResRenderer {
    */
   blender: { exposure: number; frameRate: number; startFrame: number } | null = null;
   private blenderPost: BlenderPost | null = null;
+  /** The Complex's camera as that game runs it (complexPost.ts): its tonemapper and camera passes, checked against
+   *  the game's own steps; a 4:3 picture with bars. Wins over the others. */
+  complex: ComplexParams | null = null;
+  private complexPost: ComplexPost | null = null;
+  /** Why the complex camera could not start ('' = fine). */
+  complexError = '';
   private blenderSize: [number, number] = [854, 480];
   private blenderTime = 0;
   /** Wall-clock times of the last few Blender frames (the slow-frame guard). */
@@ -235,7 +242,7 @@ export class LowResRenderer {
     const w = this.canvas.clientWidth || window.innerWidth;
     const h = this.canvas.clientHeight || window.innerHeight;
     if (this.canvas.width !== w || this.canvas.height !== h) this.gl.setSize(w, h, false);
-    const aspect = this.camcorder?.bars ? 4 / 3 : this.blender ? this.blenderSize[0] / this.blenderSize[1] : w / h;
+    const aspect = this.camcorder?.bars || this.complex ? 4 / 3 : this.blender ? this.blenderSize[0] / this.blenderSize[1] : w / h;
     if (this.viewMatch) {
       // A window onto a larger image whose centre is the match's image centre.
       const m = this.viewMatch, fullW = w + 2 * Math.abs(m.dx), fullH = h + 2 * Math.abs(m.dy);
@@ -333,6 +340,7 @@ export class LowResRenderer {
     if (this.blitMat.map !== frame.texture) { this.blitMat.map = frame.texture; this.blitMat.needsUpdate = true; }
     const now = performance.now(), dt = Math.min(0.25, (now - this.lastFrame) / 1000);
     this.lastFrame = now;
+    if (this.complex && this.runComplex(frame, dt)) return;
     if (this.blender && this.runBlender(frame, dt)) return;
     if (!this.blender) this.blenderOff();
     if (this.camcorder) {
@@ -430,6 +438,26 @@ export class LowResRenderer {
     if (st.state !== 'failed' && st.state !== 'loading') return;
     if (st.state === 'loading') blenderGuard.set(null);
     st.state = 'idle'; st.error = '';
+  }
+
+  /** The 'complex' camera; false (the plain picture) if it cannot run here. */
+  private runComplex(frame: THREE.WebGLRenderTarget, dt: number): boolean {
+    if (this.complexError) return false;
+    const tex = (this.gl.properties.get(frame.texture) as { __webglTexture?: WebGLTexture }).__webglTexture;
+    if (!tex) return false;
+    try {
+      this.complexPost ??= new ComplexPost(this.gl.getContext() as WebGL2RenderingContext);
+      const hfov = 2 * Math.atan(Math.tan((this.camera.fov * Math.PI) / 360) * this.camera.aspect);
+      const c = this.gl.domElement;
+      this.complexPost.render(tex, c.width, c.height, { ...this.complex!, hfov }, dt);
+    } catch (e) {
+      this.complexError = String(e);
+      console.error(e);
+      return false;
+    } finally {
+      this.gl.resetState();
+    }
+    return true;
   }
 
   /** One line for the HUD while the Blender camera is chosen but not showing ('' otherwise). */

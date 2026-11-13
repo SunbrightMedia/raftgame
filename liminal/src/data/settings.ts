@@ -152,7 +152,7 @@ export const SETTINGS = {
     label: 'Camera',
     help: 'A 2001–2006 consumer digicam: meters the scene and sets exposure itself, has its own white balance and a short dynamic range. The look comes from this, not from filters (STYLE.md, "The medium").',
     defs: {
-      model: select('Camera model', 'digicam', ['digicam', 'source', 'camcorder', 'blender'] as const, 'digicam = the 2000s point-and-shoot look below. source = Source engine\'s own camera (Portal 2): exposure puts the brightest 2% of the picture at 60%, soft whole-frame bloom, clean clip. Source-lit maps set this. camcorder = the capture-matched camcorder (Camcorder group). blender = the ShuttleworthL Blender project\'s own post-processing and AgX view, as Blender does it (Blender group).'),
+      model: select('Camera model', 'digicam', ['digicam', 'source', 'camcorder', 'complex', 'blender'] as const, 'digicam = the 2000s point-and-shoot look below. source = Source engine\'s own camera (Portal 2): exposure puts the brightest 2% of the picture at 60%, soft whole-frame bloom, clean clip. Source-lit maps set this. camcorder = the capture-matched camcorder, with options (Camcorder group). complex = The Complex\'s camera as that game runs it, its steps checked against the game\'s own (Complex group). blender = the ShuttleworthL Blender project\'s own post-processing and AgX view, as Blender does it (Blender group).'),
       sourceHdr: bool('Source: HDR', true, 'on = Source\'s HDR path: auto exposure, bloom, sRGB. off = its non-HDR path (maps compiled without HDR): fixed brightness, no bloom, colour maths in plain 2.2 gamma.'),
       sourceExposureMin: num('Source: exposure min', 0.5, 0.05, 4, 0.01, 'Lowest tonemap scale auto exposure may use (env_tonemap_controller; 0.5 by default).'),
       sourceExposureMax: num('Source: exposure max', 2, 0.1, 8, 0.01, 'Highest tonemap scale (2 by default).'),
@@ -249,6 +249,24 @@ export const SETTINGS = {
       codecRadius: num('Codec smoothing radius', 1.5, 0.3, 6, 0.1, 'How far the codec smoothing reaches, thousandths of the picture width.'),
       motionBlur: num('Motion blur (shutter)', 0, 0, 66, 1, 'How long the shutter stays open: the picture smears along the camera\'s motion for that time (turning fast smears most). 0 = off. A camcorder indoors: 17-33 ms (1/60-1/30 s).', 'ms'),
       motionTestYaw: num('Motion blur test: turn speed', 0, -360, 360, 1, 'For stills and screenshots: blur as if the camera were turning this fast. 0 = the real motion.', '°/s'),
+    },
+  },
+  complex: {
+    label: 'Complex',
+    help: 'Camera model "complex": The Complex\'s camera, step by step as that game draws it. Its tone table, tonemapper and five camera passes (sharpen, posterize, grain, tape, lens) are checked against the game\'s own compiled steps (tools/complex/): the stored 10-bit values agree in 97.4 to 100 % of pixels, the rest by one step. Not the game\'s own yet: the glow\'s shape (a fitted stand-in) and the upscaler (a blur stands in). The lens dirt and the noises are ours (the game\'s are its own image files).',
+    defs: {
+      exposure: num('Exposure', 1, 0, 64, 0.0001, 'Scene light × this = the game\'s exposed light (the game: × 34.13; maps lit ×1000 brighter use 0.03413).'),
+      sceneR: num('Scene share: red', 0.84, 0, 2, 0.001, 'What the game\'s glow step leaves of the scene (from its glow kernel\'s colour and scatter). Fitted: 0.84 / 0.83 / 0.64; the deep export will give it exactly.'),
+      sceneG: num('Scene share: green', 0.83, 0, 2, 0.001),
+      sceneB: num('Scene share: blue', 0.64, 0, 2, 0.001),
+      glowR: num('Glow share: red', 0.16, 0, 1, 0.001, 'What goes to the glow; with the scene share it adds up to the kernel\'s colour (the game\'s own formula).'),
+      glowG: num('Glow share: green', 0.158, 0, 1, 0.001),
+      glowB: num('Glow share: blue', 0.122, 0, 1, 0.001),
+      glowNear: num('Glow shape: near', 0.612, 0, 1, 0.005, 'Stand-in for the game\'s glow kernel: share within σ 0.6 % of the width (measured).'),
+      glowMid: num('Glow shape: middle', 0.241, 0, 1, 0.005, 'Share within σ 2.5 %.'),
+      glowFar: num('Glow shape: far', 0.147, 0, 1, 0.005, 'Share within σ 8 %.'),
+      dirt: num('Lens dirt', 20, 0, 60, 0.5, 'Glow × (1 + this × dirt), as the game (20).'),
+      soften: num('Upscaler softness', 0.7, 0, 4, 0.05, 'Stand-in for the game\'s upscaler (it draws at 70 % and upsamples over time): a blur, σ in picture pixels.', 'px'),
     },
   },
   blender: {

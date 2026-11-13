@@ -190,6 +190,7 @@ export class Game {
     this.renderer.camera_ = s.camera;
     this.renderer.camcorder = s.camera.model === 'camcorder' ? { ...s.camcorder } : null;
     this.renderer.blender = s.camera.model === 'blender' ? { ...s.blender } : null;
+    this.renderer.complex = s.camera.model === 'complex' ? { ...s.complex } : null;
     const C = s.camera;
     // Source's non-HDR path: fixed brightness (scale 1 unless set), no bloom, plain 2.2 gamma.
     const hdr = C.sourceHdr;
