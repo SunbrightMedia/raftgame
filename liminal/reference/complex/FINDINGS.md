@@ -149,6 +149,31 @@ What the rebuild taught:
 - RenderDoc stored HDR pictures linearly when it stretched their range, and
   stored the window image with an extra sRGB curve.
 
+## The camera, exact (camera model "complex", 2026-11-13)
+
+The capture holds every camera step's compiled shader (DXBC) and numbers. `tools/complex/dxbc.py` runs
+them; our own code for each step is compared with them on the same inputs (`tools/complex/`):
+
+| step | ours vs the game's step (stored 10-bit values equal) |
+|---|---|
+| tone table (CombineLUTs, 32^3) | all 98,304 floats equal to the last bit (exactly rounded exp2/log2) |
+| tonemapper | 99.994 % (without its random dither; dither statistics equal) |
+| sharpen / posterize / grain / tape / lens | 99.85 / 99.99996 / 99.97 / 97.4 / 99.91 % |
+
+The rest differ by one step (float rounding, texture filtering of the software GPU). Found on the way:
+- The warm multiplier is the glow step's `FinalizeApplyConstants`: scene x (1 - 0.2 x the share the glow
+  kernel spreads) x the kernel's own colour, from 16 numbers (`Bloom.FFT.KernelConstants`). Glow share =
+  the rest of the same colour. The deep export saves those numbers.
+- The tone curve is a 32^3 10-bit table in log space (x 1.05 after, dither +-1/512), not the analytic
+  curve the camcorder model used; with it, blue matches at the first fit (0.64) instead of 0.75.
+- Pictures between camera passes are 10-bit; the scene and glow are R11G11B10 floats.
+- The game's streaks add only +0.003 / 0.003 / 0.002 (measured: its tape step run with the streak images
+  off, subtracted from its output); grain +0.0022 / 0.0024 / 0.0081.
+- Steps after the lens (423-426) are UI drawing (a blurred-background panel), not camera.
+
+Still stand-ins in the "complex" model: the glow's shape (the three-width fit), the upscaler (TAAU, a
+blur stands in), motion blur; and our own lens dirt and noise images (the game's are its own files).
+
 ## Rebuilding the capture's area (map `cx_area_a`)
 
 The rebuild checks our light against the capture with nothing fitted per frame. Tools
