@@ -6,16 +6,16 @@
  *
  * Steps: scene (x exposure, flipped to row 0 = top, at 70 % of the picture) -> upscaler (the game's TAAU,
  * complexTAA.ts: the scene is drawn with a new sub-pixel jitter each frame and the picture is made over frames) ->
- * glow -> tonemapper -> sharpen -> posterize -> grain -> tape -> lens -> the screen, 4:3 with bars.
+ * motion blur -> glow -> tonemapper -> sharpen -> posterize -> grain -> tape -> lens -> the screen, 4:3 with bars.
  *
- * Not yet the game's own (said in the HUD help): the glow (a three-width blur fitted to the capture's measured
- * spread, split into the game's scene / glow weights), and its motion blur (a copy stands in: in the capture it
- * changes 0.6 % of the picture). The lens dirt and the grain and tape noises are ours (the game's are its own
- * image files).
+ * Then the game's motion blur (complexMotionBlur.ts). Not yet the game's own (said in the HUD help): the glow (a
+ * three-width blur fitted to the capture's measured spread, split into the game's scene / glow weights). The lens
+ * dirt and the grain and tape noises are ours (the game's are its own image files).
  */
 import { COMPLEX_VERT, TONEMAP, SHARPEN, POSTERIZE, GRAIN, TAPE, LENS, lensConstants } from './complexCamera';
 import { makeToneTable, COMPLEX_TONE } from './complexTone';
 import { TAAU } from './complexTAA';
+import { ComplexMotionBlur } from './complexMotionBlur';
 import { Rng } from '../../world/rng';
 
 export interface ComplexParams {
@@ -34,6 +34,12 @@ export interface ComplexParams {
   screenPct: number;
   /** With the upscaler off: the scene scaled up, then this blur (sigma in output pixels). */
   soften: number;
+  /** The game's motion blur (complexMotionBlur.ts), after the upscaler. */
+  motionBlur: boolean;
+  /** Unreal's motion blur amount and target frame rate: the blur lasts amount / target fps seconds (0.5 / 30 = 1/60 s). */
+  mbAmount: number; mbTargetFps: number;
+  /** The longest blur, as a share of the picture's width (the game: 0.4). */
+  mbMax: number;
   /** Horizontal field of view the lens bend uses (radians; the game's camera: 98.2 degrees). */
   hfov?: number;
 }
@@ -54,6 +60,8 @@ export interface ComplexTAAFrame {
   cut: boolean;
   /** A frame counter (the dither uses it mod 8, as the game). */
   frame: number;
+  /** The camera's near and far planes (inches): the motion blur's depth. */
+  near: number; far: number;
 }
 
 /** The picture in a canvas: the biggest centred 4:3 box (width, height). */
@@ -251,6 +259,7 @@ export class ComplexPost {
   /** The upscaler's two pictures: last frame's output is read, this frame's written; which is which flips each frame. */
   private taaFlip = false;
   private taaKey = '';
+  private mb: ComplexMotionBlur | null = null;
 
   constructor(private gl: WebGL2RenderingContext) {
     if (!gl.getExtension('EXT_color_buffer_float')) throw new Error('complex camera: needs EXT_color_buffer_float');
@@ -397,8 +406,18 @@ export class ComplexPost {
         u_resp: [0, 0, 1, 0.04], u_misc: [taa.cut || fresh ? 1 : 0, iw / ow, ow / iw, taa.frame % 8], u_dither: [1 / 1024, 1 / 1024, 1 / 1024, 0],
         u_c2p0: row(0), u_c2p1: row(1), u_c2p2: row(2), u_c2p3: row(3), u_depthMap: [-1, 1, 1, 0], u_exposure: TAA_EXPOSURE,
       });
-      // 3. the game's motion blur comes next and stores the scene as R11G11B10; it is not ours yet: a copy
-      this.run('copy', COPY, scene, { t_src: [write.tex] }, {});
+      // 3. the game's motion blur, which stores the scene as R11G11B10 (a copy when it is off). Its length: the camera's
+      // motion this frame x amount / (target fps x frame time), as Unreal's; none after a cut.
+      let blurred = write.tex;
+      if (p.motionBlur) {
+        this.mb ??= new ComplexMotionBlur(gl);
+        const k = dt > 0 && !taa.cut && !fresh ? p.mbAmount / (Math.max(1, p.mbTargetFps) * dt) : 0;
+        const zc = (taa.far - taa.near) / (2.54 * taa.far * taa.near), wc = -1 / (2.54 * taa.far);   // depth -> cm, as the game's
+        blurred = this.mb.run({ scene: write.tex, depth: taa.depth, vel: this.zero, inW: iw, inH: ih, bufW: iw, bufH: ih, outW: ow, outH: oh,
+          c2p: [row(0), row(1), row(2), row(3)], depthMap: [-1, 1, 1, 0], zToCm: [0, 0, zc, wc], shutter: k, maxBlur: p.mbMax * ow, maxSamples: 16 });
+        this.clean();
+      }
+      this.run('copy', COPY, scene, { t_src: [blurred] }, {});
     } else {
       // 1. the scene, exposed as the game stores it (R11G11B10), at the picture's size
       this.run('in', SCENE_IN, scene, { t_src: [src] }, { u_size: [ow, oh], u_scale: p.exposure });

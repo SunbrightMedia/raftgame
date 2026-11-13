@@ -485,7 +485,7 @@ export class LowResRenderer {
     T.c2p.copy(cut ? T.vp : T.prevVP).multiply(T.inv).multiply(toNdc);
     T.prevVP.copy(T.vp); T.pos.copy(pos); T.dir.copy(dir); T.key = key; T.have = true;
     const frame = T.frame++;
-    return { inW: iw, inH: ih, jitter: [jx, jy], clipToPrev: T.c2p.elements, cut, frame };
+    return { inW: iw, inH: ih, jitter: [jx, jy], clipToPrev: T.c2p.elements, cut, frame, near: cam.near, far: cam.far };
   }
 
   /** The 'complex' camera; false (the plain picture) if it cannot run here. */
