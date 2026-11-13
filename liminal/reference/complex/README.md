@@ -17,7 +17,11 @@ textures) goes into our game.
 game, and saves what the first export left out: the shader numbers of every draw (every lamp's position,
 colour, brightness, range and cone; each object's material numbers; Lumen's and the camera passes'
 settings), the packed lamp list, and exact copies (raw, zlib) of the depth, the G-buffer, the light at each
-lighting step and each camera pass. It also reads a few header bytes of the game's data files to report
+lighting step and each camera pass. For frames 18325, 20732 and 19893 it also keeps the whole camera chain losslessly:
+every camera step's output (the 3D tone table too), the small data buffers those steps read (exposure, the
+tonemapper's colour multiplier) and the pictures from the frame before that they read (the upscaler's history),
+about 90 MB more per frame. Textures the game loaded from its files (lens dirt, noise images) and the glow's
+kernel are never kept. It also reads a few header bytes of the game's data files to report
 whether they are encrypted (`game_files.txt`; nothing is unpacked or decrypted). They go to the same
 branch, folder `deep/`. `complex_deep.py` is the part
 that runs inside RenderDoc; the `.ps1` carries a copy of it between `$DeepPy = @'` and `'@` (keep the two the

@@ -132,6 +132,10 @@ $DeepPy = @'
 #                  material, base colour and their alpha channels), the scene light after the emissive base
 #                  pass, after the bounce light, after the lamps, the bounce light itself (Lumen), the
 #                  upscaled picture, after motion blur, the glow, the tone curve and each camera pass
+#  - in frames 18325, 20732 and 19893 (POST_FRAMES), the whole camera chain: every step's output (the 3D
+#    tone table and small ones too), the data buffers the steps read (exposure, the tonemapper's colour
+#    multiplier, the glow's constants), and the pictures from an earlier frame they read (the upscaler's
+#    history). About 90 MB more per frame.
 #  - errors.txt
 #
 # Step numbers are the same as in complex_export.py's export (same way of splitting the frame into steps),
@@ -167,6 +171,12 @@ TARGET_STEPS = ('PrePass', 'BasePass', 'DiffuseIndirectComposite', 'LumenScreenP
                 'PostProcessing / TAA', 'MotionBlur FullResFilter', 'Bloom', 'Tonemap', 'PostProcessMaterial')
 # Depth of field's own half-size copies, Lumen's atlases, the translucency light volume.
 SKIP_TARGET_STEPS = ('DOF', 'LumenSceneLighting', 'Inject')
+# The frames (capture names containing these) whose whole camera chain is kept, and what counts as camera.
+POST_FRAMES = ('18325', '20732', '19893')
+POST_STEPS = ('PostProcessing',)
+# Never kept: a texture the game loaded from its files (lens dirt, noise images: they have no render-target or
+# read-write flag), and the glow's kernel (the FFT of the game's kernel image).
+KERNEL_WORDS = ('Kernel', 'kernel')
 
 
 def rid(x):
@@ -183,10 +193,12 @@ def has(path, words):
 
 
 class Deep:
-    def __init__(self, controller, out, progress):
+    def __init__(self, controller, out, progress, full_post=False):
         self.c = controller
         self.out = out
         self.progress = progress
+        self.full_post = full_post
+        self.saved_tex = set()
         self.errors = []
         self.sd = controller.GetStructuredFile()
         self.tex = {rid(t.resourceId): t for t in controller.GetTextures()}
@@ -353,7 +365,7 @@ class Deep:
                 else:
                     first[key] = bl
                 d[sn + '_blocks'] = bl
-                if has(p['path'], BUFFER_STEPS) and (key not in rec.get('_buffers_done', set())):
+                if (has(p['path'], BUFFER_STEPS) or (self.full_post and has(p['path'], POST_STEPS))) and (key not in rec.get('_buffers_done', set())):
                     rec.setdefault('_buffers_done', set()).add(key)
                     d[sn + '_buffers'] = self.buffers_read(pipe, st, i, a.eventId)
             rec['draws'].append(d)
@@ -361,20 +373,40 @@ class Deep:
         return rec
 
     # ---- lossless targets
-    def save_target(self, res, step, k, markers):
+    def gpu_made(self, t):
+        """Drawn or written by the graphics card (not loaded from the game's files)."""
+        return bool(t.creationFlags & (rd.TextureCategory.ColorTarget | rd.TextureCategory.DepthTarget |
+                                       rd.TextureCategory.ShaderReadWrite | rd.TextureCategory.SwapBuffer))
+
+    def save_target(self, res, step, k, markers, small=False, role='output'):
         t = self.tex.get(rid(res))
-        if t is None or t.width < MIN_SIDE or t.height < MIN_SIDE or t.width * t.height > MAX_TEXELS:
+        side = 1 if small else MIN_SIDE
+        if t is None or t.width < side or t.height < side or t.width * t.height > MAX_TEXELS:
+            return None
+        if not self.gpu_made(t) or any(w in self.name(res) for w in KERNEL_WORDS):
             return None
         fmt = t.format.Name()
         if 'R32G32B32' in fmt:      # the glow's FFT work buffers (complex numbers), not pictures
             return None
         sub = rd.Subresource()
         sub.mip, sub.slice, sub.sample = 0, 0, 0
-        raw = self.c.GetTextureData(res, sub)
+        raw = bytes(self.c.GetTextureData(res, sub))
+        depth = max(1, getattr(t, 'depth', 1))
+        if depth > 1 and len(raw) <= t.width * t.height * 16:
+            # a 3D texture (the tone table) given one depth slice at a time: join them, front to back
+            parts = [raw]
+            for z in range(1, depth):
+                sub.slice = z
+                parts.append(bytes(self.c.GetTextureData(res, sub)))
+            raw = b''.join(parts)
+            sub.slice = 0
+        self.saved_tex.add(rid(res))
         fname = 'targets/%04d_%d_%s.bin.z' % (step, k, ''.join(ch for ch in rid(res) if ch.isdigit()))
+        if role != 'output':
+            fname = fname.replace('.bin.z', '_%s.bin.z' % role)
         rec = {'step': step, 'markers': markers, 'file': fname, 'id': rid(res), 'name': self.name(res),
-               'w': t.width, 'h': t.height, 'format': fmt, 'bytes': len(raw),
-               'bytes_per_texel': round(len(raw) / float(t.width * t.height), 3)}
+               'w': t.width, 'h': t.height, 'depth': depth, 'format': fmt, 'bytes': len(raw), 'role': role,
+               'bytes_per_texel': round(len(raw) / float(t.width * t.height * depth), 3)}
         try:
             mn, mx = self.c.GetMinMax(res, sub, rd.CompType.Typeless)
             rec['min'], rec['max'] = list(mn.floatValue), list(mx.floatValue)
@@ -398,14 +430,36 @@ class Deep:
                 self.err('outputs of step %d' % i, e)
         if not isnull(last.depthOut):
             outs.append(last.depthOut)
+        post = self.full_post and has(p['path'], POST_STEPS)
         res = []
         for k, o in enumerate(outs):
             try:
-                r = self.save_target(o, i, k, p['path'])
+                r = self.save_target(o, i, k, p['path'], small=post)
                 if r:
                     res.append(r)
             except Exception as e:
                 self.err('target of step %d' % i, e)
+        return res
+
+    def post_inputs(self, i, p):
+        """Camera steps: the pictures they read that the GPU made but this export has not kept yet (the
+        upscaler's history from the frame before, velocity, the depth of field's result)."""
+        last = p['actions'][-1][0]
+        self.c.SetFrameEvent(last.eventId, False)
+        pipe = self.c.GetPipelineState()
+        stages = [rd.ShaderStage.Compute] if p['kind'] == 'dispatch' else [rd.ShaderStage.Pixel]
+        res = []
+        for st in stages:
+            try:
+                for k, ud in enumerate(pipe.GetReadOnlyResources(st, True)):
+                    r = ud.descriptor.resource
+                    if isnull(r) or rid(r) not in self.tex or rid(r) in self.saved_tex:
+                        continue
+                    rec = self.save_target(r, i, 100 + k, p['path'], small=True, role='input')
+                    if rec:
+                        res.append(rec)
+            except Exception as e:
+                self.err('inputs of step %d' % i, e)
         return res
 
     def run(self, label):
@@ -429,7 +483,10 @@ class Deep:
                     self.err('step %d' % i, e)
             # Targets after the last step of each run of steps with the same markers.
             nxt = ps[i + 1]['path'] if i + 1 < n else None
-            if (p['kind'] in ('draw', 'dispatch') and has(p['path'], TARGET_STEPS) and not has(p['path'], SKIP_TARGET_STEPS)
+            post = self.full_post and p['kind'] in ('draw', 'dispatch') and has(p['path'], POST_STEPS) and not has(p['path'], ('DOF',))
+            if post:
+                targets.extend(self.post_inputs(i, p))
+            if (p['kind'] in ('draw', 'dispatch') and (post or (has(p['path'], TARGET_STEPS) and not has(p['path'], SKIP_TARGET_STEPS)))
                     and nxt != p['path']):
                 targets.extend(self.target_step(i, p))
         # The last picture on screen, raw (the JPEG of the first export had an extra sRGB curve).
@@ -455,7 +512,8 @@ class Deep:
 
 
 def export_controller(controller, out, progress, label):
-    d = Deep(controller, out, progress)
+    full = any(f in os.path.basename(os.path.normpath(out)) for f in POST_FRAMES)
+    d = Deep(controller, out, progress, full_post=full)
     n, nl, nt = d.run(label)
     progress('%s: done, %d steps, %d lighting steps, %d targets, %d buffers, %d errors' % (label, n, nl, nt, len(d.saved_buffers), len(d.errors)))
 
